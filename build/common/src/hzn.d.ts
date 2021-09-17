@@ -9,6 +9,10 @@ export declare class Hzn {
     serviceJson: any;
     patternJson: any;
     policyJson: any;
+    mmsPattern: any;
+    mmsServiceJson: any;
+    mmsPatternJson: any;
+    mmsPolicyJson: any;
     envVar: Env;
     utils: Utils;
     constructor();

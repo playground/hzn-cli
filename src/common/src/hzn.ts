@@ -17,6 +17,10 @@ export class Hzn {
   serviceJson: any;
   patternJson: any;
   policyJson: any;
+  mmsPattern: any;
+  mmsServiceJson: any;
+  mmsPatternJson: any;
+  mmsPolicyJson: any;
   envVar = new Env();
   utils = new Utils();
   constructor() {}
@@ -29,10 +33,13 @@ export class Hzn {
           this.objectType = process.env.npm_config_type || this.envVar.getMMSObjectType();
           this.objectId = process.env.npm_config_id || this.envVar.getMMSObjectId();
           this.objectFile = process.env.npm_config_object || this.envVar.getMMSObjectFile();
-          this.pattern = process.env.npm_config_pattern || this.envVar.getMMSPatterName();
-          this.patternJson = process.env.npm_config_patternjson || 'config/mms/pattern.json';
-          this.serviceJson = process.env.npm_config_servicejson || 'config/mms/service.json';
-          this.policyJson = process.env.npm_config_policyjson || 'config/mms/policy.json';
+          this.mmsPattern = process.env.npm_config_pattern || this.envVar.getMMSPatterName();
+          this.patternJson = process.env.npm_config_patternjson || 'config/service/pattern.json';
+          this.serviceJson = process.env.npm_config_servicejson || 'config/service/service.json';
+          this.policyJson = process.env.npm_config_policyjson || 'config/service/policy.json';
+          this.mmsPatternJson = process.env.npm_config_patternjson || 'config/mms/pattern.json';
+          this.mmsServiceJson = process.env.npm_config_servicejson || 'config/mms/service.json';
+          this.mmsPolicyJson = process.env.npm_config_policyjson || 'config/mms/policy.json';
           observer.complete();    
         },
         error: (err) => {
@@ -83,7 +90,7 @@ export class Hzn {
   }
   publishMMSService() {
     return new Observable((observer) => {
-      let arg = `hzn exchange service publish -O ${envVar.getMMSContainerCreds()} -f ${this.serviceJson}`;
+      let arg = `hzn exchange service publish -O ${envVar.getMMSContainerCreds()} -f ${this.mmsServiceJson}`;
       console.log(arg)
       exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
         if(!err) {
@@ -100,7 +107,7 @@ export class Hzn {
   }
   publishMMSPattern() {
     return new Observable((observer) => {
-      let arg = `hzn exchange pattern publish -f ${this.patternJson}`;
+      let arg = `hzn exchange pattern publish -f ${this.mmsPatternJson}`;
       console.log(arg)
       exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
         if(!err) {
@@ -117,7 +124,7 @@ export class Hzn {
   }
   agentRun() {
     return new Observable((observer) => {
-      let arg = `hzn register --policy ${this.policyJson} --pattern "${this.pattern}"`;
+      let arg = `hzn register --policy ${this.mmsPolicyJson} --pattern "${this.mmsPattern}"`;
       console.log(arg)
       exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
         if(!err) {
@@ -134,7 +141,7 @@ export class Hzn {
   }
   publishMMSObject() {
     return new Observable((observer) => {
-      let arg = `hzn mms object publish --type=${this.objectType} --id=${this.objectId} --object=${this.objectFile} --pattern=${this.pattern}`
+      let arg = `hzn mms object publish --type=${this.objectType} --id=${this.objectId} --object=${this.objectFile} --pattern=${this.mmsPattern}`
       console.log(arg)
       exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
         if(!err) {
