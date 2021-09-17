@@ -23,6 +23,7 @@ const handler = (argv) => {
     if ((0, fs_1.existsSync)('./config/.env-hzn.json')) {
         const hzn = new hzn_1.Hzn();
         const { action, org } = argv;
+        console.log('$$$ ', action, org);
         hzn.setup()
             .subscribe({
             complete: () => {

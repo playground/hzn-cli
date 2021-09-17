@@ -43,7 +43,7 @@ export class Hzn {
   }
   test() {
     return new Observable((observer) => {
-      console.log('it works...')
+      console.log(`it works...${envVar.getArch()}`)
       observer.complete();
     });  
   }
@@ -210,7 +210,7 @@ export class Hzn {
   }
   publishService() {
     return new Observable((observer) => {
-      let arg = `hzn exchange service publish -O ${envVar.getContainerCreds()} -f ${this.serviceJson} --pull-image`;
+      let arg = `hzn exchange service publish -O ${envVar.getServiceContainerCreds()} -f ${this.serviceJson} --pull-image`;
       console.log(arg)
       exec(arg, {maxBuffer: 1024 * 2000}, (err, stdout, stderr) => {
         if(!err) {

@@ -26,7 +26,7 @@ export declare class Env {
     getMMSObjectType(): string | undefined;
     getMMSObjectId(): string | undefined;
     getMMSObjectFile(): string | undefined;
-    getContainerCreds(): string | undefined;
+    getServiceContainerCreds(): string | undefined;
     getPatterName(): string | undefined;
     getServiceContainer(): string | undefined;
 }

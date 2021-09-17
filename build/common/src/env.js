@@ -107,8 +107,8 @@ class Env {
     getMMSObjectFile() {
         return pEnv.MMS_OBJECT_FILE;
     }
-    getContainerCreds() {
-        return pEnv.CONTAINER_CREDS;
+    getServiceContainerCreds() {
+        return pEnv.SERVICE_CONTAINER_CREDS;
     }
     getPatterName() {
         return pEnv.PATTERN_NAME;

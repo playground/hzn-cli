@@ -29,6 +29,7 @@ export const handler = (argv: Arguments<Options>): void => {
   if(existsSync('./config/.env-hzn.json')) {
     const hzn = new Hzn();
     const { action, org } = argv;
+    console.log('$$$ ', action, org);
     hzn.setup()
     .subscribe({
       complete: () => {
