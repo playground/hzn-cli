@@ -3,6 +3,7 @@ import { Hzn } from '../common/src/hzn';
 import chalk from 'chalk';
 import clear from 'clear';
 import figlet from 'figlet';
+import { existsSync } from 'fs';
 
 type Options = {
   action: string;
@@ -25,23 +26,28 @@ export const handler = (argv: Arguments<Options>): void => {
       figlet.textSync('hzn-cli', { horizontalLayout: 'full' })
     )
   );
-  const hzn = new Hzn();
-  const { action, org } = argv;
-  hzn.setup()
-  .subscribe({
-    complete: () => {
-      hzn[action]()
-      .subscribe({
-        complete:() => {
-          console.log(action, process.env.YOUR_SERVICE_NAME, process.env.HZN_ORG_ID);
-          console.log('process completed.');
-          process.exit(0)          
-        }
-      })
-    },
-    error: (err) => {
-      console.log('something went wrong. ', err);      
-      process.exit(0);
-    }
-  })
+  if(existsSync('./config/.env-hzn.json')) {
+    const hzn = new Hzn();
+    const { action, org } = argv;
+    hzn.setup()
+    .subscribe({
+      complete: () => {
+        hzn[action]()
+        .subscribe({
+          complete:() => {
+            console.log(action, process.env.YOUR_SERVICE_NAME, process.env.HZN_ORG_ID);
+            console.log('process completed.');
+            process.exit(0)          
+          }
+        })
+      },
+      error: (err) => {
+        console.log('something went wrong. ', err);      
+        process.exit(0);
+      }
+    })  
+  } else {
+    console.log('./config/.env-hzn.json file not fouund.')
+  }
 };
+
