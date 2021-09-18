@@ -342,15 +342,31 @@ export class Hzn {
   }
   installHznCli() {
     return new Observable((observer) => {
-      utils.installHznCli()
+      utils.aptUpate()
       .subscribe({
         complete: () => {
-          utils.createHznKey()
+          utils.installPrereq()
           .subscribe({
             complete: () => {
-              observer.complete();
+              utils.installHznCli()
+              .subscribe({
+                complete: () => {
+                  utils.createHznKey()
+                  .subscribe({
+                    complete: () => {
+                      observer.complete();
+                    }
+                  })
+                }
+              })        
+            },
+            error: (err) => {
+              console.log(err);
             }
           })
+        },
+        error: (err) => {
+          console.log(err);
         }
       })
     });  
