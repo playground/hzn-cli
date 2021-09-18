@@ -7,7 +7,7 @@ const cp = require('child_process'), exec = cp.exec;
 const pEnv = process.env;
 class Env {
     constructor(env) {
-        this.env = pEnv.npm_config_env || 'biz';
+        this.env = env || 'biz';
     }
     init() {
         return new rxjs_1.Observable((observer) => {

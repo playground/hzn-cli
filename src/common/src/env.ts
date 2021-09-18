@@ -10,8 +10,8 @@ export class Env {
   envVars: any;
   hznJson: any;
   hznEnv: any;
-  constructor(env) {
-    this.env = pEnv.npm_config_env || 'biz';
+  constructor(env: string) {
+    this.env = env || 'biz';
   }
   init() {
     return new Observable((observer) => {

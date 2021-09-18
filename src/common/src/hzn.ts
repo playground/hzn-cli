@@ -20,9 +20,9 @@ export class Hzn {
   mmsServiceJson: any;
   mmsPatternJson: any;
   mmsPolicyJson: any;
-  envVar;
+  envVar: any;
   utils = new Utils();
-  constructor(env) {
+  constructor(env:string) {
     this.envVar = new Env(env);
   }
 
