@@ -44,9 +44,9 @@ export class Hzn {
           observer.complete();    
         },
         error: (err) => {
-          console.log(err.Error);
+          console.log(err.message);
           console.log(err.cmd);
-          if(err.indexOf('hzn: not found')) {
+          if(err.cmd.indexOf('hzn architecture') >= 0) {
             console.log('need to install hzn');
             this.installHznCli();
           } else {
