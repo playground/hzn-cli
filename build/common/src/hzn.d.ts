@@ -1,5 +1,4 @@
 import { Observable } from 'rxjs';
-import { Env } from './env';
 import { Utils } from './utils';
 export declare class Hzn {
     objectType: any;
@@ -13,9 +12,9 @@ export declare class Hzn {
     mmsServiceJson: any;
     mmsPatternJson: any;
     mmsPolicyJson: any;
-    envVar: Env;
+    envVar: any;
     utils: Utils;
-    constructor();
+    constructor(env: any);
     setup(): Observable<unknown>;
     test(): Observable<unknown>;
     buildMMSImage(): Observable<unknown>;

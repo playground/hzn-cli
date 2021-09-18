@@ -6,7 +6,6 @@ import { Env } from './env';
 import { Utils } from './utils';
 const prompt = require('prompt');
 
-const envVar = new Env();
 const utils = new Utils();
 
 export class Hzn {
@@ -21,13 +20,15 @@ export class Hzn {
   mmsServiceJson: any;
   mmsPatternJson: any;
   mmsPolicyJson: any;
-  envVar = new Env();
+  envVar;
   utils = new Utils();
-  constructor() {}
+  constructor(env) {
+    this.envVar = new Env(env);
+  }
 
   setup() {
     return new Observable((observer) => {
-      envVar.init()
+      this.envVar.init()
       .subscribe({
         complete: () => {
           this.objectType = process.env.npm_config_type || this.envVar.getMMSObjectType();
@@ -50,14 +51,14 @@ export class Hzn {
   }
   test() {
     return new Observable((observer) => {
-      console.log(`it works...${envVar.getArch()}`)
+      console.log(`it works...${this.envVar.getArch()}`)
       observer.complete();
     });  
   }
   buildMMSImage() {
     return new Observable((observer) => {
-      // let tag = `${envVar.getDockerImageBase()}_${envVar.getArch()}:${envVar.getMMSServiceVersion()}`;
-      let arg = `docker build -t ${envVar.getMMSContainer()} -f Dockerfile.${envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
+      // let tag = `${this.envVar.getDockerImageBase()}_${this.envVar.getArch()}:${this.envVar.getMMSServiceVersion()}`;
+      let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile.${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
       console.log(arg)
       exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
         if(!err) {
@@ -73,7 +74,7 @@ export class Hzn {
   }
   pushMMSImage() {
     return new Observable((observer) => {
-      let arg = `docker push ${envVar.getMMSContainer()}`;
+      let arg = `docker push ${this.envVar.getMMSContainer()}`;
       console.log(arg)
       exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
         if(!err) {
@@ -90,7 +91,7 @@ export class Hzn {
   }
   publishMMSService() {
     return new Observable((observer) => {
-      let arg = `hzn exchange service publish -O ${envVar.getMMSContainerCreds()} -f ${this.mmsServiceJson}`;
+      let arg = `hzn exchange service publish -O ${this.envVar.getMMSContainerCreds()} -f ${this.mmsServiceJson}`;
       console.log(arg)
       exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
         if(!err) {
@@ -217,12 +218,12 @@ export class Hzn {
   }
   publishService() {
     return new Observable((observer) => {
-      let arg = `hzn exchange service publish -O ${envVar.getServiceContainerCreds()} -f ${this.serviceJson} --pull-image`;
+      let arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceJson} --pull-image`;
       console.log(arg)
       exec(arg, {maxBuffer: 1024 * 2000}, (err, stdout, stderr) => {
         if(!err) {
           console.log(stdout)
-          console.log(`done publishing ${envVar.getServiceName()} service`);
+          console.log(`done publishing ${this.envVar.getServiceName()} service`);
           observer.next();
           observer.complete();
         } else {
@@ -239,7 +240,7 @@ export class Hzn {
       exec(arg, {maxBuffer: 1024 * 2000}, (err, stdout, stderr) => {
         if(!err) {
           console.log(stdout)
-          console.log(`done publishing ${envVar.getPatterName()} pattern`);
+          console.log(`done publishing ${this.envVar.getPatterName()} pattern`);
           observer.next();
           observer.complete();
         } else {

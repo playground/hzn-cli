@@ -6,7 +6,7 @@ const fs_1 = require("fs");
 const cp = require('child_process'), exec = cp.exec;
 const pEnv = process.env;
 class Env {
-    constructor() {
+    constructor(env) {
         this.env = pEnv.npm_config_env || 'biz';
     }
     init() {

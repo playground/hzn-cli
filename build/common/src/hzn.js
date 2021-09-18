@@ -7,16 +7,15 @@ const fs_1 = require("fs");
 const env_1 = require("./env");
 const utils_1 = require("./utils");
 const prompt = require('prompt');
-const envVar = new env_1.Env();
 const utils = new utils_1.Utils();
 class Hzn {
-    constructor() {
-        this.envVar = new env_1.Env();
+    constructor(env) {
         this.utils = new utils_1.Utils();
+        this.envVar = new env_1.Env(env);
     }
     setup() {
         return new rxjs_1.Observable((observer) => {
-            envVar.init()
+            this.envVar.init()
                 .subscribe({
                 complete: () => {
                     this.objectType = process.env.npm_config_type || this.envVar.getMMSObjectType();
@@ -39,14 +38,14 @@ class Hzn {
     }
     test() {
         return new rxjs_1.Observable((observer) => {
-            console.log(`it works...${envVar.getArch()}`);
+            console.log(`it works...${this.envVar.getArch()}`);
             observer.complete();
         });
     }
     buildMMSImage() {
         return new rxjs_1.Observable((observer) => {
-            // let tag = `${envVar.getDockerImageBase()}_${envVar.getArch()}:${envVar.getMMSServiceVersion()}`;
-            let arg = `docker build -t ${envVar.getMMSContainer()} -f Dockerfile.${envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
+            // let tag = `${this.envVar.getDockerImageBase()}_${this.envVar.getArch()}:${this.envVar.getMMSServiceVersion()}`;
+            let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile.${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
             console.log(arg);
             exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
                 if (!err) {
@@ -63,7 +62,7 @@ class Hzn {
     }
     pushMMSImage() {
         return new rxjs_1.Observable((observer) => {
-            let arg = `docker push ${envVar.getMMSContainer()}`;
+            let arg = `docker push ${this.envVar.getMMSContainer()}`;
             console.log(arg);
             exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
                 if (!err) {
@@ -81,7 +80,7 @@ class Hzn {
     }
     publishMMSService() {
         return new rxjs_1.Observable((observer) => {
-            let arg = `hzn exchange service publish -O ${envVar.getMMSContainerCreds()} -f ${this.mmsServiceJson}`;
+            let arg = `hzn exchange service publish -O ${this.envVar.getMMSContainerCreds()} -f ${this.mmsServiceJson}`;
             console.log(arg);
             exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
                 if (!err) {
@@ -213,12 +212,12 @@ class Hzn {
     }
     publishService() {
         return new rxjs_1.Observable((observer) => {
-            let arg = `hzn exchange service publish -O ${envVar.getServiceContainerCreds()} -f ${this.serviceJson} --pull-image`;
+            let arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceJson} --pull-image`;
             console.log(arg);
             exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
                 if (!err) {
                     console.log(stdout);
-                    console.log(`done publishing ${envVar.getServiceName()} service`);
+                    console.log(`done publishing ${this.envVar.getServiceName()} service`);
                     observer.next();
                     observer.complete();
                 }
@@ -236,7 +235,7 @@ class Hzn {
             exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
                 if (!err) {
                     console.log(stdout);
-                    console.log(`done publishing ${envVar.getPatterName()} pattern`);
+                    console.log(`done publishing ${this.envVar.getPatterName()} pattern`);
                     observer.next();
                     observer.complete();
                 }
