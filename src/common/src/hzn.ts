@@ -45,10 +45,18 @@ export class Hzn {
         },
         error: (err) => {
           console.log(err.message);
-          console.log(err.cmd);
-          if(err.cmd.indexOf('hzn architecture') >= 0) {
+          if(err.message.indexOf('hzn: not found') >= 0) {
             console.log('need to install hzn');
-            this.installHznCli();
+            this.installHznCli()
+            .subscribe({
+              complete: () => {
+                console.log('done installing hzn cli.');
+                observer.complete();
+              },
+              error: (err) => {
+                observer.error(err);
+              }
+            })
           } else {
             observer.error(err);
           }
