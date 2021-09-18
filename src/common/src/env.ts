@@ -16,6 +16,7 @@ export class Env {
   init() {
     return new Observable((observer) => {
       this.hznEnv = pEnv.npm_config_hznEnv || './config/.env-hzn.json';
+      
       this.hznJson = JSON.parse(readFileSync(this.hznEnv).toString());
       // console.log(process.cwd(), this.env, this.hznJson)
       this.envVars = this.hznJson[this.env]['envVars'];
