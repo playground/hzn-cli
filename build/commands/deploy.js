@@ -21,10 +21,10 @@ const handler = (argv) => {
     (0, clear_1.default)();
     console.log(chalk_1.default.greenBright(figlet_1.default.textSync('hzn-cli', { horizontalLayout: 'full' })));
     if ((0, fs_1.existsSync)('./config/.env-hzn.json')) {
-        const hzn = new hzn_1.Hzn();
         const { action, org } = argv;
         console.log('$$$ ', action, org);
         process.env.npm_config_env = org;
+        const hzn = new hzn_1.Hzn();
         hzn.setup()
             .subscribe({
             complete: () => {
