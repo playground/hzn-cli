@@ -31,6 +31,8 @@ class Hzn {
                     observer.complete();
                 },
                 error: (err) => {
+                    console.log(err);
+                    console.log('typeof: ' + typeof err);
                     if (err.indexOf('hzn: not found')) {
                         console.log('need to install hzn');
                         this.installHznCli();
