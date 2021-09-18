@@ -24,6 +24,7 @@ const handler = (argv) => {
         const hzn = new hzn_1.Hzn();
         const { action, org } = argv;
         console.log('$$$ ', action, org);
+        process.env.npm_config_env = org;
         hzn.setup()
             .subscribe({
             complete: () => {

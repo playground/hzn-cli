@@ -30,6 +30,7 @@ export const handler = (argv: Arguments<Options>): void => {
     const hzn = new Hzn();
     const { action, org } = argv;
     console.log('$$$ ', action, org);
+    process.env.npm_config_env = org;
     hzn.setup()
     .subscribe({
       complete: () => {
