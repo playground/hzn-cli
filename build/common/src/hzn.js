@@ -31,7 +31,13 @@ class Hzn {
                     observer.complete();
                 },
                 error: (err) => {
-                    observer.error(err);
+                    if (err.indexOf('hzn: not found')) {
+                        console.log('need to install hzn');
+                        this.installHznCli();
+                    }
+                    else {
+                        observer.error(err);
+                    }
                 }
             });
         });

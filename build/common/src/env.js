@@ -30,7 +30,7 @@ class Env {
                         observer.complete();
                     }
                     else {
-                        console.log('failed to identify arch', err);
+                        console.log('failed to identify arch');
                         observer.error(err);
                     }
                 });
