@@ -35,7 +35,7 @@ class Utils {
     }
     createHznKey(org, id) {
         if (org && id) {
-            return this.shell(`hzn key creat ${org} ${id}`);
+            return this.shell(`hzn key create ${org} ${id}`);
         }
         else {
             console.log('please provide both <YOUR_DOCKERHUB_ID> and <HZN_ORG_ID> in .env-hzn.json');

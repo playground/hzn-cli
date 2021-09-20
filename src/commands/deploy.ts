@@ -17,7 +17,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
   yargs
     .options({
       org: { type: 'string', desc: 'Organization to be deployed to'},
-      configpath: {type: 'string'}
+      configpath: {type: 'string', desc: 'Specify path to your configuration, default is ./config'}
     })
     .positional('action', { type: 'string', demandOption: true });
 
