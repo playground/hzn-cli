@@ -412,18 +412,24 @@ class Hzn {
                                         .subscribe({
                                         complete: () => {
                                             observer.complete();
+                                        },
+                                        error: (err) => {
+                                            observer.error(err);
                                         }
                                     });
+                                },
+                                error: (err) => {
+                                    observer.error(err);
                                 }
                             });
                         },
                         error: (err) => {
-                            console.log(err);
+                            observer.error(err);
                         }
                     });
                 },
                 error: (err) => {
-                    console.log(err);
+                    observer.error(err);
                 }
             });
         });
