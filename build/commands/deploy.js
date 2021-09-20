@@ -13,7 +13,7 @@ exports.command = 'deploy <action>';
 exports.desc = 'Deploy <action> to Org <org>';
 const builder = (yargs) => yargs
     .options({
-    org: { type: 'string' },
+    org: { type: 'string', desc: 'Organization to be deployed to' },
     configpath: { type: 'string' }
 })
     .positional('action', { type: 'string', demandOption: true });
@@ -33,7 +33,6 @@ const handler = (argv) => {
                 hzn[action]()
                     .subscribe({
                     complete: () => {
-                        console.log(action, process.env.YOUR_SERVICE_NAME, process.env.HZN_ORG_ID);
                         console.log('process completed.');
                         process.exit(0);
                     }

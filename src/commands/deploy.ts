@@ -16,7 +16,7 @@ export const desc: string = 'Deploy <action> to Org <org>';
 export const builder: CommandBuilder<Options, Options> = (yargs) =>
   yargs
     .options({
-      org: { type: 'string' },
+      org: { type: 'string', desc: 'Organization to be deployed to'},
       configpath: {type: 'string'}
     })
     .positional('action', { type: 'string', demandOption: true });
@@ -41,7 +41,6 @@ export const handler = (argv: Arguments<Options>): void => {
         hzn[action]()
         .subscribe({
           complete:() => {
-            console.log(action, process.env.YOUR_SERVICE_NAME, process.env.HZN_ORG_ID);
             console.log('process completed.');
             process.exit(0)          
           }

@@ -33,13 +33,11 @@ export class Utils {
     name = name ? `hzn exchange deployment listpolicy ${name}` : 'hzn exchange deployment listpolicy';
     return this.shell(name);
   }
-  createHznKey() {
-    let org = process.env.npm_config_org;
-    let email = process.env.npm_config_email;
-    if(org && email) {
-      return this.shell(`hzn key creat ${org} ${email}`);  
+  createHznKey(org: string, id: string) {
+    if(org && id) {
+      return this.shell(`hzn key creat ${org} ${id}`);  
     } else {
-      console.log('please provide both org and email: --org=<org> --email=<email>.')
+      console.log('please provide both <YOUR_DOCKERHUB_ID> and <HZN_ORG_ID> in .env-hzn.json')
       return of();
     }
   }

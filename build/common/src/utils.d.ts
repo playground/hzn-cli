@@ -7,7 +7,7 @@ export declare class Utils {
     listNode(): Observable<unknown>;
     listObject(): Observable<unknown>;
     listDeploymentPolicy(): Observable<unknown>;
-    createHznKey(): Observable<unknown>;
+    createHznKey(org: string, id: string): Observable<unknown>;
     checkConfigState(): Observable<unknown>;
     listNodePattern(): Observable<unknown>;
     getDeviceArch(): Observable<unknown>;

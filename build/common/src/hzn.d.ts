@@ -43,5 +43,7 @@ export declare class Hzn {
     listNodePattern(): Observable<unknown>;
     getDeviceArch(): Observable<unknown>;
     createHznKey(): Observable<unknown>;
+    aptUpate(): Observable<unknown>;
+    installPrereq(): Observable<unknown>;
     installHznCli(): Observable<unknown>;
 }

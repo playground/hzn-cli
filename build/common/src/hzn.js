@@ -388,20 +388,26 @@ class Hzn {
         return utils.getDeviceArch();
     }
     createHznKey() {
-        return utils.createHznKey();
+        return utils.createHznKey(this.envVar.getOrgId(), this.envVar.getMyDockerHubId());
+    }
+    aptUpate() {
+        return utils.aptUpate();
+    }
+    installPrereq() {
+        return utils.installPrereq();
     }
     installHznCli() {
         return new rxjs_1.Observable((observer) => {
-            utils.aptUpate()
+            this.aptUpate()
                 .subscribe({
                 complete: () => {
-                    utils.installPrereq()
+                    this.installPrereq()
                         .subscribe({
                         complete: () => {
-                            utils.installHznCli()
+                            this.installHznCli()
                                 .subscribe({
                                 complete: () => {
-                                    utils.createHznKey()
+                                    this.createHznKey()
                                         .subscribe({
                                         complete: () => {
                                             observer.complete();
