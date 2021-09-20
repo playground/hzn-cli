@@ -13,10 +13,14 @@ export declare class Hzn {
     mmsPatternJson: any;
     mmsPolicyJson: any;
     envVar: any;
+    configPath: string;
+    name: string;
     utils: Utils;
-    constructor(env: string);
+    constructor(env: string, configPath: string, name: string);
     setup(): Observable<unknown>;
     test(): Observable<unknown>;
+    buildServiceImage(): Observable<unknown>;
+    pushServiceImage(): Observable<unknown>;
     buildMMSImage(): Observable<unknown>;
     pushMMSImage(): Observable<unknown>;
     publishMMSService(): Observable<unknown>;
@@ -40,5 +44,7 @@ export declare class Hzn {
     listNodePattern(): Observable<unknown>;
     getDeviceArch(): Observable<unknown>;
     createHznKey(): Observable<unknown>;
+    aptUpate(): Observable<unknown>;
+    installPrereq(): Observable<unknown>;
     installHznCli(): Observable<unknown>;
 }

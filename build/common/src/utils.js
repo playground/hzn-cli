@@ -8,39 +8,32 @@ class Utils {
     constructor() { }
     init() {
     }
-    listService() {
-        let name = process.env.npm_config_name;
-        name = name ? `hzn exchange service list ${name}` : 'hzn exchange service list';
-        return this.shell(name);
+    listService(name) {
+        const arg = name.length > 0 ? `hzn exchange service list ${name}` : 'hzn exchange service list';
+        return this.shell(arg);
     }
-    listPattern() {
-        let name = process.env.npm_config_name;
-        name = name ? `hzn exchange pattern list ${name}` : 'hzn exchange pattern list';
-        return this.shell(name);
+    listPattern(name) {
+        const arg = name.length > 0 ? `hzn exchange pattern list ${name}` : 'hzn exchange pattern list';
+        return this.shell(arg);
     }
-    listNode() {
-        let name = process.env.npm_config_name;
-        name = name ? `hzn exchange node list ${name}` : 'hzn exchange node list';
-        return this.shell(name);
+    listNode(name) {
+        const arg = name.length > 0 ? `hzn exchange node list ${name}` : 'hzn exchange node list';
+        return this.shell(arg);
     }
-    listObject() {
-        let name = process.env.npm_config_name;
-        name = name ? `hzn mms object list ${name}` : 'hzn mms object list';
-        return this.shell(name);
+    listObject(name) {
+        const arg = name.length > 0 ? `hzn mms object list ${name}` : 'hzn mms object list';
+        return this.shell(arg);
     }
-    listDeploymentPolicy() {
-        let name = process.env.npm_config_name;
-        name = name ? `hzn exchange deployment listpolicy ${name}` : 'hzn exchange deployment listpolicy';
-        return this.shell(name);
+    listDeploymentPolicy(name) {
+        const arg = name.length > 0 ? `hzn exchange deployment listpolicy ${name}` : 'hzn exchange deployment listpolicy';
+        return this.shell(arg);
     }
-    createHznKey() {
-        let org = process.env.npm_config_org;
-        let email = process.env.npm_config_email;
-        if (org && email) {
-            return this.shell(`hzn key creat ${org} ${email}`);
+    createHznKey(org, id) {
+        if (org && id) {
+            return this.shell(`hzn key create ${org} ${id}`);
         }
         else {
-            console.log('please provide both org and email: --org=<org> --email=<email>.');
+            console.log('please provide both <YOUR_DOCKERHUB_ID> and <HZN_ORG_ID> in .env-hzn.json');
             return (0, rxjs_1.of)();
         }
     }
@@ -66,7 +59,7 @@ class Utils {
     }
     shell(arg) {
         return new rxjs_1.Observable((observer) => {
-            exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
+            let child = exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
                 if (!err) {
                     console.log(stdout);
                     observer.next(stdout);
@@ -76,6 +69,10 @@ class Utils {
                     console.log(`shell command failed: ${err}`);
                     observer.error(err);
                 }
+            });
+            child.stdout.pipe(process.stdout);
+            child.on('data', (data) => {
+                console.log(data);
             });
         });
     }

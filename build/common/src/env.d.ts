@@ -4,7 +4,8 @@ export declare class Env {
     envVars: any;
     hznJson: any;
     hznEnv: any;
-    constructor(env: string);
+    configPath: string;
+    constructor(env: string, configPath: string);
     init(): Observable<unknown>;
     setAdditionalEnv(): void;
     getEnv(): string;
@@ -27,6 +28,6 @@ export declare class Env {
     getMMSObjectId(): string | undefined;
     getMMSObjectFile(): string | undefined;
     getServiceContainerCreds(): string | undefined;
-    getPatterName(): string | undefined;
+    getPatternName(): string | undefined;
     getServiceContainer(): string | undefined;
 }

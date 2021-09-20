@@ -6,12 +6,13 @@ const fs_1 = require("fs");
 const cp = require('child_process'), exec = cp.exec;
 const pEnv = process.env;
 class Env {
-    constructor(env) {
-        this.env = env || 'biz';
+    constructor(env, configPath) {
+        this.env = env;
+        this.configPath = configPath;
+        this.hznEnv = `${configPath}/.env-hzn.json`;
     }
     init() {
         return new rxjs_1.Observable((observer) => {
-            this.hznEnv = pEnv.npm_config_hznEnv || './config/.env-hzn.json';
             this.hznJson = JSON.parse((0, fs_1.readFileSync)(this.hznEnv).toString());
             // console.log(process.cwd(), this.env, this.hznJson)
             this.envVars = this.hznJson[this.env]['envVars'];
@@ -110,7 +111,7 @@ class Env {
     getServiceContainerCreds() {
         return pEnv.SERVICE_CONTAINER_CREDS;
     }
-    getPatterName() {
+    getPatternName() {
         return pEnv.PATTERN_NAME;
     }
     getServiceContainer() {

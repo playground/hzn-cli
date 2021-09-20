@@ -8,6 +8,8 @@ import { existsSync } from 'fs';
 type Options = {
   action: string;
   org: string | undefined;
+  configpath: string | undefined;
+  name: string | undefined;
 };
 export const command: string = 'deploy <action>';
 export const desc: string = 'Deploy <action> to Org <org>';
@@ -15,7 +17,9 @@ export const desc: string = 'Deploy <action> to Org <org>';
 export const builder: CommandBuilder<Options, Options> = (yargs) =>
   yargs
     .options({
-      org: { type: 'string' },
+      org: { type: 'string', desc: 'Organization to be deployed to'},
+      configpath: {type: 'string', desc: 'Specify path to your configuration, default is ./config'},
+      name: { type: 'string', desc: 'Name of service, pattern, policy & etc.'}
     })
     .positional('action', { type: 'string', demandOption: true });
 
@@ -26,11 +30,13 @@ export const handler = (argv: Arguments<Options>): void => {
       figlet.textSync('hzn-cli', { horizontalLayout: 'full' })
     )
   );
-  if(existsSync('./config/.env-hzn.json')) {
-    const { action, org } = argv;
-    console.log('$$$ ', action, org);
-    const env = org || 'biz';
-    const hzn = new Hzn(env);
+  const { action, org, configpath, name } = argv;
+  const env = org || 'biz';
+  const n = name || '';
+  console.log('$$$ ', action, env, configpath, n);
+  const configPath = configpath || 'config';
+  if(existsSync(`${configPath}/.env-hzn.json`)) {
+    const hzn = new Hzn(env, configPath, n);
 
     hzn.setup()
     .subscribe({
@@ -38,7 +44,6 @@ export const handler = (argv: Arguments<Options>): void => {
         hzn[action]()
         .subscribe({
           complete:() => {
-            console.log(action, process.env.YOUR_SERVICE_NAME, process.env.HZN_ORG_ID);
             console.log('process completed.');
             process.exit(0)          
           }

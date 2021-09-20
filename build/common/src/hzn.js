@@ -9,9 +9,11 @@ const utils_1 = require("./utils");
 const prompt = require('prompt');
 const utils = new utils_1.Utils();
 class Hzn {
-    constructor(env) {
+    constructor(env, configPath, name) {
         this.utils = new utils_1.Utils();
-        this.envVar = new env_1.Env(env);
+        this.envVar = new env_1.Env(env, configPath);
+        this.configPath = configPath;
+        this.name = name;
     }
     setup() {
         return new rxjs_1.Observable((observer) => {
@@ -22,12 +24,12 @@ class Hzn {
                     this.objectId = process.env.npm_config_id || this.envVar.getMMSObjectId();
                     this.objectFile = process.env.npm_config_object || this.envVar.getMMSObjectFile();
                     this.mmsPattern = process.env.npm_config_pattern || this.envVar.getMMSPatterName();
-                    this.patternJson = process.env.npm_config_patternjson || 'config/service/pattern.json';
-                    this.serviceJson = process.env.npm_config_servicejson || 'config/service/service.json';
-                    this.policyJson = process.env.npm_config_policyjson || 'config/service/policy.json';
-                    this.mmsPatternJson = process.env.npm_config_patternjson || 'config/mms/pattern.json';
-                    this.mmsServiceJson = process.env.npm_config_servicejson || 'config/mms/service.json';
-                    this.mmsPolicyJson = process.env.npm_config_policyjson || 'config/mms/policy.json';
+                    this.patternJson = `${this.configPath}/service/pattern.json`;
+                    this.serviceJson = `${this.configPath}/service/service.json`;
+                    this.policyJson = `${this.configPath}/service/policy.json`;
+                    this.mmsPatternJson = `${this.configPath}/mms/pattern.json`;
+                    this.mmsServiceJson = `${this.configPath}/mms/service.json`;
+                    this.mmsPolicyJson = `${this.configPath}/mms/policy.json`;
                     observer.complete();
                 },
                 error: (err) => {
@@ -58,18 +60,53 @@ class Hzn {
             observer.complete();
         });
     }
-    buildMMSImage() {
+    buildServiceImage() {
         return new rxjs_1.Observable((observer) => {
-            // let tag = `${this.envVar.getDockerImageBase()}_${this.envVar.getArch()}:${this.envVar.getMMSServiceVersion()}`;
-            let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile.${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
+            let arg = `docker build -t ${this.envVar.getServiceContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
             console.log(arg);
             exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
                 if (!err) {
                     console.log(stdout);
-                    console.log(`done building docker image`);
+                    console.log(`done building service docker image`);
                 }
                 else {
-                    console.log('failed to build docker image', err);
+                    console.log('failed to build service docker image', err);
+                }
+                observer.next();
+                observer.complete();
+            });
+        });
+    }
+    pushServiceImage() {
+        return new rxjs_1.Observable((observer) => {
+            let arg = `docker push ${this.envVar.getServiceContainer()}`;
+            console.log(arg);
+            exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
+                if (!err) {
+                    console.log(stdout);
+                    console.log(`done pushing service docker image`);
+                    observer.next();
+                    observer.complete();
+                }
+                else {
+                    console.log('failed to push service docker image', err);
+                    observer.error(err);
+                }
+            });
+        });
+    }
+    buildMMSImage() {
+        return new rxjs_1.Observable((observer) => {
+            // let tag = `${this.envVar.getDockerImageBase()}_${this.envVar.getArch()}:${this.envVar.getMMSServiceVersion()}`;
+            let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
+            console.log(arg);
+            exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
+                if (!err) {
+                    console.log(stdout);
+                    console.log(`done building mms docker image`);
+                }
+                else {
+                    console.log('failed to build mms docker image', err);
                 }
                 observer.next();
                 observer.complete();
@@ -83,12 +120,12 @@ class Hzn {
             exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
                 if (!err) {
                     console.log(stdout);
-                    console.log(`done publishing mms service`);
+                    console.log(`done pushing mms docker image`);
                     observer.next();
                     observer.complete();
                 }
                 else {
-                    console.log('failed to publish mms service', err);
+                    console.log('failed to push mms docker image', err);
                     observer.error(err);
                 }
             });
@@ -173,12 +210,12 @@ class Hzn {
             exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
                 if (!err) {
                     console.log(stdout);
-                    console.log(`done unregistering mss agent`);
+                    console.log(`done unregistering agent`);
                     observer.next();
                     observer.complete();
                 }
                 else {
-                    console.log('failed to unregister mms agent', err);
+                    console.log('failed to unregister agent', err);
                     observer.error(err);
                 }
             });
@@ -251,7 +288,7 @@ class Hzn {
             exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
                 if (!err) {
                     console.log(stdout);
-                    console.log(`done publishing ${this.envVar.getPatterName()} pattern`);
+                    console.log(`done publishing ${this.envVar.getPatternName()} pattern`);
                     observer.next();
                     observer.complete();
                 }
@@ -328,19 +365,19 @@ class Hzn {
         });
     }
     listService() {
-        return utils.listService();
+        return utils.listService(this.name);
     }
     listPattern() {
-        return utils.listPattern();
+        return utils.listPattern(this.name);
     }
     listNode() {
-        return utils.listNode();
+        return utils.listNode(this.name);
     }
     listObject() {
-        return utils.listObject();
+        return utils.listObject(this.name);
     }
     listDeploymentPolicy() {
-        return utils.listDeploymentPolicy();
+        return utils.listDeploymentPolicy(this.name);
     }
     checkConfigState() {
         return utils.checkConfigState();
@@ -352,20 +389,26 @@ class Hzn {
         return utils.getDeviceArch();
     }
     createHznKey() {
-        return utils.createHznKey();
+        return utils.createHznKey(this.envVar.getOrgId(), this.envVar.getMyDockerHubId());
+    }
+    aptUpate() {
+        return utils.aptUpate();
+    }
+    installPrereq() {
+        return utils.installPrereq();
     }
     installHznCli() {
         return new rxjs_1.Observable((observer) => {
-            utils.aptUpate()
+            this.aptUpate()
                 .subscribe({
                 complete: () => {
-                    utils.installPrereq()
+                    this.installPrereq()
                         .subscribe({
                         complete: () => {
-                            utils.installHznCli()
+                            this.installHznCli()
                                 .subscribe({
                                 complete: () => {
-                                    utils.createHznKey()
+                                    this.createHznKey()
                                         .subscribe({
                                         complete: () => {
                                             observer.complete();

@@ -10,13 +10,14 @@ export class Env {
   envVars: any;
   hznJson: any;
   hznEnv: any;
-  constructor(env: string) {
-    this.env = env || 'biz';
+  configPath: string;
+  constructor(env: string, configPath: string) {
+    this.env = env;
+    this.configPath = configPath;
+    this.hznEnv = `${configPath}/.env-hzn.json`;
   }
   init() {
     return new Observable((observer) => {
-      this.hznEnv = pEnv.npm_config_hznEnv || './config/.env-hzn.json';
-      
       this.hznJson = JSON.parse(readFileSync(this.hznEnv).toString());
       // console.log(process.cwd(), this.env, this.hznJson)
       this.envVars = this.hznJson[this.env]['envVars'];
@@ -113,7 +114,7 @@ export class Env {
   getServiceContainerCreds() {
     return pEnv.SERVICE_CONTAINER_CREDS;
   }
-  getPatterName() {
+  getPatternName() {
     return pEnv.PATTERN_NAME;
   }
   getServiceContainer() {
