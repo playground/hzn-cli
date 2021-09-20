@@ -29,10 +29,10 @@ export const handler = (argv: Arguments<Options>): void => {
     )
   );
   const { action, org, configpath } = argv;
-  console.log('$$$ ', action, org, configpath);
+  const env = org || 'biz';
+  console.log('$$$ ', action, env, configpath);
   const configPath = configpath || 'config';
   if(existsSync(`${configPath}/.env-hzn.json`)) {
-    const env = org || 'biz';
     const hzn = new Hzn(env, configPath);
 
     hzn.setup()

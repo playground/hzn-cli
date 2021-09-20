@@ -22,10 +22,10 @@ const handler = (argv) => {
     (0, clear_1.default)();
     console.log(chalk_1.default.greenBright(figlet_1.default.textSync('hzn-cli', { horizontalLayout: 'full' })));
     const { action, org, configpath } = argv;
-    console.log('$$$ ', action, org, configpath);
+    const env = org || 'biz';
+    console.log('$$$ ', action, env, configpath);
     const configPath = configpath || 'config';
     if ((0, fs_1.existsSync)(`${configPath}/.env-hzn.json`)) {
-        const env = org || 'biz';
         const hzn = new hzn_1.Hzn(env, configPath);
         hzn.setup()
             .subscribe({

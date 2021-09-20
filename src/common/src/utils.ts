@@ -63,7 +63,7 @@ export class Utils {
   }
   shell(arg: string) {
     return new Observable((observer) => {
-      exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
+      let child = exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
         if(!err) {
           console.log(stdout);
           observer.next(stdout);
@@ -72,7 +72,11 @@ export class Utils {
           console.log(`shell command failed: ${err}`);
           observer.error(err);
         }
-      });  
+      });
+      child.stdout.pipe(process.stdout);
+      child.on('data', (data) => {
+        console.log(data)
+      })  
     });
   }
 }

@@ -64,7 +64,7 @@ class Utils {
     }
     shell(arg) {
         return new rxjs_1.Observable((observer) => {
-            exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
+            let child = exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
                 if (!err) {
                     console.log(stdout);
                     observer.next(stdout);
@@ -74,6 +74,10 @@ class Utils {
                     console.log(`shell command failed: ${err}`);
                     observer.error(err);
                 }
+            });
+            child.stdout.pipe(process.stdout);
+            child.on('data', (data) => {
+                console.log(data);
             });
         });
     }
