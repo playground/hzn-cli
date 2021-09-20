@@ -74,7 +74,7 @@ export class Hzn {
   }
   buildServiceImage() {
     return new Observable((observer) => {
-      let arg = `docker build -t ${this.envVar.getServiceContainer()} -f Dockerfile.${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
+      let arg = `docker build -t ${this.envVar.getServiceContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
       console.log(arg)
       exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
         if(!err) {
@@ -108,7 +108,7 @@ export class Hzn {
   buildMMSImage() {
     return new Observable((observer) => {
       // let tag = `${this.envVar.getDockerImageBase()}_${this.envVar.getArch()}:${this.envVar.getMMSServiceVersion()}`;
-      let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile.${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
+      let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
       console.log(arg)
       exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
         if(!err) {
@@ -214,11 +214,11 @@ export class Hzn {
       exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
         if(!err) {
           console.log(stdout)
-          console.log(`done unregistering mss agent`);
+          console.log(`done unregistering agent`);
           observer.next();
           observer.complete();
         } else {
-          console.log('failed to unregister mms agent', err);
+          console.log('failed to unregister agent', err);
           observer.error(err);
         }
       });
@@ -290,7 +290,7 @@ export class Hzn {
       exec(arg, {maxBuffer: 1024 * 2000}, (err, stdout, stderr) => {
         if(!err) {
           console.log(stdout)
-          console.log(`done publishing ${this.envVar.getPatterName()} pattern`);
+          console.log(`done publishing ${this.envVar.getPatternName()} pattern`);
           observer.next();
           observer.complete();
         } else {
