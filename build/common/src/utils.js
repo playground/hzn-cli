@@ -49,7 +49,7 @@ class Utils {
     aptUpate() {
         // TODO, if failed run sudo apt-get -y --fix-missing full-upgrade
         // cat info.cfg
-        return this.shell(`sudo apt-get -y update`);
+        return this.shell(`sudo apt-get -y --fix-missing full-upgrade`);
     }
     installPrereq() {
         return this.shell(`sudo apt-get -yq install jq curl git`);
@@ -59,6 +59,7 @@ class Utils {
     }
     shell(arg) {
         return new rxjs_1.Observable((observer) => {
+            console.log(arg);
             let child = exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
                 if (!err) {
                     console.log(stdout);
