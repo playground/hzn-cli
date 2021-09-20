@@ -49,7 +49,7 @@ class Utils {
     aptUpate() {
         // TODO, if failed run sudo apt-get -y --fix-missing full-upgrade
         // cat info.cfg
-        return this.shell(`sudo apt-get -y --fix-missing full-upgrade`);
+        return this.shell(`sudo apt-get -y update`);
     }
     installPrereq() {
         return this.shell(`sudo apt-get -yq install jq curl git`);

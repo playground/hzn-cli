@@ -51,7 +51,7 @@ export class Hzn {
           console.log(err.message);
           if(err.message.indexOf('hzn: not found') >= 0) {
             console.log('need to install hzn');
-            this.installHznCli()
+            this.preInstallHznCli()
             .subscribe({
               complete: () => {
                 console.log('done installing hzn cli.');
@@ -400,6 +400,9 @@ export class Hzn {
     return utils.installPrereq();
   }
   installHznCli() {
+    return utils.installHznCli();
+  }
+  preInstallHznCli() {
     return new Observable((observer) => {
       this.aptUpate()
       .subscribe({

@@ -47,4 +47,5 @@ export declare class Hzn {
     aptUpate(): Observable<unknown>;
     installPrereq(): Observable<unknown>;
     installHznCli(): Observable<unknown>;
+    preInstallHznCli(): Observable<unknown>;
 }
