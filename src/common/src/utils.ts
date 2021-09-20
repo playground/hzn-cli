@@ -58,6 +58,7 @@ export class Utils {
   }
   shell(arg: string) {
     return new Observable((observer) => {
+      console.log(arg);
       let child = exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
         if(!err) {
           console.log(stdout);
