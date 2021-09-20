@@ -8,30 +8,25 @@ class Utils {
     constructor() { }
     init() {
     }
-    listService() {
-        let name = process.env.npm_config_name;
-        name = name ? `hzn exchange service list ${name}` : 'hzn exchange service list';
-        return this.shell(name);
+    listService(name) {
+        const arg = name.length > 0 ? `hzn exchange service list ${name}` : 'hzn exchange service list';
+        return this.shell(arg);
     }
-    listPattern() {
-        let name = process.env.npm_config_name;
-        name = name ? `hzn exchange pattern list ${name}` : 'hzn exchange pattern list';
-        return this.shell(name);
+    listPattern(name) {
+        const arg = name.length > 0 ? `hzn exchange pattern list ${name}` : 'hzn exchange pattern list';
+        return this.shell(arg);
     }
-    listNode() {
-        let name = process.env.npm_config_name;
-        name = name ? `hzn exchange node list ${name}` : 'hzn exchange node list';
-        return this.shell(name);
+    listNode(name) {
+        const arg = name.length > 0 ? `hzn exchange node list ${name}` : 'hzn exchange node list';
+        return this.shell(arg);
     }
-    listObject() {
-        let name = process.env.npm_config_name;
-        name = name ? `hzn mms object list ${name}` : 'hzn mms object list';
-        return this.shell(name);
+    listObject(name) {
+        const arg = name.length > 0 ? `hzn mms object list ${name}` : 'hzn mms object list';
+        return this.shell(arg);
     }
-    listDeploymentPolicy() {
-        let name = process.env.npm_config_name;
-        name = name ? `hzn exchange deployment listpolicy ${name}` : 'hzn exchange deployment listpolicy';
-        return this.shell(name);
+    listDeploymentPolicy(name) {
+        const arg = name.length > 0 ? `hzn exchange deployment listpolicy ${name}` : 'hzn exchange deployment listpolicy';
+        return this.shell(arg);
     }
     createHznKey(org, id) {
         if (org && id) {

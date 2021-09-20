@@ -14,8 +14,9 @@ export declare class Hzn {
     mmsPolicyJson: any;
     envVar: any;
     configPath: string;
+    name: string;
     utils: Utils;
-    constructor(env: string, configPath: string);
+    constructor(env: string, configPath: string, name: string);
     setup(): Observable<unknown>;
     test(): Observable<unknown>;
     buildServiceImage(): Observable<unknown>;

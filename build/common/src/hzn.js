@@ -9,10 +9,11 @@ const utils_1 = require("./utils");
 const prompt = require('prompt');
 const utils = new utils_1.Utils();
 class Hzn {
-    constructor(env, configPath) {
+    constructor(env, configPath, name) {
         this.utils = new utils_1.Utils();
         this.envVar = new env_1.Env(env, configPath);
         this.configPath = configPath;
+        this.name = name;
     }
     setup() {
         return new rxjs_1.Observable((observer) => {
@@ -364,19 +365,19 @@ class Hzn {
         });
     }
     listService() {
-        return utils.listService();
+        return utils.listService(this.name);
     }
     listPattern() {
-        return utils.listPattern();
+        return utils.listPattern(this.name);
     }
     listNode() {
-        return utils.listNode();
+        return utils.listNode(this.name);
     }
     listObject() {
-        return utils.listObject();
+        return utils.listObject(this.name);
     }
     listDeploymentPolicy() {
-        return utils.listDeploymentPolicy();
+        return utils.listDeploymentPolicy(this.name);
     }
     checkConfigState() {
         return utils.checkConfigState();

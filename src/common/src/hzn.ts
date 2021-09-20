@@ -22,10 +22,12 @@ export class Hzn {
   mmsPolicyJson: any;
   envVar: any;
   configPath: string;
+  name: string;
   utils = new Utils();
-  constructor(env:string, configPath: string) {
+  constructor(env:string, configPath: string, name: string) {
     this.envVar = new Env(env, configPath);
     this.configPath = configPath;
+    this.name = name;
   }
 
   setup() {
@@ -365,19 +367,19 @@ export class Hzn {
     });
   }
   listService() {
-    return utils.listService();
+    return utils.listService(this.name);
   }
   listPattern() {
-    return utils.listPattern();
+    return utils.listPattern(this.name);
   }
   listNode() {
-    return utils.listNode();
+    return utils.listNode(this.name);
   }
   listObject() {
-    return utils.listObject();
+    return utils.listObject(this.name);
   }
   listDeploymentPolicy() {
-    return utils.listDeploymentPolicy();
+    return utils.listDeploymentPolicy(this.name);
   }
   checkConfigState() {
     return utils.checkConfigState();

@@ -2,11 +2,11 @@ import { Observable } from 'rxjs';
 export declare class Utils {
     constructor();
     init(): void;
-    listService(): Observable<unknown>;
-    listPattern(): Observable<unknown>;
-    listNode(): Observable<unknown>;
-    listObject(): Observable<unknown>;
-    listDeploymentPolicy(): Observable<unknown>;
+    listService(name: string): Observable<unknown>;
+    listPattern(name: string): Observable<unknown>;
+    listNode(name: string): Observable<unknown>;
+    listObject(name: string): Observable<unknown>;
+    listDeploymentPolicy(name: string): Observable<unknown>;
     createHznKey(org: string, id: string): Observable<unknown>;
     checkConfigState(): Observable<unknown>;
     listNodePattern(): Observable<unknown>;

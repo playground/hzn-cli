@@ -14,19 +14,21 @@ exports.desc = 'Deploy <action> to Org <org>';
 const builder = (yargs) => yargs
     .options({
     org: { type: 'string', desc: 'Organization to be deployed to' },
-    configpath: { type: 'string', desc: 'Specify path to your configuration, default is ./config' }
+    configpath: { type: 'string', desc: 'Specify path to your configuration, default is ./config' },
+    name: { type: 'string', desc: 'Name of service, pattern, policy & etc.' }
 })
     .positional('action', { type: 'string', demandOption: true });
 exports.builder = builder;
 const handler = (argv) => {
     (0, clear_1.default)();
     console.log(chalk_1.default.greenBright(figlet_1.default.textSync('hzn-cli', { horizontalLayout: 'full' })));
-    const { action, org, configpath } = argv;
+    const { action, org, configpath, name } = argv;
     const env = org || 'biz';
-    console.log('$$$ ', action, env, configpath);
+    const n = name || '';
+    console.log('$$$ ', action, env, configpath, n);
     const configPath = configpath || 'config';
     if ((0, fs_1.existsSync)(`${configPath}/.env-hzn.json`)) {
-        const hzn = new hzn_1.Hzn(env, configPath);
+        const hzn = new hzn_1.Hzn(env, configPath, n);
         hzn.setup()
             .subscribe({
             complete: () => {
