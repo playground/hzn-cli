@@ -8,6 +8,7 @@ import { existsSync } from 'fs';
 type Options = {
   action: string;
   org: string | undefined;
+  configpath: string | undefined;
 };
 export const command: string = 'deploy <action>';
 export const desc: string = 'Deploy <action> to Org <org>';
@@ -16,6 +17,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
   yargs
     .options({
       org: { type: 'string' },
+      configpath: {type: 'string'}
     })
     .positional('action', { type: 'string', demandOption: true });
 
@@ -26,11 +28,12 @@ export const handler = (argv: Arguments<Options>): void => {
       figlet.textSync('hzn-cli', { horizontalLayout: 'full' })
     )
   );
-  if(existsSync('./config/.env-hzn.json')) {
-    const { action, org } = argv;
-    console.log('$$$ ', action, org);
+  const { action, org, configpath } = argv;
+  console.log('$$$ ', action, org, configpath);
+  const configPath = configpath || 'config';
+  if(existsSync(`${configPath}/.env-hzn.json`)) {
     const env = org || 'biz';
-    const hzn = new Hzn(env);
+    const hzn = new Hzn(env, configPath);
 
     hzn.setup()
     .subscribe({

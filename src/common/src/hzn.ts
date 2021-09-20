@@ -21,9 +21,11 @@ export class Hzn {
   mmsPatternJson: any;
   mmsPolicyJson: any;
   envVar: any;
+  configPath: string;
   utils = new Utils();
-  constructor(env:string) {
-    this.envVar = new Env(env);
+  constructor(env:string, configPath: string) {
+    this.envVar = new Env(env, configPath);
+    this.configPath = configPath;
   }
 
   setup() {
@@ -35,12 +37,12 @@ export class Hzn {
           this.objectId = process.env.npm_config_id || this.envVar.getMMSObjectId();
           this.objectFile = process.env.npm_config_object || this.envVar.getMMSObjectFile();
           this.mmsPattern = process.env.npm_config_pattern || this.envVar.getMMSPatterName();
-          this.patternJson = process.env.npm_config_patternjson || 'config/service/pattern.json';
-          this.serviceJson = process.env.npm_config_servicejson || 'config/service/service.json';
-          this.policyJson = process.env.npm_config_policyjson || 'config/service/policy.json';
-          this.mmsPatternJson = process.env.npm_config_patternjson || 'config/mms/pattern.json';
-          this.mmsServiceJson = process.env.npm_config_servicejson || 'config/mms/service.json';
-          this.mmsPolicyJson = process.env.npm_config_policyjson || 'config/mms/policy.json';
+          this.patternJson = `${this.configPath}/service/pattern.json`;
+          this.serviceJson = `${this.configPath}/service/service.json`;
+          this.policyJson = `${this.configPath}/service/policy.json`;
+          this.mmsPatternJson = `${this.configPath}/mms/pattern.json`;
+          this.mmsServiceJson = `${this.configPath}/mms/service.json`;
+          this.mmsPolicyJson = `${this.configPath}/mms/policy.json`;
           observer.complete();    
         },
         error: (err) => {
@@ -70,6 +72,39 @@ export class Hzn {
       observer.complete();
     });  
   }
+  buildServiceImage() {
+    return new Observable((observer) => {
+      let arg = `docker build -t ${this.envVar.getServiceContainer()} -f Dockerfile.${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
+      console.log(arg)
+      exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
+        if(!err) {
+          console.log(stdout)
+          console.log(`done building service docker image`);
+        } else {
+          console.log('failed to build service docker image', err);
+        }
+        observer.next();
+        observer.complete();
+      });
+    });
+  }
+  pushServiceImage() {
+    return new Observable((observer) => {
+      let arg = `docker push ${this.envVar.getServiceContainer()}`;
+      console.log(arg)
+      exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
+        if(!err) {
+          console.log(stdout)
+          console.log(`done pushing service docker image`);
+          observer.next();
+          observer.complete();
+        } else {
+          console.log('failed to push service docker image', err);
+          observer.error(err);
+        }
+      });
+    })  
+  }
   buildMMSImage() {
     return new Observable((observer) => {
       // let tag = `${this.envVar.getDockerImageBase()}_${this.envVar.getArch()}:${this.envVar.getMMSServiceVersion()}`;
@@ -78,9 +113,9 @@ export class Hzn {
       exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
         if(!err) {
           console.log(stdout)
-          console.log(`done building docker image`);
+          console.log(`done building mms docker image`);
         } else {
-          console.log('failed to build docker image', err);
+          console.log('failed to build mms docker image', err);
         }
         observer.next();
         observer.complete();
@@ -94,11 +129,11 @@ export class Hzn {
       exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
         if(!err) {
           console.log(stdout)
-          console.log(`done publishing mms service`);
+          console.log(`done pushing mms docker image`);
           observer.next();
           observer.complete();
         } else {
-          console.log('failed to publish mms service', err);
+          console.log('failed to push mms docker image', err);
           observer.error(err);
         }
       });

@@ -2,6 +2,7 @@ import type { Arguments, CommandBuilder } from 'yargs';
 declare type Options = {
     action: string;
     org: string | undefined;
+    configpath: string | undefined;
 };
 export declare const command: string;
 export declare const desc: string;
