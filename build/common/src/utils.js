@@ -59,6 +59,7 @@ class Utils {
     }
     shell(arg) {
         return new rxjs_1.Observable((observer) => {
+            console.log(arg);
             let child = exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
                 if (!err) {
                     console.log(stdout);

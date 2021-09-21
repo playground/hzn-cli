@@ -36,7 +36,7 @@ class Hzn {
                     console.log(err.message);
                     if (err.message.indexOf('hzn: not found') >= 0) {
                         console.log('need to install hzn');
-                        this.installHznCli()
+                        this.preInstallHznCli()
                             .subscribe({
                             complete: () => {
                                 console.log('done installing hzn cli.');
@@ -398,6 +398,9 @@ class Hzn {
         return utils.installPrereq();
     }
     installHznCli() {
+        return utils.installHznCli();
+    }
+    preInstallHznCli() {
         return new rxjs_1.Observable((observer) => {
             this.aptUpate()
                 .subscribe({
@@ -412,18 +415,24 @@ class Hzn {
                                         .subscribe({
                                         complete: () => {
                                             observer.complete();
+                                        },
+                                        error: (err) => {
+                                            observer.error(err);
                                         }
                                     });
+                                },
+                                error: (err) => {
+                                    observer.error(err);
                                 }
                             });
                         },
                         error: (err) => {
-                            console.log(err);
+                            observer.error(err);
                         }
                     });
                 },
                 error: (err) => {
-                    console.log(err);
+                    observer.error(err);
                 }
             });
         });
