@@ -302,20 +302,20 @@ export class Hzn {
       });
     })  
   }
-  showHorizonInfo() {
+  showHznInfo() {
     return new Observable((observer) => {
-      const file = this.getHorizonInfo();
+      const file = this.getHznInfo();
       console.log(file)
       observer.next(file);
       observer.complete();
     })  
   }
-  getHorizonInfo() {
+  getHznInfo() {
     return readFileSync('/etc/default/horizon').toString().split('\n');
   }
-  updateHorizonInfo() {
+  updateHznInfo() {
     return new Observable((observer) => {
-      let data = this.getHorizonInfo();
+      let data = this.getHznInfo();
       let props: any[] = [];
       data.forEach((el, i) => {
         if(el.length > 0) {

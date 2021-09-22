@@ -17,11 +17,17 @@ export const desc: string = 'Deploy <action> to Org <org>';
 export const builder: CommandBuilder<Options, Options> = (yargs) =>
   yargs
     .options({
-      org: { type: 'string', desc: 'Organization to be deployed to'},
+      org: {type: 'string', desc: 'Organization to be deployed to'},
       configpath: {type: 'string', desc: 'Specify path to your configuration, default is ./config'},
-      name: { type: 'string', desc: 'Name of service, pattern, policy & etc.'}
+      name: {type: 'string', desc: 'Name of service, pattern, policy & etc.'}
     })
-    .positional('action', { type: 'string', demandOption: true });
+    .positional('action', {
+      type: 'string', 
+      demandOption: true,
+      desc: 'Available actions:  test, buildServiceImage, pushServiceImage, publishService, publishPatterrn, buildMMSImage, pushMMSImage, publishMMSService, ' +
+            'publishMMSPattern, agentRun, publishMMSObject, unregisterAgent, registerAgent, showHznInfo, updateHznInfo, listService, listPattern, ' +
+            'listNode, listObject, listDeploymentPolicy, listNodePattern, checkConfigState, getDeviceArch, createHznKey'
+    });
 
 export const handler = (argv: Arguments<Options>): void => {
   clear();

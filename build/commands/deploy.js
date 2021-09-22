@@ -17,7 +17,13 @@ const builder = (yargs) => yargs
     configpath: { type: 'string', desc: 'Specify path to your configuration, default is ./config' },
     name: { type: 'string', desc: 'Name of service, pattern, policy & etc.' }
 })
-    .positional('action', { type: 'string', demandOption: true });
+    .positional('action', {
+    type: 'string',
+    demandOption: true,
+    desc: 'Available actions:  test, buildServiceImage, pushServiceImage, publishService, publishPatterrn, buildMMSImage, pushMMSImage, publishMMSService, ' +
+        'publishMMSPattern, agentRun, publishMMSObject, unregisterAgent, registerAgent, showHznInfo, updateHznInfo, listService, listPattern, ' +
+        'listNode, listObject, listDeploymentPolicy, listNodePattern, checkConfigState, getDeviceArch, createHznKey'
+});
 exports.builder = builder;
 const handler = (argv) => {
     (0, clear_1.default)();

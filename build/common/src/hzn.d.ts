@@ -31,9 +31,9 @@ export declare class Hzn {
     registerAgent(): Observable<unknown>;
     publishService(): Observable<unknown>;
     publishPattern(): Observable<unknown>;
-    showHorizonInfo(): Observable<unknown>;
-    getHorizonInfo(): string[];
-    updateHorizonInfo(): Observable<unknown>;
+    showHznInfo(): Observable<unknown>;
+    getHznInfo(): string[];
+    updateHznInfo(): Observable<unknown>;
     copyFile(arg: string): Promise<unknown>;
     listService(): Observable<unknown>;
     listPattern(): Observable<unknown>;
