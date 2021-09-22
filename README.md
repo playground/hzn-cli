@@ -25,7 +25,13 @@ After installlation run
 Deploy <action> to Org <org>
 
 Positionals:
-  action                                                     [string] [required]
+  action  Available actions:  test, buildServiceImage, pushServiceImage,
+          publishService, publishPatterrn, buildMMSImage, pushMMSImage,
+          publishMMSService, publishMMSPattern, agentRun, publishMMSObject,
+          unregisterAgent, registerAgent, showHznInfo, updateHznInfo,
+          listService, listPattern, listNode, listObject, listDeploymentPolicy,
+          listNodePattern, checkConfigState, getDeviceArch, createHznKey
+                                                             [string] [required]
 
 Options:
       --version     Show version number                                [boolean]

@@ -299,20 +299,20 @@ class Hzn {
             });
         });
     }
-    showHorizonInfo() {
+    showHznInfo() {
         return new rxjs_1.Observable((observer) => {
-            const file = this.getHorizonInfo();
+            const file = this.getHznInfo();
             console.log(file);
             observer.next(file);
             observer.complete();
         });
     }
-    getHorizonInfo() {
+    getHznInfo() {
         return (0, fs_1.readFileSync)('/etc/default/horizon').toString().split('\n');
     }
-    updateHorizonInfo() {
+    updateHznInfo() {
         return new rxjs_1.Observable((observer) => {
-            let data = this.getHorizonInfo();
+            let data = this.getHznInfo();
             let props = [];
             data.forEach((el, i) => {
                 if (el.length > 0) {
