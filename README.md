@@ -92,6 +92,20 @@ Options:
 }
 ```
 
+## After installation, you can test out the cli by running
+
+```oh deploy test --configpath /home/pi/config```
+
+  _                                    _   _ 
+ | |__    ____  _ __             ___  | | (_)
+ | '_ \  |_  / | '_ \   _____   / __| | | | |
+ | | | |  / /  | | | | |_____| | (__  | | | |
+ |_| |_| /___| |_| |_|          \___| |_| |_|
+                                             
+$$$  test biz /home/ubuntu/config 
+it works...arm
+process completed.
+
 ## Here are a few examples of actions you can perform with "oh", default org is "biz"
 
 Build service docker image
