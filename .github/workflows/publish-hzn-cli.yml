@@ -14,6 +14,7 @@ jobs:
           node-version: 14
           registry-url: https://registry.npmjs.org/
           scope: ${{ github.repository_owner }}
+      - run: echo "::set-env name=NPM_REGISTRY_URL::$(node -p "require('./package.json').publishConfig.registry")"
       - run: npm install
       - run: npm publish --access public
         env:
