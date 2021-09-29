@@ -1,6 +1,6 @@
 {
-  "name": "@soconnect/hzn-cli",
-  "version": "0.0.1",
+  "name": "@playground/hzn-cli",
+  "version": "0.0.2",
   "description": "Open Horizon CLI toolkit helps streamline the process of preparing node agents and perform tasks between orgs environments",
   "main": "./build/index.js",
   "bin": {
@@ -15,9 +15,6 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/playground/hzn-cli.git"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
   },
   "keywords": [
     "IEAM",
