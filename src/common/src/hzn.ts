@@ -176,6 +176,7 @@ export class Hzn {
     })  
   }
   agentRun() {
+    // TODO run unregister agent first
     return new Observable((observer) => {
       let arg = `hzn register --policy ${this.mmsPolicyJson} --pattern "${this.mmsPattern}"`;
       console.log(arg)
