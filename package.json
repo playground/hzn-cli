@@ -12,10 +12,6 @@
     "local": "sudo npm i -g && oh",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/playground/hzn-cli.git"
-  },
   "keywords": [
     "IEAM",
     "Open",
