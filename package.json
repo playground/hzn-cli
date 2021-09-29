@@ -1,5 +1,5 @@
 {
-  "name": "@playground/hzn-cli",
+  "name": "@soconnect/hzn-cli",
   "version": "0.0.1",
   "description": "Open Horizon CLI toolkit helps streamline the process of preparing node agents and perform tasks between orgs environments",
   "main": "./build/index.js",
