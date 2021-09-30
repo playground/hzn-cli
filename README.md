@@ -117,22 +117,25 @@ process completed.
 ## Here are a few examples of actions you can perform with "oh", default org is "biz"
 
 Build service docker image
-```oh deploy buildServiceImage --configpath /home/pi/config```
+```oh deploy buildServiceImage --config_path /home/pi/config```
 
 Push service docker image
-```oh deploy pushServiceImage --configpath /home/pi/config```
+```oh deploy pushServiceImage --config_path /home/pi/config```
 
 Publish service to management hub
-```oh deploy publishService --configpath /home/pi/config```
+```oh deploy publishService --config_path /home/pi/config```
 
 Publish service pattern
-```oh deploy publishPattern --configpath /home/pi/config```
+```oh deploy publishPattern --config_path /home/pi/config```
 
 Publish MMS service
-```oh deploy publishMMSService --configpath /home/pi/config```
+```oh deploy publishMMSService --config_path /home/pi/config```
 
 Publish MMS pattern
-```oh deploy publishMMSPattern --configpath /home/pi/config```
+```oh deploy publishMMSPattern --config_path /home/pi/config```
+
+Publish MMS Object file
+```oh deploy publishMMSObject --object_type=object_detection --object_id=config.json --object=/Users/jeff/Downloads/demo-model/demo/version1/model.zip --pattern=pattern-pi-mms-service-arm --config_path=config```
 
 *Register agent (org=demo)- 
 ```oh deploy registerAgent --configpath /home/pi/config --org demo```

@@ -16,7 +16,7 @@ export declare class Hzn {
     configPath: string;
     name: string;
     utils: Utils;
-    constructor(env: string, configPath: string, name: string);
+    constructor(env: string, configPath: string, name: string, objectType: string, objectId: string, objectFile: string, mmsPattern: string);
     setup(): Observable<unknown>;
     test(): Observable<unknown>;
     buildServiceImage(): Observable<unknown>;

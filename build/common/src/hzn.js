@@ -9,21 +9,25 @@ const utils_1 = require("./utils");
 const prompt = require('prompt');
 const utils = new utils_1.Utils();
 class Hzn {
-    constructor(env, configPath, name) {
+    constructor(env, configPath, name, objectType, objectId, objectFile, mmsPattern) {
         this.utils = new utils_1.Utils();
         this.envVar = new env_1.Env(env, configPath);
         this.configPath = configPath;
         this.name = name;
+        this.objectType = objectType;
+        this.objectId = objectId;
+        this.objectFile = objectFile;
+        this.mmsPattern = mmsPattern;
     }
     setup() {
         return new rxjs_1.Observable((observer) => {
             this.envVar.init()
                 .subscribe({
                 complete: () => {
-                    this.objectType = process.env.npm_config_type || this.envVar.getMMSObjectType();
-                    this.objectId = process.env.npm_config_id || this.envVar.getMMSObjectId();
-                    this.objectFile = process.env.npm_config_object || this.envVar.getMMSObjectFile();
-                    this.mmsPattern = process.env.npm_config_pattern || this.envVar.getMMSPatterName();
+                    this.objectType = this.objectType || this.envVar.getMMSObjectType();
+                    this.objectId = this.objectId || this.envVar.getMMSObjectId();
+                    this.objectFile = this.objectFile || this.envVar.getMMSObjectFile();
+                    this.mmsPattern = this.mmsPattern || this.envVar.getMMSPatterName();
                     this.patternJson = `${this.configPath}/service/pattern.json`;
                     this.serviceJson = `${this.configPath}/service/service.json`;
                     this.policyJson = `${this.configPath}/service/policy.json`;
@@ -168,6 +172,7 @@ class Hzn {
         });
     }
     agentRun() {
+        // TODO run unregister agent first
         return new rxjs_1.Observable((observer) => {
             let arg = `hzn register --policy ${this.mmsPolicyJson} --pattern "${this.mmsPattern}"`;
             console.log(arg);
