@@ -24,10 +24,14 @@ export class Hzn {
   configPath: string;
   name: string;
   utils = new Utils();
-  constructor(env:string, configPath: string, name: string) {
+  constructor(env: string, configPath: string, name: string, objectType: string, objectId: string, objectFile: string, mmsPattern: string) {
     this.envVar = new Env(env, configPath);
     this.configPath = configPath;
     this.name = name;
+    this.objectType = objectType;
+    this.objectId = objectId;
+    this.objectFile = objectFile;
+    this.mmsPattern = mmsPattern;
   }
 
   setup() {
@@ -35,10 +39,10 @@ export class Hzn {
       this.envVar.init()
       .subscribe({
         complete: () => {
-          this.objectType = process.env.npm_config_type || this.envVar.getMMSObjectType();
-          this.objectId = process.env.npm_config_id || this.envVar.getMMSObjectId();
-          this.objectFile = process.env.npm_config_object || this.envVar.getMMSObjectFile();
-          this.mmsPattern = process.env.npm_config_pattern || this.envVar.getMMSPatterName();
+          this.objectType = this.objectType || this.envVar.getMMSObjectType();
+          this.objectId = this.objectId || this.envVar.getMMSObjectId();
+          this.objectFile = this.objectFile || this.envVar.getMMSObjectFile();
+          this.mmsPattern = this.mmsPattern || this.envVar.getMMSPatterName();
           this.patternJson = `${this.configPath}/service/pattern.json`;
           this.serviceJson = `${this.configPath}/service/service.json`;
           this.policyJson = `${this.configPath}/service/policy.json`;

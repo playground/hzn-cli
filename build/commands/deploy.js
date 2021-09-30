@@ -14,8 +14,12 @@ exports.desc = 'Deploy <action> to Org <org>';
 const builder = (yargs) => yargs
     .options({
     org: { type: 'string', desc: 'Organization to be deployed to' },
-    configpath: { type: 'string', desc: 'Specify path to your configuration, default is ./config' },
-    name: { type: 'string', desc: 'Name of service, pattern, policy & etc.' }
+    config_path: { type: 'string', desc: 'Specify path to your configuration, default is ./config' },
+    name: { type: 'string', desc: 'Name of service, pattern, policy & etc.' },
+    object_type: { type: 'string', desc: 'Type of object' },
+    object_id: { type: 'string', desc: 'Id of object to be published' },
+    object: { type: 'string', desc: 'Object file to be published' },
+    pattern: { type: 'string', desc: 'MMS pattern' }
 })
     .positional('action', {
     type: 'string',
@@ -28,13 +32,17 @@ exports.builder = builder;
 const handler = (argv) => {
     (0, clear_1.default)();
     console.log(chalk_1.default.greenBright(figlet_1.default.textSync('hzn-cli', { horizontalLayout: 'full' })));
-    const { action, org, configpath, name } = argv;
+    const { action, org, config_path, name, object_type, object_id, object, pattern } = argv;
     const env = org || 'biz';
     const n = name || '';
-    console.log('$$$ ', action, env, configpath, n);
-    const configPath = configpath || 'config';
+    const objType = object_type || '';
+    const objId = object_id || '';
+    const obj = object || '';
+    const p = pattern || '';
+    console.log('$$$ ', action, env, config_path, n);
+    const configPath = config_path || 'config';
     if ((0, fs_1.existsSync)(`${configPath}/.env-hzn.json`)) {
-        const hzn = new hzn_1.Hzn(env, configPath, n);
+        const hzn = new hzn_1.Hzn(env, configPath, n, objType, objId, obj, p);
         hzn.setup()
             .subscribe({
             complete: () => {
