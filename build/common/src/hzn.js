@@ -396,8 +396,8 @@ class Hzn {
     createHznKey() {
         return utils.createHznKey(this.envVar.getOrgId(), this.envVar.getMyDockerHubId());
     }
-    aptUpate() {
-        return utils.aptUpate();
+    aptUpdate() {
+        return utils.aptUpdate();
     }
     installPrereq() {
         return utils.installPrereq();
@@ -407,7 +407,7 @@ class Hzn {
     }
     preInstallHznCli() {
         return new rxjs_1.Observable((observer) => {
-            this.aptUpate()
+            this.aptUpdate()
                 .subscribe({
                 complete: () => {
                     this.installPrereq()

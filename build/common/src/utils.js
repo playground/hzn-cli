@@ -46,13 +46,19 @@ class Utils {
     getDeviceArch() {
         return this.shell(`hzn architecture`);
     }
-    aptUpate() {
+    aptUpdate() {
         // TODO, if failed run sudo apt-get -y --fix-missing full-upgrade
         // cat info.cfg
-        return this.shell(`sudo apt-get -y update`);
+        return this.shell(`sudo apt-get -y update && sudo apt-get -yq install jq curl git`);
     }
     installPrereq() {
-        return this.shell(`sudo apt-get -yq install jq curl git`);
+        return new rxjs_1.Observable((observer) => {
+            this.aptUpdate()
+                .subscribe({
+                complete: () => observer.complete(),
+                error: () => observer.complete() // Ignore errors
+            });
+        });
     }
     installHznCli() {
         return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/api/v1/objects/IBM/agent_files/agent-install.sh/data && chmod +x agent-install.sh && sudo -s -E ./agent-install.sh -i 'css:'`);
