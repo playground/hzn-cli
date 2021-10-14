@@ -53,7 +53,7 @@ export class Hzn {
         },
         error: (err) => {
           console.log(err.message);
-          if(err.message.indexOf('hzn: not found') >= 0) {
+          if(err.message.indexOf('hzn:') >= 0) {
             console.log('need to install hzn');
             this.preInstallHznCli()
             .subscribe({
