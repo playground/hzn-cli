@@ -11,7 +11,7 @@ export declare class Utils {
     checkConfigState(): Observable<unknown>;
     listNodePattern(): Observable<unknown>;
     getDeviceArch(): Observable<unknown>;
-    aptUpate(): Observable<unknown>;
+    aptUpdate(): Observable<unknown>;
     installPrereq(): Observable<unknown>;
     installHznCli(): Observable<unknown>;
     shell(arg: string): Observable<unknown>;

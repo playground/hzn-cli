@@ -53,7 +53,7 @@ export class Hzn {
         },
         error: (err) => {
           console.log(err.message);
-          if(err.message.indexOf('hzn: not found') >= 0) {
+          if(err.message.indexOf('hzn:') >= 0) {
             console.log('need to install hzn');
             this.preInstallHznCli()
             .subscribe({
@@ -398,8 +398,8 @@ export class Hzn {
   createHznKey() {
     return utils.createHznKey(this.envVar.getOrgId(), this.envVar.getMyDockerHubId());
   }
-  aptUpate() {
-    return utils.aptUpate();
+  aptUpdate() {
+    return utils.aptUpdate();
   }
   installPrereq() {
     return utils.installPrereq();
@@ -409,34 +409,26 @@ export class Hzn {
   }
   preInstallHznCli() {
     return new Observable((observer) => {
-      this.aptUpate()
+      this.installPrereq()
       .subscribe({
         complete: () => {
-          this.installPrereq()
+          this.installHznCli()
           .subscribe({
             complete: () => {
-              this.installHznCli()
+              this.createHznKey()
               .subscribe({
                 complete: () => {
-                  this.createHznKey()
-                  .subscribe({
-                    complete: () => {
-                      observer.complete();
-                    },
-                    error: (err) => {
-                      observer.error(err);
-                    }
-                  })
+                  observer.complete();
                 },
                 error: (err) => {
                   observer.error(err);
                 }
-              })        
+              })
             },
             error: (err) => {
               observer.error(err);
             }
-          })
+          })        
         },
         error: (err) => {
           observer.error(err);
