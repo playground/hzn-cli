@@ -9,7 +9,7 @@
   "scripts": {
     "start": "nodemon -e ts --watch 'src/**/*.ts' --exec 'npm run build'",
     "build": "npx tsc && chmod +x build/*.js && chmod +x build/**/*.js",
-    "local": "sudo npm i -g && oh",
+    "local": "npm run build && sudo npm i -g && oh",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "keywords": [
