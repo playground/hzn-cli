@@ -69,6 +69,9 @@ export class Utils {
       return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/api/v1/objects/IBM/agent_files/agent-install.sh/data && chmod +x agent-install.sh && sudo -s -E ./agent-install.sh -i 'css:'`)
     }  
   }
+  uninstallHorizon() {
+    return this.shell(`sudo apt purge -y bluehorizon horizon horizon-cli`);
+  }
   shell(arg: string) {
     return new Observable((observer) => {
       console.log(arg);

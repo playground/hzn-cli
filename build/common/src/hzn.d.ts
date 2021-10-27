@@ -47,6 +47,7 @@ export declare class Hzn {
     aptUpdate(): Observable<unknown>;
     installPrereq(): Observable<unknown>;
     installHznCli(): Observable<unknown>;
+    uninstallHorizon(): Observable<unknown>;
     preInstallHznCli(): Observable<unknown>;
     setupRedHat(): Observable<unknown>;
 }

@@ -15,5 +15,6 @@ export declare class Utils {
     aptUpdate(): Observable<unknown>;
     installPrereq(): Observable<unknown>;
     installHznCli(anax: string): Observable<unknown>;
+    uninstallHorizon(): Observable<unknown>;
     shell(arg: string): Observable<unknown>;
 }

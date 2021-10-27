@@ -407,6 +407,9 @@ export class Hzn {
   installHznCli() {
     return utils.installHznCli(this.envVar.getAnax());
   }
+  uninstallHorizon() {
+    return utils.uninstallHorizon();
+  }
   preInstallHznCli() {
     return new Observable((observer) => {
       this.installPrereq()
