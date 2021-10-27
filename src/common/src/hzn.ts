@@ -179,22 +179,44 @@ export class Hzn {
       });
     })  
   }
-  agentRun() {
-    // TODO run unregister agent first
+  unregisterAgent() {
     return new Observable((observer) => {
-      let arg = `hzn register --policy ${this.mmsPolicyJson} --pattern "${this.mmsPattern}"`;
+      let arg = `hzn unregister -f`;
       console.log(arg)
       exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
         if(!err) {
           console.log(stdout)
-          console.log(`done registering mss agent`);
+          console.log(`done unregistering agent`);
           observer.next();
           observer.complete();
         } else {
-          console.log('failed to register mms agent', err);
+          console.log('failed to unregister agent', err);
           observer.error(err);
         }
       });
+    })  
+  }
+  agentRun() {
+    return new Observable((observer) => {
+      this.unregisterAgent().subscribe({
+        complete: () => {
+          let arg = `hzn register --policy ${this.mmsPolicyJson} --pattern "${this.mmsPattern}"`;
+          console.log(arg)
+          exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
+            if(!err) {
+              console.log(stdout)
+              console.log(`done registering mss agent`);
+              observer.next();
+              observer.complete();
+            } else {
+              console.log('failed to register mms agent', err);
+              observer.error(err);
+            }
+          })
+        }, error: (err) => {
+          observer.error(err);
+        }    
+      })  
     })  
   }
   publishMMSObject() {
@@ -209,23 +231,6 @@ export class Hzn {
           observer.complete();
         } else {
           console.log('failed to publish object', err);
-          observer.error(err);
-        }
-      });
-    })  
-  }
-  unregisterAgent() {
-    return new Observable((observer) => {
-      let arg = `hzn unregister -f`;
-      console.log(arg)
-      exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
-        if(!err) {
-          console.log(stdout)
-          console.log(`done unregistering agent`);
-          observer.next();
-          observer.complete();
-        } else {
-          console.log('failed to unregister agent', err);
           observer.error(err);
         }
       });
