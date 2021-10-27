@@ -122,4 +122,7 @@ export class Env {
   getServiceContainer() {
     return pEnv.SERVICE_CONTAINER;
   }
+  getAnax() {
+    return pEnv.ANAX || null;
+  }
 }

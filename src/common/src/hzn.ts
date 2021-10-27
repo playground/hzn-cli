@@ -405,7 +405,7 @@ export class Hzn {
     return utils.installPrereq();
   }
   installHznCli() {
-    return utils.installHznCli();
+    return utils.installHznCli(this.envVar.getAnax());
   }
   preInstallHznCli() {
     return new Observable((observer) => {
@@ -435,5 +435,26 @@ export class Hzn {
         }
       })
     });  
+  }
+  setupRedHat() {
+    return new Observable((observer) => {
+      utils.checkOS()
+      .subscribe({
+        next: (stdout:any) => {
+          if(stdout.toLowerCase().indexOf('redhat') >= 0) {
+            utils.shell(`sudo yum remove -y docker docker-client docker-client-latest docker-common docker-latest docker-latest-logrotate docker-logrotate docker-engine podman runc 
+                        && sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo -y 
+                        && sudo yum install docker-ce docker-ce-cli containerd.io`)
+            .subscribe({
+              complete: () => observer.complete(),
+              error: (err) => observer.error(err)
+            })
+          } else {
+            console.log('This is not RHEL')
+            observer.complete();
+          }
+        }
+      })
+    })
   }
 }

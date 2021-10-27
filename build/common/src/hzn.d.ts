@@ -48,4 +48,5 @@ export declare class Hzn {
     installPrereq(): Observable<unknown>;
     installHznCli(): Observable<unknown>;
     preInstallHznCli(): Observable<unknown>;
+    setupRedHat(): Observable<unknown>;
 }

@@ -46,6 +46,9 @@ class Utils {
     getDeviceArch() {
         return this.shell(`hzn architecture`);
     }
+    checkOS() {
+        return this.shell(`cat /etc/os-release`);
+    }
     aptUpdate() {
         // TODO, if failed run sudo apt-get -y --fix-missing full-upgrade
         // cat info.cfg
@@ -60,8 +63,13 @@ class Utils {
             });
         });
     }
-    installHznCli() {
-        return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/api/v1/objects/IBM/agent_files/agent-install.sh/data && chmod +x agent-install.sh && sudo -s -E ./agent-install.sh -i 'css:'`);
+    installHznCli(anax) {
+        if (anax && anax.length > 0) {
+            return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh ${anax} && chmod +x agent-install.sh && sudo -s -E ./agent-install.sh -i 'css:'`);
+        }
+        else {
+            return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/api/v1/objects/IBM/agent_files/agent-install.sh/data && chmod +x agent-install.sh && sudo -s -E ./agent-install.sh -i 'css:'`);
+        }
     }
     shell(arg) {
         return new rxjs_1.Observable((observer) => {

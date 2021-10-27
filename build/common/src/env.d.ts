@@ -30,4 +30,5 @@ export declare class Env {
     getServiceContainerCreds(): string | undefined;
     getPatternName(): string | undefined;
     getServiceContainer(): string | undefined;
+    getAnax(): string | null;
 }

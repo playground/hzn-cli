@@ -403,28 +403,20 @@ class Hzn {
         return utils.installPrereq();
     }
     installHznCli() {
-        return utils.installHznCli();
+        return utils.installHznCli(this.envVar.getAnax());
     }
     preInstallHznCli() {
         return new rxjs_1.Observable((observer) => {
-            this.aptUpdate()
+            this.installPrereq()
                 .subscribe({
                 complete: () => {
-                    this.installPrereq()
+                    this.installHznCli()
                         .subscribe({
                         complete: () => {
-                            this.installHznCli()
+                            this.createHznKey()
                                 .subscribe({
                                 complete: () => {
-                                    this.createHznKey()
-                                        .subscribe({
-                                        complete: () => {
-                                            observer.complete();
-                                        },
-                                        error: (err) => {
-                                            observer.error(err);
-                                        }
-                                    });
+                                    observer.complete();
                                 },
                                 error: (err) => {
                                     observer.error(err);
@@ -438,6 +430,28 @@ class Hzn {
                 },
                 error: (err) => {
                     observer.error(err);
+                }
+            });
+        });
+    }
+    setupRedHat() {
+        return new rxjs_1.Observable((observer) => {
+            utils.checkOS()
+                .subscribe({
+                next: (stdout) => {
+                    if (stdout.toLowerCase().indexOf('redhat') >= 0) {
+                        utils.shell(`sudo yum remove -y docker docker-client docker-client-latest docker-common docker-latest docker-latest-logrotate docker-logrotate docker-engine podman runc 
+                        && sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo -y 
+                        && sudo yum install docker-ce docker-ce-cli containerd.io`)
+                            .subscribe({
+                            complete: () => observer.complete(),
+                            error: (err) => observer.error(err)
+                        });
+                    }
+                    else {
+                        console.log('This is not RHEL');
+                        observer.complete();
+                    }
                 }
             });
         });
