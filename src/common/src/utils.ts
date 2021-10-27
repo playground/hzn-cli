@@ -64,7 +64,7 @@ export class Utils {
   }
   installHznCli(anax: string) {
     if(anax && anax.length > 0) {
-      return this.shell(`curl -sSL ${anax} | bash`)
+      return this.shell(`curl -sSL ${anax} | bash -s -- -i anax: -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`);
     } else {
       return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/api/v1/objects/IBM/agent_files/agent-install.sh/data && chmod +x agent-install.sh && sudo -s -E ./agent-install.sh -i 'css:'`)
     }  
