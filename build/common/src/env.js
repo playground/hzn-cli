@@ -45,10 +45,12 @@ class Env {
         });
     }
     setAdditionalEnv() {
+        let container = pEnv.MMS_CONTAINER_NAME || pEnv.MMS_SERVICE_NAME;
         pEnv.MMS_PATTERN_NAME = `pattern-${pEnv.MMS_SERVICE_NAME}-${pEnv.ARCH}`;
-        pEnv.MMS_CONTAINER = `${pEnv.YOUR_DOCKERHUB_ID}/${pEnv.MMS_SERVICE_NAME}_${pEnv.ARCH}:${pEnv.MMS_SERVICE_VERSION}`.replace(/\r?\n|\r/g, '');
+        pEnv.MMS_CONTAINER = `${pEnv.YOUR_DOCKERHUB_ID}/${container}_${pEnv.ARCH}:${pEnv.MMS_SERVICE_VERSION}`.replace(/\r?\n|\r/g, '');
         pEnv.PATTERN_NAME = `pattern-${pEnv.SERVICE_NAME}`;
-        pEnv.SERVICE_CONTAINER = `${pEnv.YOUR_DOCKERHUB_ID}/${pEnv.SERVICE_NAME}_${pEnv.ARCH}:${pEnv.SERVICE_VERSION}`.replace(/\r?\n|\r/g, '');
+        container = pEnv.SERVICE_CONTAINER_NAME || pEnv.SERVICE_NAME;
+        pEnv.SERVICE_CONTAINER = `${pEnv.YOUR_DOCKERHUB_ID}/${container}_${pEnv.ARCH}:${pEnv.SERVICE_VERSION}`.replace(/\r?\n|\r/g, '');
     }
     getEnv() {
         return this.env;
@@ -116,6 +118,9 @@ class Env {
     }
     getServiceContainer() {
         return pEnv.SERVICE_CONTAINER;
+    }
+    getAnax() {
+        return pEnv.ANAX || null;
     }
 }
 exports.Env = Env;

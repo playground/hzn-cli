@@ -11,8 +11,12 @@ export declare class Utils {
     checkConfigState(): Observable<unknown>;
     listNodePattern(): Observable<unknown>;
     getDeviceArch(): Observable<unknown>;
+    checkOS(): Observable<unknown>;
     aptUpdate(): Observable<unknown>;
     installPrereq(): Observable<unknown>;
-    installHznCli(): Observable<unknown>;
-    shell(arg: string): Observable<unknown>;
+    installHznCli(anax: string): Observable<unknown>;
+    uninstallHorizon(): Observable<unknown>;
+    shell(arg: string, options?: {
+        maxBuffer: number;
+    }): Observable<unknown>;
 }

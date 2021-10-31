@@ -46,6 +46,9 @@ class Utils {
     getDeviceArch() {
         return this.shell(`hzn architecture`);
     }
+    checkOS() {
+        return this.shell(`cat /etc/os-release`);
+    }
     aptUpdate() {
         // TODO, if failed run sudo apt-get -y --fix-missing full-upgrade
         // cat info.cfg
@@ -60,13 +63,21 @@ class Utils {
             });
         });
     }
-    installHznCli() {
-        return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/api/v1/objects/IBM/agent_files/agent-install.sh/data && chmod +x agent-install.sh && sudo -s -E ./agent-install.sh -i 'css:'`);
+    installHznCli(anax) {
+        if (anax && anax.length > 0) {
+            return this.shell(`curl -sSL ${anax} | sudo -s -E bash -s -- -i anax: -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`);
+        }
+        else {
+            return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/api/v1/objects/IBM/agent_files/agent-install.sh/data && chmod +x agent-install.sh && sudo -s -E ./agent-install.sh -i 'css:'`);
+        }
     }
-    shell(arg) {
+    uninstallHorizon() {
+        return this.shell(`sudo apt purge -y bluehorizon horizon horizon-cli`);
+    }
+    shell(arg, options = { maxBuffer: 1024 * 2000 }) {
         return new rxjs_1.Observable((observer) => {
             console.log(arg);
-            let child = exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
+            let child = exec(arg, options, (err, stdout, stderr) => {
                 if (!err) {
                     console.log(stdout);
                     observer.next(stdout);

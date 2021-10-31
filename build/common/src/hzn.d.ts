@@ -25,9 +25,9 @@ export declare class Hzn {
     pushMMSImage(): Observable<unknown>;
     publishMMSService(): Observable<unknown>;
     publishMMSPattern(): Observable<unknown>;
+    unregisterAgent(): Observable<unknown>;
     agentRun(): Observable<unknown>;
     publishMMSObject(): Observable<unknown>;
-    unregisterAgent(): Observable<unknown>;
     registerAgent(): Observable<unknown>;
     publishService(): Observable<unknown>;
     publishPattern(): Observable<unknown>;
@@ -47,5 +47,7 @@ export declare class Hzn {
     aptUpdate(): Observable<unknown>;
     installPrereq(): Observable<unknown>;
     installHznCli(): Observable<unknown>;
+    uninstallHorizon(): Observable<unknown>;
     preInstallHznCli(): Observable<unknown>;
+    setupRedHat(): Observable<unknown>;
 }

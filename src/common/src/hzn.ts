@@ -179,22 +179,44 @@ export class Hzn {
       });
     })  
   }
-  agentRun() {
-    // TODO run unregister agent first
+  unregisterAgent() {
     return new Observable((observer) => {
-      let arg = `hzn register --policy ${this.mmsPolicyJson} --pattern "${this.mmsPattern}"`;
+      let arg = `hzn unregister -f`;
       console.log(arg)
       exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
         if(!err) {
           console.log(stdout)
-          console.log(`done registering mss agent`);
+          console.log(`done unregistering agent`);
           observer.next();
           observer.complete();
         } else {
-          console.log('failed to register mms agent', err);
+          console.log('failed to unregister agent', err);
           observer.error(err);
         }
       });
+    })  
+  }
+  agentRun() {
+    return new Observable((observer) => {
+      this.unregisterAgent().subscribe({
+        complete: () => {
+          let arg = `hzn register --policy ${this.mmsPolicyJson} --pattern "${this.mmsPattern}"`;
+          console.log(arg)
+          exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
+            if(!err) {
+              console.log(stdout)
+              console.log(`done registering mss agent`);
+              observer.next();
+              observer.complete();
+            } else {
+              console.log('failed to register mms agent', err);
+              observer.error(err);
+            }
+          })
+        }, error: (err) => {
+          observer.error(err);
+        }    
+      })  
     })  
   }
   publishMMSObject() {
@@ -209,23 +231,6 @@ export class Hzn {
           observer.complete();
         } else {
           console.log('failed to publish object', err);
-          observer.error(err);
-        }
-      });
-    })  
-  }
-  unregisterAgent() {
-    return new Observable((observer) => {
-      let arg = `hzn unregister -f`;
-      console.log(arg)
-      exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
-        if(!err) {
-          console.log(stdout)
-          console.log(`done unregistering agent`);
-          observer.next();
-          observer.complete();
-        } else {
-          console.log('failed to unregister agent', err);
           observer.error(err);
         }
       });
@@ -405,7 +410,10 @@ export class Hzn {
     return utils.installPrereq();
   }
   installHznCli() {
-    return utils.installHznCli();
+    return utils.installHznCli(this.envVar.getAnax());
+  }
+  uninstallHorizon() {
+    return utils.uninstallHorizon();
   }
   preInstallHznCli() {
     return new Observable((observer) => {
@@ -435,5 +443,26 @@ export class Hzn {
         }
       })
     });  
+  }
+  setupRedHat() {
+    return new Observable((observer) => {
+      utils.checkOS()
+      .subscribe({
+        next: (stdout:any) => {
+          if(stdout.toLowerCase().indexOf('redhat') >= 0) {
+            utils.shell(`sudo yum remove -y docker docker-client docker-client-latest docker-common docker-latest docker-latest-logrotate docker-logrotate docker-engine podman runc 
+                        && sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo -y 
+                        && sudo yum install docker-ce docker-ce-cli containerd.io`)
+            .subscribe({
+              complete: () => observer.complete(),
+              error: (err) => observer.error(err)
+            })
+          } else {
+            console.log('This is not RHEL')
+            observer.complete();
+          }
+        }
+      })
+    })
   }
 }

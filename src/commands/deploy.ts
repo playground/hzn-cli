@@ -34,7 +34,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
       demandOption: true,
       desc: 'Available actions:  test, buildServiceImage, pushServiceImage, publishService, publishPatterrn, buildMMSImage, pushMMSImage, publishMMSService, ' +
             'publishMMSPattern, agentRun, publishMMSObject, unregisterAgent, registerAgent, showHznInfo, updateHznInfo, listService, listPattern, ' +
-            'listNode, listObject, listDeploymentPolicy, listNodePattern, checkConfigState, getDeviceArch, createHznKey'
+            'listNode, listObject, listDeploymentPolicy, listNodePattern, checkConfigState, getDeviceArch, createHznKey, uninstallHorizon'
     });
 
 export const handler = (argv: Arguments<Options>): void => {
