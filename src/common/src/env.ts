@@ -49,7 +49,7 @@ export class Env {
   }
   setAdditionalEnv() {
     let container = pEnv.MMS_CONTAINER_NAME || pEnv.MMS_SERVICE_NAME;
-    pEnv.MMS_PATTERN_NAME = `pattern-${pEnv.MMS_SERVICE_NAME}`;
+    pEnv.MMS_PATTERN_NAME = `pattern-${pEnv.MMS_SERVICE_NAME}-${pEnv.ARCH}`;
     pEnv.MMS_CONTAINER = `${pEnv.YOUR_DOCKERHUB_ID}/${container}_${pEnv.ARCH}:${pEnv.MMS_SERVICE_VERSION}`.replace(/\r?\n|\r/g, '')
     pEnv.PATTERN_NAME = `pattern-${pEnv.SERVICE_NAME}`;
     container = pEnv.SERVICE_CONTAINER_NAME || pEnv.SERVICE_NAME;
