@@ -196,7 +196,7 @@ export class Hzn {
       });
     })  
   }
-  agentRun() {
+  registerAgent() {
     return new Observable((observer) => {
       this.unregisterAgent().subscribe({
         complete: () => {
@@ -236,7 +236,7 @@ export class Hzn {
       });
     })  
   }
-  registerAgent() {
+  allInOneMMS() {
     return new Observable((observer) => {
       this.unregisterAgent().subscribe({
         complete: () => {
@@ -248,7 +248,7 @@ export class Hzn {
                     complete: () => {
                       this.publishMMSPattern().subscribe({
                         complete: () => {
-                          this.agentRun().subscribe({
+                          this.registerAgent().subscribe({
                             complete: () => {
                               observer.next();
                               observer.complete();

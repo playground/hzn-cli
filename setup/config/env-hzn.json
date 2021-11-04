@@ -1,0 +1,50 @@
+{
+  "biz": 
+  {
+    "envVars": {
+      "HZN_ORG_ID": "<HZN_ORG_ID>",
+      "HZN_EXCHANGE_USER_AUTH": "<HZN_EXCHANGE_USER_AUTH>",
+      "HZN_EXCHANGE_URL": "<HZN_EXCHANGE_URL>",
+      "HZN_FSS_CSSURL": "<HZN_FSS_CSSURL>",  
+      "SERVICE_NAME": "<YOUR_SERVICE_NAME>",
+      "SERVICE_VERSION": "<YOUR_SERVICE_VERSION>",
+      "SERVICE_CONTAINER_CREDS": "",
+      "YOUR_DOCKERHUB_ID": "<YOUR_DOCKERHUB_ID>",
+      "VOLUME_MOUNT": "<VOLUME_MOUNT>",
+      "MMS_SHARED_VOLUME": "<MMS_SHARED_VOLUME>",
+      "MMS_CONTAINER_CREDS": "",
+      "MMS_SERVICE_NAME": "<MMS_SERVICE_NAME>",
+      "MMS_SERVICE_VERSION": "<MMS_SERVICE_VERSION>",
+      "MMS_OBJECT_TYPE": "<MMS_OBJECT_TYPE>",
+      "MMS_OBJECT_ID": "<MMS_OBJECT_ID>",
+      "MMS_OBJECT_FILE": "config/config.json",
+      "UPDATE_FILE_NAME": "<UPDATE_FILE_NAME>"  
+    },
+    "metaVars": {
+    }
+  },
+  "demo": 
+  {
+    "envVars": {
+      "HZN_ORG_ID": "<HZN_ORG_ID>",
+      "HZN_EXCHANGE_USER_AUTH": "<HZN_EXCHANGE_USER_AUTH>",
+      "HZN_EXCHANGE_URL": "<HZN_EXCHANGE_URL>",
+      "HZN_FSS_CSSURL": "<HZN_FSS_CSSURL>",  
+      "SERVICE_NAME": "<YOUR_SERVICE_NAME>",
+      "SERVICE_VERSION": "<YOUR_SERVICE_VERSION>",
+      "SERVICE_CONTAINER_CREDS": "",
+      "YOUR_DOCKERHUB_ID": "<YOUR_DOCKERHUB_ID>",
+      "VOLUME_MOUNT": "<VOLUME_MOUNT>",
+      "MMS_SHARED_VOLUME": "<MMS_SHARED_VOLUME>",
+      "MMS_CONTAINER_CREDS": "",
+      "MMS_SERVICE_NAME": "<MMS_SERVICE_NAME>",
+      "MMS_SERVICE_VERSION": "<MMS_SERVICE_VERSION>",
+      "MMS_OBJECT_TYPE": "<MMS_OBJECT_TYPE>",
+      "MMS_OBJECT_ID": "<MMS_OBJECT_ID>",
+      "MMS_OBJECT_FILE": "config/config.json",
+      "UPDATE_FILE_NAME": "<UPDATE_FILE_NAME>"  
+    },
+    "metaVars": {
+    }
+  }
+}

@@ -189,7 +189,7 @@ class Hzn {
             });
         });
     }
-    agentRun() {
+    registerAgent() {
         return new rxjs_1.Observable((observer) => {
             this.unregisterAgent().subscribe({
                 complete: () => {
@@ -231,7 +231,7 @@ class Hzn {
             });
         });
     }
-    registerAgent() {
+    allInOneMMS() {
         return new rxjs_1.Observable((observer) => {
             this.unregisterAgent().subscribe({
                 complete: () => {
@@ -243,7 +243,7 @@ class Hzn {
                                         complete: () => {
                                             this.publishMMSPattern().subscribe({
                                                 complete: () => {
-                                                    this.agentRun().subscribe({
+                                                    this.registerAgent().subscribe({
                                                         complete: () => {
                                                             observer.next();
                                                             observer.complete();
