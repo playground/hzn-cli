@@ -26,9 +26,9 @@ export declare class Hzn {
     publishMMSService(): Observable<unknown>;
     publishMMSPattern(): Observable<unknown>;
     unregisterAgent(): Observable<unknown>;
-    agentRun(): Observable<unknown>;
-    publishMMSObject(): Observable<unknown>;
     registerAgent(): Observable<unknown>;
+    publishMMSObject(): Observable<unknown>;
+    allInOneMMS(): Observable<unknown>;
     publishService(): Observable<unknown>;
     publishPattern(): Observable<unknown>;
     showHznInfo(): Observable<unknown>;
