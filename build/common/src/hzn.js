@@ -408,7 +408,7 @@ class Hzn {
         return utils.installPrereq();
     }
     installHznCli() {
-        return utils.installHznCli(this.envVar.getAnax());
+        return utils.installHznCli(this.envVar.getAnax(), this.envVar.getHznNodeID());
     }
     uninstallHorizon() {
         return utils.uninstallHorizon();
