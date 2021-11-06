@@ -122,6 +122,9 @@ class Env {
     getAnax() {
         return pEnv.ANAX || null;
     }
+    getHznNodeID() {
+        return pEnv.HZN_CUSTOM_NODE_ID || null;
+    }
 }
 exports.Env = Env;
 //# sourceMappingURL=env.js.map

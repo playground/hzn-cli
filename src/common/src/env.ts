@@ -125,4 +125,8 @@ export class Env {
   getAnax() {
     return pEnv.ANAX || null;
   }
+
+  getHznNodeID() {
+    return pEnv.HZN_CUSTOM_NODE_ID || null;
+  }
 }

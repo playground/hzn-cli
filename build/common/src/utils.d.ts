@@ -14,7 +14,7 @@ export declare class Utils {
     checkOS(): Observable<unknown>;
     aptUpdate(): Observable<unknown>;
     installPrereq(): Observable<unknown>;
-    installHznCli(anax: string): Observable<unknown>;
+    installHznCli(anax: string, id: null): Observable<unknown>;
     uninstallHorizon(): Observable<unknown>;
     shell(arg: string, options?: {
         maxBuffer: number;
