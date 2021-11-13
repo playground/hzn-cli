@@ -12,7 +12,6 @@ class Env {
             const localEnv = dotenv.parse((0, fs_1.readFileSync)(`${configPath}/.env-local`));
             for (var i in localEnv) {
                 pEnv[i] = localEnv[i];
-                console.log('env', pEnv[i]);
             }
         }
         this.env = env;
@@ -29,8 +28,7 @@ class Env {
                     // @ts-ignore
                     pEnv[key] = value.replace(/\r?\n|\r/g, '');
                 }
-                else
-                    console.log(`${key}: ${pEnv[key]}`);
+                // console.log(`${key}: ${pEnv[key]}`);
             }
             if (!this.envVars.ARCH || this.envVars.ARCH === undefined) {
                 let arg = `hzn architecture`;
