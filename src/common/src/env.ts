@@ -1,7 +1,8 @@
 import { Observable } from 'rxjs';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 const cp = require('child_process'),
 exec = cp.exec;
+var dotenv = require('dotenv');
 
 const pEnv = process.env;
 
@@ -12,6 +13,12 @@ export class Env {
   hznEnv: any;
   configPath: string;
   constructor(env: string, configPath: string) {
+    if(existsSync(`${configPath}/.env-local`)) {
+      const localEnv = dotenv.parse(readFileSync(`${configPath}/.env-local`));
+      for(var i in localEnv) {
+        pEnv[i] = localEnv[i];
+      }
+    }
     this.env = env;
     this.configPath = configPath;
     this.hznEnv = `${configPath}/.env-hzn.json`;
@@ -22,8 +29,10 @@ export class Env {
       // console.log(process.cwd(), this.env, this.hznJson)
       this.envVars = this.hznJson[this.env]['envVars'];
       for(const [key, value] of Object.entries(this.envVars)) {
-        // @ts-ignore
-        pEnv[key] = value.replace(/\r?\n|\r/g, '');
+        if(!pEnv[key]) {
+          // @ts-ignore
+          pEnv[key] = value.replace(/\r?\n|\r/g, '');
+        } 
         // console.log(`${key}: ${pEnv[key]}`);
       }
       if(!this.envVars.ARCH || this.envVars.ARCH === undefined) {
