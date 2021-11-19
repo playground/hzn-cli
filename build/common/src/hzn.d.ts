@@ -1,5 +1,6 @@
 import { Observable } from 'rxjs';
 import { Utils } from './utils';
+export declare const utils: Utils;
 export declare class Hzn {
     objectType: any;
     objectId: any;
@@ -15,7 +16,6 @@ export declare class Hzn {
     envVar: any;
     configPath: string;
     name: string;
-    utils: Utils;
     constructor(env: string, configPath: string, name: string, objectType: string, objectId: string, objectFile: string, mmsPattern: string);
     setup(): Observable<unknown>;
     test(): Observable<unknown>;
@@ -32,9 +32,7 @@ export declare class Hzn {
     publishService(): Observable<unknown>;
     publishPattern(): Observable<unknown>;
     showHznInfo(): Observable<unknown>;
-    getHznInfo(): string[];
     updateHznInfo(): Observable<unknown>;
-    copyFile(arg: string): Promise<unknown>;
     listService(): Observable<unknown>;
     listPattern(): Observable<unknown>;
     listNode(): Observable<unknown>;

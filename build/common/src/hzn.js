@@ -1,16 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Hzn = void 0;
+exports.Hzn = exports.utils = void 0;
 const rxjs_1 = require("rxjs");
 const cp = require('child_process'), exec = cp.exec;
-const fs_1 = require("fs");
 const env_1 = require("./env");
 const utils_1 = require("./utils");
 const prompt = require('prompt');
-const utils = new utils_1.Utils();
+exports.utils = new utils_1.Utils();
 class Hzn {
     constructor(env, configPath, name, objectType, objectId, objectFile, mmsPattern) {
-        this.utils = new utils_1.Utils();
         this.envVar = new env_1.Env(env, configPath);
         this.configPath = configPath;
         this.name = name;
@@ -100,22 +98,8 @@ class Hzn {
         });
     }
     buildMMSImage() {
-        return new rxjs_1.Observable((observer) => {
-            // let tag = `${this.envVar.getDockerImageBase()}_${this.envVar.getArch()}:${this.envVar.getMMSServiceVersion()}`;
-            let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
-            console.log(arg);
-            exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
-                if (!err) {
-                    console.log(stdout);
-                    console.log(`done building mms docker image`);
-                }
-                else {
-                    console.log('failed to build mms docker image', err);
-                }
-                observer.next();
-                observer.complete();
-            });
-        });
+        let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
+        return exports.utils.shell(arg, 'done building mms docker image', 'failed to build mms docker image');
     }
     pushMMSImage() {
         return new rxjs_1.Observable((observer) => {
@@ -310,108 +294,49 @@ class Hzn {
         });
     }
     showHznInfo() {
-        return new rxjs_1.Observable((observer) => {
-            const file = this.getHznInfo();
-            console.log(file);
-            observer.next(file);
-            observer.complete();
-        });
-    }
-    getHznInfo() {
-        return (0, fs_1.readFileSync)('/etc/default/horizon').toString().split('\n');
+        return exports.utils.showHznInfo();
     }
     updateHznInfo() {
-        return new rxjs_1.Observable((observer) => {
-            let data = this.getHznInfo();
-            let props = [];
-            data.forEach((el, i) => {
-                if (el.length > 0) {
-                    let prop = el.split('=');
-                    if (prop && prop.length > 0) {
-                        props[i] = { name: prop[0], default: prop[1], required: true };
-                    }
-                }
-            });
-            console.log('\nKey in new value or press Enter to keep current value: ');
-            prompt.get(props, (err, result) => {
-                console.log(result);
-                console.log('\nWould like to update horizon: Y/n?');
-                prompt.get({ name: 'answer', required: true }, (err, question) => {
-                    if (question.answer === 'Y') {
-                        let content = '';
-                        for (const [key, value] of Object.entries(result)) {
-                            content += `${key}=${value}\n`;
-                        }
-                        this.copyFile('sudo cp /etc/default/horizon /etc/default/.horizon').then(() => {
-                            (0, fs_1.writeFileSync)('.horizon', content);
-                            this.copyFile(`sudo mv .horizon /etc/default/horizon`).then(() => {
-                                observer.next();
-                                observer.complete();
-                            });
-                        });
-                    }
-                });
-            });
-        });
-    }
-    copyFile(arg) {
-        return new Promise((resolve, reject) => {
-            try {
-                console.log(arg);
-                exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
-                    if (!err) {
-                        console.log(`done moving file`);
-                    }
-                    else {
-                        console.log('failed to move file', err);
-                    }
-                    resolve(stdout);
-                });
-            }
-            catch (e) {
-                console.log(e);
-                resolve(e);
-            }
-        });
+        return exports.utils.updateHznInfo();
     }
     listService() {
-        return utils.listService(this.name);
+        return exports.utils.listService(this.name);
     }
     listPattern() {
-        return utils.listPattern(this.name);
+        return exports.utils.listPattern(this.name);
     }
     listNode() {
-        return utils.listNode(this.name);
+        return exports.utils.listNode(this.name);
     }
     listObject() {
-        return utils.listObject(this.name);
+        return exports.utils.listObject(this.name);
     }
     listDeploymentPolicy() {
-        return utils.listDeploymentPolicy(this.name);
+        return exports.utils.listDeploymentPolicy(this.name);
     }
     checkConfigState() {
-        return utils.checkConfigState();
+        return exports.utils.checkConfigState();
     }
     listNodePattern() {
-        return utils.listNodePattern();
+        return exports.utils.listNodePattern();
     }
     getDeviceArch() {
-        return utils.getDeviceArch();
+        return exports.utils.getDeviceArch();
     }
     createHznKey() {
-        return utils.createHznKey(this.envVar.getOrgId(), this.envVar.getMyDockerHubId());
+        return exports.utils.createHznKey(this.envVar.getOrgId(), this.envVar.getMyDockerHubId());
     }
     aptUpdate() {
-        return utils.aptUpdate();
+        return exports.utils.aptUpdate();
     }
     installPrereq() {
-        return utils.installPrereq();
+        return exports.utils.installPrereq();
     }
     installHznCli() {
-        return utils.installHznCli(this.envVar.getAnax(), this.envVar.getHznNodeID());
+        return exports.utils.installHznCli(this.envVar.getAnax(), this.envVar.getHznNodeID());
     }
     uninstallHorizon() {
-        return utils.uninstallHorizon();
+        return exports.utils.uninstallHorizon();
     }
     preInstallHznCli() {
         return new rxjs_1.Observable((observer) => {
@@ -444,11 +369,11 @@ class Hzn {
     }
     setupRedHat() {
         return new rxjs_1.Observable((observer) => {
-            utils.checkOS()
+            exports.utils.checkOS()
                 .subscribe({
                 next: (stdout) => {
                     if (stdout.toLowerCase().indexOf('redhat') >= 0) {
-                        utils.shell(`sudo yum remove -y docker docker-client docker-client-latest docker-common docker-latest docker-latest-logrotate docker-logrotate docker-engine podman runc 
+                        exports.utils.shell(`sudo yum remove -y docker docker-client docker-client-latest docker-common docker-latest docker-latest-logrotate docker-logrotate docker-engine podman runc 
                         && sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo -y 
                         && sudo yum install docker-ce docker-ce-cli containerd.io`)
                             .subscribe({

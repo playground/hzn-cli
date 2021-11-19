@@ -1,6 +1,9 @@
-import { Observable, of } from 'rxjs';
+import { Observable, of, firstValueFrom } from 'rxjs';
 const cp = require('child_process'),
 exec = cp.exec;
+import { readFileSync, writeFileSync } from 'fs';
+const prompt = require('prompt');
+
 
 const env = process.env.npm_config_env || 'biz';
 
@@ -73,16 +76,66 @@ export class Utils {
   uninstallHorizon() {
     return this.shell(`sudo apt purge -y bluehorizon horizon horizon-cli`);
   }
-  shell(arg: string, options={maxBuffer: 1024 * 2000}) {
+  copyFile(arg: string) {
+    return firstValueFrom(this.shell(arg));
+  }
+  getHznInfo() {
+    return readFileSync('/etc/default/horizon').toString().split('\n');
+  }
+  showHznInfo() {
+    return new Observable((observer) => {
+      const file = this.getHznInfo();
+      console.log(file)
+      observer.next(file);
+      observer.complete();
+    })  
+  }
+  updateHznInfo() {
+    return new Observable((observer) => {
+      let data = this.getHznInfo();
+      let props: any[] = [];
+      data.forEach((el, i) => {
+        if(el.length > 0) {
+          let prop = el.split('=');
+          if(prop && prop.length > 0) {
+            props[i] = {name: prop[0], default: prop[1], required: true};
+          }  
+        }
+      });
+      console.log('\nKey in new value or press Enter to keep current value: ')
+      prompt.get(props, (err: any, result: any) => {
+        console.log(result)
+
+        console.log('\nWould like to update horizon: Y/n?')
+        prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
+          if(question.answer === 'Y') {
+            let content = '';
+            for(const [key, value] of Object.entries(result)) {
+              content += `${key}=${value}\n`; 
+            }
+            this.copyFile('sudo cp /etc/default/horizon /etc/default/.horizon').then(() => {
+              writeFileSync('.horizon', content);
+              this.copyFile(`sudo mv .horizon /etc/default/horizon`).then(() => {
+                observer.next();
+                observer.complete();  
+              })
+            })
+          }
+        })
+      })
+    })  
+  }
+  shell(arg: string, success='command executed successfully', error='command failed', options={maxBuffer: 1024 * 2000}) {
     return new Observable((observer) => {
       console.log(arg);
       let child = exec(arg, options, (err: any, stdout: any, stderr: any) => {
         if(!err) {
           console.log(stdout);
+          console.log(success);
           observer.next(stdout);
           observer.complete();
         } else {
-          console.log(`shell command failed: ${err}`);
+          console.log(`${error}: ${err}`);
           observer.error(err);
         }
       });

@@ -1,5 +1,5 @@
 import type { Arguments, CommandBuilder } from 'yargs';
-import { Hzn } from '../common/src/hzn';
+import { Hzn, utils } from '../common/src/hzn';
 import chalk from 'chalk';
 import clear from 'clear';
 import figlet from 'figlet';
@@ -32,7 +32,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
     .positional('action', {
       type: 'string', 
       demandOption: true,
-      desc: 'Available actions:  test, buildServiceImage, pushServiceImage, publishService, publishPatterrn, buildMMSImage, pushMMSImage, publishMMSService, ' +
+      desc: 'Available actions:  test, setup, buildServiceImage, pushServiceImage, publishService, publishPatterrn, buildMMSImage, pushMMSImage, publishMMSService, ' +
             'publishMMSPattern, registerAgent, publishMMSObject, unregisterAgent, allInOneMMS, showHznInfo, updateHznInfo, listService, listPattern, ' +
             'listNode, listObject, listDeploymentPolicy, listNodePattern, checkConfigState, getDeviceArch, createHznKey, uninstallHorizon'
     });
@@ -53,6 +53,7 @@ export const handler = (argv: Arguments<Options>): void => {
   const p = pattern || '';
   console.log('$$$ ', action, env, config_path, n);
   const configPath = config_path || 'config';
+
   if(existsSync(`${configPath}/.env-hzn.json`)) {
     const hzn = new Hzn(env, configPath, n, objType, objId, obj, p);
 
@@ -73,7 +74,7 @@ export const handler = (argv: Arguments<Options>): void => {
       }
     })  
   } else {
-    console.log('./config/.env-hzn.json file not fouund.')
+    console.log(`${configPath}/.env-hzn.json file not fouund.`)
   }
 };
 

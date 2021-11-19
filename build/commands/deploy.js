@@ -24,7 +24,7 @@ const builder = (yargs) => yargs
     .positional('action', {
     type: 'string',
     demandOption: true,
-    desc: 'Available actions:  test, buildServiceImage, pushServiceImage, publishService, publishPatterrn, buildMMSImage, pushMMSImage, publishMMSService, ' +
+    desc: 'Available actions:  test, setup, buildServiceImage, pushServiceImage, publishService, publishPatterrn, buildMMSImage, pushMMSImage, publishMMSService, ' +
         'publishMMSPattern, registerAgent, publishMMSObject, unregisterAgent, allInOneMMS, showHznInfo, updateHznInfo, listService, listPattern, ' +
         'listNode, listObject, listDeploymentPolicy, listNodePattern, checkConfigState, getDeviceArch, createHznKey, uninstallHorizon'
 });
@@ -61,7 +61,7 @@ const handler = (argv) => {
         });
     }
     else {
-        console.log('./config/.env-hzn.json file not fouund.');
+        console.log(`${configPath}/.env-hzn.json file not fouund.`);
     }
 };
 exports.handler = handler;

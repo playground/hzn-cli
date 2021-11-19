@@ -6,7 +6,7 @@ import { Env } from './env';
 import { Utils } from './utils';
 const prompt = require('prompt');
 
-const utils = new Utils();
+export const utils = new Utils();
 
 export class Hzn {
   objectType: any;
@@ -23,7 +23,6 @@ export class Hzn {
   envVar: any;
   configPath: string;
   name: string;
-  utils = new Utils();
   constructor(env: string, configPath: string, name: string, objectType: string, objectId: string, objectFile: string, mmsPattern: string) {
     this.envVar = new Env(env, configPath);
     this.configPath = configPath;
@@ -112,21 +111,8 @@ export class Hzn {
     })  
   }
   buildMMSImage() {
-    return new Observable((observer) => {
-      // let tag = `${this.envVar.getDockerImageBase()}_${this.envVar.getArch()}:${this.envVar.getMMSServiceVersion()}`;
-      let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
-      console.log(arg)
-      exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
-        if(!err) {
-          console.log(stdout)
-          console.log(`done building mms docker image`);
-        } else {
-          console.log('failed to build mms docker image', err);
-        }
-        observer.next();
-        observer.complete();
-      });
-    })  
+    let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
+    return utils.shell(arg, 'done building mms docker image', 'failed to build mms docker image');
   }
   pushMMSImage() {
     return new Observable((observer) => {
@@ -313,68 +299,10 @@ export class Hzn {
     })  
   }
   showHznInfo() {
-    return new Observable((observer) => {
-      const file = this.getHznInfo();
-      console.log(file)
-      observer.next(file);
-      observer.complete();
-    })  
-  }
-  getHznInfo() {
-    return readFileSync('/etc/default/horizon').toString().split('\n');
+    return utils.showHznInfo();
   }
   updateHznInfo() {
-    return new Observable((observer) => {
-      let data = this.getHznInfo();
-      let props: any[] = [];
-      data.forEach((el, i) => {
-        if(el.length > 0) {
-          let prop = el.split('=');
-          if(prop && prop.length > 0) {
-            props[i] = {name: prop[0], default: prop[1], required: true};
-          }  
-        }
-      });
-      console.log('\nKey in new value or press Enter to keep current value: ')
-      prompt.get(props, (err: any, result: any) => {
-        console.log(result)
-
-        console.log('\nWould like to update horizon: Y/n?')
-        prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
-          if(question.answer === 'Y') {
-            let content = '';
-            for(const [key, value] of Object.entries(result)) {
-              content += `${key}=${value}\n`; 
-            }
-            this.copyFile('sudo cp /etc/default/horizon /etc/default/.horizon').then(() => {
-              writeFileSync('.horizon', content);
-              this.copyFile(`sudo mv .horizon /etc/default/horizon`).then(() => {
-                observer.next();
-                observer.complete();  
-              })
-            })
-          }
-        })
-      })
-    })  
-  }
-  copyFile(arg: string) {
-    return new Promise((resolve, reject) => {
-      try {
-        console.log(arg);
-        exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
-          if(!err) {
-            console.log(`done moving file`);
-          } else {
-            console.log('failed to move file', err);
-          }
-          resolve(stdout);
-        });       
-      } catch(e) {
-        console.log(e)
-        resolve(e);
-      }
-    });
+    return utils.updateHznInfo();
   }
   listService() {
     return utils.listService(this.name);

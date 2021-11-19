@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Utils = void 0;
 const rxjs_1 = require("rxjs");
 const cp = require('child_process'), exec = cp.exec;
+const fs_1 = require("fs");
+const prompt = require('prompt');
 const env = process.env.npm_config_env || 'biz';
 class Utils {
     constructor() { }
@@ -75,17 +77,66 @@ class Utils {
     uninstallHorizon() {
         return this.shell(`sudo apt purge -y bluehorizon horizon horizon-cli`);
     }
-    shell(arg, options = { maxBuffer: 1024 * 2000 }) {
+    copyFile(arg) {
+        return (0, rxjs_1.firstValueFrom)(this.shell(arg));
+    }
+    getHznInfo() {
+        return (0, fs_1.readFileSync)('/etc/default/horizon').toString().split('\n');
+    }
+    showHznInfo() {
+        return new rxjs_1.Observable((observer) => {
+            const file = this.getHznInfo();
+            console.log(file);
+            observer.next(file);
+            observer.complete();
+        });
+    }
+    updateHznInfo() {
+        return new rxjs_1.Observable((observer) => {
+            let data = this.getHznInfo();
+            let props = [];
+            data.forEach((el, i) => {
+                if (el.length > 0) {
+                    let prop = el.split('=');
+                    if (prop && prop.length > 0) {
+                        props[i] = { name: prop[0], default: prop[1], required: true };
+                    }
+                }
+            });
+            console.log('\nKey in new value or press Enter to keep current value: ');
+            prompt.get(props, (err, result) => {
+                console.log(result);
+                console.log('\nWould like to update horizon: Y/n?');
+                prompt.get({ name: 'answer', required: true }, (err, question) => {
+                    if (question.answer === 'Y') {
+                        let content = '';
+                        for (const [key, value] of Object.entries(result)) {
+                            content += `${key}=${value}\n`;
+                        }
+                        this.copyFile('sudo cp /etc/default/horizon /etc/default/.horizon').then(() => {
+                            (0, fs_1.writeFileSync)('.horizon', content);
+                            this.copyFile(`sudo mv .horizon /etc/default/horizon`).then(() => {
+                                observer.next();
+                                observer.complete();
+                            });
+                        });
+                    }
+                });
+            });
+        });
+    }
+    shell(arg, success = 'command executed successfully', error = 'command failed', options = { maxBuffer: 1024 * 2000 }) {
         return new rxjs_1.Observable((observer) => {
             console.log(arg);
             let child = exec(arg, options, (err, stdout, stderr) => {
                 if (!err) {
                     console.log(stdout);
+                    console.log(success);
                     observer.next(stdout);
                     observer.complete();
                 }
                 else {
-                    console.log(`shell command failed: ${err}`);
+                    console.log(`${error}: ${err}`);
                     observer.error(err);
                 }
             });

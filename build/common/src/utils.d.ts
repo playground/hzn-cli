@@ -16,7 +16,11 @@ export declare class Utils {
     installPrereq(): Observable<unknown>;
     installHznCli(anax: string, id: null): Observable<unknown>;
     uninstallHorizon(): Observable<unknown>;
-    shell(arg: string, options?: {
+    copyFile(arg: string): Promise<unknown>;
+    getHznInfo(): string[];
+    showHznInfo(): Observable<unknown>;
+    updateHznInfo(): Observable<unknown>;
+    shell(arg: string, success?: string, error?: string, options?: {
         maxBuffer: number;
     }): Observable<unknown>;
 }
