@@ -14,6 +14,7 @@ type Options = {
   object_id: string | undefined;
   object: string | undefined;
   pattern: string | undefined;
+  skip_config_update: string | undefined;
 };
 export const command: string = 'deploy <action>';
 export const desc: string = 'Deploy <action> to Org <org>';
@@ -27,7 +28,8 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
       object_type: {type: 'string', desc: 'Type of object'},
       object_id: {type: 'string', desc: 'Id of object to be published'},
       object: {type: 'string', desc: 'Object file to be published'},
-      pattern: {type: 'string', desc: 'MMS pattern'}
+      pattern: {type: 'string', desc: 'MMS pattern'},
+      skip_config_update: {type: 'string', desc: 'Do not prompt for config updates'}
     })
     .positional('action', {
       type: 'string', 
@@ -44,37 +46,66 @@ export const handler = (argv: Arguments<Options>): void => {
       figlet.textSync('hzn-cli', { horizontalLayout: 'full' })
     )
   );
-  const { action, org, config_path, name, object_type, object_id, object, pattern } = argv;
+  const { action, org, config_path, name, object_type, object_id, object, pattern, skip_config_update } = argv;
   const env = org || 'biz';
   const n = name || '';
   const objType = object_type || '';
   const objId = object_id || '';
   const obj = object || '';
   const p = pattern || '';
-  console.log('$$$ ', action, env, config_path, n);
-  const configPath = config_path || 'config';
+  const configPath = config_path || '/etc/default';
+  const promptForUpdate = ['setup', 'publishService', 'publishPatterrn', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent']
+  console.log('$$$ ', action, env, configPath, n);
 
-  if(existsSync(`${configPath}/.env-hzn.json`)) {
-    const hzn = new Hzn(env, configPath, n, objType, objId, obj, p);
-
-    hzn.setup()
-    .subscribe({
-      complete: () => {
-        hzn[action]()
-        .subscribe({
-          complete:() => {
-            console.log('process completed.');
-            process.exit(0)          
-          }
-        })
-      },
-      error: (err) => {
-        console.log('something went wrong. ', err);      
-        process.exit(0);
-      }
-    })  
-  } else {
-    console.log(`${configPath}/.env-hzn.json file not fouund.`)
+  const proceed = () => {
+    if(existsSync(`${configPath}/.env-hzn.json`)) {
+      const hzn = new Hzn(env, configPath, n, objType, objId, obj, p);
+  
+      hzn.init()
+      .subscribe({
+        complete: () => {
+          hzn[action]()
+          .subscribe({
+            complete:() => {
+              console.log('process completed.');
+              process.exit(0)          
+            }
+          })
+        },
+        error: (err) => {
+          console.log('something went wrong. ', err);      
+          process.exit(0);
+        }
+      })  
+    } else {
+      console.log(`${configPath}/.env-hzn.json file not fouund.`)
+    }  
   }
+
+  utils.checkDefaultConfig()
+  .subscribe({
+    complete: () => {
+      if(promptForUpdate.indexOf(action) < 0 || skip_config_update) {
+        proceed();
+      } else {
+        utils.updateEnvFiles(env, configPath)
+        .subscribe({
+          complete: () => {
+            proceed()
+          }, error: (err) => {
+            console.log(err)
+          }  
+        })  
+      }
+    }, error: (err) => {
+      console.log(err, 'Initialising...')
+      utils.setupEnvFiles()
+      .subscribe({
+        complete: () => {
+          proceed();
+        }, error: () => process.exit(0)
+      })
+    }
+  })
 };
 

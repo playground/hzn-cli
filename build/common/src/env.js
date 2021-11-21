@@ -8,8 +8,8 @@ var dotenv = require('dotenv');
 const pEnv = process.env;
 class Env {
     constructor(env, configPath) {
-        if ((0, fs_1.existsSync)(`${configPath}/.env-local`)) {
-            const localEnv = dotenv.parse((0, fs_1.readFileSync)(`${configPath}/.env-local`));
+        if ((0, fs_1.existsSync)(`/etc/default/.env-local`)) {
+            const localEnv = dotenv.parse((0, fs_1.readFileSync)(`/etc/default/.env-local`));
             for (var i in localEnv) {
                 pEnv[i] = localEnv[i];
             }
@@ -55,6 +55,7 @@ class Env {
     }
     setAdditionalEnv() {
         let container = pEnv.MMS_CONTAINER_NAME || pEnv.MMS_SERVICE_NAME;
+        pEnv.HZN_ORG_ID = this.env;
         pEnv.MMS_PATTERN_NAME = `pattern-${pEnv.MMS_SERVICE_NAME}-${pEnv.ARCH}`;
         pEnv.MMS_CONTAINER = `${pEnv.YOUR_DOCKERHUB_ID}/${container}_${pEnv.ARCH}:${pEnv.MMS_SERVICE_VERSION}`.replace(/\r?\n|\r/g, '');
         pEnv.PATTERN_NAME = `pattern-${pEnv.SERVICE_NAME}`;

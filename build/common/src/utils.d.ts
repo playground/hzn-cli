@@ -17,8 +17,13 @@ export declare class Utils {
     installHznCli(anax: string, id: null): Observable<unknown>;
     uninstallHorizon(): Observable<unknown>;
     copyFile(arg: string): Promise<unknown>;
+    updateEnvFiles(org: string, configPath: string): Observable<unknown>;
+    setupEnvFiles(): Observable<unknown>;
+    updateEnvHzn(org: string, configPath: string): Observable<unknown>;
+    checkDefaultConfig(): Observable<unknown>;
     getHznInfo(): string[];
     showHznInfo(): Observable<unknown>;
+    getPropsFromFile(file: string): any[];
     updateHznInfo(): Observable<unknown>;
     shell(arg: string, success?: string, error?: string, options?: {
         maxBuffer: number;

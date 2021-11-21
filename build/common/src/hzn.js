@@ -17,7 +17,7 @@ class Hzn {
         this.objectFile = objectFile;
         this.mmsPattern = mmsPattern;
     }
-    setup() {
+    init() {
         return new rxjs_1.Observable((observer) => {
             this.envVar.init()
                 .subscribe({
@@ -59,6 +59,12 @@ class Hzn {
     test() {
         return new rxjs_1.Observable((observer) => {
             console.log(`it works...${this.envVar.getArch()}`);
+            observer.complete();
+        });
+    }
+    setup() {
+        return new rxjs_1.Observable((observer) => {
+            console.log(`it works...${this.envVar.getArch()}, your environment is ready to go!`);
             observer.complete();
         });
     }

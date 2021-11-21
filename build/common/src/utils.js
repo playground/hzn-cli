@@ -1,10 +1,15 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Utils = void 0;
 const rxjs_1 = require("rxjs");
 const cp = require('child_process'), exec = cp.exec;
 const fs_1 = require("fs");
-const prompt = require('prompt');
+const os_1 = __importDefault(require("os"));
+const prompt_1 = __importDefault(require("prompt"));
+const jsonfile_1 = __importDefault(require("jsonfile"));
 const env = process.env.npm_config_env || 'biz';
 class Utils {
     constructor() { }
@@ -80,6 +85,123 @@ class Utils {
     copyFile(arg) {
         return (0, rxjs_1.firstValueFrom)(this.shell(arg));
     }
+    updateEnvFiles(org, configPath) {
+        return new rxjs_1.Observable((observer) => {
+            let props = this.getPropsFromFile('/etc/default/.env-local');
+            console.log(props);
+            console.log(`\nWould you like to change any of the above properties: Y/n?`);
+            prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                if (question.answer === 'Y') {
+                    console.log('\nKey in new value or press Enter to keep current value: ');
+                    prompt_1.default.get(props, (err, result) => {
+                        console.log(result);
+                        console.log(`\nWould you like to update config files: Y/n?`);
+                        prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                            let content = '';
+                            for (const [key, value] of Object.entries(result)) {
+                                content += `${key}=${value}\n`;
+                            }
+                            (0, fs_1.writeFileSync)('.env-local', content);
+                            this.copyFile('sudo mv .env-local /etc/default/.env-local').then(() => {
+                                this.updateEnvHzn(org, configPath)
+                                    .subscribe({
+                                    complete: () => observer.complete()
+                                });
+                            });
+                        });
+                    });
+                }
+                else {
+                    this.updateEnvHzn(org, configPath)
+                        .subscribe({
+                        complete: () => observer.complete()
+                    });
+                }
+            });
+        });
+    }
+    setupEnvFiles() {
+        return new rxjs_1.Observable((observer) => {
+            let props = this.getPropsFromFile('./src/env-local');
+            console.log('\nKey in new value or press Enter to keep current value: ');
+            prompt_1.default.get(props, (err, result) => {
+                console.log(result);
+                console.log(`\nWould you like to save config files: Y/n?`);
+                prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                    if (question.answer === 'Y') {
+                        let content = '';
+                        for (const [key, value] of Object.entries(result)) {
+                            content += `${key}=${value}\n`;
+                        }
+                        (0, fs_1.writeFileSync)('.env-local', content);
+                        this.copyFile('sudo mv .env-local /etc/default/.env-local').then(() => {
+                            this.copyFile('sudo cp ./src/env-hzn.json /etc/default/.env-hzn.json').then(() => {
+                                observer.next();
+                                observer.complete();
+                            });
+                        });
+                    }
+                    else {
+                        console.log(`config files not saved`);
+                        observer.error();
+                    }
+                });
+            });
+        });
+    }
+    updateEnvHzn(org, configPath) {
+        return new rxjs_1.Observable((observer) => {
+            let props = [];
+            let hznJson = jsonfile_1.default.readFileSync(`${configPath}/.env-hzn.json`);
+            let envVars = hznJson[org]['envVars'];
+            let i = 0;
+            const notRequired = ['SERVICE_CONTAINER_CREDS', 'MMS_CONTAINER_CREDS', 'MMS_OBJECT_FILE'];
+            for (const [key, value] of Object.entries(envVars)) {
+                props[i] = { name: key, default: value, required: notRequired.indexOf(key) < 0 };
+                i++;
+            }
+            console.log(props);
+            console.log(`\nWould you like to change any of the above properties for ${org}: Y/n?`);
+            prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                if (question.answer === 'Y') {
+                    console.log('\nKey in new value or press Enter to keep current value: ');
+                    prompt_1.default.get(props, (err, result) => {
+                        console.log(result);
+                        console.log(`\nWould you like to save these changes: Y/n?`);
+                        prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                            if (question.answer === 'Y') {
+                                for (const [key, value] of Object.entries(result)) {
+                                    envVars[key] = value;
+                                }
+                                jsonfile_1.default.writeFileSync('.env-hzn.json', hznJson, { spaces: 2 });
+                                this.copyFile(`sudo mv .env-hzn.json ${configPath}/.env-hzn.json`).then(() => {
+                                    observer.complete();
+                                });
+                            }
+                            else {
+                                console.log(`config files updated`);
+                                observer.complete();
+                            }
+                        });
+                    });
+                }
+                else {
+                    console.log(`config files not updated for ${org}`);
+                    observer.complete();
+                }
+            });
+        });
+    }
+    checkDefaultConfig() {
+        return new rxjs_1.Observable((observer) => {
+            if ((0, fs_1.existsSync)(`/etc/default/.env-local`) && (0, fs_1.existsSync)(`/etc/default/.env-hzn.json`)) {
+                observer.complete();
+            }
+            else {
+                observer.error('No config files.');
+            }
+        });
+    }
     getHznInfo() {
         return (0, fs_1.readFileSync)('/etc/default/horizon').toString().split('\n');
     }
@@ -91,23 +213,30 @@ class Utils {
             observer.complete();
         });
     }
+    getPropsFromFile(file) {
+        let props = [];
+        let data = (0, fs_1.readFileSync)(file).toString().split('\n');
+        data.forEach((el, i) => {
+            if (el.length > 0) {
+                let prop = el.split('=');
+                if (prop && prop.length > 0) {
+                    if (prop[0] === 'HZN_CUSTOM_NODE_ID' && (!prop[1] || prop[1].length == 0)) {
+                        prop[1] = os_1.default.hostname();
+                    }
+                    props[i] = { name: prop[0], default: prop[1], required: true };
+                }
+            }
+        });
+        return props;
+    }
     updateHznInfo() {
         return new rxjs_1.Observable((observer) => {
-            let data = this.getHznInfo();
-            let props = [];
-            data.forEach((el, i) => {
-                if (el.length > 0) {
-                    let prop = el.split('=');
-                    if (prop && prop.length > 0) {
-                        props[i] = { name: prop[0], default: prop[1], required: true };
-                    }
-                }
-            });
+            let props = this.getPropsFromFile('/etc/default/horizon');
             console.log('\nKey in new value or press Enter to keep current value: ');
-            prompt.get(props, (err, result) => {
+            prompt_1.default.get(props, (err, result) => {
                 console.log(result);
-                console.log('\nWould like to update horizon: Y/n?');
-                prompt.get({ name: 'answer', required: true }, (err, question) => {
+                console.log('\nWould you like to update horizon: Y/n?');
+                prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                     if (question.answer === 'Y') {
                         let content = '';
                         for (const [key, value] of Object.entries(result)) {
@@ -120,6 +249,9 @@ class Utils {
                                 observer.complete();
                             });
                         });
+                    }
+                    else {
+                        observer.complete();
                     }
                 });
             });

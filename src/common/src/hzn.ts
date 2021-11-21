@@ -33,7 +33,7 @@ export class Hzn {
     this.mmsPattern = mmsPattern;
   }
 
-  setup() {
+  init() {
     return new Observable((observer) => {
       this.envVar.init()
       .subscribe({
@@ -74,6 +74,12 @@ export class Hzn {
   test() {
     return new Observable((observer) => {
       console.log(`it works...${this.envVar.getArch()}`)
+      observer.complete();
+    });  
+  }
+  setup() {
+    return new Observable((observer) => {
+      console.log(`it works...${this.envVar.getArch()}, your environment is ready to go!`)
       observer.complete();
     });  
   }
