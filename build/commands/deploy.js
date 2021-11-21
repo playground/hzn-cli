@@ -70,7 +70,6 @@ const handler = (argv) => {
     hzn_1.utils.checkDefaultConfig()
         .subscribe({
         complete: () => {
-            console.log(skip_config_update);
             if (promptForUpdate.indexOf(action) < 0 || skip_config_update) {
                 proceed();
             }

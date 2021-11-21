@@ -71,7 +71,7 @@ export class Utils {
     if(anax && anax.length > 0) {
       return this.shell(`curl -sSL ${anax} | sudo -s -E bash -s -- -i anax: -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`)
     } else {
-      let nodeId = id ? ` -d ${id}` : '';
+      let nodeId = id ? `-d ${id}` : '';
       return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/api/v1/objects/IBM/agent_files/agent-install.sh/data && chmod +x agent-install.sh && sudo -s -E ./agent-install.sh -i 'css:' ${nodeId}`)
     }  
   }

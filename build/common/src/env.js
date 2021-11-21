@@ -14,6 +14,7 @@ class Env {
                 pEnv[i] = localEnv[i];
             }
         }
+        console.log('env', pEnv);
         this.env = env;
         this.configPath = configPath;
         this.hznEnv = `${configPath}/.env-hzn.json`;
