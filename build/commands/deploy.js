@@ -25,9 +25,11 @@ const builder = (yargs) => yargs
     .positional('action', {
     type: 'string',
     demandOption: true,
-    desc: 'Available actions:  test, setup, buildServiceImage, pushServiceImage, publishService, publishPatterrn, buildMMSImage, pushMMSImage, publishMMSService, ' +
-        'publishMMSPattern, registerAgent, publishMMSObject, unregisterAgent, allInOneMMS, showHznInfo, updateHznInfo, listService, listPattern, ' +
-        'listNode, listObject, listDeploymentPolicy, listNodePattern, checkConfigState, getDeviceArch, createHznKey, uninstallHorizon'
+    desc: 'Available actions: ' +
+        'allInOneMMS, buildMMSImage, buildServiceImage, checkConfigState, createHznKey, dockerImageExists, getDeviceArch, ' +
+        'listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishMMSObject, ' +
+        'publishMMSPattern, publishMMSService, publishPatterrn, publishService, pullDockerImage, pushMMSImage, pushServiceImage, ' +
+        'registerAgent, setup, showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo'
 });
 exports.builder = builder;
 const handler = (argv) => {
@@ -40,11 +42,11 @@ const handler = (argv) => {
     const objId = object_id || '';
     const obj = object || '';
     const p = pattern || '';
-    const configPath = config_path || '/etc/default';
+    const configPath = config_path || '/etc/default/config';
     const promptForUpdate = ['setup', 'publishService', 'publishPatterrn', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent'];
     console.log('$$$ ', action, env, configPath, n);
     const proceed = () => {
-        if ((0, fs_1.existsSync)(`${configPath}/.env-hzn.json`)) {
+        if ((0, fs_1.existsSync)(`${hzn_1.utils.getHznConfig()}/.env-hzn.json`)) {
             const hzn = new hzn_1.Hzn(env, configPath, n, objType, objId, obj, p);
             hzn.init()
                 .subscribe({
@@ -74,7 +76,7 @@ const handler = (argv) => {
                 proceed();
             }
             else {
-                hzn_1.utils.updateEnvFiles(env, configPath)
+                hzn_1.utils.updateEnvFiles(env)
                     .subscribe({
                     complete: () => {
                         proceed();

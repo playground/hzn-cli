@@ -11,17 +11,17 @@ export class Env {
   envVars: any;
   hznJson: any;
   hznEnv: any;
-  configPath: string;
-  constructor(env: string, configPath: string) {
-    if(existsSync(`/etc/default/.env-local`)) {
-      const localEnv = dotenv.parse(readFileSync(`/etc/default/.env-local`));
+  hznConfig: string;
+  constructor(env: string, hznConfig: string) {
+    if(existsSync(`${hznConfig}/.env-local`)) {
+      const localEnv = dotenv.parse(readFileSync(`${hznConfig}/.env-local`));
       for(var i in localEnv) {
         pEnv[i] = localEnv[i];
       }
     }
     this.env = env;
-    this.configPath = configPath;
-    this.hznEnv = `${configPath}/.env-hzn.json`;
+    this.hznConfig = hznConfig;
+    this.hznEnv = `${hznConfig}/.env-hzn.json`;
   }
   init() {
     return new Observable((observer) => {

@@ -24,14 +24,16 @@ export declare class Hzn {
     pushServiceImage(): Observable<unknown>;
     buildMMSImage(): Observable<unknown>;
     pushMMSImage(): Observable<unknown>;
+    pullDockerImage(): Observable<unknown>;
+    dockerImageExists(): Observable<unknown>;
+    publishService(): Observable<unknown>;
+    publishPattern(): Observable<unknown>;
     publishMMSService(): Observable<unknown>;
     publishMMSPattern(): Observable<unknown>;
     unregisterAgent(): Observable<unknown>;
     registerAgent(): Observable<unknown>;
     publishMMSObject(): Observable<unknown>;
     allInOneMMS(): Observable<unknown>;
-    publishService(): Observable<unknown>;
-    publishPattern(): Observable<unknown>;
     showHznInfo(): Observable<unknown>;
     updateHznInfo(): Observable<unknown>;
     listService(): Observable<unknown>;

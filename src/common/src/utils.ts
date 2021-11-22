@@ -10,8 +10,12 @@ import jsonfile from 'jsonfile';
 const env = process.env.npm_config_env || 'biz';
 
 export class Utils {
+  hznConfig = '/etc/default/config';
   constructor() {}
   init() {
+  }
+  getHznConfig() {
+    return this.hznConfig
   }
   listService(name: string) {
     const arg = name.length > 0 ? `hzn exchange service list ${name}` : 'hzn exchange service list';
@@ -81,9 +85,9 @@ export class Utils {
   copyFile(arg: string) {
     return firstValueFrom(this.shell(arg));
   }
-  updateEnvFiles(org: string, configPath: string) {
+  updateEnvFiles(org: string) {
     return new Observable((observer) => {
-      let props = this.getPropsFromFile('/etc/default/.env-local');
+      let props = this.getPropsFromFile(`${this.hznConfig}/.env-local`);
       console.log(props)
       console.log(`\nWould you like to change any of the above properties: Y/n?`)
       prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
@@ -98,8 +102,8 @@ export class Utils {
                 content += `${key}=${value}\n`; 
               }
               writeFileSync('.env-local', content);
-              this.copyFile('sudo mv .env-local /etc/default/.env-local').then(() => {
-                this.updateEnvHzn(org, configPath)
+              this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local`).then(() => {
+                this.updateEnvHzn(org)
                 .subscribe({
                   complete: () => observer.complete()
                 })
@@ -107,7 +111,7 @@ export class Utils {
             })
           })        
         } else {
-          this.updateEnvHzn(org, configPath)
+          this.updateEnvHzn(org)
           .subscribe({
             complete: () => observer.complete()
           })
@@ -124,17 +128,19 @@ export class Utils {
         console.log(`\nWould you like to save config files: Y/n?`)
         prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
           if(question.answer === 'Y') {
-            let content = '';
-            for(const [key, value] of Object.entries(result)) {
-              content += `${key}=${value}\n`; 
-            }
-            writeFileSync('.env-local', content);
-            this.copyFile('sudo mv .env-local /etc/default/.env-local').then(() => {
-              this.copyFile('sudo cp ./src/env-hzn.json /etc/default/.env-hzn.json').then(() => {
-                observer.next();
-                observer.complete();
+            this.copyFile(`sudo cp -rf ./src/config /etc/default`).then(() => {
+              let content = '';
+              for(const [key, value] of Object.entries(result)) {
+                content += `${key}=${value}\n`; 
+              }
+              writeFileSync('.env-local', content);
+              this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local`).then(() => {
+                this.copyFile(`sudo cp ./src/env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
+                  observer.next();
+                  observer.complete();
+                })
               })
-            })      
+            })        
           } else {
             console.log(`config files not saved`)
             observer.error();
@@ -143,10 +149,10 @@ export class Utils {
       })
     })
   }
-  updateEnvHzn(org: string, configPath: string) {
+  updateEnvHzn(org: string) {
     return new Observable((observer) => {
       let props: any[] = [];
-      let hznJson = jsonfile.readFileSync(`${configPath}/.env-hzn.json`);
+      let hznJson = jsonfile.readFileSync(`${this.hznConfig}/.env-hzn.json`);
       let envVars = hznJson[org]['envVars'];
       let i = 0;
       const notRequired = ['SERVICE_CONTAINER_CREDS', 'MMS_CONTAINER_CREDS', 'MMS_OBJECT_FILE'];
@@ -168,11 +174,12 @@ export class Utils {
                   envVars[key] = value;
                 }
                 jsonfile.writeFileSync('.env-hzn.json', hznJson, {spaces: 2});
-                this.copyFile(`sudo mv .env-hzn.json ${configPath}/.env-hzn.json`).then(() => {
+                this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
+                  console.log(`config files updated for ${org}`)
                   observer.complete();
                 })
               } else {
-                console.log(`config files updated`)
+                console.log(`config files not updated for ${org}`)
                 observer.complete()
               }
             })
@@ -186,7 +193,7 @@ export class Utils {
   }
   checkDefaultConfig() {
     return new Observable((observer) => {
-      if(existsSync(`/etc/default/.env-local`) && existsSync(`/etc/default/.env-hzn.json`)) {
+      if(existsSync(`${this.hznConfig}/.env-local`) && existsSync(`${this.hznConfig}/.env-hzn.json`)) {
         observer.complete()
       } else {
         observer.error('No config files.')
@@ -253,7 +260,7 @@ export class Utils {
       console.log(arg);
       let child = exec(arg, options, (err: any, stdout: any, stderr: any) => {
         if(!err) {
-          console.log(stdout);
+          // console.log(stdout);
           console.log(success);
           observer.next(stdout);
           observer.complete();

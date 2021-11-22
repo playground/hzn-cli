@@ -7,20 +7,20 @@ const cp = require('child_process'), exec = cp.exec;
 var dotenv = require('dotenv');
 const pEnv = process.env;
 class Env {
-    constructor(env, configPath) {
-        if ((0, fs_1.existsSync)(`/etc/default/.env-local`)) {
-            const localEnv = dotenv.parse((0, fs_1.readFileSync)(`/etc/default/.env-local`));
+    constructor(env, hznConfig) {
+        if ((0, fs_1.existsSync)(`${hznConfig}/.env-local`)) {
+            const localEnv = dotenv.parse((0, fs_1.readFileSync)(`${hznConfig}/.env-local`));
             for (var i in localEnv) {
                 pEnv[i] = localEnv[i];
             }
         }
-        console.log('env', pEnv);
         this.env = env;
-        this.configPath = configPath;
-        this.hznEnv = `${configPath}/.env-hzn.json`;
+        this.hznConfig = hznConfig;
+        this.hznEnv = `${hznConfig}/.env-hzn.json`;
     }
     init() {
         return new rxjs_1.Observable((observer) => {
+            pEnv.HZN_ORG_ID = this.env;
             this.hznJson = JSON.parse((0, fs_1.readFileSync)(this.hznEnv).toString());
             // console.log(process.cwd(), this.env, this.hznJson)
             this.envVars = this.hznJson[this.env]['envVars'];
@@ -56,7 +56,6 @@ class Env {
     }
     setAdditionalEnv() {
         let container = pEnv.MMS_CONTAINER_NAME || pEnv.MMS_SERVICE_NAME;
-        pEnv.HZN_ORG_ID = this.env;
         pEnv.MMS_PATTERN_NAME = `pattern-${pEnv.MMS_SERVICE_NAME}-${pEnv.ARCH}`;
         pEnv.MMS_CONTAINER = `${pEnv.YOUR_DOCKERHUB_ID}/${container}_${pEnv.ARCH}:${pEnv.MMS_SERVICE_VERSION}`.replace(/\r?\n|\r/g, '');
         pEnv.PATTERN_NAME = `pattern-${pEnv.SERVICE_NAME}`;

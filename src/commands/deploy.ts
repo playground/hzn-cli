@@ -34,9 +34,11 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
     .positional('action', {
       type: 'string', 
       demandOption: true,
-      desc: 'Available actions:  test, setup, buildServiceImage, pushServiceImage, publishService, publishPatterrn, buildMMSImage, pushMMSImage, publishMMSService, ' +
-            'publishMMSPattern, registerAgent, publishMMSObject, unregisterAgent, allInOneMMS, showHznInfo, updateHznInfo, listService, listPattern, ' +
-            'listNode, listObject, listDeploymentPolicy, listNodePattern, checkConfigState, getDeviceArch, createHznKey, uninstallHorizon'
+      desc: 'Available actions: ' +
+            'allInOneMMS, buildMMSImage, buildServiceImage, checkConfigState, createHznKey, dockerImageExists, getDeviceArch, ' +
+            'listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishMMSObject, ' +
+            'publishMMSPattern, publishMMSService, publishPatterrn, publishService, pullDockerImage, pushMMSImage, pushServiceImage, ' +
+		        'registerAgent, setup, showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo'
     });
 
 export const handler = (argv: Arguments<Options>): void => {
@@ -53,12 +55,13 @@ export const handler = (argv: Arguments<Options>): void => {
   const objId = object_id || '';
   const obj = object || '';
   const p = pattern || '';
-  const configPath = config_path || '/etc/default';
-  const promptForUpdate = ['setup', 'publishService', 'publishPatterrn', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent']
+  const configPath = config_path || utils.getHznConfig();
+  const skipInitialize = ['uninstallHorizon'];
+  const promptForUpdate = ['setup', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent']
   console.log('$$$ ', action, env, configPath, n);
 
   const proceed = () => {
-    if(existsSync(`${configPath}/.env-hzn.json`)) {
+    if(existsSync(`${utils.getHznConfig()}/.env-hzn.json`)) {
       const hzn = new Hzn(env, configPath, n, objType, objId, obj, p);
   
       hzn.init()
@@ -88,7 +91,7 @@ export const handler = (argv: Arguments<Options>): void => {
       if(promptForUpdate.indexOf(action) < 0 || skip_config_update) {
         proceed();
       } else {
-        utils.updateEnvFiles(env, configPath)
+        utils.updateEnvFiles(env)
         .subscribe({
           complete: () => {
             proceed()
@@ -98,13 +101,23 @@ export const handler = (argv: Arguments<Options>): void => {
         })  
       }
     }, error: (err) => {
-      console.log(err, 'Initialising...')
-      utils.setupEnvFiles()
-      .subscribe({
-        complete: () => {
-          proceed();
-        }, error: () => process.exit(0)
-      })
+      if(skipInitialize.indexOf(action) < 0) {
+        console.log(err, 'Initialising...')
+        utils.setupEnvFiles()
+        .subscribe({
+          complete: () => {
+            proceed();
+          }, error: () => process.exit(0)
+        })
+      } else {
+        utils.uninstallHorizon()
+        .subscribe({
+          complete:() => {
+            console.log('process completed.');
+            process.exit(0)          
+          }
+        })
+      }
     }
   })
 };
