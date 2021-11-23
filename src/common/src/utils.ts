@@ -8,6 +8,7 @@ import jsonfile from 'jsonfile';
 
 
 const env = process.env.npm_config_env || 'biz';
+const notRequired = ['SERVICE_CONTAINER_CREDS', 'MMS_CONTAINER_CREDS', 'MMS_OBJECT_FILE', 'HZN_CUSTOM_NODE_ID', 'UPDATE_FILE_NAME'];
 
 export class Utils {
   hznConfig = '/etc/default/config';
@@ -155,7 +156,6 @@ export class Utils {
       let hznJson = jsonfile.readFileSync(`${this.hznConfig}/.env-hzn.json`);
       let envVars = hznJson[org]['envVars'];
       let i = 0;
-      const notRequired = ['SERVICE_CONTAINER_CREDS', 'MMS_CONTAINER_CREDS', 'MMS_OBJECT_FILE'];
       for(const [key, value] of Object.entries(envVars)) {
         props[i] = {name: key, default: value, required: notRequired.indexOf(key) < 0};
         i++;
@@ -221,7 +221,7 @@ export class Utils {
           if(prop[0] === 'HZN_CUSTOM_NODE_ID' && (!prop[1] || prop[1].length == 0)) {
             prop[1] = os.hostname();
           }
-          props[i] = {name: prop[0], default: prop[1], required: true};
+          props[i] = {name: prop[0], default: prop[1], required: notRequired.indexOf(prop[0]) < 0};
         }  
       }
     });

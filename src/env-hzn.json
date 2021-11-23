@@ -14,7 +14,7 @@
       "MMS_SERVICE_VERSION": "1.0.0",
       "MMS_OBJECT_TYPE": "object_detection",
       "MMS_OBJECT_ID": "config.json",
-      "MMS_OBJECT_FILE": "path-to-file"
+      "MMS_OBJECT_FILE": ""
     },
     "metaVars": {
     }
