@@ -8,15 +8,7 @@ Open Horizon toolkit is a CLI built with Typescript for the NodeJS developers.  
 
 ## Pre-release version of hzn-cli, howto?
 
-For now, you can give it a test drive by cloning this repo
-
-```git clone git@github.com:playground/hzn-cli.git```
-
-cd into hzn-cli then run the following command to install it on your device, this will install hzn-cli and the command will be available globally.
-
-NOTE:  Node version 12 or higher is required to be installed before running the following command
-
-```npm run local```
+```npm i -g hzn-cli```
 
 After installlation run
 
@@ -25,86 +17,40 @@ After installlation run
 Deploy <action> to Org <org>
 
 Positionals:
-  action  Available actions:  test, buildServiceImage, pushServiceImage,
-          publishService, publishPatterrn, buildMMSImage, pushMMSImage,
-          publishMMSService, publishMMSPattern, agentRun, publishMMSObject,
-          unregisterAgent, registerAgent, showHznInfo, updateHznInfo,
-          listService, listPattern, listNode, listObject, listDeploymentPolicy,
-          listNodePattern, checkConfigState, getDeviceArch, createHznKey
+  action  Available actions: allInOneMMS, buildMMSImage, buildServiceImage,
+          checkConfigState, createHznKey, dockerImageExists, getDeviceArch,
+          listDeploymentPolicy, listNode, listNodePattern, listObject,
+          listPattern, listService, publishMMSObject, publishMMSPattern,
+          publishMMSService, publishPatterrn, publishService, pullDockerImage,
+          pushMMSImage, pushServiceImage, registerAgent, setup, showHznInfo,
+          test, uninstallHorizon, unregisterAgent, updateHznInfo
                                                              [string] [required]
 
 Options:
-      --version     Show version number                                [boolean]
-      --org         Organization to be deployed to                      [string]
-      --configpath  Specify path to your configuration, default is ./config
-                                                                        [string]
-      --name        Name of service, pattern, policy & etc.             [string]
-  -h, --help        Show help                                          [boolean]
+      --version             Show version number                        [boolean]
+      --org                 Organization to be deployed to              [string]
+      --config_path         Specify path to your configuration, default is
+                            ./config                                    [string]
+      --name                Name of service, pattern, policy & etc.     [string]
+      --object_type         Type of object                              [string]
+      --object_id           Id of object to be published                [string]
+      --object              Object file to be published                 [string]
+      --pattern             MMS pattern                                 [string]
+      --skip_config_update  Do not prompt for config updates            [string]
+  -h, --help                Show help                                  [boolean]
 ```
+## To setup your environment, you will need to run
+```oh deploy setup```
 
-## To execute any of the "oh" actions, .env-hzn.json config file is required
+This will prompt you for your credential, Docker Hub Id & other configuration parameters.
+This will also install and setup hzn envirnoment for you if it hasn't been installled.
 
-.env-hzn.json template
-```
-{
-  "biz": 
-  {
-    "envVars": {
-      "HZN_ORG_ID": "<HZN_ORG_ID>",
-      "HZN_EXCHANGE_USER_AUTH": "<HZN_EXCHANGE_USER_AUTH>",
-      "HZN_EXCHANGE_URL": "<HZN_EXCHANGE_URL>",
-      "HZN_FSS_CSSURL": "<HZN_FSS_CSSURL>",  
-      "SERVICE_NAME": "<YOUR_SERVICE_NAME>",
-      "SERVICE_VERSION": "<YOUR_SERVICE_VERSION>",
-      "SERVICE_CONTAINER_NAME": "<YOUR_SERVICE_CONTAINER_NAME>",
-      "SERVICE_CONTAINER_CREDS": "",
-      "YOUR_DOCKERHUB_ID": "<YOUR_DOCKERHUB_ID>",
-      "VOLUME_MOUNT": "<VOLUME_MOUNT>",
-      "MMS_SHARED_VOLUME": "<MMS_SHARED_VOLUME>",
-      "MMS_CONTAINER_CREDS": "",
-      "MMS_CONTAINER_NAME": "<MMS_CONTAINER_NAME>",
-      "MMS_SERVICE_NAME": "<MMS_SERVICE_NAME>",
-      "MMS_SERVICE_VERSION": "<MMS_SERVICE_VERSION>",
-      "MMS_OBJECT_TYPE": "<MMS_OBJECT_TYPE>",
-      "MMS_OBJECT_ID": "<MMS_OBJECT_ID>",
-      "MMS_OBJECT_FILE": "config/config.json",
-      "UPDATE_FILE_NAME": "<UPDATE_FILE_NAME>"  
-    },
-    "metaVars": {
-    }
-  },
-  "demo": 
-  {
-    "envVars": {
-      "HZN_ORG_ID": "<HZN_ORG_ID>",
-      "HZN_EXCHANGE_USER_AUTH": "<HZN_EXCHANGE_USER_AUTH>",
-      "HZN_EXCHANGE_URL": "<HZN_EXCHANGE_URL>",
-      "HZN_FSS_CSSURL": "<HZN_FSS_CSSURL>",  
-      "SERVICE_NAME": "<YOUR_SERVICE_NAME>",
-      "SERVICE_VERSION": "<YOUR_SERVICE_VERSION>",
-      "SERVICE_CONTAINER_NAME": "<YOUR_SERVICE_CONTAINER_NAME>",
-      "SERVICE_CONTAINER_CREDS": "",
-      "YOUR_DOCKERHUB_ID": "<YOUR_DOCKERHUB_ID>",
-      "VOLUME_MOUNT": "<VOLUME_MOUNT>",
-      "MMS_SHARED_VOLUME": "<MMS_SHARED_VOLUME>",
-      "MMS_CONTAINER_CREDS": "",
-      "MMS_CONTAINER_NAME": "<MMS_CONTAINER_NAME>",
-      "MMS_SERVICE_NAME": "<MMS_SERVICE_NAME>",
-      "MMS_SERVICE_VERSION": "<MMS_SERVICE_VERSION>",
-      "MMS_OBJECT_TYPE": "<MMS_OBJECT_TYPE>",
-      "MMS_OBJECT_ID": "<MMS_OBJECT_ID>",
-      "MMS_OBJECT_FILE": "config/config.json",
-      "UPDATE_FILE_NAME": "<UPDATE_FILE_NAME>"  
-    },
-    "metaVars": {
-    }
-  }
-}
-```
+## To execute any of the "oh" actions
+```oh deploy <action>, for example: oh deploy registerAgent```
 
-## After installation, you can test out the cli by running
+## After installation and initialization, you can test out the cli by running
 
-```oh deploy test --configpath /home/pi/config```
+```oh deploy test```
 ```
 
   _                                    _   _ 
@@ -121,25 +67,25 @@ process completed.
 ## Here are a few examples of actions you can perform with "oh", default org is "biz"
 
 Build service docker image
-```oh deploy buildServiceImage --config_path /home/pi/config```
+```oh deploy buildServiceImage```
 
 Push service docker image
-```oh deploy pushServiceImage --config_path /home/pi/config```
+```oh deploy pushServiceImage```
 
 Publish service to management hub
-```oh deploy publishService --config_path /home/pi/config```
+```oh deploy publishService```
 
 Publish service pattern
-```oh deploy publishPattern --config_path /home/pi/config```
+```oh deploy publishPattern```
 
 Publish MMS service
-```oh deploy publishMMSService --config_path /home/pi/config```
+```oh deploy publishMMSService```
 
-Publish MMS pattern
+Publish MMS pattern and specify path to the policy.json
 ```oh deploy publishMMSPattern --config_path /home/pi/config```
 
 Publish MMS Object file
-```oh deploy publishMMSObject --object_type=object_detection --object_id=config.json --object=/Users/jeff/Downloads/demo-model/demo/version1/model.zip --pattern=pattern-pi-mms-service-arm --config_path=config```
+```oh deploy publishMMSObject --object_type=object_detection --object_id=config.json --object=/Users/jeff/Downloads/demo-model/demo/version1/model.zip --pattern=pattern-pi-mms-service-arm```
 
 *Register agent (org=demo)- 
-```oh deploy registerAgent --configpath /home/pi/config --org demo```
+```oh deploy registerAgent --org demo```
