@@ -19,50 +19,94 @@ const builder = (yargs) => yargs
     object_type: { type: 'string', desc: 'Type of object' },
     object_id: { type: 'string', desc: 'Id of object to be published' },
     object: { type: 'string', desc: 'Object file to be published' },
-    pattern: { type: 'string', desc: 'MMS pattern' }
+    pattern: { type: 'string', desc: 'MMS pattern' },
+    skip_config_update: { type: 'string', desc: 'Do not prompt for config updates' }
 })
     .positional('action', {
     type: 'string',
     demandOption: true,
-    desc: 'Available actions:  test, buildServiceImage, pushServiceImage, publishService, publishPatterrn, buildMMSImage, pushMMSImage, publishMMSService, ' +
-        'publishMMSPattern, registerAgent, publishMMSObject, unregisterAgent, allInOneMMS, showHznInfo, updateHznInfo, listService, listPattern, ' +
-        'listNode, listObject, listDeploymentPolicy, listNodePattern, checkConfigState, getDeviceArch, createHznKey, uninstallHorizon'
+    desc: 'Available actions: ' +
+        'allInOneMMS, buildMMSImage, buildServiceImage, checkConfigState, createHznKey, dockerImageExists, getDeviceArch, ' +
+        'listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishMMSObject, ' +
+        'publishMMSPattern, publishMMSService, publishPatterrn, publishService, pullDockerImage, pushMMSImage, pushServiceImage, ' +
+        'registerAgent, setup, showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo'
 });
 exports.builder = builder;
 const handler = (argv) => {
     (0, clear_1.default)();
     console.log(chalk_1.default.greenBright(figlet_1.default.textSync('hzn-cli', { horizontalLayout: 'full' })));
-    const { action, org, config_path, name, object_type, object_id, object, pattern } = argv;
+    const { action, org, config_path, name, object_type, object_id, object, pattern, skip_config_update } = argv;
     const env = org || 'biz';
     const n = name || '';
     const objType = object_type || '';
     const objId = object_id || '';
     const obj = object || '';
     const p = pattern || '';
-    console.log('$$$ ', action, env, config_path, n);
-    const configPath = config_path || 'config';
-    if ((0, fs_1.existsSync)(`${configPath}/.env-hzn.json`)) {
-        const hzn = new hzn_1.Hzn(env, configPath, n, objType, objId, obj, p);
-        hzn.setup()
-            .subscribe({
-            complete: () => {
-                hzn[action]()
+    const configPath = config_path || hzn_1.utils.getHznConfig();
+    const skipInitialize = ['uninstallHorizon'];
+    const promptForUpdate = ['setup', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent'];
+    console.log('$$$ ', action, env, configPath, n);
+    const proceed = () => {
+        if ((0, fs_1.existsSync)(`${hzn_1.utils.getHznConfig()}/.env-hzn.json`)) {
+            const hzn = new hzn_1.Hzn(env, configPath, n, objType, objId, obj, p);
+            hzn.init()
+                .subscribe({
+                complete: () => {
+                    hzn[action]()
+                        .subscribe({
+                        complete: () => {
+                            console.log('process completed.');
+                            process.exit(0);
+                        }
+                    });
+                },
+                error: (err) => {
+                    console.log('something went wrong. ', err);
+                    process.exit(0);
+                }
+            });
+        }
+        else {
+            console.log(`${configPath}/.env-hzn.json file not fouund.`);
+        }
+    };
+    hzn_1.utils.checkDefaultConfig()
+        .subscribe({
+        complete: () => {
+            if (promptForUpdate.indexOf(action) < 0 || skip_config_update) {
+                proceed();
+            }
+            else {
+                hzn_1.utils.updateEnvFiles(env)
+                    .subscribe({
+                    complete: () => {
+                        proceed();
+                    }, error: (err) => {
+                        console.log(err);
+                    }
+                });
+            }
+        }, error: (err) => {
+            if (skipInitialize.indexOf(action) < 0) {
+                console.log(err, 'Initialising...');
+                hzn_1.utils.setupEnvFiles()
+                    .subscribe({
+                    complete: () => {
+                        proceed();
+                    }, error: () => process.exit(0)
+                });
+            }
+            else {
+                hzn_1.utils.uninstallHorizon()
                     .subscribe({
                     complete: () => {
                         console.log('process completed.');
                         process.exit(0);
                     }
                 });
-            },
-            error: (err) => {
-                console.log('something went wrong. ', err);
-                process.exit(0);
             }
-        });
-    }
-    else {
-        console.log('./config/.env-hzn.json file not fouund.');
-    }
+        }
+    });
 };
 exports.handler = handler;
 //# sourceMappingURL=deploy.js.map

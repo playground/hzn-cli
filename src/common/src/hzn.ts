@@ -1,12 +1,8 @@
-import { Observable, forkJoin } from 'rxjs';
-const cp = require('child_process'),
-exec = cp.exec;
-import { readFileSync, writeFileSync } from 'fs';
+import { Observable } from 'rxjs';
 import { Env } from './env';
 import { Utils } from './utils';
-const prompt = require('prompt');
 
-const utils = new Utils();
+export const utils = new Utils();
 
 export class Hzn {
   objectType: any;
@@ -23,9 +19,8 @@ export class Hzn {
   envVar: any;
   configPath: string;
   name: string;
-  utils = new Utils();
   constructor(env: string, configPath: string, name: string, objectType: string, objectId: string, objectFile: string, mmsPattern: string) {
-    this.envVar = new Env(env, configPath);
+    this.envVar = new Env(env, utils.getHznConfig());
     this.configPath = configPath;
     this.name = name;
     this.objectType = objectType;
@@ -34,7 +29,7 @@ export class Hzn {
     this.mmsPattern = mmsPattern;
   }
 
-  setup() {
+  init() {
     return new Observable((observer) => {
       this.envVar.init()
       .subscribe({
@@ -78,140 +73,80 @@ export class Hzn {
       observer.complete();
     });  
   }
-  buildServiceImage() {
+  setup() {
     return new Observable((observer) => {
-      let arg = `docker build -t ${this.envVar.getServiceContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
-      console.log(arg)
-      exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
-        if(!err) {
-          console.log(stdout)
-          console.log(`done building service docker image`);
-        } else {
-          console.log('failed to build service docker image', err);
-        }
-        observer.next();
-        observer.complete();
-      });
-    });
+      console.log(`it works...${this.envVar.getArch()}, your environment is ready to go!`)
+      observer.complete();
+    });  
+  }
+  buildServiceImage() {
+    let arg = `docker build -t ${this.envVar.getServiceContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
+    return utils.shell(arg, 'done building service docker image', 'failed to build service docker image');
   }
   pushServiceImage() {
-    return new Observable((observer) => {
-      let arg = `docker push ${this.envVar.getServiceContainer()}`;
-      console.log(arg)
-      exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
-        if(!err) {
-          console.log(stdout)
-          console.log(`done pushing service docker image`);
-          observer.next();
-          observer.complete();
-        } else {
-          console.log('failed to push service docker image', err);
-          observer.error(err);
-        }
-      });
-    })  
+    let arg = `docker push ${this.envVar.getServiceContainer()}`;
+    return utils.shell(arg, 'done pushing service docker image', 'failed to push service docker image');
   }
   buildMMSImage() {
-    return new Observable((observer) => {
-      // let tag = `${this.envVar.getDockerImageBase()}_${this.envVar.getArch()}:${this.envVar.getMMSServiceVersion()}`;
-      let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
-      console.log(arg)
-      exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
-        if(!err) {
-          console.log(stdout)
-          console.log(`done building mms docker image`);
-        } else {
-          console.log('failed to build mms docker image', err);
-        }
-        observer.next();
-        observer.complete();
-      });
-    })  
+    let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
+    return utils.shell(arg, 'done building mms docker image', 'failed to build mms docker image');
   }
   pushMMSImage() {
+    let arg = `docker push ${this.envVar.getMMSContainer()}`;
+    return utils.shell(arg, 'done pushing mms docker image', 'failed to push mms docker image');
+  }
+  pullDockerImage() {
+    let image = this.name ? this.name : this.envVar.getServiceContainer()
+    let arg = `docker pull ${image}`;
+    return utils.shell(arg, 'done pulling docker image', 'failed to pull docker image');
+  }
+  dockerImageExists() {
+    let image = this.name ? this.name : this.envVar.getMMSContainer()
+    let arg = `docker images ${image}`;
+    // return utils.shell(arg, 'done checking docker image', 'failed to check docker image');
     return new Observable((observer) => {
-      let arg = `docker push ${this.envVar.getMMSContainer()}`;
-      console.log(arg)
-      exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
-        if(!err) {
-          console.log(stdout)
-          console.log(`done pushing mms docker image`);
-          observer.next();
-          observer.complete();
-        } else {
-          console.log('failed to push mms docker image', err);
-          observer.error(err);
+      utils.shell(arg, 'done checking docker image', 'failed to check docker image')
+      .subscribe({
+        next: (res) => {
+          console.log(res)
+          const imageName = image.split(':')
+          // @ts-ignore
+          let exist = res.indexOf(imageName[0]) > 0 && res.indexOf(imageName[1]) > 0;
+          observer.next(exist)
+          observer.complete()
         }
-      });
-    })  
+      })
+    })
+  }
+  publishService() {
+    let arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceJson} --pull-image`;
+    return utils.shell(arg, 'done publishing service', 'failed to publish service');
+  }
+  publishPattern() {
+    let arg = `hzn exchange pattern publish -f ${this.patternJson}`;
+    return utils.shell(arg, 'done publishing service pattern', 'failed to publish service pattern');
   }
   publishMMSService() {
-    return new Observable((observer) => {
-      let arg = `hzn exchange service publish -O ${this.envVar.getMMSContainerCreds()} -f ${this.mmsServiceJson}`;
-      console.log(arg)
-      exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
-        if(!err) {
-          console.log(stdout)
-          console.log(`done publishing mms service`);
-          observer.next();
-          observer.complete();
-        } else {
-          console.log('failed to publish mms service', err);
-          observer.error(err);
-        }
-      });
-    })  
+    let arg = `hzn exchange service publish -O ${this.envVar.getMMSContainerCreds()} -f ${this.mmsServiceJson} --pull-image`;
+    return utils.shell(arg, 'done publishing mms service', 'failed to publish mms service');
   }
   publishMMSPattern() {
-    return new Observable((observer) => {
-      let arg = `hzn exchange pattern publish -f ${this.mmsPatternJson}`;
-      console.log(arg)
-      exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
-        if(!err) {
-          console.log(stdout)
-          console.log(`done publishing mss pattern`);
-          observer.next();
-          observer.complete();
-        } else {
-          console.log('failed to publish mms pattern', err);
-          observer.error(err);
-        }
-      });
-    })  
+    let arg = `hzn exchange pattern publish -f ${this.mmsPatternJson}`;
+    return utils.shell(arg, 'done publishing mss pattern', 'failed to publish mms pattern');
   }
   unregisterAgent() {
-    return new Observable((observer) => {
-      let arg = `hzn unregister -f`;
-      console.log(arg)
-      exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
-        if(!err) {
-          console.log(stdout)
-          console.log(`done unregistering agent`);
-          observer.next();
-          observer.complete();
-        } else {
-          console.log('failed to unregister agent', err);
-          observer.error(err);
-        }
-      });
-    })  
+    let arg = `hzn unregister -f`;
+    return utils.shell(arg, 'done unregistering agent', 'failed to unregister agent');
   }
   registerAgent() {
     return new Observable((observer) => {
       this.unregisterAgent().subscribe({
         complete: () => {
           let arg = `hzn register --policy ${this.mmsPolicyJson} --pattern "${this.mmsPattern}"`;
-          console.log(arg)
-          exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
-            if(!err) {
-              console.log(stdout)
-              console.log(`done registering mss agent`);
-              observer.next();
-              observer.complete();
-            } else {
-              console.log('failed to register mms agent', err);
-              observer.error(err);
-            }
+          utils.shell(arg, 'done registering agent', 'failed to register agent')
+          .subscribe({
+            complete: () => observer.complete(),
+            error: (err) => observer.error(err)
           })
         }, error: (err) => {
           observer.error(err);
@@ -220,21 +155,8 @@ export class Hzn {
     })  
   }
   publishMMSObject() {
-    return new Observable((observer) => {
-      let arg = `hzn mms object publish --type=${this.objectType} --id=${this.objectId} --object=${this.objectFile} --pattern=${this.mmsPattern}`
-      console.log(arg)
-      exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
-        if(!err) {
-          console.log(stdout)
-          console.log(`done publishing object`);
-          observer.next();
-          observer.complete();
-        } else {
-          console.log('failed to publish object', err);
-          observer.error(err);
-        }
-      });
-    })  
+    let arg = `hzn mms object publish --type=${this.objectType} --id=${this.objectId} --object=${this.objectFile} --pattern=${this.mmsPattern}`
+    return utils.shell(arg, 'done publishing object', 'failed to publish object');
   }
   allInOneMMS() {
     return new Observable((observer) => {
@@ -278,103 +200,11 @@ export class Hzn {
       })
     });
   }
-  publishService() {
-    return new Observable((observer) => {
-      let arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceJson} --pull-image`;
-      console.log(arg)
-      exec(arg, {maxBuffer: 1024 * 2000}, (err, stdout, stderr) => {
-        if(!err) {
-          console.log(stdout)
-          console.log(`done publishing ${this.envVar.getServiceName()} service`);
-          observer.next();
-          observer.complete();
-        } else {
-          console.log('failed to publish service', err);
-          observer.error(err);
-        }
-      });
-    })  
-  }
-  publishPattern() {
-    return new Observable((observer) => {
-      let arg = `hzn exchange pattern publish -f ${this.patternJson}`;
-      console.log(arg)
-      exec(arg, {maxBuffer: 1024 * 2000}, (err, stdout, stderr) => {
-        if(!err) {
-          console.log(stdout)
-          console.log(`done publishing ${this.envVar.getPatternName()} pattern`);
-          observer.next();
-          observer.complete();
-        } else {
-          console.log('failed to publish mms pattern', err);
-          observer.error(err);
-        }
-      });
-    })  
-  }
   showHznInfo() {
-    return new Observable((observer) => {
-      const file = this.getHznInfo();
-      console.log(file)
-      observer.next(file);
-      observer.complete();
-    })  
-  }
-  getHznInfo() {
-    return readFileSync('/etc/default/horizon').toString().split('\n');
+    return utils.showHznInfo();
   }
   updateHznInfo() {
-    return new Observable((observer) => {
-      let data = this.getHznInfo();
-      let props: any[] = [];
-      data.forEach((el, i) => {
-        if(el.length > 0) {
-          let prop = el.split('=');
-          if(prop && prop.length > 0) {
-            props[i] = {name: prop[0], default: prop[1], required: true};
-          }  
-        }
-      });
-      console.log('\nKey in new value or press Enter to keep current value: ')
-      prompt.get(props, (err: any, result: any) => {
-        console.log(result)
-
-        console.log('\nWould like to update horizon: Y/n?')
-        prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
-          if(question.answer === 'Y') {
-            let content = '';
-            for(const [key, value] of Object.entries(result)) {
-              content += `${key}=${value}\n`; 
-            }
-            this.copyFile('sudo cp /etc/default/horizon /etc/default/.horizon').then(() => {
-              writeFileSync('.horizon', content);
-              this.copyFile(`sudo mv .horizon /etc/default/horizon`).then(() => {
-                observer.next();
-                observer.complete();  
-              })
-            })
-          }
-        })
-      })
-    })  
-  }
-  copyFile(arg: string) {
-    return new Promise((resolve, reject) => {
-      try {
-        console.log(arg);
-        exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
-          if(!err) {
-            console.log(`done moving file`);
-          } else {
-            console.log('failed to move file', err);
-          }
-          resolve(stdout);
-        });       
-      } catch(e) {
-        console.log(e)
-        resolve(e);
-      }
-    });
+    return utils.updateHznInfo();
   }
   listService() {
     return utils.listService(this.name);

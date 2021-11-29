@@ -4,8 +4,8 @@ export declare class Env {
     envVars: any;
     hznJson: any;
     hznEnv: any;
-    configPath: string;
-    constructor(env: string, configPath: string);
+    hznConfig: string;
+    constructor(env: string, hznConfig: string);
     init(): Observable<unknown>;
     setAdditionalEnv(): void;
     getEnv(): string;

@@ -1,7 +1,9 @@
 import { Observable } from 'rxjs';
 export declare class Utils {
+    hznConfig: string;
     constructor();
     init(): void;
+    getHznConfig(): string;
     listService(name: string): Observable<unknown>;
     listPattern(name: string): Observable<unknown>;
     listNode(name: string): Observable<unknown>;
@@ -16,7 +18,16 @@ export declare class Utils {
     installPrereq(): Observable<unknown>;
     installHznCli(anax: string, id: null): Observable<unknown>;
     uninstallHorizon(): Observable<unknown>;
-    shell(arg: string, options?: {
+    copyFile(arg: string): Promise<unknown>;
+    updateEnvFiles(org: string): Observable<unknown>;
+    setupEnvFiles(): Observable<unknown>;
+    updateEnvHzn(org: string): Observable<unknown>;
+    checkDefaultConfig(): Observable<unknown>;
+    getHznInfo(): string[];
+    showHznInfo(): Observable<unknown>;
+    getPropsFromFile(file: string): any[];
+    updateHznInfo(): Observable<unknown>;
+    shell(arg: string, success?: string, error?: string, options?: {
         maxBuffer: number;
     }): Observable<unknown>;
 }
