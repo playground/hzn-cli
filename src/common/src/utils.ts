@@ -122,21 +122,22 @@ export class Utils {
   }
   setupEnvFiles() {
     return new Observable((observer) => {
-      let props = this.getPropsFromFile('./src/env-local');
+      // console.log(process.cwd(), __dirname, __filename)
+      let props = this.getPropsFromFile(`${__dirname}/env-local`);
       console.log('\nKey in new value or press Enter to keep current value: ')
       prompt.get(props, (err: any, result: any) => {
         console.log(result)
         console.log(`\nWould you like to save config files: Y/n?`)
         prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
           if(question.answer === 'Y') {
-            this.copyFile(`sudo cp -rf ./src/config /etc/default`).then(() => {
+            this.copyFile(`sudo cp -rf ${__dirname}/config /etc/default`).then(() => {
               let content = '';
               for(const [key, value] of Object.entries(result)) {
                 content += `${key}=${value}\n`; 
               }
               writeFileSync('.env-local', content);
               this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local`).then(() => {
-                this.copyFile(`sudo cp ./src/env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
+                this.copyFile(`sudo cp ${__dirname}/env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
                   observer.next();
                   observer.complete();
                 })

@@ -42,8 +42,9 @@ const handler = (argv) => {
     const objId = object_id || '';
     const obj = object || '';
     const p = pattern || '';
-    const configPath = config_path || '/etc/default/config';
-    const promptForUpdate = ['setup', 'publishService', 'publishPatterrn', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent'];
+    const configPath = config_path || hzn_1.utils.getHznConfig();
+    const skipInitialize = ['uninstallHorizon'];
+    const promptForUpdate = ['setup', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent'];
     console.log('$$$ ', action, env, configPath, n);
     const proceed = () => {
         if ((0, fs_1.existsSync)(`${hzn_1.utils.getHznConfig()}/.env-hzn.json`)) {
@@ -86,13 +87,24 @@ const handler = (argv) => {
                 });
             }
         }, error: (err) => {
-            console.log(err, 'Initialising...');
-            hzn_1.utils.setupEnvFiles()
-                .subscribe({
-                complete: () => {
-                    proceed();
-                }, error: () => process.exit(0)
-            });
+            if (skipInitialize.indexOf(action) < 0) {
+                console.log(err, 'Initialising...');
+                hzn_1.utils.setupEnvFiles()
+                    .subscribe({
+                    complete: () => {
+                        proceed();
+                    }, error: () => process.exit(0)
+                });
+            }
+            else {
+                hzn_1.utils.uninstallHorizon()
+                    .subscribe({
+                    complete: () => {
+                        console.log('process completed.');
+                        process.exit(0);
+                    }
+                });
+            }
         }
     });
 };

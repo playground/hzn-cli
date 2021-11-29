@@ -11,6 +11,7 @@ const os_1 = __importDefault(require("os"));
 const prompt_1 = __importDefault(require("prompt"));
 const jsonfile_1 = __importDefault(require("jsonfile"));
 const env = process.env.npm_config_env || 'biz';
+const notRequired = ['SERVICE_CONTAINER_CREDS', 'MMS_CONTAINER_CREDS', 'MMS_OBJECT_FILE', 'HZN_CUSTOM_NODE_ID', 'UPDATE_FILE_NAME'];
 class Utils {
     constructor() {
         this.hznConfig = '/etc/default/config';
@@ -81,7 +82,7 @@ class Utils {
         }
         else {
             let nodeId = id ? `-d ${id}` : '';
-            return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/api/v1/objects/IBM/agent_files/agent-install.sh/data && chmod +x agent-install.sh && sudo -s -E ./agent-install.sh -i 'css:' ${nodeId}`);
+            return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/api/v1/objects/IBM/agent_files/agent-install.sh/data && chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`);
         }
     }
     uninstallHorizon() {
@@ -127,21 +128,22 @@ class Utils {
     }
     setupEnvFiles() {
         return new rxjs_1.Observable((observer) => {
-            let props = this.getPropsFromFile('./src/env-local');
+            // console.log(process.cwd(), __dirname, __filename)
+            let props = this.getPropsFromFile(`${__dirname}/env-local`);
             console.log('\nKey in new value or press Enter to keep current value: ');
             prompt_1.default.get(props, (err, result) => {
                 console.log(result);
                 console.log(`\nWould you like to save config files: Y/n?`);
                 prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                     if (question.answer === 'Y') {
-                        this.copyFile(`sudo cp -rf ./src/config /etc/default`).then(() => {
+                        this.copyFile(`sudo cp -rf ${__dirname}/config /etc/default`).then(() => {
                             let content = '';
                             for (const [key, value] of Object.entries(result)) {
                                 content += `${key}=${value}\n`;
                             }
                             (0, fs_1.writeFileSync)('.env-local', content);
                             this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local`).then(() => {
-                                this.copyFile(`sudo cp ./src/env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
+                                this.copyFile(`sudo cp ${__dirname}/env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
                                     observer.next();
                                     observer.complete();
                                 });
@@ -162,7 +164,6 @@ class Utils {
             let hznJson = jsonfile_1.default.readFileSync(`${this.hznConfig}/.env-hzn.json`);
             let envVars = hznJson[org]['envVars'];
             let i = 0;
-            const notRequired = ['SERVICE_CONTAINER_CREDS', 'MMS_CONTAINER_CREDS', 'MMS_OBJECT_FILE'];
             for (const [key, value] of Object.entries(envVars)) {
                 props[i] = { name: key, default: value, required: notRequired.indexOf(key) < 0 };
                 i++;
@@ -231,7 +232,7 @@ class Utils {
                     if (prop[0] === 'HZN_CUSTOM_NODE_ID' && (!prop[1] || prop[1].length == 0)) {
                         prop[1] = os_1.default.hostname();
                     }
-                    props[i] = { name: prop[0], default: prop[1], required: true };
+                    props[i] = { name: prop[0], default: prop[1], required: notRequired.indexOf(prop[0]) < 0 };
                 }
             }
         });
