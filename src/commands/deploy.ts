@@ -57,7 +57,7 @@ export const handler = (argv: Arguments<Options>): void => {
   const p = pattern || '';
   const configPath = config_path || utils.getHznConfig();
   const skipInitialize = ['uninstallHorizon'];
-  const justRun = ['removeOrg'];
+  const justRun = ['buildMMSImage', 'buildServiceImage', 'checkConfigState', 'createHznKey', 'dockerImageExists', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'unregisterAgent', 'updateHznInfo'];
   const promptForUpdate = ['setup', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent']
   console.log('$$$ ', action, env, configPath, n);
 
