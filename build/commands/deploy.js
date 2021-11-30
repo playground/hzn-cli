@@ -29,7 +29,7 @@ const builder = (yargs) => yargs
         'allInOneMMS, buildMMSImage, buildServiceImage, checkConfigState, createHznKey, dockerImageExists, getDeviceArch, ' +
         'listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishMMSObject, ' +
         'publishMMSPattern, publishMMSService, publishPatterrn, publishService, pullDockerImage, pushMMSImage, pushServiceImage, ' +
-        'registerAgent, setup, showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo'
+        'registerAgent, removeOrg, setup, showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo'
 });
 exports.builder = builder;
 const handler = (argv) => {
@@ -44,6 +44,7 @@ const handler = (argv) => {
     const p = pattern || '';
     const configPath = config_path || hzn_1.utils.getHznConfig();
     const skipInitialize = ['uninstallHorizon'];
+    const justRun = ['removeOrg'];
     const promptForUpdate = ['setup', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent'];
     console.log('$$$ ', action, env, configPath, n);
     const proceed = () => {
@@ -61,7 +62,7 @@ const handler = (argv) => {
                     });
                 },
                 error: (err) => {
-                    console.log('something went wrong. ', err);
+                    console.log(err);
                     process.exit(0);
                 }
             });
@@ -73,8 +74,25 @@ const handler = (argv) => {
     hzn_1.utils.checkDefaultConfig()
         .subscribe({
         complete: () => {
-            if (promptForUpdate.indexOf(action) < 0 || skip_config_update) {
-                proceed();
+            if (justRun.indexOf(action) >= 0) {
+                hzn_1.utils.removeOrg(env)
+                    .subscribe({
+                    complete: () => process.exit(0),
+                    error: (err) => {
+                        console.log(err);
+                        process.exit(0);
+                    }
+                });
+            }
+            else if (promptForUpdate.indexOf(action) < 0 || skip_config_update) {
+                hzn_1.utils.orgCheck(env)
+                    .subscribe({
+                    complete: () => proceed(),
+                    error: (err) => {
+                        console.log(err);
+                        process.exit(0);
+                    }
+                });
             }
             else {
                 hzn_1.utils.updateEnvFiles(env)
@@ -83,13 +101,14 @@ const handler = (argv) => {
                         proceed();
                     }, error: (err) => {
                         console.log(err);
+                        process.exit(0);
                     }
                 });
             }
         }, error: (err) => {
             if (skipInitialize.indexOf(action) < 0) {
                 console.log(err, 'Initialising...');
-                hzn_1.utils.setupEnvFiles()
+                hzn_1.utils.setupEnvFiles(env)
                     .subscribe({
                     complete: () => {
                         proceed();
