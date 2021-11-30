@@ -57,8 +57,8 @@ export const handler = (argv: Arguments<Options>): void => {
   const p = pattern || '';
   const configPath = config_path || utils.getHznConfig();
   const skipInitialize = ['uninstallHorizon'];
-  const justRun = ['buildMMSImage', 'buildServiceImage', 'checkConfigState', 'createHznKey', 'dockerImageExists', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'unregisterAgent', 'updateHznInfo'];
-  const promptForUpdate = ['setup', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent']
+  const justRun = ['buildMMSImage', 'buildServiceImage', 'checkConfigState', 'createHznKey', 'dockerImageExists', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'];
+  const promptForUpdate = ['setup', 'test', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent']
   console.log('$$$ ', action, env, configPath, n);
 
   const proceed = () => {
@@ -90,7 +90,8 @@ export const handler = (argv: Arguments<Options>): void => {
   .subscribe({
     complete: () => {
       if(justRun.indexOf(action) >= 0) {
-        utils.removeOrg(env)
+        const hzn = new Hzn(env, configPath, n, objType, objId, obj, p);
+        hzn[action](env)
         .subscribe({
           complete: () => process.exit(0),
           error: (err) => {

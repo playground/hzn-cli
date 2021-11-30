@@ -44,8 +44,8 @@ const handler = (argv) => {
     const p = pattern || '';
     const configPath = config_path || hzn_1.utils.getHznConfig();
     const skipInitialize = ['uninstallHorizon'];
-    const justRun = ['removeOrg'];
-    const promptForUpdate = ['setup', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent'];
+    const justRun = ['buildMMSImage', 'buildServiceImage', 'checkConfigState', 'createHznKey', 'dockerImageExists', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'];
+    const promptForUpdate = ['setup', 'test', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent'];
     console.log('$$$ ', action, env, configPath, n);
     const proceed = () => {
         if ((0, fs_1.existsSync)(`${hzn_1.utils.getHznConfig()}/.env-hzn.json`)) {
@@ -75,7 +75,8 @@ const handler = (argv) => {
         .subscribe({
         complete: () => {
             if (justRun.indexOf(action) >= 0) {
-                hzn_1.utils.removeOrg(env)
+                const hzn = new hzn_1.Hzn(env, configPath, n, objType, objId, obj, p);
+                hzn[action](env)
                     .subscribe({
                     complete: () => process.exit(0),
                     error: (err) => {
