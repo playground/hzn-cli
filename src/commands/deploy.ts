@@ -56,8 +56,8 @@ export const handler = (argv: Arguments<Options>): void => {
   const obj = object || '';
   const p = pattern || '';
   const configPath = config_path || utils.getHznConfig();
-  const skipInitialize = ['uninstallHorizon'];
-  const justRun = ['buildMMSImage', 'buildServiceImage', 'checkConfigState', 'createHznKey', 'dockerImageExists', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'];
+  const skipInitialize = ['buildMMSImage', 'buildServiceImage', 'dockerImageExists', 'uninstallHorizon'];
+  const justRun = ['checkConfigState', 'createHznKey', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'];
   const promptForUpdate = ['setup', 'test', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent']
   console.log('$$$ ', action, env, configPath, n);
 
@@ -89,18 +89,19 @@ export const handler = (argv: Arguments<Options>): void => {
   utils.checkDefaultConfig()
   .subscribe({
     complete: () => {
-      if(justRun.indexOf(action) >= 0) {
-        const hzn = new Hzn(env, configPath, n, objType, objId, obj, p);
-        hzn[action](env)
+      if(skipInitialize.indexOf(action) >= 0) {
+        proceed();
+      } else if(justRun.indexOf(action) >= 0) {
+        utils.orgCheck(env, true)
         .subscribe({
-          complete: () => process.exit(0),
+          complete: () => proceed(),
           error: (err) => {
-            console.log(err);
-            process.exit(0);
+            console.log(err);      
+            process.exit(0);  
           }
         })
       } else if(promptForUpdate.indexOf(action) < 0 || skip_config_update) {
-        utils.orgCheck(env)
+        utils.orgCheck(env, skip_config_update === 'true')
         .subscribe({
           complete: () => proceed(),
           error: (err) => {

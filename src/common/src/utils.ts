@@ -196,15 +196,19 @@ export class Utils {
       }
     })    
   }
-  orgCheck(org: string) {
+  orgCheck(org: string, skipUpdate = false) {
     return new Observable((observer) => {
       let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
       if(hznJson[org]) {
-        this.updateOrgConfig(hznJson, org)
-        .subscribe({
-          complete: () => observer.complete(),
-          error: (err) => observer.error(err) 
-        })
+        if(!skipUpdate) {
+          this.updateOrgConfig(hznJson, org)
+          .subscribe({
+            complete: () => observer.complete(),
+            error: (err) => observer.error(err) 
+          })
+        } else {
+          observer.complete()
+        }
       } else {
         console.log(`\n${org} is not setup in your envvironment, would you like to set it up: Y/n?`)
         prompt.get({name: 'answer', required: true}, (err: any, question: any) => {

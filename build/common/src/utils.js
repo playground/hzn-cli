@@ -207,15 +207,20 @@ class Utils {
             }
         });
     }
-    orgCheck(org) {
+    orgCheck(org, skipUpdate = false) {
         return new rxjs_1.Observable((observer) => {
             let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
             if (hznJson[org]) {
-                this.updateOrgConfig(hznJson, org)
-                    .subscribe({
-                    complete: () => observer.complete(),
-                    error: (err) => observer.error(err)
-                });
+                if (!skipUpdate) {
+                    this.updateOrgConfig(hznJson, org)
+                        .subscribe({
+                        complete: () => observer.complete(),
+                        error: (err) => observer.error(err)
+                    });
+                }
+                else {
+                    observer.complete();
+                }
             }
             else {
                 console.log(`\n${org} is not setup in your envvironment, would you like to set it up: Y/n?`);
