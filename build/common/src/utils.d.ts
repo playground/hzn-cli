@@ -20,7 +20,10 @@ export declare class Utils {
     uninstallHorizon(): Observable<unknown>;
     copyFile(arg: string): Promise<unknown>;
     updateEnvFiles(org: string): Observable<unknown>;
-    setupEnvFiles(): Observable<unknown>;
+    updateOrgConfig(hznJson: any, org: string, newOrg?: boolean): Observable<unknown>;
+    removeOrg(org: string): Observable<unknown>;
+    orgCheck(org: string, skipUpdate?: boolean): Observable<unknown>;
+    setupEnvFiles(org: string): Observable<unknown>;
     updateEnvHzn(org: string): Observable<unknown>;
     checkDefaultConfig(): Observable<unknown>;
     getHznInfo(): string[];

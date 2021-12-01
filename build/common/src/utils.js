@@ -111,7 +111,8 @@ class Utils {
                             this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local`).then(() => {
                                 this.updateEnvHzn(org)
                                     .subscribe({
-                                    complete: () => observer.complete()
+                                    complete: () => observer.complete(),
+                                    error: (err) => observer.error(err)
                                 });
                             });
                         });
@@ -120,48 +121,16 @@ class Utils {
                 else {
                     this.updateEnvHzn(org)
                         .subscribe({
-                        complete: () => observer.complete()
+                        complete: () => observer.complete(),
+                        error: (err) => observer.error(err)
                     });
                 }
             });
         });
     }
-    setupEnvFiles() {
-        return new rxjs_1.Observable((observer) => {
-            // console.log(process.cwd(), __dirname, __filename)
-            let props = this.getPropsFromFile(`${__dirname}/env-local`);
-            console.log('\nKey in new value or press Enter to keep current value: ');
-            prompt_1.default.get(props, (err, result) => {
-                console.log(result);
-                console.log(`\nWould you like to save config files: Y/n?`);
-                prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
-                    if (question.answer === 'Y') {
-                        this.copyFile(`sudo cp -rf ${__dirname}/config /etc/default`).then(() => {
-                            let content = '';
-                            for (const [key, value] of Object.entries(result)) {
-                                content += `${key}=${value}\n`;
-                            }
-                            (0, fs_1.writeFileSync)('.env-local', content);
-                            this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local`).then(() => {
-                                this.copyFile(`sudo cp ${__dirname}/env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
-                                    observer.next();
-                                    observer.complete();
-                                });
-                            });
-                        });
-                    }
-                    else {
-                        console.log(`config files not saved`);
-                        observer.error();
-                    }
-                });
-            });
-        });
-    }
-    updateEnvHzn(org) {
+    updateOrgConfig(hznJson, org, newOrg = false) {
         return new rxjs_1.Observable((observer) => {
             let props = [];
-            let hznJson = jsonfile_1.default.readFileSync(`${this.hznConfig}/.env-hzn.json`);
             let envVars = hznJson[org]['envVars'];
             let i = 0;
             for (const [key, value] of Object.entries(envVars)) {
@@ -188,16 +157,130 @@ class Utils {
                                 });
                             }
                             else {
-                                console.log(`config files not updated for ${org}`);
-                                observer.complete();
+                                observer.error(`config files not updated for ${org}`);
                             }
                         });
                     });
                 }
                 else {
-                    console.log(`config files not updated for ${org}`);
+                    if (newOrg) {
+                        console.log(`\nWould you like to save config for ${org}: Y/n?`);
+                        prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                            if (question.answer === 'Y') {
+                                jsonfile_1.default.writeFileSync('.env-hzn.json', hznJson, { spaces: 2 });
+                                this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
+                                    console.log(`config files updated for ${org}`);
+                                    observer.complete();
+                                });
+                            }
+                            else {
+                                observer.error(`config files not updated for ${org}`);
+                            }
+                        });
+                    }
+                    else {
+                        observer.error(`config files not updated for ${org}`);
+                    }
+                }
+            });
+        });
+    }
+    removeOrg(org) {
+        return new rxjs_1.Observable((observer) => {
+            let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
+            if (hznJson[org]) {
+                console.log(hznJson[org]);
+                console.log(`\nAre you sure you want to delete ${org}: Y/n?`);
+                prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                    if (question.answer === 'Y') {
+                        delete (hznJson[org]);
+                        jsonfile_1.default.writeFileSync('.env-hzn.json', hznJson, { spaces: 2 });
+                        this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
+                            console.log(`config files updated, ${org} has been removed`);
+                            observer.complete();
+                        });
+                    }
+                });
+            }
+            else {
+                observer.error(`${org} doesn't exist in your environment config.`);
+            }
+        });
+    }
+    orgCheck(org, skipUpdate = false) {
+        return new rxjs_1.Observable((observer) => {
+            let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
+            if (hznJson[org]) {
+                if (!skipUpdate) {
+                    this.updateOrgConfig(hznJson, org)
+                        .subscribe({
+                        complete: () => observer.complete(),
+                        error: (err) => observer.error(err)
+                    });
+                }
+                else {
                     observer.complete();
                 }
+            }
+            else {
+                console.log(`\n${org} is not setup in your envvironment, would you like to set it up: Y/n?`);
+                prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                    if (question.answer === 'Y') {
+                        hznJson[org] = Object.assign({}, hznJson.biz);
+                        this.updateOrgConfig(hznJson, org, true)
+                            .subscribe({
+                            complete: () => observer.complete(),
+                            error: (err) => observer.error(err)
+                        });
+                    }
+                    else {
+                        observer.error(`config files not updated for ${org}`);
+                    }
+                });
+            }
+        });
+    }
+    setupEnvFiles(org) {
+        return new rxjs_1.Observable((observer) => {
+            // console.log(process.cwd(), __dirname, __filename)
+            let props = this.getPropsFromFile(`${__dirname}/env-local`);
+            console.log('\nKey in new value or press Enter to keep current value: ');
+            prompt_1.default.get(props, (err, result) => {
+                console.log(result);
+                console.log(`\nWould you like to save config files: Y/n?`);
+                prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                    if (question.answer === 'Y') {
+                        this.copyFile(`sudo cp -rf ${__dirname}/config /etc/default`).then(() => {
+                            let content = '';
+                            for (const [key, value] of Object.entries(result)) {
+                                content += `${key}=${value}\n`;
+                            }
+                            (0, fs_1.writeFileSync)('.env-local', content);
+                            this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local`).then(() => {
+                                this.copyFile(`sudo cp ${__dirname}/env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
+                                    this.orgCheck(org)
+                                        .subscribe({
+                                        complete: () => observer.complete(),
+                                        error: () => observer.complete()
+                                    });
+                                });
+                            });
+                        });
+                    }
+                    else {
+                        console.log(`config files not saved`);
+                        observer.error();
+                    }
+                });
+            });
+        });
+    }
+    updateEnvHzn(org) {
+        return new rxjs_1.Observable((observer) => {
+            this.orgCheck(org)
+                .subscribe({
+                complete: () => observer.complete(),
+                error: (err) => observer.complete()
             });
         });
     }

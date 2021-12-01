@@ -38,7 +38,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
             'allInOneMMS, buildMMSImage, buildServiceImage, checkConfigState, createHznKey, dockerImageExists, getDeviceArch, ' +
             'listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishMMSObject, ' +
             'publishMMSPattern, publishMMSService, publishPatterrn, publishService, pullDockerImage, pushMMSImage, pushServiceImage, ' +
-		        'registerAgent, setup, showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo'
+		        'registerAgent, removeOrg, setup, showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo'
     });
 
 export const handler = (argv: Arguments<Options>): void => {
@@ -56,8 +56,9 @@ export const handler = (argv: Arguments<Options>): void => {
   const obj = object || '';
   const p = pattern || '';
   const configPath = config_path || utils.getHznConfig();
-  const skipInitialize = ['uninstallHorizon'];
-  const promptForUpdate = ['setup', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent']
+  const skipInitialize = ['buildMMSImage', 'buildServiceImage', 'dockerImageExists', 'uninstallHorizon'];
+  const justRun = ['checkConfigState', 'createHznKey', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'];
+  const promptForUpdate = ['setup', 'test', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent']
   console.log('$$$ ', action, env, configPath, n);
 
   const proceed = () => {
@@ -76,7 +77,7 @@ export const handler = (argv: Arguments<Options>): void => {
           })
         },
         error: (err) => {
-          console.log('something went wrong. ', err);      
+          console.log(err);      
           process.exit(0);
         }
       })  
@@ -88,8 +89,26 @@ export const handler = (argv: Arguments<Options>): void => {
   utils.checkDefaultConfig()
   .subscribe({
     complete: () => {
-      if(promptForUpdate.indexOf(action) < 0 || skip_config_update) {
+      if(skipInitialize.indexOf(action) >= 0) {
         proceed();
+      } else if(justRun.indexOf(action) >= 0) {
+        utils.orgCheck(env, true)
+        .subscribe({
+          complete: () => proceed(),
+          error: (err) => {
+            console.log(err);      
+            process.exit(0);  
+          }
+        })
+      } else if(promptForUpdate.indexOf(action) < 0 || skip_config_update) {
+        utils.orgCheck(env, skip_config_update === 'true')
+        .subscribe({
+          complete: () => proceed(),
+          error: (err) => {
+            console.log(err);      
+            process.exit(0);  
+          }
+        })
       } else {
         utils.updateEnvFiles(env)
         .subscribe({
@@ -97,13 +116,14 @@ export const handler = (argv: Arguments<Options>): void => {
             proceed()
           }, error: (err) => {
             console.log(err)
+            process.exit(0);  
           }  
         })  
       }
     }, error: (err) => {
       if(skipInitialize.indexOf(action) < 0) {
         console.log(err, 'Initialising...')
-        utils.setupEnvFiles()
+        utils.setupEnvFiles(env)
         .subscribe({
           complete: () => {
             proceed();
