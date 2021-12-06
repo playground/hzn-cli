@@ -59,8 +59,7 @@ export const handler = (argv: Arguments<Options>): void => {
   const skipInitialize = ['buildMMSImage', 'buildServiceImage', 'dockerImageExists', 'uninstallHorizon'];
   const justRun = ['checkConfigState', 'createHznKey', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'];
   const promptForUpdate = ['setup', 'test', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent']
-  console.log('$$$ ', action, env, configPath, n);
-
+  
   const proceed = () => {
     if(existsSync(`${utils.getHznConfig()}/.env-hzn.json`)) {
       const hzn = new Hzn(env, configPath, n, objType, objId, obj, p);
@@ -86,59 +85,64 @@ export const handler = (argv: Arguments<Options>): void => {
     }  
   }
 
-  utils.checkDefaultConfig()
-  .subscribe({
-    complete: () => {
-      if(skipInitialize.indexOf(action) >= 0) {
-        proceed();
-      } else if(justRun.indexOf(action) >= 0) {
-        utils.orgCheck(env, true)
-        .subscribe({
-          complete: () => proceed(),
-          error: (err) => {
-            console.log(err);      
-            process.exit(0);  
-          }
-        })
-      } else if(promptForUpdate.indexOf(action) < 0 || skip_config_update) {
-        utils.orgCheck(env, skip_config_update === 'true')
-        .subscribe({
-          complete: () => proceed(),
-          error: (err) => {
-            console.log(err);      
-            process.exit(0);  
-          }
-        })
-      } else {
-        utils.updateEnvFiles(env)
-        .subscribe({
-          complete: () => {
-            proceed()
-          }, error: (err) => {
-            console.log(err)
-            process.exit(0);  
-          }  
-        })  
+  if(action) {
+    console.log('$$$ ', action, env);
+    utils.checkDefaultConfig()
+    .subscribe({
+      complete: () => {
+        if(skipInitialize.indexOf(action) >= 0) {
+          proceed();
+        } else if(justRun.indexOf(action) >= 0) {
+          utils.orgCheck(env, true)
+          .subscribe({
+            complete: () => proceed(),
+            error: (err) => {
+              console.log(err);      
+              process.exit(0);  
+            }
+          })
+        } else if(promptForUpdate.indexOf(action) < 0 || skip_config_update) {
+          utils.orgCheck(env, skip_config_update === 'true')
+          .subscribe({
+            complete: () => proceed(),
+            error: (err) => {
+              console.log(err);      
+              process.exit(0);  
+            }
+          })
+        } else {
+          utils.updateEnvFiles(env)
+          .subscribe({
+            complete: () => {
+              proceed()
+            }, error: (err) => {
+              console.log(err)
+              process.exit(0);  
+            }  
+          })  
+        }
+      }, error: (err) => {
+        if(skipInitialize.indexOf(action) < 0) {
+          console.log(err, 'Initialising...')
+          utils.setupEnvFiles(env)
+          .subscribe({
+            complete: () => {
+              proceed();
+            }, error: () => process.exit(0)
+          })
+        } else {
+          utils.uninstallHorizon()
+          .subscribe({
+            complete:() => {
+              console.log('process completed.');
+              process.exit(0)          
+            }
+          })
+        }
       }
-    }, error: (err) => {
-      if(skipInitialize.indexOf(action) < 0) {
-        console.log(err, 'Initialising...')
-        utils.setupEnvFiles(env)
-        .subscribe({
-          complete: () => {
-            proceed();
-          }, error: () => process.exit(0)
-        })
-      } else {
-        utils.uninstallHorizon()
-        .subscribe({
-          complete:() => {
-            console.log('process completed.');
-            process.exit(0)          
-          }
-        })
-      }
-    }
-  })
+    })
+  } else {
+    console.log('specify an action you would like to perform, ex: "oh deploy test" or "oh deploy -h" for help')
+  } 
 };
 
