@@ -230,6 +230,14 @@ export class Utils {
     return new Observable((observer) => {
       // console.log(process.cwd(), __dirname, __filename)
       let props = this.getPropsFromFile(`${__dirname}/env-local`);
+      Object.values(props).some((el) => {
+        if(el.name == 'DEFAULT_ORG') {
+          el.default = org;
+          return true;
+        } else {
+          return false;
+        }
+      })
       console.log('\nKey in new value or press Enter to keep current value: ')
       prompt.get(props, (err: any, result: any) => {
         console.log(result)
