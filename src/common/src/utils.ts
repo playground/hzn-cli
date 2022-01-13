@@ -221,7 +221,8 @@ export class Utils {
               error: (err) => observer.error(err) 
             })
           } else {
-            observer.error(`config files not updated for ${org}`);
+            console.log(`config files not updated for ${org}`);
+            observer.complete()
           }
         })      
       }
