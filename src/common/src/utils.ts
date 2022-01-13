@@ -150,7 +150,8 @@ export class Utils {
                   observer.complete();
                 })
               } else {
-                observer.error(`config files not updated for ${org}`)
+                console.log(`config files not updated for ${org}`)
+                observer.complete();
               }
             })
           })        
@@ -304,7 +305,7 @@ export class Utils {
         let data = readFileSync(file).toString().split('\n');
         Object.values(data).some((el) => {
           let ar = el.split('=');
-          if(ar && ar.length > 0 && ar[0] == 'prop') {
+          if(ar && ar.length > 0 && ar[0] == prop) {
             value = ar[1];
             return true;  
           } else {
