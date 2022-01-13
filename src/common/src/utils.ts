@@ -170,7 +170,8 @@ export class Utils {
               }
             })    
           } else {
-            observer.error(`config files not updated for ${org}`)
+            console.log(`config files not updated for ${org}`)
+            observer.complete();
           }
         }  
       })  
