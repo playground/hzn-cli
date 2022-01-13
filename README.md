@@ -94,13 +94,11 @@ Publish MMS Object file
 ## Complete guide to set up an agent on a brand new device running on Ubuntu 20.04
 ```
   - sudo apt-get update && sudo apt-get upgrade
-  - node -v, node not found, run "apt install nodejs -y"
-  - npm -v, npm not found, run "apt install npm -y"
-  - node -v, return v10.x, let's get the latest stable version
-  - npm install -g n && n stable
+  - sudo apt install npm -y"
+  - sudo npm install -g n && sudo n stable
   - open a new shell or run PATH="$PATH"
   - node -v should return the latest stable version, currently at v16.13.1
-  - run "npm i -g hzn-cli"
+  - sudo npm i -g hzn-cli
   - oh --version should return v0.1.8
   - run "oh deploy setup"
     - No config files. Initialising...

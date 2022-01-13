@@ -49,7 +49,7 @@ export const handler = (argv: Arguments<Options>): void => {
     )
   );
   const { action, org, config_path, name, object_type, object_id, object, pattern, skip_config_update } = argv;
-  const env = org || 'biz';
+  let env = org || '';
   const n = name || '';
   const objType = object_type || '';
   const objId = object_id || '';
@@ -60,6 +60,10 @@ export const handler = (argv: Arguments<Options>): void => {
   const justRun = ['checkConfigState', 'createHznKey', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'];
   const promptForUpdate = ['setup', 'test', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent']
   
+  if(env.length == 0) {
+    let value = utils.getPropValueFromFile(`${utils.getHznConfig()}/.env-local`, 'DEFAULT_ORG')
+    env = value.length > 0 ? value : 'biz'
+  }
   const proceed = () => {
     if(existsSync(`${utils.getHznConfig()}/.env-hzn.json`)) {
       const hzn = new Hzn(env, configPath, n, objType, objId, obj, p);
