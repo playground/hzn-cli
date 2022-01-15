@@ -28,6 +28,7 @@ export declare class Utils {
     checkDefaultConfig(): Observable<unknown>;
     getHznInfo(): string[];
     showHznInfo(): Observable<unknown>;
+    getPropValueFromFile(file: string, prop: string): string;
     getPropsFromFile(file: string): any[];
     updateHznInfo(): Observable<unknown>;
     shell(arg: string, success?: string, error?: string, options?: {

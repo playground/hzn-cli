@@ -97,7 +97,7 @@ class Utils {
             console.log(props);
             console.log(`\nWould you like to change any of the above properties: Y/n?`);
             prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
-                if (question.answer === 'Y') {
+                if (question.answer.toUpperCase() === 'Y') {
                     console.log('\nKey in new value or press Enter to keep current value: ');
                     prompt_1.default.get(props, (err, result) => {
                         console.log(result);
@@ -140,13 +140,13 @@ class Utils {
             console.log(props);
             console.log(`\nWould you like to change any of the above properties for ${org}: Y/n?`);
             prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
-                if (question.answer === 'Y') {
+                if (question.answer.toUpperCase() === 'Y') {
                     console.log('\nKey in new value or press Enter to keep current value: ');
                     prompt_1.default.get(props, (err, result) => {
                         console.log(result);
                         console.log(`\nWould you like to save these changes: Y/n?`);
                         prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
-                            if (question.answer === 'Y') {
+                            if (question.answer.toUpperCase() === 'Y') {
                                 for (const [key, value] of Object.entries(result)) {
                                     envVars[key] = value;
                                 }
@@ -166,7 +166,7 @@ class Utils {
                     if (newOrg) {
                         console.log(`\nWould you like to save config for ${org}: Y/n?`);
                         prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
-                            if (question.answer === 'Y') {
+                            if (question.answer.toUpperCase() === 'Y') {
                                 jsonfile_1.default.writeFileSync('.env-hzn.json', hznJson, { spaces: 2 });
                                 this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
                                     console.log(`config files updated for ${org}`);
@@ -192,7 +192,7 @@ class Utils {
                 console.log(hznJson[org]);
                 console.log(`\nAre you sure you want to delete ${org}: Y/n?`);
                 prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
-                    if (question.answer === 'Y') {
+                    if (question.answer.toUpperCase() === 'Y') {
                         delete (hznJson[org]);
                         jsonfile_1.default.writeFileSync('.env-hzn.json', hznJson, { spaces: 2 });
                         this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
@@ -225,7 +225,7 @@ class Utils {
             else {
                 console.log(`\n${org} is not setup in your envvironment, would you like to set it up: Y/n?`);
                 prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
-                    if (question.answer === 'Y') {
+                    if (question.answer.toUpperCase() === 'Y') {
                         hznJson[org] = Object.assign({}, hznJson.biz);
                         this.updateOrgConfig(hznJson, org, true)
                             .subscribe({
@@ -244,12 +244,21 @@ class Utils {
         return new rxjs_1.Observable((observer) => {
             // console.log(process.cwd(), __dirname, __filename)
             let props = this.getPropsFromFile(`${__dirname}/env-local`);
+            Object.values(props).some((el) => {
+                if (el.name == 'DEFAULT_ORG') {
+                    el.default = org;
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            });
             console.log('\nKey in new value or press Enter to keep current value: ');
             prompt_1.default.get(props, (err, result) => {
                 console.log(result);
                 console.log(`\nWould you like to save config files: Y/n?`);
                 prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
-                    if (question.answer === 'Y') {
+                    if (question.answer.toUpperCase() === 'Y') {
                         this.copyFile(`sudo cp -rf ${__dirname}/config /etc/default`).then(() => {
                             let content = '';
                             for (const [key, value] of Object.entries(result)) {
@@ -305,20 +314,50 @@ class Utils {
             observer.complete();
         });
     }
+    getPropValueFromFile(file, prop) {
+        let value = '';
+        try {
+            if ((0, fs_1.existsSync)(file)) {
+                let data = (0, fs_1.readFileSync)(file).toString().split('\n');
+                Object.values(data).some((el) => {
+                    let ar = el.split('=');
+                    if (ar && ar.length > 0 && ar[0] == 'prop') {
+                        value = ar[1];
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                });
+            }
+        }
+        catch (e) {
+            console.log(e);
+        }
+        return value;
+    }
     getPropsFromFile(file) {
         let props = [];
-        let data = (0, fs_1.readFileSync)(file).toString().split('\n');
-        data.forEach((el, i) => {
-            if (el.length > 0) {
-                let prop = el.split('=');
-                if (prop && prop.length > 0) {
-                    if (prop[0] === 'HZN_CUSTOM_NODE_ID' && (!prop[1] || prop[1].length == 0)) {
-                        prop[1] = os_1.default.hostname();
+        try {
+            if ((0, fs_1.existsSync)(file)) {
+                let data = (0, fs_1.readFileSync)(file).toString().split('\n');
+                data.forEach((el, i) => {
+                    if (el.length > 0) {
+                        let prop = el.split('=');
+                        if (prop && prop.length > 0) {
+                            if (prop[0] === 'HZN_CUSTOM_NODE_ID' && (!prop[1] || prop[1].length == 0)) {
+                                prop[1] = os_1.default.hostname();
+                            }
+                            props[i] = { name: prop[0], default: prop[1], required: notRequired.indexOf(prop[0]) < 0 };
+                        }
                     }
-                    props[i] = { name: prop[0], default: prop[1], required: notRequired.indexOf(prop[0]) < 0 };
-                }
+                });
             }
-        });
+        }
+        catch (e) {
+            console.log(e);
+            props = [];
+        }
         return props;
     }
     updateHznInfo() {
@@ -329,7 +368,7 @@ class Utils {
                 console.log(result);
                 console.log('\nWould you like to update horizon: Y/n?');
                 prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
-                    if (question.answer === 'Y') {
+                    if (question.answer.toUpperCase() === 'Y') {
                         let content = '';
                         for (const [key, value] of Object.entries(result)) {
                             content += `${key}=${value}\n`;

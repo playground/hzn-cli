@@ -36,7 +36,7 @@ const handler = (argv) => {
     (0, clear_1.default)();
     console.log(chalk_1.default.greenBright(figlet_1.default.textSync('hzn-cli', { horizontalLayout: 'full' })));
     const { action, org, config_path, name, object_type, object_id, object, pattern, skip_config_update } = argv;
-    const env = org || 'biz';
+    let env = org || '';
     const n = name || '';
     const objType = object_type || '';
     const objId = object_id || '';
@@ -46,6 +46,10 @@ const handler = (argv) => {
     const skipInitialize = ['buildMMSImage', 'buildServiceImage', 'dockerImageExists', 'uninstallHorizon'];
     const justRun = ['checkConfigState', 'createHznKey', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'];
     const promptForUpdate = ['setup', 'test', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent'];
+    if (env.length == 0) {
+        let value = hzn_1.utils.getPropValueFromFile(`${hzn_1.utils.getHznConfig()}/.env-local`, 'DEFAULT_ORG');
+        env = value.length > 0 ? value : 'biz';
+    }
     const proceed = () => {
         if ((0, fs_1.existsSync)(`${hzn_1.utils.getHznConfig()}/.env-hzn.json`)) {
             const hzn = new hzn_1.Hzn(env, configPath, n, objType, objId, obj, p);

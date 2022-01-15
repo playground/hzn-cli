@@ -92,7 +92,7 @@ export class Utils {
       console.log(props)
       console.log(`\nWould you like to change any of the above properties: Y/n?`)
       prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
-        if(question.answer === 'Y') {
+        if(question.answer.toUpperCase() === 'Y') {
           console.log('\nKey in new value or press Enter to keep current value: ')
           prompt.get(props, (err: any, result: any) => {
             console.log(result)
@@ -134,13 +134,13 @@ export class Utils {
       console.log(props)
       console.log(`\nWould you like to change any of the above properties for ${org}: Y/n?`)
       prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
-        if(question.answer === 'Y') {
+        if(question.answer.toUpperCase() === 'Y') {
           console.log('\nKey in new value or press Enter to keep current value: ')
           prompt.get(props, (err: any, result: any) => {
             console.log(result)
             console.log(`\nWould you like to save these changes: Y/n?`)
             prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
-              if(question.answer === 'Y') {
+              if(question.answer.toUpperCase() === 'Y') {
                 for(const [key, value] of Object.entries(result)) {
                   envVars[key] = value;
                 }
@@ -150,7 +150,8 @@ export class Utils {
                   observer.complete();
                 })
               } else {
-                observer.error(`config files not updated for ${org}`)
+                console.log(`config files not updated for ${org}`)
+                observer.complete();
               }
             })
           })        
@@ -158,7 +159,7 @@ export class Utils {
           if(newOrg) {
             console.log(`\nWould you like to save config for ${org}: Y/n?`)
             prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
-              if(question.answer === 'Y') {
+              if(question.answer.toUpperCase() === 'Y') {
                 jsonfile.writeFileSync('.env-hzn.json', hznJson, {spaces: 2});
                 this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
                   console.log(`config files updated for ${org}`)
@@ -169,7 +170,8 @@ export class Utils {
               }
             })    
           } else {
-            observer.error(`config files not updated for ${org}`)
+            console.log(`config files not updated for ${org}`)
+            observer.complete();
           }
         }  
       })  
@@ -182,7 +184,7 @@ export class Utils {
         console.log(hznJson[org])
         console.log(`\nAre you sure you want to delete ${org}: Y/n?`)
         prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
-          if(question.answer === 'Y') {
+          if(question.answer.toUpperCase() === 'Y') {
             delete(hznJson[org])
             jsonfile.writeFileSync('.env-hzn.json', hznJson, {spaces: 2});
             this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
@@ -212,7 +214,7 @@ export class Utils {
       } else {
         console.log(`\n${org} is not setup in your envvironment, would you like to set it up: Y/n?`)
         prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
-          if(question.answer === 'Y') {
+          if(question.answer.toUpperCase() === 'Y') {
             hznJson[org] = Object.assign({}, hznJson.biz);
             this.updateOrgConfig(hznJson, org, true)
             .subscribe({
@@ -220,7 +222,8 @@ export class Utils {
               error: (err) => observer.error(err) 
             })
           } else {
-            observer.error(`config files not updated for ${org}`);
+            console.log(`config files not updated for ${org}`);
+            observer.complete()
           }
         })      
       }
@@ -230,12 +233,20 @@ export class Utils {
     return new Observable((observer) => {
       // console.log(process.cwd(), __dirname, __filename)
       let props = this.getPropsFromFile(`${__dirname}/env-local`);
+      Object.values(props).some((el) => {
+        if(el.name == 'DEFAULT_ORG') {
+          el.default = org;
+          return true;
+        } else {
+          return false;
+        }
+      })
       console.log('\nKey in new value or press Enter to keep current value: ')
       prompt.get(props, (err: any, result: any) => {
         console.log(result)
         console.log(`\nWould you like to save config files: Y/n?`)
         prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
-          if(question.answer === 'Y') {
+          if(question.answer.toUpperCase() === 'Y') {
             this.copyFile(`sudo cp -rf ${__dirname}/config /etc/default`).then(() => {
               let content = '';
               for(const [key, value] of Object.entries(result)) {
@@ -289,20 +300,47 @@ export class Utils {
       observer.complete();
     })  
   }
+  getPropValueFromFile(file: string, prop: string) {
+    let value = '';
+    try {
+      if(existsSync(file)) {
+        let data = readFileSync(file).toString().split('\n');
+        Object.values(data).some((el) => {
+          let ar = el.split('=');
+          if(ar && ar.length > 0 && ar[0] == prop) {
+            value = ar[1];
+            return true;  
+          } else {
+            return false;
+          }
+        }) 
+      }
+    } catch(e) {
+      console.log(e)
+    }
+    return value;
+  }    
   getPropsFromFile(file: string) {
     let props: any[] = [];
-    let data = readFileSync(file).toString().split('\n');
-    data.forEach((el, i) => {
-      if(el.length > 0) {
-        let prop = el.split('=');
-        if(prop && prop.length > 0) {
-          if(prop[0] === 'HZN_CUSTOM_NODE_ID' && (!prop[1] || prop[1].length == 0)) {
-            prop[1] = os.hostname();
+    try {
+      if(existsSync(file)) {
+        let data = readFileSync(file).toString().split('\n');
+        data.forEach((el, i) => {
+          if(el.length > 0) {
+            let prop = el.split('=');
+            if(prop && prop.length > 0) {
+              if(prop[0] === 'HZN_CUSTOM_NODE_ID' && (!prop[1] || prop[1].length == 0)) {
+                prop[1] = os.hostname();
+              }
+              props[i] = {name: prop[0], default: prop[1], required: notRequired.indexOf(prop[0]) < 0};
+            }  
           }
-          props[i] = {name: prop[0], default: prop[1], required: notRequired.indexOf(prop[0]) < 0};
-        }  
-      }
-    });
+        });  
+      }  
+    } catch(e) {
+      console.log(e)
+      props = [];
+    }
     return props;
   }
   updateHznInfo() {
@@ -314,7 +352,7 @@ export class Utils {
 
         console.log('\nWould you like to update horizon: Y/n?')
         prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
-          if(question.answer === 'Y') {
+          if(question.answer.toUpperCase() === 'Y') {
             let content = '';
             for(const [key, value] of Object.entries(result)) {
               content += `${key}=${value}\n`; 
