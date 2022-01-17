@@ -3,6 +3,7 @@ const cp = require('child_process'),
 exec = cp.exec;
 import { readFileSync, writeFileSync, copyFileSync , existsSync, exists } from 'fs';
 import os from 'os';
+const ifs: any = os.networkInterfaces();
 import prompt from 'prompt';
 import jsonfile from 'jsonfile';
 
@@ -58,6 +59,12 @@ export class Utils {
   checkOS() {
     return this.shell(`cat /etc/os-release`);  
   }
+  getIpAddress() {
+    return Object.keys(ifs)
+    .map(x => [x, ifs[x].filter(x => x.family === 'IPv4')[0]])
+    .filter(x => x[1])
+    .map(x => x[1].address);
+  }
   aptUpdate() {
     // TODO, if failed run sudo apt-get -y --fix-missing full-upgrade
     // cat info.cfg
@@ -93,7 +100,7 @@ export class Utils {
       console.log(`\nWould you like to change any of the above properties: Y/n?`)
       prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
         if(question.answer.toUpperCase() === 'Y') {
-          console.log('\nKey in new value or press Enter to keep current value: ')
+          console.log('\nKey in new value or (leave blank) press Enter to keep current value: ')
           prompt.get(props, (err: any, result: any) => {
             console.log(result)
             console.log(`\nWould you like to update config files: Y/n?`)
@@ -127,15 +134,21 @@ export class Utils {
       let props: any[] = [];
       let envVars = hznJson[org]['envVars'];
       let i = 0;
+      let pkg = jsonfile.readFileSync('./package.json');
+
       for(const [key, value] of Object.entries(envVars)) {
-        props[i] = {name: key, default: value, required: notRequired.indexOf(key) < 0};
+        if(pkg && pkg.version && (key == 'SERVICE_VERSION' || key == 'MMS_SERVICE_VERSION')) {
+          props[i] = {name: key, default: value, package: pkg.version, required: notRequired.indexOf(key) < 0};
+        } else {
+          props[i] = {name: key, default: value, required: notRequired.indexOf(key) < 0};
+        }
         i++;
       }
       console.log(props)
       console.log(`\nWould you like to change any of the above properties for ${org}: Y/n?`)
       prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
         if(question.answer.toUpperCase() === 'Y') {
-          console.log('\nKey in new value or press Enter to keep current value: ')
+          console.log('\nKey in new value or (leave blank) press Enter to keep current value: ')
           prompt.get(props, (err: any, result: any) => {
             console.log(result)
             console.log(`\nWould you like to save these changes: Y/n?`)
@@ -241,7 +254,7 @@ export class Utils {
           return false;
         }
       })
-      console.log('\nKey in new value or press Enter to keep current value: ')
+      console.log('\nKey in new value or (leave blank) press Enter to keep current value: ')
       prompt.get(props, (err: any, result: any) => {
         console.log(result)
         console.log(`\nWould you like to save config files: Y/n?`)
@@ -346,7 +359,7 @@ export class Utils {
   updateHznInfo() {
     return new Observable((observer) => {
       let props = this.getPropsFromFile('/etc/default/horizon');
-      console.log('\nKey in new value or press Enter to keep current value: ')
+      console.log('\nKey in new value or (leave blank) press Enter to keep current value: ')
       prompt.get(props, (err: any, result: any) => {
         console.log(result)
 

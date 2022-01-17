@@ -26,8 +26,8 @@ const builder = (yargs) => yargs
     type: 'string',
     demandOption: true,
     desc: 'Available actions: ' +
-        'allInOneMMS, buildMMSImage, buildServiceImage, checkConfigState, createHznKey, dockerImageExists, getDeviceArch, ' +
-        'listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishMMSObject, ' +
+        'allInOneMMS, buildAndPublish, buildMMSImage, buildServiceImage, checkConfigState, createHznKey, dockerImageExists, getDeviceArch, ' +
+        'getIpAddress, listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishMMSObject, ' +
         'publishMMSPattern, publishMMSService, publishPatterrn, publishService, pullDockerImage, pushMMSImage, pushServiceImage, ' +
         'registerAgent, removeOrg, setup, showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo'
 });
@@ -45,7 +45,7 @@ const handler = (argv) => {
     const configPath = config_path || hzn_1.utils.getHznConfig();
     const skipInitialize = ['buildMMSImage', 'buildServiceImage', 'dockerImageExists', 'uninstallHorizon'];
     const justRun = ['checkConfigState', 'createHznKey', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'];
-    const promptForUpdate = ['setup', 'test', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent'];
+    const promptForUpdate = ['setup', 'test', 'buildAndPublish', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent'];
     if (env.length == 0) {
         let value = hzn_1.utils.getPropValueFromFile(`${hzn_1.utils.getHznConfig()}/.env-local`, 'DEFAULT_ORG');
         env = value.length > 0 ? value : 'biz';

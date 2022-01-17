@@ -14,6 +14,7 @@ export declare class Utils {
     listNodePattern(): Observable<unknown>;
     getDeviceArch(): Observable<unknown>;
     checkOS(): Observable<unknown>;
+    getIpAddress(): any[];
     aptUpdate(): Observable<unknown>;
     installPrereq(): Observable<unknown>;
     installHznCli(anax: string, id: null): Observable<unknown>;
