@@ -56,10 +56,11 @@ export const handler = (argv: Arguments<Options>): void => {
   const obj = object || '';
   const p = pattern || '';
   const configPath = config_path || utils.getHznConfig();
-  const skipInitialize = ['buildMMSImage', 'buildServiceImage', 'dockerImageExists', 'setupManagementHub', 'uninstallHorizon'];
+  const skipInitialize = ['buildMMSImage', 'buildServiceImage', 'dockerImageExists', 'uninstallHorizon'];
   const justRun = ['checkConfigState', 'createHznKey', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'];
   const promptForUpdate = ['setup', 'test', 'buildAndPublish', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent']
-  
+  const runDirectly = ['setupManagementHub'];
+
   if(env.length == 0) {
     let value = utils.getPropValueFromFile(`${utils.getHznConfig()}/.env-local`, 'DEFAULT_ORG')
     env = value.length > 0 ? value : 'biz'
@@ -94,7 +95,16 @@ export const handler = (argv: Arguments<Options>): void => {
     utils.checkDefaultConfig()
     .subscribe({
       complete: () => {
-        if(skipInitialize.indexOf(action) >= 0) {
+        if(runDirectly.indexOf(action) >= 0) {
+          utils.setupManagementHub()
+          .subscribe({
+            complete: () => proceed(),
+            error: (err) => {
+              console.log(err);      
+              process.exit(0);  
+            }
+          })
+        } else if(skipInitialize.indexOf(action) >= 0) {
           proceed();
         } else if(justRun.indexOf(action) >= 0) {
           utils.orgCheck(env, true)
