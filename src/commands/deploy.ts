@@ -56,10 +56,10 @@ export const handler = (argv: Arguments<Options>): void => {
   const obj = object || '';
   const p = pattern || '';
   const configPath = config_path || utils.getHznConfig();
-  const skipInitialize = ['buildMMSImage', 'buildServiceImage', 'dockerImageExists', 'uninstallHorizon'];
+  const skipInitialize = ['buildMMSImage', 'buildServiceImage', 'dockerImageExists'];
   const justRun = ['checkConfigState', 'createHznKey', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'];
   const promptForUpdate = ['setup', 'test', 'buildAndPublish', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent']
-  const runDirectly = ['setupManagementHub'];
+  const runDirectly = ['setupManagementHub', 'uninstallHorizon'];
 
   if(env.length == 0) {
     let value = utils.getPropValueFromFile(`${utils.getHznConfig()}/.env-local`, 'DEFAULT_ORG')
@@ -96,7 +96,7 @@ export const handler = (argv: Arguments<Options>): void => {
     .subscribe({
       complete: () => {
         if(runDirectly.indexOf(action) >= 0) {
-          utils.setupManagementHub()
+          utils[action]()
           .subscribe({
             complete: () => proceed(),
             error: (err) => {
