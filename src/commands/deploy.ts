@@ -98,7 +98,7 @@ export const handler = (argv: Arguments<Options>): void => {
         if(runDirectly.indexOf(action) >= 0) {
           utils[action]()
           .subscribe({
-            complete: () => proceed(),
+            complete: () => process.exit(0),
             error: (err) => {
               console.log(err);      
               process.exit(0);  
