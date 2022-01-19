@@ -90,11 +90,40 @@ export class Utils {
   uninstallHorizon() {
     return this.shell(`sudo apt purge -y bluehorizon horizon horizon-cli`);
   }
+  setupManagementHub() {
+    return new Observable((observer) => { 
+      let ips = this.getIpAddress()
+      const pEnv: any = process.env;
+      const props = [
+        {name: 'HZN_LISTEN_IP', default: ips ? ips[0]: '', ipList: ips, required: true},
+        {name: 'HZN_TRANSPORT', default: 'https', required: true},
+        {name: 'EXCHANGE_USER_ORG', default: 'myorg', required: true}
+      ]
+      console.log(props)
+      console.log('\nKey in new value or (leave blank) press Enter to keep current value: ')
+      prompt.get(props, (err: any, result: any) => {
+        console.log(result)
+        console.log(`\nWould you like to proceed to install Management Hub: Y/n?`)
+        prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
+          if(question.answer.toUpperCase() === 'Y') {
+            for(const [key, value] of Object.entries(result)) {
+              pEnv[key] = value; 
+            }
+            this.shell(`curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo -s -E -b ./deploy-mgmt-hub.sh`)
+            .subscribe({
+              complete: () => observer.complete(),
+              error: (err) => observer.error(err)
+            })
+          }
+        })    
+      })
+    })    
+  }
   copyFile(arg: string) {
     return firstValueFrom(this.shell(arg));
   }
   updateEnvFiles(org: string) {
-    return new Observable((observer) => {
+    return new Observable((observer) => { 
       let props = this.getPropsFromFile(`${this.hznConfig}/.env-local`);
       console.log(props)
       console.log(`\nWould you like to change any of the above properties: Y/n?`)

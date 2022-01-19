@@ -321,6 +321,9 @@ class Hzn {
             });
         });
     }
+    setupManagementHub() {
+        return exports.utils.setupManagementHub();
+    }
     setupRedHat() {
         return new rxjs_1.Observable((observer) => {
             exports.utils.checkOS()
@@ -348,28 +351,6 @@ class Hzn {
             let result = exports.utils.getIpAddress();
             console.log(result);
             observer.complete();
-        });
-    }
-    setupManagementHub() {
-        return new rxjs_1.Observable((observer) => {
-            exports.utils.checkOS()
-                .subscribe({
-                next: (stdout) => {
-                    if (stdout.toLowerCase().indexOf('redhat') >= 0) {
-                        exports.utils.shell(`sudo yum remove -y docker docker-client docker-client-latest docker-common docker-latest docker-latest-logrotate docker-logrotate docker-engine podman runc 
-                        && sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo -y 
-                        && sudo yum install docker-ce docker-ce-cli containerd.io`)
-                            .subscribe({
-                            complete: () => observer.complete(),
-                            error: (err) => observer.error(err)
-                        });
-                    }
-                    else {
-                        console.log('This is not RHEL');
-                        observer.complete();
-                    }
-                }
-            });
         });
     }
 }

@@ -51,7 +51,7 @@ export declare class Hzn {
     installHznCli(): Observable<unknown>;
     uninstallHorizon(): Observable<unknown>;
     preInstallHznCli(): Observable<unknown>;
+    setupManagementHub(): Observable<unknown>;
     setupRedHat(): Observable<unknown>;
     getIpAddress(): Observable<unknown>;
-    setupManagementHub(): Observable<unknown>;
 }
