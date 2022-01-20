@@ -92,68 +92,70 @@ export const handler = (argv: Arguments<Options>): void => {
 
   if(action) {
     console.log('$$$ ', action, env);
-    utils.checkDefaultConfig()
-    .subscribe({
-      complete: () => {
-        if(runDirectly.indexOf(action) >= 0) {
-          utils[action]()
-          .subscribe({
-            complete: () => process.exit(0),
-            error: (err) => {
-              console.log(err);      
-              process.exit(0);  
-            }
-          })
-        } else if(skipInitialize.indexOf(action) >= 0) {
-          proceed();
-        } else if(justRun.indexOf(action) >= 0) {
-          utils.orgCheck(env, true)
-          .subscribe({
-            complete: () => proceed(),
-            error: (err) => {
-              console.log(err);      
-              process.exit(0);  
-            }
-          })
-        } else if(promptForUpdate.indexOf(action) < 0 || skip_config_update) {
-          utils.orgCheck(env, skip_config_update === 'true')
-          .subscribe({
-            complete: () => proceed(),
-            error: (err) => {
-              console.log(err);      
-              process.exit(0);  
-            }
-          })
-        } else {
-          utils.updateEnvFiles(env)
-          .subscribe({
-            complete: () => {
-              proceed()
-            }, error: (err) => {
-              console.log(err)
-              process.exit(0);  
-            }  
-          })  
+    if(runDirectly.indexOf(action) >= 0) {
+      utils[action]()
+      .subscribe({
+        complete: () => process.exit(0),
+        error: (err) => {
+          console.log(err);      
+          process.exit(0);  
         }
-      }, error: (err) => {
-        if(skipInitialize.indexOf(action) < 0) {
-          console.log(err, 'Initialising...')
-          utils.setupEnvFiles(env)
-          .subscribe({
-            complete: () => {
-              proceed();
-            }, error: () => process.exit(0)
-          })
-        } else {
-          utils.uninstallHorizon()
-          .subscribe({
-            complete:() => {
-              console.log('process completed.');
-              process.exit(0)          
-            }
-          })
+      })
+    } else {
+      utils.checkDefaultConfig()
+      .subscribe({
+        complete: () => {
+          if(skipInitialize.indexOf(action) >= 0) {
+            proceed();
+          } else if(justRun.indexOf(action) >= 0) {
+            utils.orgCheck(env, true)
+            .subscribe({
+              complete: () => proceed(),
+              error: (err) => {
+                console.log(err);      
+                process.exit(0);  
+              }
+            })
+          } else if(promptForUpdate.indexOf(action) < 0 || skip_config_update) {
+            utils.orgCheck(env, skip_config_update === 'true')
+            .subscribe({
+              complete: () => proceed(),
+              error: (err) => {
+                console.log(err);      
+                process.exit(0);  
+              }
+            })
+          } else {
+            utils.updateEnvFiles(env)
+            .subscribe({
+              complete: () => {
+                proceed()
+              }, error: (err) => {
+                console.log(err)
+                process.exit(0);  
+              }  
+            })  
+          }
+        }, error: (err) => {
+          if(skipInitialize.indexOf(action) < 0) {
+            console.log(err, 'Initialising...')
+            utils.setupEnvFiles(env)
+            .subscribe({
+              complete: () => {
+                proceed();
+              }, error: () => process.exit(0)
+            })
+          } else {
+            utils.uninstallHorizon()
+            .subscribe({
+              complete:() => {
+                console.log('process completed.');
+                process.exit(0)          
+              }
+            })
+          }
         }
-      }
+      }  
     })
   } else {
     console.log('specify an action you would like to perform, ex: "oh deploy test" or "oh deploy -h" for help')
