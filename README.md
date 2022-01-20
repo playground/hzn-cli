@@ -151,3 +151,39 @@ Publish MMS Object file
   will attempt to unregister then register agent with the provided configurations
   if all goes well, agent should start up shortly
   http://<ip-to-device>:3000/ is now up and running
+
+## Complete guide to set up an Open Horizon Management Hub
+
+  - oh deploy setupManagementHub
+
+    _                                    _   _ 
+  | |__    ____  _ __             ___  | | (_)
+  | '_ \  |_  / | '_ \   _____   / __| | | | |
+  | | | |  / /  | | | | |_____| | (__  | | | |
+  |_| |_| /___| |_| |_|          \___| |_| |_|
+
+  setupManagementHub biz
+  [
+    {
+      name: 'HZN_LISTEN_IP',
+      default: '127.0.0.1',
+      ipList: [ '127.0.0.1', 'xxx.xxx.xxx.xxx' ],
+      required: true
+    },
+    { name: 'HZN_TRANSPORT', default: 'https', required: true },
+    { name: 'EXCHANGE_USER_ORG', default: 'myorg', required: true }
+  ]
+
+  Key in new value or (leave blank) press Enter to keep current value: 
+  prompt: HZN_LISTEN_IP:  (127.0.0.1) xxx.xxx.xxx.xxx  // external ip 
+  prompt: HZN_TRANSPORT:  (https) 
+  prompt: EXCHANGE_USER_ORG:  (myorg) myhub
+  {
+    HZN_LISTEN_IP: 'xxx.xxx.xxx.xxx',
+    HZN_TRANSPORT: 'https',
+    EXCHANGE_USER_ORG: 'myhub'
+  }
+
+  Would you like to proceed to install Management Hub: Y/n?
+  prompt: answer:  y
+```  
