@@ -111,6 +111,9 @@ export class Utils {
             }
             this.shell(`curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo -s -E -b ./deploy-mgmt-hub.sh`)
             .subscribe({
+              next: (res: any) => {
+                writeFileSync(`${this.hznConfig}/.secret`, res)
+              },
               complete: () => observer.complete(),
               error: (err) => observer.error(err)
             })
