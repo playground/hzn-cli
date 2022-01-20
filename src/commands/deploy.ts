@@ -155,8 +155,8 @@ export const handler = (argv: Arguments<Options>): void => {
             })
           }
         }
-      }  
-    })
+      })
+    }  
   } else {
     console.log('specify an action you would like to perform, ex: "oh deploy test" or "oh deploy -h" for help')
   } 
