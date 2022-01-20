@@ -33,6 +33,7 @@ export declare class Hzn {
     unregisterAgent(): Observable<unknown>;
     registerAgent(): Observable<unknown>;
     publishMMSObject(): Observable<unknown>;
+    buildAndPublish(): Observable<unknown>;
     allInOneMMS(): Observable<unknown>;
     showHznInfo(): Observable<unknown>;
     updateHznInfo(): Observable<unknown>;
@@ -50,5 +51,7 @@ export declare class Hzn {
     installHznCli(): Observable<unknown>;
     uninstallHorizon(): Observable<unknown>;
     preInstallHznCli(): Observable<unknown>;
+    setupManagementHub(): Observable<unknown>;
     setupRedHat(): Observable<unknown>;
+    getIpAddress(): Observable<unknown>;
 }

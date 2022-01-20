@@ -8,6 +8,7 @@ const rxjs_1 = require("rxjs");
 const cp = require('child_process'), exec = cp.exec;
 const fs_1 = require("fs");
 const os_1 = __importDefault(require("os"));
+const ifs = os_1.default.networkInterfaces();
 const prompt_1 = __importDefault(require("prompt"));
 const jsonfile_1 = __importDefault(require("jsonfile"));
 const env = process.env.npm_config_env || 'biz';
@@ -62,6 +63,12 @@ class Utils {
     checkOS() {
         return this.shell(`cat /etc/os-release`);
     }
+    getIpAddress() {
+        return Object.keys(ifs)
+            .map(x => [x, ifs[x].filter(x => x.family === 'IPv4')[0]])
+            .filter(x => x[1])
+            .map(x => x[1].address);
+    }
     aptUpdate() {
         // TODO, if failed run sudo apt-get -y --fix-missing full-upgrade
         // cat info.cfg
@@ -88,6 +95,35 @@ class Utils {
     uninstallHorizon() {
         return this.shell(`sudo apt purge -y bluehorizon horizon horizon-cli`);
     }
+    setupManagementHub() {
+        return new rxjs_1.Observable((observer) => {
+            let ips = this.getIpAddress();
+            const pEnv = process.env;
+            const props = [
+                { name: 'HZN_LISTEN_IP', default: ips ? ips[0] : '', ipList: ips, required: true },
+                { name: 'HZN_TRANSPORT', default: 'https', required: true },
+                { name: 'EXCHANGE_USER_ORG', default: 'myorg', required: true }
+            ];
+            console.log(props);
+            console.log('\nKey in new value or (leave blank) press Enter to keep current value: ');
+            prompt_1.default.get(props, (err, result) => {
+                console.log(result);
+                console.log(`\nWould you like to proceed to install Management Hub: Y/n?`);
+                prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                    if (question.answer.toUpperCase() === 'Y') {
+                        for (const [key, value] of Object.entries(result)) {
+                            pEnv[key] = value;
+                        }
+                        this.shell(`curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo -s -E -b ./deploy-mgmt-hub.sh`)
+                            .subscribe({
+                            complete: () => observer.complete(),
+                            error: (err) => observer.error(err)
+                        });
+                    }
+                });
+            });
+        });
+    }
     copyFile(arg) {
         return (0, rxjs_1.firstValueFrom)(this.shell(arg));
     }
@@ -98,7 +134,7 @@ class Utils {
             console.log(`\nWould you like to change any of the above properties: Y/n?`);
             prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                 if (question.answer.toUpperCase() === 'Y') {
-                    console.log('\nKey in new value or press Enter to keep current value: ');
+                    console.log('\nKey in new value or (leave blank) press Enter to keep current value: ');
                     prompt_1.default.get(props, (err, result) => {
                         console.log(result);
                         console.log(`\nWould you like to update config files: Y/n?`);
@@ -133,15 +169,21 @@ class Utils {
             let props = [];
             let envVars = hznJson[org]['envVars'];
             let i = 0;
+            let pkg = jsonfile_1.default.readFileSync('./package.json');
             for (const [key, value] of Object.entries(envVars)) {
-                props[i] = { name: key, default: value, required: notRequired.indexOf(key) < 0 };
+                if (pkg && pkg.version && (key == 'SERVICE_VERSION' || key == 'MMS_SERVICE_VERSION')) {
+                    props[i] = { name: key, default: value, package: pkg.version, required: notRequired.indexOf(key) < 0 };
+                }
+                else {
+                    props[i] = { name: key, default: value, required: notRequired.indexOf(key) < 0 };
+                }
                 i++;
             }
             console.log(props);
             console.log(`\nWould you like to change any of the above properties for ${org}: Y/n?`);
             prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                 if (question.answer.toUpperCase() === 'Y') {
-                    console.log('\nKey in new value or press Enter to keep current value: ');
+                    console.log('\nKey in new value or (leave blank) press Enter to keep current value: ');
                     prompt_1.default.get(props, (err, result) => {
                         console.log(result);
                         console.log(`\nWould you like to save these changes: Y/n?`);
@@ -157,7 +199,8 @@ class Utils {
                                 });
                             }
                             else {
-                                observer.error(`config files not updated for ${org}`);
+                                console.log(`config files not updated for ${org}`);
+                                observer.complete();
                             }
                         });
                     });
@@ -179,7 +222,8 @@ class Utils {
                         });
                     }
                     else {
-                        observer.error(`config files not updated for ${org}`);
+                        console.log(`config files not updated for ${org}`);
+                        observer.complete();
                     }
                 }
             });
@@ -234,7 +278,8 @@ class Utils {
                         });
                     }
                     else {
-                        observer.error(`config files not updated for ${org}`);
+                        console.log(`config files not updated for ${org}`);
+                        observer.complete();
                     }
                 });
             }
@@ -253,7 +298,7 @@ class Utils {
                     return false;
                 }
             });
-            console.log('\nKey in new value or press Enter to keep current value: ');
+            console.log('\nKey in new value or (leave blank) press Enter to keep current value: ');
             prompt_1.default.get(props, (err, result) => {
                 console.log(result);
                 console.log(`\nWould you like to save config files: Y/n?`);
@@ -321,7 +366,7 @@ class Utils {
                 let data = (0, fs_1.readFileSync)(file).toString().split('\n');
                 Object.values(data).some((el) => {
                     let ar = el.split('=');
-                    if (ar && ar.length > 0 && ar[0] == 'prop') {
+                    if (ar && ar.length > 0 && ar[0] == prop) {
                         value = ar[1];
                         return true;
                     }
@@ -363,7 +408,7 @@ class Utils {
     updateHznInfo() {
         return new rxjs_1.Observable((observer) => {
             let props = this.getPropsFromFile('/etc/default/horizon');
-            console.log('\nKey in new value or press Enter to keep current value: ');
+            console.log('\nKey in new value or (leave blank) press Enter to keep current value: ');
             prompt_1.default.get(props, (err, result) => {
                 console.log(result);
                 console.log('\nWould you like to update horizon: Y/n?');

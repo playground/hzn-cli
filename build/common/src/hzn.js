@@ -145,6 +145,66 @@ class Hzn {
         let arg = `hzn mms object publish --type=${this.objectType} --id=${this.objectId} --object=${this.objectFile} --pattern=${this.mmsPattern}`;
         return exports.utils.shell(arg, 'done publishing object', 'failed to publish object');
     }
+    buildAndPublish() {
+        return new rxjs_1.Observable((observer) => {
+            this.buildServiceImage().subscribe({
+                complete: () => {
+                    this.pushServiceImage().subscribe({
+                        complete: () => {
+                            this.buildMMSImage().subscribe({
+                                complete: () => {
+                                    this.pushMMSImage().subscribe({
+                                        complete: () => {
+                                            this.publishService().subscribe({
+                                                complete: () => {
+                                                    this.publishPattern().subscribe({
+                                                        complete: () => {
+                                                            this.publishMMSService().subscribe({
+                                                                complete: () => {
+                                                                    this.publishMMSPattern().subscribe({
+                                                                        complete: () => {
+                                                                            this.registerAgent().subscribe({
+                                                                                complete: () => {
+                                                                                    observer.next();
+                                                                                    observer.complete();
+                                                                                }, error: (err) => {
+                                                                                    observer.error(err);
+                                                                                }
+                                                                            });
+                                                                        }, error: (err) => {
+                                                                            observer.error(err);
+                                                                        }
+                                                                    });
+                                                                }, error: (err) => {
+                                                                    observer.error(err);
+                                                                }
+                                                            });
+                                                        }, error: (err) => {
+                                                            observer.error(err);
+                                                        }
+                                                    });
+                                                }, error: (err) => {
+                                                    observer.error(err);
+                                                }
+                                            });
+                                        }, error: (err) => {
+                                            observer.error(err);
+                                        }
+                                    });
+                                }, error: (err) => {
+                                    observer.error(err);
+                                }
+                            });
+                        }, error: (err) => {
+                            observer.error(err);
+                        }
+                    });
+                }, error: (err) => {
+                    observer.error(err);
+                }
+            });
+        });
+    }
     allInOneMMS() {
         return new rxjs_1.Observable((observer) => {
             this.unregisterAgent().subscribe({
@@ -261,6 +321,9 @@ class Hzn {
             });
         });
     }
+    setupManagementHub() {
+        return exports.utils.setupManagementHub();
+    }
     setupRedHat() {
         return new rxjs_1.Observable((observer) => {
             exports.utils.checkOS()
@@ -281,6 +344,13 @@ class Hzn {
                     }
                 }
             });
+        });
+    }
+    getIpAddress() {
+        return new rxjs_1.Observable((observer) => {
+            let result = exports.utils.getIpAddress();
+            console.log(result);
+            observer.complete();
         });
     }
 }

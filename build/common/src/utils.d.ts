@@ -14,10 +14,12 @@ export declare class Utils {
     listNodePattern(): Observable<unknown>;
     getDeviceArch(): Observable<unknown>;
     checkOS(): Observable<unknown>;
+    getIpAddress(): any[];
     aptUpdate(): Observable<unknown>;
     installPrereq(): Observable<unknown>;
     installHznCli(anax: string, id: null): Observable<unknown>;
     uninstallHorizon(): Observable<unknown>;
+    setupManagementHub(): Observable<unknown>;
     copyFile(arg: string): Promise<unknown>;
     updateEnvFiles(org: string): Observable<unknown>;
     updateOrgConfig(hznJson: any, org: string, newOrg?: boolean): Observable<unknown>;

@@ -158,6 +158,66 @@ export class Hzn {
     let arg = `hzn mms object publish --type=${this.objectType} --id=${this.objectId} --object=${this.objectFile} --pattern=${this.mmsPattern}`
     return utils.shell(arg, 'done publishing object', 'failed to publish object');
   }
+  buildAndPublish() {
+    return new Observable((observer) => {
+      this.buildServiceImage().subscribe({
+        complete: () => {
+          this.pushServiceImage().subscribe({
+            complete: () => {
+              this.buildMMSImage().subscribe({
+                complete: () => {
+                  this.pushMMSImage().subscribe({
+                    complete: () => {
+                      this.publishService().subscribe({
+                        complete: () => {
+                          this.publishPattern().subscribe({
+                            complete: () => {
+                              this.publishMMSService().subscribe({
+                                complete: () => {
+                                  this.publishMMSPattern().subscribe({
+                                    complete: () => {
+                                      this.registerAgent().subscribe({
+                                        complete: () => {
+                                          observer.next();
+                                          observer.complete();
+                                        }, error: (err) => {
+                                          observer.error(err);
+                                        }
+                                      })
+                                    }, error: (err) => {
+                                      observer.error(err);
+                                    }  
+                                  })
+                                }, error: (err) => {
+                                  observer.error(err);
+                                }
+                              })
+                            }, error: (err) => {
+                              observer.error(err);
+                            }
+                          })
+                        }, error: (err) => {
+                          observer.error(err);
+                        }
+                      })
+                    }, error: (err) => {
+                      observer.error(err);
+                    }
+                  })
+                }, error: (err) => {
+                  observer.error(err);
+                }    
+              })
+            }, error: (err) => {
+              observer.error(err);
+            }    
+          })
+        }, error: (err) => {
+          observer.error(err);
+        }    
+      })
+    });
+  }
   allInOneMMS() {
     return new Observable((observer) => {
       this.unregisterAgent().subscribe({
@@ -274,6 +334,9 @@ export class Hzn {
       })
     });  
   }
+  setupManagementHub() {
+    return utils.setupManagementHub();
+  }
   setupRedHat() {
     return new Observable((observer) => {
       utils.checkOS()
@@ -294,5 +357,12 @@ export class Hzn {
         }
       })
     })
+  }
+  getIpAddress() {
+    return new Observable((observer) => {
+      let result = utils.getIpAddress()
+      console.log(result)
+      observer.complete()
+    })  
   }
 }
