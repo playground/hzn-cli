@@ -89,7 +89,7 @@ export class Utils {
   }
   uninstallHorizon() {
     return new Observable((observer) => { 
-      console.log(`\nWould you like to proceed to install Management Hub: Y/n?`)
+      console.log(`\nWould you like to proceed to uninstall Horzion: Y/n?`)
       prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
         if(question.answer.toUpperCase() === 'Y') {
           this.shell(`sudo apt purge -y bluehorizon horizon horizon-cli`)
@@ -309,6 +309,9 @@ export class Utils {
               let content = '';
               for(const [key, value] of Object.entries(result)) {
                 content += `${key}=${value}\n`; 
+                if(key === 'DEFAULT_ORG') {
+                  org = `${value}`;
+                }
               }
               writeFileSync('.env-local', content);
               this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local`).then(() => {
