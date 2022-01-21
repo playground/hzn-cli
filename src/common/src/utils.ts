@@ -88,7 +88,20 @@ export class Utils {
     }  
   }
   uninstallHorizon() {
-    return this.shell(`sudo apt purge -y bluehorizon horizon horizon-cli`);
+    return new Observable((observer) => { 
+      console.log(`\nWould you like to proceed to install Management Hub: Y/n?`)
+      prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
+        if(question.answer.toUpperCase() === 'Y') {
+          this.shell(`sudo apt purge -y bluehorizon horizon horizon-cli`)
+          .subscribe({
+            complete: () => observer.complete(),
+            error: (err) => observer.error(err)
+          })
+        } else {
+          observer.complete()
+        }
+      })  
+    })  
   }
   setupManagementHub() {
     return new Observable((observer) => { 
@@ -267,8 +280,8 @@ export class Utils {
               error: (err) => observer.error(err) 
             })
           } else {
-            console.log(`config files not updated for ${org}`);
-            observer.complete()
+            console.log(`config files is not setup for ${org}`);
+            observer.error(`config files is not setup for ${org}`)
           }
         })      
       }
