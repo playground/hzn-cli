@@ -319,7 +319,7 @@ export class Utils {
                   this.orgCheck(org)
                   .subscribe({
                     complete: () => observer.complete(),
-                    error: () => observer.complete()
+                    error: (err) => observer.error(err)
                   })
                 })
               })
