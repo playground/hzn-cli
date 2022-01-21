@@ -90,7 +90,7 @@ export const handler = (argv: Arguments<Options>): void => {
     }  
   }
 
-  if(action) {
+  if(action && skipInitialize.concat(runDirectly).concat(justRun).concat(promptForUpdate).includes(action)) {
     console.log('$$$ ', action, env);
     if(runDirectly.indexOf(action) >= 0) {
       utils[action]()
