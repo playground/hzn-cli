@@ -151,9 +151,10 @@ Publish MMS Object file
   will attempt to unregister then register agent with the provided configurations
   if all goes well, agent should start up shortly
   http://<ip-to-device>:3000/ is now up and running
+```
 
 ## Complete guide to set up an Open Horizon Management Hub
-
+```
   - oh deploy setupManagementHub
 
     _                                    _   _ 

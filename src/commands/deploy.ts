@@ -35,8 +35,8 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
       type: 'string', 
       demandOption: true,
       desc: 'Available actions: ' +
-            'allInOneMMS, buildAndPublish, buildMMSImage, buildServiceImage, checkConfigState, createHznKey, dockerImageExists, getDeviceArch, ' +
-            'getIpAddress, listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishMMSObject, ' +
+            'buildAndPublish, buildMMSImage, buildServiceImage, checkConfigState, createHznKey, dockerImageExists, getDeviceArch, ' +
+            'getIpAddress, listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishAndRegister, publishMMSObject, ' +
             'publishMMSPattern, publishMMSService, publishPatterrn, publishService, pullDockerImage, pushMMSImage, pushServiceImage, ' +
 		        'registerAgent, removeOrg, setup, setupManagementHub, showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo'
     });
@@ -58,7 +58,7 @@ export const handler = (argv: Arguments<Options>): void => {
   const configPath = config_path || utils.getHznConfig();
   const skipInitialize = ['buildMMSImage', 'buildServiceImage', 'dockerImageExists'];
   const justRun = ['checkConfigState', 'createHznKey', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'];
-  const promptForUpdate = ['setup', 'test', 'buildAndPublish', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent']
+  const promptForUpdate = ['setup', 'test', 'buildAndPublish', 'publishAndRegister', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent']
   const runDirectly = ['setupManagementHub', 'uninstallHorizon'];
 
   if(env.length == 0) {
