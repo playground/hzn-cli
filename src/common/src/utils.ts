@@ -208,8 +208,8 @@ export class Utils {
                   observer.complete();
                 })
               } else {
-                console.log(`config files not updated for ${org}`)
-                observer.complete();
+                console.log(`config files not updated/created for ${org}`)
+                observer.error(`config files not updated/created for ${org}`);
               }
             })
           })        
