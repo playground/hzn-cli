@@ -34,7 +34,7 @@ export declare class Hzn {
     registerAgent(): Observable<unknown>;
     publishMMSObject(): Observable<unknown>;
     buildAndPublish(): Observable<unknown>;
-    allInOneMMS(): Observable<unknown>;
+    publishAndRegister(): Observable<unknown>;
     showHznInfo(): Observable<unknown>;
     updateHznInfo(): Observable<unknown>;
     listService(): Observable<unknown>;

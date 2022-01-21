@@ -84,12 +84,12 @@ class Utils {
         });
     }
     installHznCli(anax, id) {
-        if (anax && anax.length > 0) {
+        let nodeId = id ? `-d ${id}` : '';
+        if (anax && anax.indexOf('open-horizon') > 0) {
             return this.shell(`curl -sSL ${anax} | sudo -s -E bash -s -- -i anax: -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`);
         }
         else {
-            let nodeId = id ? `-d ${id}` : '';
-            return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/api/v1/objects/IBM/agent_files/agent-install.sh/data && chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`);
+            return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`);
         }
     }
     uninstallHorizon() {
@@ -117,7 +117,7 @@ class Utils {
                         this.shell(`curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo -s -E -b ./deploy-mgmt-hub.sh`)
                             .subscribe({
                             next: (res) => {
-                                (0, fs_1.writeFileSync)(`${this.hznConfig}/.secret`, res);
+                                (0, fs_1.writeFileSync)(`/etc/default/.secret`, res);
                             },
                             complete: () => observer.complete(),
                             error: (err) => observer.error(err)

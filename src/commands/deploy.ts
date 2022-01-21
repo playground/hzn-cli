@@ -66,7 +66,7 @@ export const handler = (argv: Arguments<Options>): void => {
     env = value.length > 0 ? value : 'biz'
   }
   const proceed = () => {
-    if(existsSync(`${utils.getHznConfig()}/.env-hzn.json`)) {
+    if(existsSync(`${utils.getHznConfig()}/.env-hzn.json`) && existsSync(`${utils.getHznConfig()}/.env-local`)) {
       const hzn = new Hzn(env, configPath, n, objType, objId, obj, p);
   
       hzn.init()
