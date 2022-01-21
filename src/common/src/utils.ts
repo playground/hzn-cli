@@ -81,7 +81,7 @@ export class Utils {
   }
   installHznCli(anax: string, id: null) {
     if(anax && anax.indexOf('open-horizon') > 0) {
-      return this.shell(`curl -sSL ${anax} | sudo -s -E bash -s -- -i anax: -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`)
+      return this.shell(`curl -sSL --http0.9 ${anax} | sudo -s -E bash -s -- -i anax: -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`)
     } else {
       let nodeId = id ? `-d ${id}` : '';
       return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`)
