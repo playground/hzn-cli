@@ -311,6 +311,7 @@ export class Utils {
                 content += `${key}=${value}\n`; 
                 if(key === 'DEFAULT_ORG') {
                   org = `${value}`;
+                  process.env.HZN_ORG_ID = org;
                 }
               }
               writeFileSync('.env-local', content);

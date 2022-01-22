@@ -50,7 +50,6 @@ export class Hzn {
           console.log(err.message);
           if(err.message.indexOf('hzn:') >= 0) {
             console.log('need to install hzn');
-            console.log(process.env)
             this.preInstallHznCli()
             .subscribe({
               complete: () => {

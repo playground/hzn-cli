@@ -19,42 +19,40 @@ export class Env {
   }
   init() {
     return new Observable((observer) => {
-      (async () => {
-        const localEnv = await dotenv.parse(readFileSync(`${this.hznConfig}/.env-local`));
-        for(var i in localEnv) {
-          pEnv[i] = localEnv[i];
-        }
-        pEnv.HZN_ORG_ID = this.env;
-        this.hznJson = JSON.parse(readFileSync(this.hznEnv).toString());
-        // console.log(process.cwd(), this.env, this.hznJson)
-        this.envVars = this.hznJson[this.env]['envVars'];
-        for(const [key, value] of Object.entries(this.envVars)) {
-          if(!pEnv[key]) {
-            // @ts-ignore
-            pEnv[key] = value.replace(/\r?\n|\r/g, '');
-          } 
-          // console.log(`${key}: ${pEnv[key]}`);
-        }
-        if(!this.envVars.ARCH || this.envVars.ARCH === undefined) {
-          let arg = `hzn architecture`
-          exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
-            if(!err) {
-              pEnv.ARCH = this.envVars.ARCH = stdout.replace(/\r?\n|\r/g, '');
-              this.setAdditionalEnv();
-              observer.next();
-              observer.complete();
-            } else {
-              console.log('failed to identify arch');
-              observer.error(err);
-            }
-          });  
-        } else {
-          this.setAdditionalEnv();
-          console.log(this.envVars.ARCH)
-          observer.next();
-          observer.complete();
-        }      
-      })();
+      const localEnv = dotenv.parse(readFileSync(`${this.hznConfig}/.env-local`));
+      for(var i in localEnv) {
+        pEnv[i] = localEnv[i];
+      }
+      pEnv.HZN_ORG_ID = this.env;
+      this.hznJson = JSON.parse(readFileSync(this.hznEnv).toString());
+      // console.log(process.cwd(), this.env, this.hznJson)
+      this.envVars = this.hznJson[this.env]['envVars'];
+      for(const [key, value] of Object.entries(this.envVars)) {
+        if(!pEnv[key]) {
+          // @ts-ignore
+          pEnv[key] = value.replace(/\r?\n|\r/g, '');
+        } 
+        // console.log(`${key}: ${pEnv[key]}`);
+      }
+      if(!this.envVars.ARCH || this.envVars.ARCH === undefined) {
+        let arg = `hzn architecture`
+        exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
+          if(!err) {
+            pEnv.ARCH = this.envVars.ARCH = stdout.replace(/\r?\n|\r/g, '');
+            this.setAdditionalEnv();
+            observer.next();
+            observer.complete();
+          } else {
+            console.log('failed to identify arch');
+            observer.error(err);
+          }
+        });  
+      } else {
+        this.setAdditionalEnv();
+        console.log(this.envVars.ARCH)
+        observer.next();
+        observer.complete();
+      }      
     });
   }
   setAdditionalEnv() {
