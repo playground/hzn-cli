@@ -142,9 +142,7 @@ export const handler = (argv: Arguments<Options>): void => {
             utils.setupEnvFiles(env)
             .subscribe({
               next: (data: any) => {
-                console.log('data', data, data.env)
                 env = data.env ? data.env : env
-                console.log('data', data, data.env, env)
                 proceed()
               }, error: () => process.exit(0)
             })
