@@ -139,7 +139,7 @@ export const handler = (argv: Arguments<Options>): void => {
         }, error: (err) => {
           if(skipInitialize.indexOf(action) < 0) {
             console.log(err, 'Initialising...')
-            utils.updateEnvFiles(env)
+            utils.setupEnvFiles(env)
             .subscribe({
               complete: () => {
                 proceed();
