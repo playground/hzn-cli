@@ -205,6 +205,7 @@ export class Utils {
                 jsonfile.writeFileSync('.env-hzn.json', hznJson, {spaces: 2});
                 this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
                   console.log(`config files updated for ${org}`)
+                  observer.next({env: org})
                   observer.complete();
                 })
               } else {
@@ -221,6 +222,7 @@ export class Utils {
                 jsonfile.writeFileSync('.env-hzn.json', hznJson, {spaces: 2});
                 this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
                   console.log(`config files updated for ${org}`)
+                  observer.next({env: org})
                   observer.complete();
                 })
               } else {
