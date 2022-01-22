@@ -263,6 +263,7 @@ export class Utils {
         if(!skipUpdate) {
           this.updateOrgConfig(hznJson, org)
           .subscribe({
+            next: () => observer.next({env: org}),
             complete: () => observer.complete(),
             error: (err) => observer.error(err) 
           })
@@ -276,6 +277,7 @@ export class Utils {
             hznJson[org] = Object.assign({}, hznJson.biz);
             this.updateOrgConfig(hznJson, org, true)
             .subscribe({
+              next: () => observer.next({env: org}),
               complete: () => observer.complete(),
               error: (err) => observer.error(err) 
             })
