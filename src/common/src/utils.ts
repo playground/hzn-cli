@@ -319,6 +319,7 @@ export class Utils {
                 this.copyFile(`sudo cp ${__dirname}/env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
                   this.orgCheck(org)
                   .subscribe({
+                    next: () => observer.next({env: org}),
                     complete: () => observer.complete(),
                     error: (err) => observer.error(err)
                   })

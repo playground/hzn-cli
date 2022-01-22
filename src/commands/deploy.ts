@@ -141,6 +141,7 @@ export const handler = (argv: Arguments<Options>): void => {
             console.log(err, 'Initialising...')
             utils.setupEnvFiles(env)
             .subscribe({
+              next: (data: any) => env = data.env ? data.env : env,
               complete: () => {
                 proceed();
               }, error: () => process.exit(0)
