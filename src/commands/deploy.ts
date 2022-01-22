@@ -145,9 +145,7 @@ export const handler = (argv: Arguments<Options>): void => {
                 console.log('data', data, data.env)
                 env = data.env ? data.env : env
                 console.log('data', data, data.env, env)
-              },
-              complete: () => {
-                proceed();
+                proceed()
               }, error: () => process.exit(0)
             })
           } else {
