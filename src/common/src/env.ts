@@ -24,7 +24,7 @@ export class Env {
         for(var i in localEnv) {
           pEnv[i] = localEnv[i];
         }
-        pEnv.HZN_ORG_ID = this.env;
+        pEnv.HZN_ORG_ID = pEnv.DEFAULT_ORG || this.env;
         this.hznJson = JSON.parse(readFileSync(this.hznEnv).toString());
         // console.log(process.cwd(), this.env, this.hznJson)
         this.envVars = this.hznJson[this.env]['envVars'];
