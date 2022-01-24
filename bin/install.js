@@ -63,30 +63,42 @@ const getPropsFromFile = (file) => {
 const postInstall = () => {
   if(fs.existsSync(`${hznConfig}/.env-local`)) {
     let props = getPropsFromFile(`${hznConfig}/.env-local`);
+    let newProps = {};
     Object.keys(template.envLocal).forEach((key) => {
       if(!props[key]) {
-        props[key] = template.envLocal[key]
+        newProps[key] = template.envLocal[key]
+      } else {
+        newProps[key] = props[key]
       }
     })
     let content = '';
-    Object.keys(props).forEach((key) => {
-      content += `${key}=${props[key]}\n`; 
+    Object.keys(newProps).forEach((key) => {
+      content += `${key}=${newProps[key]}\n`; 
     })
     fs.writeFileSync(`${hznConfig}/.env-local`, content);
   }
   if(fs.existsSync(`${hznConfig}/.env-hzn.json`)) {
     let json = jsonfile.readFileSync(`${hznConfig}/.env-hzn.json`);
+    let newJson = {};
     Object.keys(template.envHzn).forEach((child) => {
       let node = template.envHzn[child];
       Object.keys(json).forEach((org) => {
+        if(!newJson[org]) {
+          newJson[org] = {}
+        }
+        if(!newJson[org][child]) {
+          newJson[org][child] = {}
+        }
         Object.keys(node).forEach((key) => {
           if(!json[org][child][key]) {
-            json[org][child][key] = node[key];
+            newJson[org][child][key] = node[key];
+          } else {
+            newJson[org][child][key] = json[org][child][key]
           }
         })  
       })
     })
-    jsonfile.writeFileSync(`${hznConfig}/.env-hzn.json`, json, {spaces: 2});
+    jsonfile.writeFileSync(`${hznConfig}/.env-hzn.json`, newJson, {spaces: 2});
   }
 };
 

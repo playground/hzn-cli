@@ -86,6 +86,7 @@ class Utils {
     installHznCli(anax, id) {
         let nodeId = id ? `-d ${id}` : '';
         if (anax && anax.indexOf('open-horizon') > 0) {
+            // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download/agent-install.sh
             return this.shell(`curl -sSL ${anax} | sudo -s -E bash -s -- -i anax: -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`);
         }
         else {
@@ -93,7 +94,21 @@ class Utils {
         }
     }
     uninstallHorizon() {
-        return this.shell(`sudo apt purge -y bluehorizon horizon horizon-cli`);
+        return new rxjs_1.Observable((observer) => {
+            console.log(`\nWould you like to proceed to uninstall Horzion: Y/n?`);
+            prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                if (question.answer.toUpperCase() === 'Y') {
+                    this.shell(`sudo apt purge -y bluehorizon horizon horizon-cli`)
+                        .subscribe({
+                        complete: () => observer.complete(),
+                        error: (err) => observer.error(err)
+                    });
+                }
+                else {
+                    observer.complete();
+                }
+            });
+        });
     }
     setupManagementHub() {
         return new rxjs_1.Observable((observer) => {
@@ -198,12 +213,13 @@ class Utils {
                                 jsonfile_1.default.writeFileSync('.env-hzn.json', hznJson, { spaces: 2 });
                                 this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
                                     console.log(`config files updated for ${org}`);
+                                    observer.next({ env: org });
                                     observer.complete();
                                 });
                             }
                             else {
-                                console.log(`config files not updated for ${org}`);
-                                observer.complete();
+                                console.log(`config files not updated/created for ${org}`);
+                                observer.error(`config files not updated/created for ${org}`);
                             }
                         });
                     });
@@ -216,6 +232,7 @@ class Utils {
                                 jsonfile_1.default.writeFileSync('.env-hzn.json', hznJson, { spaces: 2 });
                                 this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
                                     console.log(`config files updated for ${org}`);
+                                    observer.next({ env: org });
                                     observer.complete();
                                 });
                             }
@@ -261,6 +278,7 @@ class Utils {
                 if (!skipUpdate) {
                     this.updateOrgConfig(hznJson, org)
                         .subscribe({
+                        next: () => observer.next({ env: org }),
                         complete: () => observer.complete(),
                         error: (err) => observer.error(err)
                     });
@@ -276,13 +294,14 @@ class Utils {
                         hznJson[org] = Object.assign({}, hznJson.biz);
                         this.updateOrgConfig(hznJson, org, true)
                             .subscribe({
+                            next: () => observer.next({ env: org }),
                             complete: () => observer.complete(),
                             error: (err) => observer.error(err)
                         });
                     }
                     else {
-                        console.log(`config files not updated for ${org}`);
-                        observer.complete();
+                        console.log(`config files is not setup for ${org}`);
+                        observer.error(`config files is not setup for ${org}`);
                     }
                 });
             }
@@ -311,14 +330,19 @@ class Utils {
                             let content = '';
                             for (const [key, value] of Object.entries(result)) {
                                 content += `${key}=${value}\n`;
+                                if (key === 'DEFAULT_ORG') {
+                                    org = `${value}`;
+                                    process.env.HZN_ORG_ID = org;
+                                }
                             }
                             (0, fs_1.writeFileSync)('.env-local', content);
                             this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local`).then(() => {
                                 this.copyFile(`sudo cp ${__dirname}/env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
                                     this.orgCheck(org)
                                         .subscribe({
+                                        next: () => observer.next({ env: org }),
                                         complete: () => observer.complete(),
-                                        error: () => observer.complete()
+                                        error: (err) => observer.error(err)
                                     });
                                 });
                             });
