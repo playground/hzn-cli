@@ -35,8 +35,8 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
       type: 'string', 
       demandOption: true,
       desc: 'Available actions: ' +
-            'allInOneMMS, buildAndPublish, buildMMSImage, buildServiceImage, checkConfigState, createHznKey, dockerImageExists, getDeviceArch, ' +
-            'getIpAddress, listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishMMSObject, ' +
+            'buildAndPublish, buildMMSImage, buildServiceImage, checkConfigState, createHznKey, dockerImageExists, getDeviceArch, ' +
+            'getIpAddress, listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishAndRegister, publishMMSObject, ' +
             'publishMMSPattern, publishMMSService, publishPatterrn, publishService, pullDockerImage, pushMMSImage, pushServiceImage, ' +
 		        'registerAgent, removeOrg, setup, setupManagementHub, showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo'
     });
@@ -58,7 +58,7 @@ export const handler = (argv: Arguments<Options>): void => {
   const configPath = config_path || utils.getHznConfig();
   const skipInitialize = ['buildMMSImage', 'buildServiceImage', 'dockerImageExists'];
   const justRun = ['checkConfigState', 'createHznKey', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'];
-  const promptForUpdate = ['setup', 'test', 'buildAndPublish', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent']
+  const promptForUpdate = ['setup', 'test', 'buildAndPublish', 'publishAndRegister', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent']
   const runDirectly = ['setupManagementHub', 'uninstallHorizon'];
 
   if(env.length == 0) {
@@ -66,7 +66,7 @@ export const handler = (argv: Arguments<Options>): void => {
     env = value.length > 0 ? value : 'biz'
   }
   const proceed = () => {
-    if(existsSync(`${utils.getHznConfig()}/.env-hzn.json`)) {
+    if(existsSync(`${utils.getHznConfig()}/.env-hzn.json`) && existsSync(`${utils.getHznConfig()}/.env-local`)) {
       const hzn = new Hzn(env, configPath, n, objType, objId, obj, p);
   
       hzn.init()
@@ -90,7 +90,7 @@ export const handler = (argv: Arguments<Options>): void => {
     }  
   }
 
-  if(action) {
+  if(action && skipInitialize.concat(runDirectly).concat(justRun).concat(promptForUpdate).includes(action)) {
     console.log('$$$ ', action, env);
     if(runDirectly.indexOf(action) >= 0) {
       utils[action]()
@@ -141,8 +141,9 @@ export const handler = (argv: Arguments<Options>): void => {
             console.log(err, 'Initialising...')
             utils.setupEnvFiles(env)
             .subscribe({
-              complete: () => {
-                proceed();
+              next: (data: any) => {
+                env = data.env ? data.env : env
+                proceed()
               }, error: () => process.exit(0)
             })
           } else {

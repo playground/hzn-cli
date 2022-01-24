@@ -168,34 +168,10 @@ export class Hzn {
                 complete: () => {
                   this.pushMMSImage().subscribe({
                     complete: () => {
-                      this.publishService().subscribe({
+                      this.publishAndRegister().subscribe({
                         complete: () => {
-                          this.publishPattern().subscribe({
-                            complete: () => {
-                              this.publishMMSService().subscribe({
-                                complete: () => {
-                                  this.publishMMSPattern().subscribe({
-                                    complete: () => {
-                                      this.registerAgent().subscribe({
-                                        complete: () => {
-                                          observer.next();
-                                          observer.complete();
-                                        }, error: (err) => {
-                                          observer.error(err);
-                                        }
-                                      })
-                                    }, error: (err) => {
-                                      observer.error(err);
-                                    }  
-                                  })
-                                }, error: (err) => {
-                                  observer.error(err);
-                                }
-                              })
-                            }, error: (err) => {
-                              observer.error(err);
-                            }
-                          })
+                          observer.next();
+                          observer.complete();
                         }, error: (err) => {
                           observer.error(err);
                         }
@@ -218,17 +194,17 @@ export class Hzn {
       })
     });
   }
-  allInOneMMS() {
+  publishAndRegister() {
     return new Observable((observer) => {
-      this.unregisterAgent().subscribe({
+      this.publishService().subscribe({
         complete: () => {
-          this.buildMMSImage().subscribe({
+          this.publishPattern().subscribe({
             complete: () => {
-              this.pushMMSImage().subscribe({
+              this.publishMMSService().subscribe({
                 complete: () => {
-                  this.publishMMSService().subscribe({
+                  this.publishMMSPattern().subscribe({
                     complete: () => {
-                      this.publishMMSPattern().subscribe({
+                      this.unregisterAgent().subscribe({
                         complete: () => {
                           this.registerAgent().subscribe({
                             complete: () => {
@@ -244,7 +220,7 @@ export class Hzn {
                       })
                     }, error: (err) => {
                       observer.error(err);
-                    }
+                    }  
                   })
                 }, error: (err) => {
                   observer.error(err);
@@ -252,11 +228,11 @@ export class Hzn {
               })
             }, error: (err) => {
               observer.error(err);
-            }    
+            }
           })
         }, error: (err) => {
           observer.error(err);
-        }    
+        }
       })
     });
   }

@@ -13,18 +13,16 @@ export class Env {
   hznEnv: any;
   hznConfig: string;
   constructor(env: string, hznConfig: string) {
-    if(existsSync(`${hznConfig}/.env-local`)) {
-      const localEnv = dotenv.parse(readFileSync(`${hznConfig}/.env-local`));
-      for(var i in localEnv) {
-        pEnv[i] = localEnv[i];
-      }
-    }
     this.env = env;
     this.hznConfig = hznConfig;
     this.hznEnv = `${hznConfig}/.env-hzn.json`;
   }
   init() {
     return new Observable((observer) => {
+      const localEnv = dotenv.parse(readFileSync(`${this.hznConfig}/.env-local`));
+      for(var i in localEnv) {
+        pEnv[i] = localEnv[i];
+      }
       pEnv.HZN_ORG_ID = this.env;
       this.hznJson = JSON.parse(readFileSync(this.hznEnv).toString());
       // console.log(process.cwd(), this.env, this.hznJson)
@@ -54,7 +52,7 @@ export class Env {
         console.log(this.envVars.ARCH)
         observer.next();
         observer.complete();
-      }    
+      }      
     });
   }
   setAdditionalEnv() {

@@ -26,8 +26,8 @@ const builder = (yargs) => yargs
     type: 'string',
     demandOption: true,
     desc: 'Available actions: ' +
-        'allInOneMMS, buildAndPublish, buildMMSImage, buildServiceImage, checkConfigState, createHznKey, dockerImageExists, getDeviceArch, ' +
-        'getIpAddress, listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishMMSObject, ' +
+        'buildAndPublish, buildMMSImage, buildServiceImage, checkConfigState, createHznKey, dockerImageExists, getDeviceArch, ' +
+        'getIpAddress, listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishAndRegister, publishMMSObject, ' +
         'publishMMSPattern, publishMMSService, publishPatterrn, publishService, pullDockerImage, pushMMSImage, pushServiceImage, ' +
         'registerAgent, removeOrg, setup, setupManagementHub, showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo'
 });
@@ -45,14 +45,14 @@ const handler = (argv) => {
     const configPath = config_path || hzn_1.utils.getHznConfig();
     const skipInitialize = ['buildMMSImage', 'buildServiceImage', 'dockerImageExists'];
     const justRun = ['checkConfigState', 'createHznKey', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'];
-    const promptForUpdate = ['setup', 'test', 'buildAndPublish', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent'];
+    const promptForUpdate = ['setup', 'test', 'buildAndPublish', 'publishAndRegister', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent'];
     const runDirectly = ['setupManagementHub', 'uninstallHorizon'];
     if (env.length == 0) {
         let value = hzn_1.utils.getPropValueFromFile(`${hzn_1.utils.getHznConfig()}/.env-local`, 'DEFAULT_ORG');
         env = value.length > 0 ? value : 'biz';
     }
     const proceed = () => {
-        if ((0, fs_1.existsSync)(`${hzn_1.utils.getHznConfig()}/.env-hzn.json`)) {
+        if ((0, fs_1.existsSync)(`${hzn_1.utils.getHznConfig()}/.env-hzn.json`) && (0, fs_1.existsSync)(`${hzn_1.utils.getHznConfig()}/.env-local`)) {
             const hzn = new hzn_1.Hzn(env, configPath, n, objType, objId, obj, p);
             hzn.init()
                 .subscribe({
@@ -75,7 +75,7 @@ const handler = (argv) => {
             console.log(`${configPath}/.env-hzn.json file not fouund.`);
         }
     };
-    if (action) {
+    if (action && skipInitialize.concat(runDirectly).concat(justRun).concat(promptForUpdate).includes(action)) {
         console.log('$$$ ', action, env);
         if (runDirectly.indexOf(action) >= 0) {
             hzn_1.utils[action]()

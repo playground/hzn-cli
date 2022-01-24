@@ -7,7 +7,6 @@ const hznConfig = '/etc/default/config';
 const template = {
   envHzn:   {
     "envVars": {
-      "ANAX": "",
       "SERVICE_NAME": "saved-model-service",
       "SERVICE_CONTAINER_NAME": "saved-model-service",
       "SERVICE_VERSION": "1.0.0",
@@ -32,7 +31,8 @@ const template = {
     "HZN_EXCHANGE_URL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-exchange/v1",
     "HZN_FSS_CSSURL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-css",
     "HZN_CUSTOM_NODE_ID": "",
-    "DEFAULT_ORG": ""
+    "DEFAULT_ORG": "biz",
+    "ANAX": "api/v1/objects/IBM/agent_files/agent-install.sh/data"
   }
 }
 
