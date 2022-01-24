@@ -130,7 +130,8 @@ const handler = (argv) => {
                         console.log(err, 'Initialising...');
                         hzn_1.utils.setupEnvFiles(env)
                             .subscribe({
-                            complete: () => {
+                            next: (data) => {
+                                env = data.env ? data.env : env;
                                 proceed();
                             }, error: () => process.exit(0)
                         });
