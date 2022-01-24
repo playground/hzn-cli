@@ -168,7 +168,7 @@ export class Hzn {
                 complete: () => {
                   this.pushMMSImage().subscribe({
                     complete: () => {
-                      this.publishAndRegister().subscribe({
+                      this.publishServiceAndPattern().subscribe({
                         complete: () => {
                           observer.next();
                           observer.complete();
@@ -194,7 +194,7 @@ export class Hzn {
       })
     });
   }
-  publishAndRegister() {
+  publishServiceAndPattern() {
     return new Observable((observer) => {
       this.publishService().subscribe({
         complete: () => {
@@ -204,23 +204,11 @@ export class Hzn {
                 complete: () => {
                   this.publishMMSPattern().subscribe({
                     complete: () => {
-                      this.unregisterAgent().subscribe({
-                        complete: () => {
-                          this.registerAgent().subscribe({
-                            complete: () => {
-                              observer.next();
-                              observer.complete();
-                            }, error: (err) => {
-                              observer.error(err);
-                            }
-                          })
-                        }, error: (err) => {
-                          observer.error(err);
-                        }  
-                      })
+                      observer.next();
+                      observer.complete();
                     }, error: (err) => {
                       observer.error(err);
-                    }  
+                    }
                   })
                 }, error: (err) => {
                   observer.error(err);
@@ -233,6 +221,60 @@ export class Hzn {
         }, error: (err) => {
           observer.error(err);
         }
+      })
+    });
+  }
+  buildPublishAndRegister() {
+    return new Observable((observer) => {
+      this.buildAndPublish().subscribe({
+        complete: () => {
+          this.publishServiceAndPattern().subscribe({
+            complete: () => {
+              this.unregisterAgent().subscribe({
+                complete: () => {
+                  this.registerAgent().subscribe({
+                    complete: () => {
+                      observer.next();
+                      observer.complete();
+                    }, error: (err) => {
+                      observer.error(err);
+                    }
+                  })
+                }, error: (err) => {
+                  observer.error(err);
+                }  
+              })
+            }, error: (err) => {
+              observer.error(err);
+            }
+          })
+        }, error: (err) => {
+          observer.error(err);
+        }
+      })
+    });    
+  }
+  publishAndRegister() {
+    return new Observable((observer) => {
+      this.publishServiceAndPattern().subscribe({
+        complete: () => {
+          this.unregisterAgent().subscribe({
+            complete: () => {
+              this.registerAgent().subscribe({
+                complete: () => {
+                  observer.next();
+                  observer.complete();
+                }, error: (err) => {
+                  observer.error(err);
+                }
+              })
+            }, error: (err) => {
+              observer.error(err);
+            }  
+          })
+        }, error: (err) => {
+          observer.error(err);
+        }  
       })
     });
   }
