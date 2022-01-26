@@ -26,9 +26,9 @@ const builder = (yargs) => yargs
     type: 'string',
     demandOption: true,
     desc: 'Available actions: ' +
-        'buildAndPublish, buildMMSImage, buildServiceImage, checkConfigState, createHznKey, dockerImageExists, getDeviceArch, ' +
+        'buildAndPublish, buildMMSImage, buildPublishAndRegister, buildServiceImage, checkConfigState, createHznKey, dockerImageExists, getDeviceArch, ' +
         'getIpAddress, listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishAndRegister, publishMMSObject, ' +
-        'publishMMSPattern, publishMMSService, publishPatterrn, publishService, pullDockerImage, pushMMSImage, pushServiceImage, ' +
+        'publishMMSPattern, publishMMSService, publishPatterrn, publishService, publishServiceAndPattern, pullDockerImage, pushMMSImage, pushServiceImage, ' +
         'registerAgent, removeOrg, setup, setupManagementHub, showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo'
 });
 exports.builder = builder;
@@ -45,7 +45,7 @@ const handler = (argv) => {
     const configPath = config_path || hzn_1.utils.getHznConfig();
     const skipInitialize = ['buildMMSImage', 'buildServiceImage', 'dockerImageExists'];
     const justRun = ['checkConfigState', 'createHznKey', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'];
-    const promptForUpdate = ['setup', 'test', 'buildAndPublish', 'publishAndRegister', 'publishService', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent'];
+    const promptForUpdate = ['setup', 'test', 'buildAndPublish', 'buildPublishAndRegister', 'publishAndRegister', 'publishService', 'publishServiceAndPattern', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent'];
     const runDirectly = ['setupManagementHub', 'uninstallHorizon'];
     if (env.length == 0) {
         let value = hzn_1.utils.getPropValueFromFile(`${hzn_1.utils.getHznConfig()}/.env-local`, 'DEFAULT_ORG');
