@@ -4,6 +4,9 @@ set -e
 
 # Run this script like - bash script-name.sh
 
+# Tested on Ubuntu, MacOS
+# @playground
+
 # Define versions
 INSTALL_NODE_VER=16
 INSTALL_NVM_VER=0.39.1
@@ -61,6 +64,3 @@ oh --version
 
 echo "==> Setting up hzn environment"
 oh deploy setup
-
-# Tested on Ubuntu, MacOS
-# @playground
