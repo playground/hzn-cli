@@ -9,6 +9,8 @@ Open Horizon toolkit is a CLI built with Typescript for the NodeJS developers.  
 
 ## Pre-release version of hzn-cli, howto?
 
+```curl -o- https://raw.githubusercontent.com/playground/hzn-cli/0.2.11/install.sh | sudo bash```
+
 ```npm i -g hzn-cli```
 
 After installlation run
