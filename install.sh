@@ -62,5 +62,5 @@ npm i -g hzn-cli
 echo "==> Checking oh version"
 oh --version
 
-echo "==> Setting up hzn environment"
+echo "==> Setting up hzn environment..."
 oh deploy setup
