@@ -9,7 +9,9 @@ Open Horizon toolkit is a CLI built with Typescript for the NodeJS developers.  
 
 ## Pre-release version of hzn-cli, howto?
 
-```curl -o- https://raw.githubusercontent.com/playground/hzn-cli/0.2.11/install.sh | sudo bash```
+``` curl -sSL https://raw.githubusercontent.com/playground/hzn-cli/install-sh/install.sh  --output install.sh && bash ./install.sh```
+
+OR
 
 ```npm i -g hzn-cli```
 
@@ -20,13 +22,15 @@ After installlation run
 Deploy <action> to Org <org>
 
 Positionals:
-  action  Available actions: allInOneMMS, buildMMSImage, buildServiceImage,
-          checkConfigState, createHznKey, dockerImageExists, getDeviceArch,
+  action  Available actions: buildAndPublish, buildMMSImage,
+          buildPublishAndRegister, buildServiceImage, checkConfigState,
+          createHznKey, dockerImageExists, getDeviceArch, getIpAddress,
           listDeploymentPolicy, listNode, listNodePattern, listObject,
-          listPattern, listService, publishMMSObject, publishMMSPattern,
-          publishMMSService, publishPatterrn, publishService, pullDockerImage,
-          pushMMSImage, pushServiceImage, registerAgent, setup, showHznInfo,
-          test, uninstallHorizon, unregisterAgent, updateHznInfo
+          listPattern, listService, publishAndRegister, publishMMSObject,
+          publishMMSPattern, publishMMSService, publishPatterrn, publishService,
+          publishServiceAndPattern, pullDockerImage, pushMMSImage,
+          pushServiceImage, registerAgent, removeOrg, setup, setupManagementHub,
+          showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo
                                                              [string] [required]
 
 Options:
