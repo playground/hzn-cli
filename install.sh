@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -i
 set -e
 # Install node and npm via nvm - https://github.com/nvm-sh/nvm
 
