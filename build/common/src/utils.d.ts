@@ -1,5 +1,6 @@
 import { Observable } from 'rxjs';
 export declare class Utils {
+    homePath: string | undefined;
     hznConfig: string;
     constructor();
     init(): void;

@@ -15,7 +15,8 @@ const env = process.env.npm_config_env || 'biz';
 const notRequired = ['SERVICE_CONTAINER_CREDS', 'MMS_CONTAINER_CREDS', 'MMS_OBJECT_FILE', 'HZN_CUSTOM_NODE_ID', 'UPDATE_FILE_NAME'];
 class Utils {
     constructor() {
-        this.hznConfig = '/etc/default/config';
+        this.homePath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+        this.hznConfig = `${this.homePath}/config`;
     }
     init() {
     }
@@ -132,7 +133,7 @@ class Utils {
                         this.shell(`curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo -s -E -b ./deploy-mgmt-hub.sh`)
                             .subscribe({
                             next: (res) => {
-                                (0, fs_1.writeFileSync)(`/etc/default/.secret`, res);
+                                (0, fs_1.writeFileSync)(`${this.hznConfig}/.secret`, res);
                             },
                             complete: () => observer.complete(),
                             error: (err) => observer.error(err)
@@ -292,6 +293,7 @@ class Utils {
                 prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                     if (question.answer.toUpperCase() === 'Y') {
                         hznJson[org] = Object.assign({}, hznJson.biz);
+                        console.log('$$$new org', org, hznJson);
                         this.updateOrgConfig(hznJson, org, true)
                             .subscribe({
                             next: () => observer.next({ env: org }),
@@ -326,7 +328,7 @@ class Utils {
                 console.log(`\nWould you like to save config files: Y/n?`);
                 prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                     if (question.answer.toUpperCase() === 'Y') {
-                        this.copyFile(`sudo cp -rf ${__dirname}/config /etc/default`).then(() => {
+                        this.copyFile(`sudo cp -rf ${__dirname}/config ${this.homePath}`).then(() => {
                             let content = '';
                             for (const [key, value] of Object.entries(result)) {
                                 content += `${key}=${value}\n`;

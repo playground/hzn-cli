@@ -50,6 +50,7 @@ const handler = (argv) => {
     if (env.length == 0) {
         let value = hzn_1.utils.getPropValueFromFile(`${hzn_1.utils.getHznConfig()}/.env-local`, 'DEFAULT_ORG');
         env = value.length > 0 ? value : 'biz';
+        console.log('$$$env', env);
     }
     const proceed = () => {
         if ((0, fs_1.existsSync)(`${hzn_1.utils.getHznConfig()}/.env-hzn.json`) && (0, fs_1.existsSync)(`${hzn_1.utils.getHznConfig()}/.env-local`)) {

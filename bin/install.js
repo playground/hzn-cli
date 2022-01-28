@@ -2,7 +2,9 @@
 const fs = require('fs');
 const os = require('os');
 const jsonfile = require('jsonfile');
-const hznConfig = '/etc/default/config';
+const homePath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+const hznConfig = `${homePath}/config`;
+const constants = fs.constants;
 
 const template = {
   envHzn:   {
