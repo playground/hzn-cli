@@ -182,8 +182,16 @@ export class Utils {
       let props: any[] = [];
       let envVars = hznJson[org]['envVars'];
       let i = 0;
-      let pkg = jsonfile.readFileSync('./package.json');
+      let pkg;
 
+      if(existsSync('./package.json')) {
+        try {
+          pkg = jsonfile.readFileSync('./package.json');
+        } catch(e) {
+          console.log(e)
+        }
+      }
+      console.log('$$herer', __dirname)
       for(const [key, value] of Object.entries(envVars)) {
         if(pkg && pkg.version && (key == 'SERVICE_VERSION' || key == 'MMS_SERVICE_VERSION')) {
           props[i] = {name: key, default: value, package: pkg.version, required: notRequired.indexOf(key) < 0};
@@ -280,7 +288,6 @@ export class Utils {
         prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
           if(question.answer.toUpperCase() === 'Y') {
             hznJson[org] = Object.assign({}, hznJson.biz);
-            console.log('$$$new org', org, hznJson)
             this.updateOrgConfig(hznJson, org, true)
             .subscribe({
               next: () => observer.next({env: org}),
