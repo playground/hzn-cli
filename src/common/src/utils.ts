@@ -97,7 +97,13 @@ export class Utils {
         if(question.answer.toUpperCase() === 'Y') {
           this.shell(`sudo apt purge -y bluehorizon horizon horizon-cli`)
           .subscribe({
-            complete: () => observer.complete(),
+            complete: () => {
+              this.shell(`rm -rf ${this.homePath}/.hzn`)
+              .subscribe({
+                complete: () => observer.complete(),
+                error: (err) => observer.error(err)    
+              })
+            },
             error: (err) => observer.error(err)
           })
         } else {
