@@ -15,7 +15,9 @@ const env = process.env.npm_config_env || 'biz';
 const notRequired = ['SERVICE_CONTAINER_CREDS', 'MMS_CONTAINER_CREDS', 'MMS_OBJECT_FILE', 'HZN_CUSTOM_NODE_ID', 'UPDATE_FILE_NAME'];
 class Utils {
     constructor() {
-        this.hznConfig = '/etc/default/config';
+        this.etcDefault = '/etc/default';
+        this.homePath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+        this.hznConfig = `${this.homePath}/config`;
     }
     init() {
     }
@@ -100,7 +102,13 @@ class Utils {
                 if (question.answer.toUpperCase() === 'Y') {
                     this.shell(`sudo apt purge -y bluehorizon horizon horizon-cli`)
                         .subscribe({
-                        complete: () => observer.complete(),
+                        complete: () => {
+                            this.shell(`rm -rf ${this.homePath}/.hzn`)
+                                .subscribe({
+                                complete: () => observer.complete(),
+                                error: (err) => observer.error(err)
+                            });
+                        },
                         error: (err) => observer.error(err)
                     });
                 }
@@ -132,7 +140,7 @@ class Utils {
                         this.shell(`curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo -s -E -b ./deploy-mgmt-hub.sh`)
                             .subscribe({
                             next: (res) => {
-                                (0, fs_1.writeFileSync)(`/etc/default/.secret`, res);
+                                (0, fs_1.writeFileSync)(`${this.hznConfig}/.secret`, res);
                             },
                             complete: () => observer.complete(),
                             error: (err) => observer.error(err)
@@ -187,7 +195,16 @@ class Utils {
             let props = [];
             let envVars = hznJson[org]['envVars'];
             let i = 0;
-            let pkg = jsonfile_1.default.readFileSync('./package.json');
+            let pkg;
+            if ((0, fs_1.existsSync)('./package.json')) {
+                try {
+                    pkg = jsonfile_1.default.readFileSync('./package.json');
+                }
+                catch (e) {
+                    console.log(e);
+                }
+            }
+            console.log('$$herer', __dirname);
             for (const [key, value] of Object.entries(envVars)) {
                 if (pkg && pkg.version && (key == 'SERVICE_VERSION' || key == 'MMS_SERVICE_VERSION')) {
                     props[i] = { name: key, default: value, package: pkg.version, required: notRequired.indexOf(key) < 0 };
@@ -326,7 +343,7 @@ class Utils {
                 console.log(`\nWould you like to save config files: Y/n?`);
                 prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                     if (question.answer.toUpperCase() === 'Y') {
-                        this.copyFile(`sudo cp -rf ${__dirname}/config /etc/default`).then(() => {
+                        this.copyFile(`sudo cp -rf ${__dirname}/config ${this.homePath}`).then(() => {
                             let content = '';
                             for (const [key, value] of Object.entries(result)) {
                                 content += `${key}=${value}\n`;
@@ -376,7 +393,7 @@ class Utils {
         });
     }
     getHznInfo() {
-        return (0, fs_1.readFileSync)('/etc/default/horizon').toString().split('\n');
+        return (0, fs_1.readFileSync)(`${this.etcDefault}/horizon`).toString().split('\n');
     }
     showHznInfo() {
         return new rxjs_1.Observable((observer) => {
@@ -434,7 +451,7 @@ class Utils {
     }
     updateHznInfo() {
         return new rxjs_1.Observable((observer) => {
-            let props = this.getPropsFromFile('/etc/default/horizon');
+            let props = this.getPropsFromFile(`${this.etcDefault}/horizon`);
             console.log('\nKey in new value or (leave blank) press Enter to keep current value: ');
             prompt_1.default.get(props, (err, result) => {
                 console.log(result);
@@ -445,9 +462,9 @@ class Utils {
                         for (const [key, value] of Object.entries(result)) {
                             content += `${key}=${value}\n`;
                         }
-                        this.copyFile('sudo cp /etc/default/horizon /etc/default/.horizon').then(() => {
+                        this.copyFile(`sudo cp ${this.etcDefault}/horizon ${this.etcDefault}/.horizon`).then(() => {
                             (0, fs_1.writeFileSync)('.horizon', content);
-                            this.copyFile(`sudo mv .horizon /etc/default/horizon`).then(() => {
+                            this.copyFile(`sudo mv .horizon ${this.etcDefault}/horizon`).then(() => {
                                 observer.next();
                                 observer.complete();
                             });
