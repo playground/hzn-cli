@@ -34,7 +34,15 @@ const template = {
     "HZN_FSS_CSSURL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-css",
     "HZN_CUSTOM_NODE_ID": "",
     "DEFAULT_ORG": "biz",
-    "ANAX": "api/v1/objects/IBM/agent_files/agent-install.sh/data"
+    "ANAX": "api/v1/objects/IBM/agent_files/agent-install.sh/data",
+    "SUPPORTED_OS_APPEND": "",
+    "SUPPORTED_LINUX_DISTRO_APPEND": "",
+    "SUPPORTED_DEBIAN_VARIANTS_APPEND": "",
+    "SUPPORTED_DEBIAN_VERSION_APPEND": "",
+    "SUPPORTED_DEBIAN_ARCH_APPEND": "",
+    "SUPPORTED_REDHAT_VARIANTS_APPEND": "",
+    "SUPPORTED_REDHAT_VERSION_APPEND": "",
+    "SUPPORTED_REDHAT_ARCH_APPEND": ""
   }
 }
 

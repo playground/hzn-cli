@@ -12,7 +12,11 @@ const ifs = os_1.default.networkInterfaces();
 const prompt_1 = __importDefault(require("prompt"));
 const jsonfile_1 = __importDefault(require("jsonfile"));
 const env = process.env.npm_config_env || 'biz';
-const notRequired = ['SERVICE_CONTAINER_CREDS', 'MMS_CONTAINER_CREDS', 'MMS_OBJECT_FILE', 'HZN_CUSTOM_NODE_ID', 'UPDATE_FILE_NAME'];
+const notRequired = [
+    'SERVICE_CONTAINER_CREDS', 'MMS_CONTAINER_CREDS', 'MMS_OBJECT_FILE', 'HZN_CUSTOM_NODE_ID', 'UPDATE_FILE_NAME',
+    'SUPPORTED_OS_APPEND', 'SUPPORTED_LINUX_DISTRO_APPEND', 'SUPPORTED_DEBIAN_VARIANTS_APPEND', 'SUPPORTED_DEBIAN_VERSION_APPEND',
+    'SUPPORTED_DEBIAN_ARCH_APPEND', 'SUPPORTED_REDHAT_VARIANTS_APPEND', 'SUPPORTED_REDHAT_VERSION_APPEND', 'SUPPORTED_REDHAT_ARCH_APPEND'
+];
 class Utils {
     constructor() {
         this.etcDefault = '/etc/default';
@@ -206,6 +210,9 @@ class Utils {
             }
             console.log('$$herer', __dirname);
             for (const [key, value] of Object.entries(envVars)) {
+                if (key.indexOf('SUPPORTED') >= 0) {
+                    console.log(key, notRequired.indexOf(key));
+                }
                 if (pkg && pkg.version && (key == 'SERVICE_VERSION' || key == 'MMS_SERVICE_VERSION')) {
                     props[i] = { name: key, default: value, package: pkg.version, required: notRequired.indexOf(key) < 0 };
                 }
