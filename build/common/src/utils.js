@@ -210,9 +210,6 @@ class Utils {
             }
             console.log('$$herer', __dirname);
             for (const [key, value] of Object.entries(envVars)) {
-                if (key.indexOf('SUPPORTED') >= 0) {
-                    console.log(key, notRequired.indexOf(key));
-                }
                 if (pkg && pkg.version && (key == 'SERVICE_VERSION' || key == 'MMS_SERVICE_VERSION')) {
                     props[i] = { name: key, default: value, package: pkg.version, required: notRequired.indexOf(key) < 0 };
                 }
