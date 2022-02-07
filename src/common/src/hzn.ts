@@ -88,7 +88,7 @@ export class Hzn {
     return utils.shell(arg, 'done pushing service docker image', 'failed to push service docker image');
   }
   buildMMSImage() {
-    let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
+    let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile-mms-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
     return utils.shell(arg, 'done building mms docker image', 'failed to build mms docker image');
   }
   pushMMSImage() {
