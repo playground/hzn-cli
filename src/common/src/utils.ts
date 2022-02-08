@@ -99,7 +99,11 @@ export class Utils {
       console.log(`\nWould you like to proceed to uninstall Horzion: Y/n?`)
       prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
         if(question.answer.toUpperCase() === 'Y') {
-          this.shell(`sudo apt purge -y bluehorizon horizon horizon-cli`)
+          let arg = `sudo apt purge -y bluehorizon horizon horizon-cli`
+          if(process.platform == 'darwin') {
+            arg = `yes | sudo /Users/Shared/horizon-cli/bin/horizon-cli-uninstall.sh && sudo pkgutil --forget com.github.open-horizon.pkg.horizon-cli`
+          }  
+          this.shell(arg)
           .subscribe({
             complete: () => {
               this.shell(`rm -rf ${this.homePath}/.hzn`)
