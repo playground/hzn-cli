@@ -24,6 +24,7 @@ class Hzn {
                     this.objectId = this.objectId || this.envVar.getMMSObjectId();
                     this.objectFile = this.objectFile || this.envVar.getMMSObjectFile();
                     this.mmsPattern = this.mmsPattern || this.envVar.getMMSPatterName();
+                    console.log(`configPath: ${this.configPath}`);
                     this.patternJson = `${this.configPath}/service/pattern.json`;
                     this.serviceJson = `${this.configPath}/service/service.json`;
                     this.policyJson = `${this.configPath}/service/policy.json`;
