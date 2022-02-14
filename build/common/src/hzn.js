@@ -186,9 +186,9 @@ class Hzn {
         return new rxjs_1.Observable((observer) => {
             this.publishService().subscribe({
                 complete: () => {
-                    this.publishPattern().subscribe({
+                    this.publishMMSService().subscribe({
                         complete: () => {
-                            this.publishMMSService().subscribe({
+                            this.publishPattern().subscribe({
                                 complete: () => {
                                     this.publishMMSPattern().subscribe({
                                         complete: () => {

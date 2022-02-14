@@ -20,6 +20,7 @@ const template = {
       "MMS_CONTAINER_NAME": "mms-service",
       "MMS_SERVICE_NAME": "mms-service",
       "MMS_SERVICE_VERSION": "1.0.0",
+      "MMS_SERVICE_VERSION_RANGE": "1.0.0",
       "MMS_OBJECT_TYPE": "object_detection",
       "MMS_OBJECT_ID": "config.json",
       "MMS_OBJECT_FILE": "config/config.json",
