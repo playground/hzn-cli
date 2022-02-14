@@ -43,9 +43,10 @@ const handler = (argv) => {
     const obj = object || '';
     const p = pattern || '';
     const configPath = config_path || hzn_1.utils.getHznConfig();
-    const skipInitialize = ['buildMMSImage', 'buildServiceImage', 'dockerImageExists'];
+    const skipInitialize = ['dockerImageExists'];
     const justRun = ['checkConfigState', 'createHznKey', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'];
-    const promptForUpdate = ['setup', 'test', 'buildAndPublish', 'buildPublishAndRegister', 'publishAndRegister', 'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent'];
+    const promptForUpdate = ['setup', 'test', 'buildAndPublish', 'buildPublishAndRegister', 'buildMMSImage', 'buildServiceImage', 'publishAndRegister', 'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService',
+        'publishMMSPattern', 'publishMMSObject', 'pushMMSImage', 'pushServiceImage', 'registerAgent', 'unregisterAgent'];
     const runDirectly = ['setupManagementHub', 'uninstallHorizon'];
     if (env.length == 0) {
         let value = hzn_1.utils.getPropValueFromFile(`${hzn_1.utils.getHznConfig()}/.env-local`, 'DEFAULT_ORG');

@@ -13,6 +13,7 @@
       "org": "$HZN_ORG_ID",
       "url": "$SERVICE_NAME",
       "version": "$SERVICE_VERSION",
+      "versionRange": "$SERVICE_VERSION_RANGE",
       "arch": "$ARCH"
     }
   ],

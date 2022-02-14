@@ -12,6 +12,7 @@ const template = {
       "SERVICE_NAME": "saved-model-service",
       "SERVICE_CONTAINER_NAME": "saved-model-service",
       "SERVICE_VERSION": "1.0.0",
+      "SERVICE_VERSION_RANGE": "1.0.0",
       "SERVICE_CONTAINER_CREDS": "",
       "VOLUME_MOUNT": "/mms-shared",
       "MMS_SHARED_VOLUME": "demo_model_mms_helper_shared_volume",
