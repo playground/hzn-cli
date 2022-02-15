@@ -20,8 +20,12 @@ export class Env {
   init() {
     return new Observable((observer) => {
       const localEnv = dotenv.parse(readFileSync(`${this.hznConfig}/.env-local`));
-      for(var i in localEnv) {
+      for(let i in localEnv) {
         pEnv[i] = localEnv[i];
+      }
+      const supportEnv = dotenv.parse(readFileSync(`${this.hznConfig}/.env-support`));
+      for(let i in supportEnv) {
+        pEnv[i] = supportEnv[i];
       }
       pEnv.HZN_ORG_ID = this.env;
       this.hznJson = JSON.parse(readFileSync(this.hznEnv).toString());

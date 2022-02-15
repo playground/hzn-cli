@@ -67,6 +67,9 @@ class Hzn {
             observer.complete();
         });
     }
+    appendSupport() {
+        return exports.utils.appendSupport();
+    }
     buildServiceImage() {
         let arg = `docker build -t ${this.envVar.getServiceContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
         return exports.utils.shell(arg, 'done building service docker image', 'failed to build service docker image');
