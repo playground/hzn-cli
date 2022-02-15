@@ -161,6 +161,37 @@ class Utils {
     copyFile(arg) {
         return (0, rxjs_1.firstValueFrom)(this.shell(arg));
     }
+    appendSupport() {
+        return new rxjs_1.Observable((observer) => {
+            let props = this.getPropsFromFile(`${this.hznConfig}/.env-support`);
+            console.log(props);
+            console.log(`\nWould you like to change any of the above properties: Y/n?`);
+            prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                if (question.answer.toUpperCase() === 'Y') {
+                    console.log('\nKey in new value or (leave blank) press Enter to keep current value: ');
+                    prompt_1.default.get(props, (err, result) => {
+                        console.log(result);
+                        console.log(`\nWould you like to update config files: Y/n?`);
+                        prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                            let content = '';
+                            for (const [key, value] of Object.entries(result)) {
+                                content += `${key}=${value}\n`;
+                            }
+                            (0, fs_1.writeFileSync)('.env-support', content);
+                            this.copyFile(`sudo mv .env-support ${this.hznConfig}/.env-support && sudo chmod 766 ${this.hznConfig}/.env-support`).then(() => {
+                                observer.complete();
+                            }).catch((err) => {
+                                observer.error(err);
+                            });
+                        });
+                    });
+                }
+                else {
+                    observer.complete();
+                }
+            });
+        });
+    }
     updateEnvFiles(org) {
         return new rxjs_1.Observable((observer) => {
             let props = this.getPropsFromFile(`${this.hznConfig}/.env-local`);
@@ -178,7 +209,7 @@ class Utils {
                                 content += `${key}=${value}\n`;
                             }
                             (0, fs_1.writeFileSync)('.env-local', content);
-                            this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local`).then(() => {
+                            this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local && sudo chmod 766 ${this.hznConfig}/.env-local`).then(() => {
                                 this.updateEnvHzn(org)
                                     .subscribe({
                                     complete: () => observer.complete(),
@@ -236,7 +267,7 @@ class Utils {
                                     envVars[key] = value;
                                 }
                                 jsonfile_1.default.writeFileSync('.env-hzn.json', hznJson, { spaces: 2 });
-                                this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
+                                this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json && sudo chmod 766 ${this.hznConfig}/.env-hzn.json`).then(() => {
                                     console.log(`config files updated for ${org}`);
                                     observer.next({ env: org });
                                     observer.complete();
@@ -255,7 +286,7 @@ class Utils {
                         prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                             if (question.answer.toUpperCase() === 'Y') {
                                 jsonfile_1.default.writeFileSync('.env-hzn.json', hznJson, { spaces: 2 });
-                                this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
+                                this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json && sudo chmod 766 ${this.hznConfig}/.env-hzn.json`).then(() => {
                                     console.log(`config files updated for ${org}`);
                                     observer.next({ env: org });
                                     observer.complete();
@@ -284,7 +315,7 @@ class Utils {
                     if (question.answer.toUpperCase() === 'Y') {
                         delete (hznJson[org]);
                         jsonfile_1.default.writeFileSync('.env-hzn.json', hznJson, { spaces: 2 });
-                        this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
+                        this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json && sudo chmod 766 ${this.hznConfig}/.env-hzn.json`).then(() => {
                             console.log(`config files updated, ${org} has been removed`);
                             observer.complete();
                         });
@@ -361,7 +392,7 @@ class Utils {
                                 }
                             }
                             (0, fs_1.writeFileSync)('.env-local', content);
-                            this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local`).then(() => {
+                            this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local && sudo chmod 766 ${this.hznConfig}/.env-local`).then(() => {
                                 this.copyFile(`sudo cp ${__dirname}/env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
                                     this.orgCheck(org)
                                         .subscribe({

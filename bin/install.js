@@ -1,9 +1,13 @@
 #! /usr/bin/env node
 const fs = require('fs');
 const os = require('os');
+const path = require('path');
+const cp = require('child_process');
+const exec = cp.exec;
 const jsonfile = require('jsonfile');
 const homePath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
 const hznConfig = `${homePath}/config`;
+const defaultConfig = __dirname;
 const constants = fs.constants;
 
 const template = {
@@ -37,7 +41,9 @@ const template = {
     "HZN_FSS_CSSURL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-css",
     "HZN_CUSTOM_NODE_ID": "",
     "DEFAULT_ORG": "biz",
-    "ANAX": "api/v1/objects/IBM/agent_files/agent-install.sh/data",
+    "ANAX": "api/v1/objects/IBM/agent_files/agent-install.sh/data"
+  },
+  envSupport: {
     "SUPPORTED_OS_APPEND": "",
     "SUPPORTED_LINUX_DISTRO_APPEND": "",
     "SUPPORTED_DEBIAN_VARIANTS_APPEND": "",
@@ -73,45 +79,84 @@ const getPropsFromFile = (file) => {
   return props;
 }
 
-const postInstall = () => {
-  if(fs.existsSync(`${hznConfig}/.env-local`)) {
-    let props = getPropsFromFile(`${hznConfig}/.env-local`);
-    let newProps = {};
-    Object.keys(template.envLocal).forEach((key) => {
-      if(!props[key]) {
-        newProps[key] = template.envLocal[key]
-      } else {
-        newProps[key] = props[key]
+const updateEnvFile = (fname, index) => {
+  let props = getPropsFromFile(fname);
+  let newProps = {};
+  Object.keys(template[index]).forEach((key) => {
+    if(!props[key]) {
+      newProps[key] = template[index][key]
+    } else {
+      newProps[key] = props[key]
+    }
+  })
+  let content = '';
+  Object.keys(newProps).forEach((key) => {
+    content += `${key}=${newProps[key]}\n`; 
+  })
+  fs.writeFileSync(fname, content);
+}
+
+const updateJsonFile = (fname, index) => {
+  let json = jsonfile.readFileSync(fname);
+  let newJson = {};
+  Object.keys(template[index]).forEach((child) => {
+    let node = template[index][child];
+    Object.keys(json).forEach((org) => {
+      if(!newJson[org]) {
+        newJson[org] = {}
       }
+      if(!newJson[org][child]) {
+        newJson[org][child] = {}
+      }
+      Object.keys(node).forEach((key) => {
+        if(!json[org][child][key]) {
+          newJson[org][child][key] = node[key];
+        } else {
+          newJson[org][child][key] = json[org][child][key]
+        }
+      })  
     })
-    let content = '';
-    Object.keys(newProps).forEach((key) => {
-      content += `${key}=${newProps[key]}\n`; 
-    })
-    fs.writeFileSync(`${hznConfig}/.env-local`, content);
+  })
+  jsonfile.writeFileSync(fname, newJson, {spaces: 2});
+}
+
+const postInstall = () => {
+  let arg = ''
+  if(fs.existsSync(`${hznConfig}/.env-local`)) {
+    updateEnvFile(`${hznConfig}/.env-local`, 'envLocal')
+  } else {
+    arg = `sudo cp ${path.join(__dirname, '../src')}/env-local ${hznConfig}/.env-local && sudo chmod 766 ${hznConfig}/.env-local`
+    exec(arg, (err, stdout, stderr) => {
+      if(!err) {
+        updateEnvFile(`${hznConfig}/.env-local`, 'envLocal')
+      } else {
+        console.log(`${error}: ${err}`);
+      }
+    });
+  }
+  if(fs.existsSync(`${hznConfig}/.env-support`)) {
+    updateEnvFile(`${hznConfig}/.env-support`, 'envSupport')
+  } else {
+    arg = `sudo cp ${path.join(__dirname, '../src')}/env-support ${hznConfig}/.env-support && sudo chmod 766 ${hznConfig}/.env-support`
+    exec(arg, (err, stdout, stderr) => {
+      if(!err) {
+        updateEnvFile(`${hznConfig}/.env-support`, 'envSupport')
+      } else {
+        console.log(`${error}: ${err}`);
+      }
+    });
   }
   if(fs.existsSync(`${hznConfig}/.env-hzn.json`)) {
-    let json = jsonfile.readFileSync(`${hznConfig}/.env-hzn.json`);
-    let newJson = {};
-    Object.keys(template.envHzn).forEach((child) => {
-      let node = template.envHzn[child];
-      Object.keys(json).forEach((org) => {
-        if(!newJson[org]) {
-          newJson[org] = {}
-        }
-        if(!newJson[org][child]) {
-          newJson[org][child] = {}
-        }
-        Object.keys(node).forEach((key) => {
-          if(!json[org][child][key]) {
-            newJson[org][child][key] = node[key];
-          } else {
-            newJson[org][child][key] = json[org][child][key]
-          }
-        })  
-      })
-    })
-    jsonfile.writeFileSync(`${hznConfig}/.env-hzn.json`, newJson, {spaces: 2});
+    updateJsonFile(`${hznConfig}/.env-hzn.json`, 'envHzn')
+  } else {
+    arg = `sudo cp ${path.join(__dirname, '../src')}/env-hzn.json ${hznConfig}/.env-hzn.json && sudo chmod 766 ${hznConfig}/.env-hzn.json`
+    exec(arg, (err, stdout, stderr) => {
+      if(!err) {
+        updateJsonFile(`${hznConfig}/.env-hzn.json`, 'envHzn')
+      } else {
+        console.log(`${error}: ${err}`);
+      }
+    });
   }
 };
 

@@ -20,6 +20,7 @@ export declare class Hzn {
     init(): Observable<unknown>;
     test(): Observable<unknown>;
     setup(): Observable<unknown>;
+    appendSupport(): Observable<unknown>;
     buildServiceImage(): Observable<unknown>;
     pushServiceImage(): Observable<unknown>;
     buildMMSImage(): Observable<unknown>;

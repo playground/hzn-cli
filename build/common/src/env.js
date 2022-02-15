@@ -15,8 +15,12 @@ class Env {
     init() {
         return new rxjs_1.Observable((observer) => {
             const localEnv = dotenv.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-local`));
-            for (var i in localEnv) {
+            for (let i in localEnv) {
                 pEnv[i] = localEnv[i];
+            }
+            const supportEnv = dotenv.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-support`));
+            for (let i in supportEnv) {
+                pEnv[i] = supportEnv[i];
             }
             pEnv.HZN_ORG_ID = this.env;
             this.hznJson = JSON.parse((0, fs_1.readFileSync)(this.hznEnv).toString());

@@ -23,6 +23,7 @@ export declare class Utils {
     uninstallHorizon(): Observable<unknown>;
     setupManagementHub(): Observable<unknown>;
     copyFile(arg: string): Promise<unknown>;
+    appendSupport(): Observable<unknown>;
     updateEnvFiles(org: string): Observable<unknown>;
     updateOrgConfig(hznJson: any, org: string, newOrg?: boolean): Observable<unknown>;
     removeOrg(org: string): Observable<unknown>;
