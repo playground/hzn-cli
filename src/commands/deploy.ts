@@ -56,9 +56,10 @@ export const handler = (argv: Arguments<Options>): void => {
   const obj = object || '';
   const p = pattern || '';
   const configPath = config_path || utils.getHznConfig();
-  const skipInitialize = ['buildMMSImage', 'buildServiceImage', 'dockerImageExists'];
+  const skipInitialize = ['dockerImageExists'];
   const justRun = ['checkConfigState', 'createHznKey', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'];
-  const promptForUpdate = ['setup', 'test', 'buildAndPublish', 'buildPublishAndRegister', 'publishAndRegister', 'publishService', 'publishServiceAndPattern', 'publishPatterrn', 'publishMMSService', 'publishMMSPattern', 'registerAgent', 'publishMMSObject', 'unregisterAgent']
+  const promptForUpdate = ['setup', 'test', 'buildAndPublish', 'buildPublishAndRegister', 'buildMMSImage', 'buildServiceImage', 'publishAndRegister', 'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService', 
+        'publishMMSPattern', 'publishMMSObject', 'pushMMSImage', 'pushServiceImage', 'registerAgent', 'unregisterAgent']
   const runDirectly = ['setupManagementHub', 'uninstallHorizon'];
 
   if(env.length == 0) {
