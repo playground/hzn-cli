@@ -1,12 +1,12 @@
-FROM arm32v7/node:16.3.0
-
-RUN apt-get update -y && apt-get install -y apt-utils && apt-get install vim -y
+FROM alpine:3.10
+RUN apk add --no-cache  --update nodejs-current npm curl bash procps
+RUN node --version
+RUN npm --version
 
 WORKDIR /server
 
 COPY mms-docker /server/
 
-RUN npm install -g npm
 RUN npm install
 
 CMD ["npm", "start"]

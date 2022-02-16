@@ -1,6 +1,6 @@
-FROM node:16.3.0
+FROM amd64/alpine:latest
 
-RUN apt-get update -y && apt-get install -y apt-utils && apt-get install vim -y
+RUN apk --no-cache --update add jq curl bash nodejs-current npm procps
 
 WORKDIR /server
 
