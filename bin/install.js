@@ -130,7 +130,7 @@ const postInstall = () => {
       if(!err) {
         updateEnvFile(`${hznConfig}/.env-local`, 'envLocal')
       } else {
-        console.log(`${error}: ${err}`);
+        console.log(`Error: ${err}`);
       }
     });
   }
@@ -142,7 +142,7 @@ const postInstall = () => {
       if(!err) {
         updateEnvFile(`${hznConfig}/.env-support`, 'envSupport')
       } else {
-        console.log(`${error}: ${err}`);
+        console.log(`Error: ${err}`);
       }
     });
   }
@@ -154,7 +154,7 @@ const postInstall = () => {
       if(!err) {
         updateJsonFile(`${hznConfig}/.env-hzn.json`, 'envHzn')
       } else {
-        console.log(`${error}: ${err}`);
+        console.log(`Error: ${err}`);
       }
     });
   }
