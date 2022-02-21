@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 import { readFileSync, existsSync } from 'fs';
 const cp = require('child_process'),
 exec = cp.exec;
-var dotenv = require('dotenv');
+const dotenv = require('dotenv');
 
 const pEnv = process.env;
 
