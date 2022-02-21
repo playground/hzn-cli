@@ -3,9 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Env = void 0;
 const rxjs_1 = require("rxjs");
 const fs_1 = require("fs");
-const cp = require("child_process");
-const exec = cp.exec;
-const dotenv = require("dotenv");
+const cp = require('child_process'), exec = cp.exec;
+const dotenv = require('dotenv');
 const pEnv = process.env;
 class Env {
     constructor(env, hznConfig) {
