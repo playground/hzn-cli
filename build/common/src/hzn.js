@@ -7,6 +7,10 @@ const utils_1 = require("./utils");
 exports.utils = new utils_1.Utils();
 class Hzn {
     constructor(env, configPath, name, objectType, objectId, objectFile, mmsPattern) {
+        this.nodePolicyJson = '';
+        this.deploymentPolicyJson = '';
+        this.servicePolicyJson = '';
+        this.serviceDefinitionJson = '';
         this.envVar = new env_1.Env(env, exports.utils.getHznConfig());
         this.configPath = configPath;
         this.name = name;
@@ -31,6 +35,10 @@ class Hzn {
                     this.mmsPatternJson = `${this.configPath}/mms/pattern.json`;
                     this.mmsServiceJson = `${this.configPath}/mms/service.json`;
                     this.mmsPolicyJson = `${this.configPath}/mms/policy.json`;
+                    this.nodePolicyJson = `${this.configPath}/node.policy.json`;
+                    this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
+                    this.servicePolicyJson = `${this.configPath}/service.policy.json`;
+                    this.serviceDefinitionJson = `${this.configPath}/service.definition.json`;
                     observer.complete();
                 },
                 error: (err) => {
@@ -268,6 +276,18 @@ class Hzn {
                 }
             });
         });
+    }
+    addDeploymentPolicy() {
+        let arg = `hzn exchange deployment addpolicy -f ${this.deploymentPolicyJson} ${this.envVar.getEnvValue('HZN_ORG_ID')}/policy-${this.envVar.getEnvValue('SERVICE_NAME')}_${this.envVar.getEnvValue('SERVICE_VERSION')}`;
+        return exports.utils.shell(arg);
+    }
+    addServicePolicy() {
+        let arg = `hzn exchange service addpolicy -f ${this.servicePolicyJson} ${this.envVar.getEnvValue('HZN_ORG_ID')}/${this.envVar.getEnvValue('SERVICE_NAME')}_${this.envVar.getEnvValue('SERVICE_VERSION')}_${this.envVar.getEnvValue('ARCH')}`;
+        return exports.utils.shell(arg);
+    }
+    addNodePolicy() {
+        let arg = `hzn register --policy ${this.nodePolicyJson}`;
+        return exports.utils.shell(arg);
     }
     showHznInfo() {
         return exports.utils.showHznInfo();

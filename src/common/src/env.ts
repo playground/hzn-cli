@@ -67,6 +67,9 @@ export class Env {
     container = pEnv.SERVICE_CONTAINER_NAME || pEnv.SERVICE_NAME;
     pEnv.SERVICE_CONTAINER = `${pEnv.YOUR_DOCKERHUB_ID}/${container}_${pEnv.ARCH}:${pEnv.SERVICE_VERSION}`.replace(/\r?\n|\r/g, '')
   }
+  getEnvValue(key: string) {
+    return pEnv[key];
+  }
   getEnv() {
     return this.env;
   }

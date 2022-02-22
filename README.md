@@ -9,7 +9,11 @@ Open Horizon toolkit is a CLI built with Typescript for the NodeJS developers.  
 
 ## Pre-release version of hzn-cli, howto?
 
-```curl -sSL https://raw.githubusercontent.com/playground/hzn-cli/install.sh  --output install.sh && bash ./install.sh```
+### To setup Management Hub
+```curl -sSL https://raw.githubusercontent.com/playground/hzn-cli/main/install-mgmt-hub.sh  --output install-mgmt-hub.sh && bash ./install-mgmt-hub.sh```
+
+### To setup Edge Node Agent
+```curl -sSL https://raw.githubusercontent.com/playground/hzn-cli/main/install.sh  --output install.sh && bash ./install.sh```
 
 OR
 

@@ -26,6 +26,7 @@ const builder = (yargs) => yargs
     type: 'string',
     demandOption: true,
     desc: 'Available actions: ' +
+        'addDeploymentPolicy, addNodePolicy, addServicePolicy' +
         'appendSupport, buildAndPublish, buildMMSImage, buildPublishAndRegister, buildServiceImage, checkConfigState, createHznKey, dockerImageExists, getDeviceArch, ' +
         'getIpAddress, listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishAndRegister, publishMMSObject, ' +
         'publishMMSPattern, publishMMSService, publishPatterrn, publishService, publishServiceAndPattern, pullDockerImage, pushMMSImage, pushServiceImage, ' +
@@ -44,9 +45,15 @@ const handler = (argv) => {
     const p = pattern || '';
     const configPath = config_path || hzn_1.utils.getHznConfig();
     const skipInitialize = ['dockerImageExists'];
-    const justRun = ['appendSupport', 'checkConfigState', 'createHznKey', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'];
-    const promptForUpdate = ['setup', 'test', 'buildAndPublish', 'buildPublishAndRegister', 'buildMMSImage', 'buildServiceImage', 'publishAndRegister', 'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService',
-        'publishMMSPattern', 'publishMMSObject', 'pushMMSImage', 'pushServiceImage', 'registerAgent', 'unregisterAgent'];
+    const justRun = [
+        'appendSupport', 'checkConfigState', 'createHznKey', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern',
+        'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'
+    ];
+    const promptForUpdate = [
+        'setup', 'test', 'addDeploymentPolicy', 'addNodePolicy', 'addServicePolicy', 'buildAndPublish', 'buildPublishAndRegister',
+        'buildMMSImage', 'buildServiceImage', 'publishAndRegister', 'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService',
+        'publishMMSPattern', 'publishMMSObject', 'pushMMSImage', 'pushServiceImage', 'registerAgent', 'unregisterAgent'
+    ];
     const runDirectly = ['setupManagementHub', 'uninstallHorizon'];
     if (env.length == 0) {
         let value = hzn_1.utils.getPropValueFromFile(`${hzn_1.utils.getHznConfig()}/.env-local`, 'DEFAULT_ORG');

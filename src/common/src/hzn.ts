@@ -16,6 +16,11 @@ export class Hzn {
   mmsServiceJson: any;
   mmsPatternJson: any;
   mmsPolicyJson: any;
+
+  nodePolicyJson: string = '';
+  deploymentPolicyJson: string = '';
+  servicePolicyJson: string = '';
+  serviceDefinitionJson: string = '';
   envVar: any;
   configPath: string;
   name: string;
@@ -45,6 +50,11 @@ export class Hzn {
           this.mmsPatternJson = `${this.configPath}/mms/pattern.json`;
           this.mmsServiceJson = `${this.configPath}/mms/service.json`;
           this.mmsPolicyJson = `${this.configPath}/mms/policy.json`;
+
+          this.nodePolicyJson = `${this.configPath}/node.policy.json`;
+          this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
+          this.servicePolicyJson = `${this.configPath}/service.policy.json`;
+          this.serviceDefinitionJson = `${this.configPath}/service.definition.json`;
           observer.complete();    
         },
         error: (err) => {
@@ -281,6 +291,18 @@ export class Hzn {
         }  
       })
     });
+  }
+  addDeploymentPolicy() {
+    let arg = `hzn exchange deployment addpolicy -f ${this.deploymentPolicyJson} ${this.envVar.getEnvValue('HZN_ORG_ID')}/policy-${this.envVar.getEnvValue('SERVICE_NAME')}_${this.envVar.getEnvValue('SERVICE_VERSION')}`
+    return utils.shell(arg)
+  }
+  addServicePolicy() {
+    let arg = `hzn exchange service addpolicy -f ${this.servicePolicyJson} ${this.envVar.getEnvValue('HZN_ORG_ID')}/${this.envVar.getEnvValue('SERVICE_NAME')}_${this.envVar.getEnvValue('SERVICE_VERSION')}_${this.envVar.getEnvValue('ARCH')}`
+    return utils.shell(arg)
+  }
+  addNodePolicy() {
+    let arg = `hzn register --policy ${this.nodePolicyJson}`
+    return utils.shell(arg)
   }
   showHznInfo() {
     return utils.showHznInfo();
