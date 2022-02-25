@@ -10,6 +10,7 @@ const fs_1 = require("fs");
 const os_1 = __importDefault(require("os"));
 const ifs = os_1.default.networkInterfaces();
 const prompt_1 = __importDefault(require("prompt"));
+const promptSync = require('prompt-sync')();
 const jsonfile_1 = __importDefault(require("jsonfile"));
 const env = process.env.npm_config_env || 'biz';
 const notRequired = [
@@ -514,6 +515,109 @@ class Utils {
                     }
                 });
             });
+        });
+    }
+    jsonToProps(jsonFile) {
+        let policy;
+        let props = {};
+        if ((0, fs_1.existsSync)(`${this.hznConfig}/${jsonFile}`)) {
+            try {
+                policy = jsonfile_1.default.readFileSync(`${this.hznConfig}/${jsonFile}`);
+            }
+            catch (e) {
+                console.log(e);
+                policy = jsonfile_1.default.readFileSync(`${__dirname}/${jsonFile}`);
+            }
+        }
+        else {
+            policy = jsonfile_1.default.readFileSync(`${__dirname}/${jsonFile}`);
+        }
+        let keys = Object.keys(policy);
+        keys.forEach((key) => {
+            props[key] = [];
+            policy[key].forEach((el, i) => {
+                props[key].push({ name: 'name', value: el.name });
+            });
+        });
+        console.dir(props, { depth: null, colors: true });
+        return props;
+    }
+    goPrompt(props, propName) {
+        return new Promise(async (resolve, reject) => {
+            let res = [];
+            let name;
+            let value;
+            let answer;
+            Object.values(props).forEach((el) => {
+                name = promptSync(`name (${el.name}):`, { value: el.name });
+                value = promptSync(`value (${el.value}):`, { value: el.value });
+                if (name.length > 0 && value.length > 0) {
+                    res.push({ name: name, value: value });
+                }
+            });
+            do {
+                answer = promptSync(`\nWould you like to add additional ${propName}: Y/n?`);
+                if (answer.toLowerCase() == 'y') {
+                    name = promptSync('name: ', '');
+                    value = promptSync('value: ', '');
+                    if (name.length > 0 && value.length > 0) {
+                        res.push({ name: name, value: value });
+                    }
+                }
+            } while (answer.toLowerCase() == 'y');
+            resolve(res);
+        });
+    }
+    editNodePolicy() {
+        return new rxjs_1.Observable((observer) => {
+            let policy = jsonfile_1.default.readFileSync(`${this.hznConfig}/node.policy.json`);
+            console.dir(policy, { depth: null, colors: true });
+            console.log(`\nWould you like to make changes to this policy : Y/n?`);
+            prompt_1.default.get({ name: 'answer', required: true }, async (err, question) => {
+                if (question.answer.toUpperCase() === 'Y') {
+                    let props = this.jsonToProps('node.policy.json');
+                    console.log('\nKey in new value or (leave blank) press Enter to keep current value or enter blank space(s) to omit: ');
+                    console.log(props['properties']);
+                    let keys = Object.keys(props);
+                    let res = {};
+                    for (const key of keys) {
+                        res[key] = await this.goPrompt(props[key], key);
+                    }
+                    console.dir(res, { depth: null, colors: true });
+                }
+            });
+            // prompt.get(props, (err: any, result: any) => {
+            //   console.log(result)
+            //   console.log(`\nWould you like to save config files: Y/n?`)
+            //   prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
+            //     if(question.answer.toUpperCase() === 'Y') {
+            //       this.copyFile(`sudo cp -rf ${__dirname}/config ${this.homePath}`).then(() => {
+            //         let content = '';
+            //         for(const [key, value] of Object.entries(result)) {
+            //           content += `${key}=${value}\n`; 
+            //           if(key === 'DEFAULT_ORG') {
+            //             org = `${value}`;
+            //             process.env.HZN_ORG_ID = org;
+            //           }
+            //         }
+            //         writeFileSync('.env-local', content);
+            //         this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local && sudo chmod 766 ${this.hznConfig}/.env-local`).then(() => {
+            //           this.copyFile(`sudo cp ${__dirname}/env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
+            //             this.orgCheck(org)
+            //             .subscribe({
+            //               next: () => observer.next({env: org}),
+            //               complete: () => observer.complete(),
+            //               error: (err) => observer.error(err)
+            //             })
+            //           })
+            //         })
+            //       })        
+            //     } else {
+            //       console.log(`config files not saved`)
+            //       observer.error();
+            //     }
+            //   })
+            // })
         });
     }
     shell(arg, success = 'command executed successfully', error = 'command failed', options = { maxBuffer: 1024 * 2000 }) {
