@@ -666,38 +666,6 @@ class Utils {
                     observer.complete();
                 }
             });
-            // prompt.get(props, (err: any, result: any) => {
-            //   console.log(result)
-            //   console.log(`\nWould you like to save config files: Y/n?`)
-            //   prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
-            //     if(question.answer.toUpperCase() === 'Y') {
-            //       this.copyFile(`sudo cp -rf ${__dirname}/config ${this.homePath}`).then(() => {
-            //         let content = '';
-            //         for(const [key, value] of Object.entries(result)) {
-            //           content += `${key}=${value}\n`; 
-            //           if(key === 'DEFAULT_ORG') {
-            //             org = `${value}`;
-            //             process.env.HZN_ORG_ID = org;
-            //           }
-            //         }
-            //         writeFileSync('.env-local', content);
-            //         this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local && sudo chmod 766 ${this.hznConfig}/.env-local`).then(() => {
-            //           this.copyFile(`sudo cp ${__dirname}/env-hzn.json ${this.hznConfig}/.env-hzn.json`).then(() => {
-            //             this.orgCheck(org)
-            //             .subscribe({
-            //               next: () => observer.next({env: org}),
-            //               complete: () => observer.complete(),
-            //               error: (err) => observer.error(err)
-            //             })
-            //           })
-            //         })
-            //       })        
-            //     } else {
-            //       console.log(`config files not saved`)
-            //       observer.error();
-            //     }
-            //   })
-            // })
         });
     }
     shell(arg, success = 'command executed successfully', error = 'command failed', options = { maxBuffer: 1024 * 2000 }) {

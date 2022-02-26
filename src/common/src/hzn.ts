@@ -302,7 +302,7 @@ export class Hzn {
     return utils.editNodePolicy()
   }
   editServicePolicy() {
-
+    return utils.editServicePolicy()
   }
   addDeploymentPolicy() {
     let arg = `hzn exchange deployment addpolicy -f ${this.deploymentPolicyJson} ${this.envVar.getEnvValue('HZN_ORG_ID')}/policy-${this.envVar.getEnvValue('SERVICE_NAME')}_${this.envVar.getEnvValue('SERVICE_VERSION')}`
