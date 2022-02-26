@@ -602,11 +602,11 @@ export class Utils {
         json = jsonfile.readFileSync(`${this.hznConfig}/${jsonFile}`);
       } catch(e) {
         console.log(e)
-        json = jsonfile.readFileSync(`${__dirname}/${jsonFile}`)
+        json = jsonfile.readFileSync(`${__dirname}/config/${jsonFile}`)
       }
     } else {
       console.log('notfound')
-      json = jsonfile.readFileSync(`${__dirname}/${jsonFile}`)
+      json = jsonfile.readFileSync(`${__dirname}/config/${jsonFile}`)
     }
     return json
   }

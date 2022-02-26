@@ -628,12 +628,12 @@ class Utils {
             }
             catch (e) {
                 console.log(e);
-                json = jsonfile_1.default.readFileSync(`${__dirname}/${jsonFile}`);
+                json = jsonfile_1.default.readFileSync(`${__dirname}/config/${jsonFile}`);
             }
         }
         else {
             console.log('notfound');
-            json = jsonfile_1.default.readFileSync(`${__dirname}/${jsonFile}`);
+            json = jsonfile_1.default.readFileSync(`${__dirname}/config/${jsonFile}`);
         }
         return json;
     }
