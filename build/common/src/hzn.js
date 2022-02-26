@@ -277,6 +277,9 @@ class Hzn {
             });
         });
     }
+    editPolicy() {
+        return exports.utils.editPolicy();
+    }
     editDeploymentPolicy() {
     }
     editNodePolicy() {

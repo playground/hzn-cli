@@ -36,9 +36,15 @@ export declare class Utils {
     getPropValueFromFile(file: string, prop: string): string;
     getPropsFromFile(file: string): any[];
     updateHznInfo(): Observable<unknown>;
-    jsonToProps(jsonFile: string): any;
+    policyToProps(policy: string): any;
+    promptType(propName: string, res: any, el: any): void;
     goPrompt(props: any, propName: string): Promise<unknown>;
+    editPolicy(): Observable<unknown>;
     editNodePolicy(): Observable<unknown>;
+    editDeploymentPolicy(): Observable<unknown>;
+    editServicePolicy(): Observable<unknown>;
+    getJsonFromFile(jsonFile: string): any;
+    editTypePolicy(filename: string): Observable<unknown>;
     shell(arg: string, success?: string, error?: string, options?: {
         maxBuffer: number;
     }): Observable<unknown>;

@@ -42,6 +42,7 @@ export declare class Hzn {
     publishServiceAndPattern(): Observable<unknown>;
     buildPublishAndRegister(): Observable<unknown>;
     publishAndRegister(): Observable<unknown>;
+    editPolicy(): Observable<unknown>;
     editDeploymentPolicy(): void;
     editNodePolicy(): Observable<unknown>;
     editServicePolicy(): void;

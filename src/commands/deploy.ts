@@ -36,7 +36,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
       demandOption: true,
       desc: 'Available actions: ' +
             'addDeploymentPolicy, addNodePolicy, addServicePolicy, appendSupport, buildAndPublish, buildMMSImage, buildPublishAndRegister, ' + 
-            'buildServiceImage, checkConfigState, createHznKey, dockerImageExists, editDeploymentPolicy, editNodePolicy, editServicePolicy, getDeviceArch, ' +
+            'buildServiceImage, checkConfigState, createHznKey, dockerImageExists, editPolicy, editDeploymentPolicy, editNodePolicy, editServicePolicy, getDeviceArch, ' +
             'getIpAddress, listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishAndRegister, publishMMSObject, ' +
             'publishMMSPattern, publishMMSService, publishPatterrn, publishService, publishServiceAndPattern, pullDockerImage, pushMMSImage, pushServiceImage, ' +
 		        'registerAgent, removeOrg, setup, setupManagementHub, showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo'
@@ -59,7 +59,7 @@ export const handler = (argv: Arguments<Options>): void => {
   const configPath = config_path || utils.getHznConfig();
   const skipInitialize = ['dockerImageExists'];
   const justRun = [
-    'appendSupport', 'checkConfigState', 'createHznKey', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 
+    'appendSupport', 'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 
     'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'
   ];
   const promptForUpdate = [

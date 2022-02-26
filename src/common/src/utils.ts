@@ -10,7 +10,6 @@ import jsonfile from 'jsonfile';
 import { utils } from '.';
 import { fork } from 'child_process';
 
-
 const env = process.env.npm_config_env || 'biz';
 const notRequired = [
   'SERVICE_CONTAINER_CREDS', 'MMS_CONTAINER_CREDS', 'MMS_OBJECT_FILE', 'HZN_CUSTOM_NODE_ID', 'UPDATE_FILE_NAME',
@@ -496,28 +495,38 @@ export class Utils {
       })
     })  
   }
-  jsonToProps(jsonFile: string) {
-    let policy: any;
+  policyToProps(policy: string) {
     let props: any = {};
-    if(existsSync(`${this.hznConfig}/${jsonFile}`)) {
-      try {
-        policy = jsonfile.readFileSync(`${this.hznConfig}/${jsonFile}`);
-      } catch(e) {
-        console.log(e)
-        policy = jsonfile.readFileSync(`${__dirname}/${jsonFile}`)
-      }
-    } else {
-      policy = jsonfile.readFileSync(`${__dirname}/${jsonFile}`)
-    }
     let keys = Object.keys(policy);
     keys.forEach((key) => {
       props[key] = [];
       policy[key].forEach((el: any, i: number) => {
-        props[key].push({name: 'name', value: el.name})
+        if(key === 'properties') {
+          props[key].push({name: el.name, value: el.value})
+        } else {
+          props[key].push({value: el})
+        }
       })
     })
     console.dir(props, {depth: null, colors: true})  
     return props;
+  }
+  promptType(propName: string, res: any, el: any) {
+    let name: string; 
+    let value: string;
+    if(propName === 'properties') {
+      name = promptSync(`name (${el.name}): `, {value: el.name}).trim();
+      value = promptSync(`value (${el.value}): `, {value: el.value}).trim();
+      if(name.length > 0 && value.length > 0) {
+        res.push({name: name, value: value})  
+      }            
+    } else {
+      console.dir(el, {depth: null, color: true})
+      value = promptSync(`constraint (${el.value}): `, {value: el.value}).trim();
+      if(value.length > 0) {
+        res.push(value)
+      }
+    }
   }
   goPrompt(props: any, propName: string) {
     return new Promise(async (resolve, reject) => {
@@ -525,43 +534,109 @@ export class Utils {
       let name: string; 
       let value: string;
       let answer: string;
-      Object.values(props).forEach((el: any) => {
-        name = promptSync(`name (${el.name}):`, {value: el.name});
-        value = promptSync(`value (${el.value}):`, {value: el.value});
-        if(name.length > 0 && value.length > 0) {
-          res.push({name: name, value: value})  
-        }
-      })
+      if(propName == 'properties') {
+        Object.values(props).forEach((el: any) => {
+          this.promptType(propName, res, el)
+        })  
+      } else {
+        props.forEach((el: any) => {
+          this.promptType(propName, res, el)
+        })
+      }
+      const template = propName == 'properties' ? {name: '', value: ''} : {value: ''}
       do {
-        answer = promptSync(`\nWould you like to add additional ${propName}: Y/n?`)
+        answer = promptSync(`Would you like to add additional ${propName}: Y/n? `)
         if(answer.toLowerCase() == 'y') {
-          name = promptSync('name: ', '');
-          value = promptSync('value: ', '');
-          if(name.length > 0 && value.length > 0) {
-            res.push({name: name, value: value})  
-          }
+          this.promptType(propName, res, template)
         }  
       } while(answer.toLowerCase() == 'y')
       resolve(res)   
     })
   }
-  editNodePolicy() {
+  editPolicy() {
     return new Observable((observer) => {
-      let policy = jsonfile.readFileSync(`${this.hznConfig}/node.policy.json`);
+      let answer;
+      console.log('\x1b[36m', `\nType of policies:\n1) Node Policy\n2) Deployment Policy\n3) Service Policy\n0) To exit`)
+      do {
+        answer = parseInt(promptSync(`Please select the type of policy you would like to work with: `))
+        if(answer < 0 || answer > 3) {
+          console.log('\x1b[41m%s\x1b[0m', '\nInvalid, try again.')
+        } 
+      } while(answer < 0 || answer > 3)
+      switch(answer) {
+        case 0: 
+          observer.complete()
+          break;
+        case 1:
+          console.log('\x1b[32m', '\nWorking with Node Policy') 
+          this.editNodePolicy()
+          .subscribe(() => observer.complete())
+          break;
+        case 2:  
+          console.log('\x1b[32m', '\nWorking with Deployment Policy') 
+          this.editDeploymentPolicy()
+          .subscribe(() => observer.complete())
+          break;
+        case 3:  
+          console.log('\x1b[32m', '\nWorking with Service Policy') 
+          this.editServicePolicy()
+          .subscribe(() => observer.complete())
+          break;
+      }
+    })  
+  }
+  editNodePolicy() {
+    return this.editTypePolicy('node.policy.json')
+  }
+  editDeploymentPolicy() {
+    return new Observable((observer) => {
+    })  
+  }
+  editServicePolicy() {
+    return this.editTypePolicy('service.policy.json')
+  }
+  getJsonFromFile(jsonFile: string) {
+    let json;
+    if(existsSync(`${this.hznConfig}/${jsonFile}`)) {
+      try {
+        json = jsonfile.readFileSync(`${this.hznConfig}/${jsonFile}`);
+      } catch(e) {
+        console.log(e)
+        json = jsonfile.readFileSync(`${__dirname}/${jsonFile}`)
+      }
+    } else {
+      console.log('notfound')
+      json = jsonfile.readFileSync(`${__dirname}/${jsonFile}`)
+    }
+    return json
+  }
+  editTypePolicy(filename: string) {
+    return new Observable((observer) => {
+      let policy = this.getJsonFromFile(filename);
       console.dir(policy, {depth: null, colors: true})
-      console.log(`\nWould you like to make changes to this policy : Y/n?`)
+      console.log(`\nWould you like to make changes to this policy: Y/n?`)
       prompt.get({name: 'answer', required: true}, async (err: any, question: any) => {
         if(question.answer.toUpperCase() === 'Y') {
-          let props = this.jsonToProps('node.policy.json');
+          let props = this.policyToProps(policy);
           console.log('\nKey in new value or (leave blank) press Enter to keep current value or enter blank space(s) to omit: ')
-          console.log(props['properties'])
           let keys = Object.keys(props);
           let res = {};
           for(const key of keys) {
+            console.log('\x1b[32m', `${key}\n`)
+            // console.dir(`${key} ${props[key]}\n`)
             res[key] = await this.goPrompt(props[key], key)
           }
           console.dir(res, {depth: null, colors: true})
-        }
+          console.log(`\nWould you like to save this policy: Y/n?`)
+          prompt.get({name: 'answer', required: true}, async (err: any, question: any) => {
+            if(question.answer.toUpperCase() === 'Y') {
+              jsonfile.writeFileSync(`${this.hznConfig}/${filename}`, res, {spaces: 2});
+              observer.complete()
+            }
+          })
+        } else {
+          observer.complete()
+        }    
       })  
       // prompt.get(props, (err: any, result: any) => {
       //   console.log(result)
