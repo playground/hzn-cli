@@ -19,7 +19,7 @@ const builder = (yargs) => yargs
     object_type: { type: 'string', desc: 'Type of object' },
     object_id: { type: 'string', desc: 'Id of object to be published' },
     object: { type: 'string', desc: 'Object file to be published' },
-    pattern: { type: 'string', desc: 'MMS pattern' },
+    pattern: { type: 'string', desc: 'Pattern name' },
     skip_config_update: { type: 'string', desc: 'Do not prompt for config updates' }
 })
     .positional('action', {
