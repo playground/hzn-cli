@@ -1,0 +1,9 @@
+{
+  "properties": [ 
+    { 
+      "name": "openhorizon.allowPrivileged",
+      "value": true
+    }
+  ],
+  "constraints": [ ]
+}

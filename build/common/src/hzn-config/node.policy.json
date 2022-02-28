@@ -1,0 +1,13 @@
+{
+  "properties": [
+    {
+      "name": "homehub",
+      "value": "Home Automation"
+    },
+    {
+      "name": "openhorizon.allowPrivileged",
+      "value": true
+    }
+  ],
+  "constraints": []
+}

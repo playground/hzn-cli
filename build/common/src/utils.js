@@ -40,7 +40,7 @@ class Utils {
     constructor() {
         this.etcDefault = '/etc/default';
         this.homePath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
-        this.hznConfig = `${this.homePath}/config`;
+        this.hznConfig = `${this.homePath}/hzn-config`;
     }
     init() {
     }
@@ -437,8 +437,8 @@ class Utils {
                     if (question.answer.toUpperCase() === 'Y') {
                         // Copy config/* to user home
                         let arg = '';
-                        if (!(0, fs_1.existsSync)(`${this.homePath}/config`)) {
-                            arg = `sudo cp -rf ${__dirname}/config ${this.homePath} && sudo chown -R $(whoami) ${this.homePath}/config && cp ${__dirname}/env-support ${this.hznConfig}/.env-support`;
+                        if (!(0, fs_1.existsSync)(this.hznConfig)) {
+                            arg = `sudo cp -rf ${__dirname}/hzn-config ${this.homePath} && sudo chown -R $(whoami) ${this.hznConfig} && cp ${__dirname}/env-support ${this.hznConfig}/.env-support`;
                         }
                         else if (!(0, fs_1.existsSync)(`${this.hznConfig}/.env-support`)) {
                             arg = `cp ${__dirname}/env-support ${this.hznConfig}/.env-support`;

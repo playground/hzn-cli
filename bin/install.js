@@ -6,7 +6,7 @@ const cp = require('child_process');
 const exec = cp.exec;
 const jsonfile = require('jsonfile');
 const homePath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
-const hznConfig = `${homePath}/config`;
+const hznConfig = `${homePath}/hzn-config`;
 const defaultConfig = __dirname;
 const constants = fs.constants;
 
