@@ -17,7 +17,6 @@ export declare class Env {
     getServiceName(): string | undefined;
     getServiceVersion(): string | undefined;
     getSharedVolume(): string | undefined;
-    isTopLevelService(): boolean;
     getMyDockerHubId(): string | undefined;
     getDockerImageBase(): string;
     getMMSContainerCreds(): string | undefined;

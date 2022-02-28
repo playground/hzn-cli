@@ -45,23 +45,16 @@ export class Hzn {
           this.objectFile = this.objectFile || this.envVar.getObjectFile();
           this.mmsPattern = this.mmsPattern || this.envVar.getMMSPatterName();
           console.log(`configPath: ${this.configPath}`)
-          this.patternJson = `${this.configPath}/service/pattern.json`;
-          this.serviceJson = `${this.configPath}/service/service.json`;
+          this.patternJson = `${this.configPath}/services/dependent-service/service.pattern.json`;
+          this.serviceJson = `${this.configPath}/services/dependent-service/service.definition.json`;
           this.policyJson = `${this.configPath}/service/policy.json`;
-          this.mmsPatternJson = `${this.configPath}/mms/pattern.json`;
-          this.mmsServiceJson = `${this.configPath}/mms/service.json`;
+          this.mmsPatternJson = `${this.configPath}/services/top-level-service/service.pattern.json`;
+          this.mmsServiceJson = `${this.configPath}/services/top-level-service/service.definition.json`;
           this.mmsPolicyJson = `${this.configPath}/mms/policy.json`;
 
           this.nodePolicyJson = `${this.configPath}/node.policy.json`;
           this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
           this.servicePolicyJson = `${this.configPath}/service.policy.json`;
-          if(this.envVar.isTopLevelService()) {
-            this.serviceDefinitionJson = `${this.configPath}/services/top-level-service/service.definition.json`;
-            this.servicePatternJson = `${this.configPath}/services/top-level-service/service.pattern.json`;
-          } else {
-            this.serviceDefinitionJson = `${this.configPath}/services/dependent-service/service.definition.json`;
-            this.servicePatternJson = `${this.configPath}/services/dependent-service/service.pattern.json`;
-          }  
           observer.complete();    
         },
         error: (err) => {
@@ -140,11 +133,11 @@ export class Hzn {
     })
   }
   publishService() {
-    let arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceDefinitionJson} --pull-image`;
+    let arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceJson} --pull-image`;
     return utils.shell(arg, 'done publishing service', 'failed to publish service');
   }
   publishPattern() {
-    let arg = `hzn exchange pattern publish -f ${this.servicePatternJson}`;
+    let arg = `hzn exchange pattern publish -f ${this.patternJson}`;
     return utils.shell(arg, 'done publishing service pattern', 'failed to publish service pattern');
   }
   publishMMSService() {

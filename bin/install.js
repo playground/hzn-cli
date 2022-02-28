@@ -13,19 +13,22 @@ const constants = fs.constants;
 const template = {
   envHzn:   {
     "envVars": {
-      "SERVICE_NAME": "homehub-mms",
-      "SERVICE_CONTAINER_NAME": "homehub-mms",
+      "SERVICE_NAME": "saved-model-service",
+      "SERVICE_CONTAINER_NAME": "saved-model-service",
       "SERVICE_VERSION": "1.0.0",
       "SERVICE_VERSION_RANGE_UPPER": "1.0.0",
       "SERVICE_VERSION_RANGE_LOWER": "1.0.0",
       "SERVICE_CONTAINER_CREDS": "",
       "VOLUME_MOUNT": "/mms-shared",
-      "SHARED_VOLUME": "shared_volume",
+      "SHARED_VOLUME": "mms_shared_volume",
       "OBJECT_TYPE": "object_detection",
       "OBJECT_ID": "config.json",
       "OBJECT_FILE": "config/config.json",
       "UPDATE_FILE_NAME": "model.zip",
-      "TOP_LEVEL_SERVICE": true
+      "MMS_CONTAINER_CREDS": "",
+      "MMS_CONTAINER_NAME": "mms-service",
+      "MMS_SERVICE_NAME": "mms-service",
+      "MMS_SERVICE_VERSION": "1.0.0"
     },
     "metaVars": {
     }

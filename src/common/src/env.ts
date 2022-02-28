@@ -95,9 +95,6 @@ export class Env {
   getSharedVolume() {
     return pEnv.SHARED_VOLUME;
   }
-  isTopLevelService() {
-    return pEnv.TOP_LEVEL_SERVICE === 'true';
-  }
   getMyDockerHubId() {
     return pEnv.YOUR_DOCKERHUB_ID;
   }
