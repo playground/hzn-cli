@@ -32,7 +32,7 @@ export class Hzn {
     this.objectType = objectType;
     this.objectId = objectId;
     this.objectFile = objectFile;
-    this.mmsPattern = pattern;
+    this.pattern = pattern;
   }
 
   init() {
@@ -163,7 +163,7 @@ export class Hzn {
     return new Observable((observer) => {
       this.unregisterAgent().subscribe({
         complete: () => {
-          let arg = `hzn register --policy ${this.mmsPolicyJson} --pattern "${this.mmsPattern}"`;
+          let arg = `hzn register --policy ${this.nodePolicyJson} --pattern "${this.pattern}"`;
           utils.shell(arg, 'done registering agent', 'failed to register agent')
           .subscribe({
             complete: () => observer.complete(),
@@ -176,7 +176,7 @@ export class Hzn {
     })  
   }
   publishMMSObject() {
-    let arg = `hzn mms object publish --type=${this.objectType} --id=${this.objectId} --object=${this.objectFile} --pattern=${this.mmsPattern}`
+    let arg = `hzn mms object publish --type=${this.objectType} --id=${this.objectId} --object=${this.objectFile} --pattern=${this.pattern}`
     return utils.shell(arg, 'done publishing object', 'failed to publish object');
   }
   buildAndPublish() {
