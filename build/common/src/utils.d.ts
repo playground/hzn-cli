@@ -28,6 +28,7 @@ export declare class Utils {
     updateOrgConfig(hznJson: any, org: string, newOrg?: boolean): Observable<unknown>;
     removeOrg(org: string): Observable<unknown>;
     orgCheck(org: string, skipUpdate?: boolean): Observable<unknown>;
+    filterEnvVars(result: any): {};
     setupEnvFiles(org: string): Observable<unknown>;
     updateEnvHzn(org: string): Observable<unknown>;
     checkDefaultConfig(): Observable<unknown>;

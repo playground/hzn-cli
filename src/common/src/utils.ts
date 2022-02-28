@@ -11,13 +11,28 @@ import { utils } from '.';
 import { fork } from 'child_process';
 
 const env = process.env.npm_config_env || 'biz';
+const isBoolean = [
+  'TOP_LEVEL_SERVICE'
+]
 const notRequired = [
-  'SERVICE_CONTAINER_CREDS', 'MMS_CONTAINER_CREDS', 'MMS_OBJECT_FILE', 'HZN_CUSTOM_NODE_ID', 'UPDATE_FILE_NAME',
+  'SERVICE_CONTAINER_CREDS', 'MMS_CONTAINER_CREDS', 'OBJECT_FILE', 'OBJECT_ID', 'OBJECT_TYPE', 'HZN_CUSTOM_NODE_ID', 'UPDATE_FILE_NAME',
   'SUPPORTED_OS_APPEND', 'SUPPORTED_LINUX_DISTRO_APPEND', 'SUPPORTED_DEBIAN_VARIANTS_APPEND', 'SUPPORTED_DEBIAN_VERSION_APPEND',
   'SUPPORTED_DEBIAN_ARCH_APPEND', 'SUPPORTED_REDHAT_VARIANTS_APPEND', 'SUPPORTED_REDHAT_VERSION_APPEND', 'SUPPORTED_REDHAT_ARCH_APPEND'
 ];
 const mustHave = [
-  
+  "SERVICE_NAME",
+  "SERVICE_CONTAINER_NAME",
+  "SERVICE_VERSION",
+  "SERVICE_VERSION_RANGE_UPPER",
+  "SERVICE_VERSION_RANGE_LOWER",
+  "SERVICE_CONTAINER_CREDS",
+  "VOLUME_MOUNT",
+  "SHARED_VOLUME",
+  "OBJECT_TYPE",
+  "OBJECT_ID",
+  "OBJECT_FILE",
+  "UPDATE_FILE_NAME",
+  "TOP_LEVEL_SERVICE"
 ];
 
 export class Utils {
@@ -199,7 +214,18 @@ export class Utils {
         if(question.answer.toUpperCase() === 'Y') {
           console.log('\nKey in new value or (leave blank) press Enter to keep current value: ')
           prompt.get(props, (err: any, result: any) => {
-            console.log(result)
+            result = this.filterEnvVars(result)
+            console.dir(result, {depth: null, color: true})
+            const template = {name: '', value: ''}
+            let propName = 'environment variable'
+            let answer: string;
+            do {
+              answer = promptSync(`Would you like to add additional ${propName}: Y/n? `)
+              if(answer.toLowerCase() == 'y') {
+                this.promptType(propName, result, template)
+              }  
+            } while(answer.toLowerCase() == 'y')
+      
             console.log(`\nWould you like to update config files: Y/n?`)
             prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
               let content = '';
@@ -247,6 +273,11 @@ export class Utils {
         } else {
           props[i] = {name: key, default: value, required: notRequired.indexOf(key) < 0};
         }
+        if(isBoolean.indexOf(key) >= 0) {
+          props[i]['pattern'] = /^(true|false)$/
+          props[i]['message'] = 'Must be true or false'
+        }
+
         i++;
       }
       console.log(props)
@@ -255,7 +286,18 @@ export class Utils {
         if(question.answer.toUpperCase() === 'Y') {
           console.log('\nKey in new value or (leave blank) press Enter to keep current value: ')
           prompt.get(props, (err: any, result: any) => {
-            console.log(result)
+            result = this.filterEnvVars(result)
+            console.dir(result, {depth: null, color: true})
+            const template = {name: '', value: ''}
+            let propName = 'environment variable'
+            let answer: string;
+            do {
+              answer = promptSync(`Would you like to add additional ${propName}: Y/n? `)
+              if(answer.toLowerCase() == 'y') {
+                this.promptType(propName, result, template)
+              }  
+            } while(answer.toLowerCase() == 'y')
+
             console.log(`\nWould you like to save these changes: Y/n?`)
             prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
               if(question.answer.toUpperCase() === 'Y') {
@@ -351,6 +393,15 @@ export class Utils {
       }
     })
   }
+  filterEnvVars(result: any) {
+    let res = {}
+    for(const [key, value] of Object.entries(result)) {
+      if(typeof value === 'string' && (value.trim().length > 0 || mustHave.indexOf(key) >= 0)) {
+        res[key] = value.trim()
+      }
+    }
+    return res;    
+  }
   setupEnvFiles(org: string) {
     return new Observable((observer) => {
       // console.log(process.cwd(), __dirname, __filename)
@@ -365,6 +416,7 @@ export class Utils {
       })
       console.log('\nKey in new value or (leave blank) press Enter to keep current value: ')
       prompt.get(props, (err: any, result: any) => {
+        result = this.filterEnvVars(result)
         console.log(result)
         console.log(`\nWould you like to save config files: Y/n?`)
         prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
@@ -460,6 +512,10 @@ export class Utils {
                 prop[1] = os.hostname();
               }
               props[i] = {name: prop[0], default: prop[1], required: notRequired.indexOf(prop[0]) < 0};
+              if(isBoolean.indexOf(prop[0]) >= 0) {
+                props[i]['pattern'] = /^(true|false)$/
+                props[i]['message'] = 'Must be true or false'
+              }
             }  
           }
         });  
@@ -517,11 +573,15 @@ export class Utils {
   promptType(propName: string, res: any, el: any) {
     let name: string; 
     let value: string;
-    if(propName === 'properties') {
+    if(propName === 'properties' || propName === 'environment variable') {
       name = promptSync(`name (${el.name}): `, {value: el.name}).trim();
       value = promptSync(`value (${el.value}): `, {value: el.value}).trim();
       if(name.length > 0 && value.length > 0) {
-        res.push({name: name, value: value})  
+        if(propName === 'properties') {
+          res.push({name: name, value: value})  
+        } else {
+          res[name] = value
+        }
       }            
     } else {
       console.dir(el, {depth: null, color: true})
