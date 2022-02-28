@@ -130,7 +130,7 @@ class Hzn {
         return exports.utils.shell(arg, 'done publishing service', 'failed to publish service');
     }
     publishPattern() {
-        let arg = `hzn exchange pattern publish -f ${this.patternJson}`;
+        let arg = `hzn exchange pattern publish -f ${this.servicePatternJson}`;
         return exports.utils.shell(arg, 'done publishing service pattern', 'failed to publish service pattern');
     }
     publishMMSService() {
