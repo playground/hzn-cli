@@ -1,0 +1,45 @@
+{
+  "name": "pattern-${SERVICE_NAME}-$ARCH",
+  "label": "Edge $SERVICE_NAME Service Pattern for $ARCH",
+  "description": "Pattern for $SERVICE_NAME for $ARCH",
+  "public": false,
+  "services": [
+    {
+      "serviceUrl": "$SERVICE_NAME",
+      "serviceOrgid": "$HZN_ORG_ID",
+      "serviceArch": "$ARCH",
+      "serviceVersions": [
+        {
+          "version": "$SERVICE_VERSION",
+          "priority":{
+            "priority_value": 2,
+            "retries": 2,
+            "retry_durations": 3600,
+            "verified_durations": 52
+          },
+          "upgradePolicy": {}
+        },
+        {
+          "version":"1.0.0",
+          "priority":{
+            "priority_value": 3,
+            "retries": 2,
+            "retry_durations": 3600,
+            "verified_durations": 52
+          },
+          "upgradePolicy": {}
+        }
+      ],
+      "dataVerification": {},
+      "nodeHealth": {
+        "missing_heartbeat_interval": 1800,
+        "check_agreement_status": 1800
+      }
+    }
+  ],
+  "agreementProtocols": [
+    {
+      "name": "Basic"
+    }
+  ]
+}

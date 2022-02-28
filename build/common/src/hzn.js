@@ -6,27 +6,28 @@ const env_1 = require("./env");
 const utils_1 = require("./utils");
 exports.utils = new utils_1.Utils();
 class Hzn {
-    constructor(env, configPath, name, objectType, objectId, objectFile, mmsPattern) {
+    constructor(env, configPath, name, objectType, objectId, objectFile, pattern) {
         this.nodePolicyJson = '';
         this.deploymentPolicyJson = '';
         this.servicePolicyJson = '';
         this.serviceDefinitionJson = '';
+        this.servicePatternJson = '';
         this.envVar = new env_1.Env(env, exports.utils.getHznConfig());
         this.configPath = configPath;
         this.name = name;
         this.objectType = objectType;
         this.objectId = objectId;
         this.objectFile = objectFile;
-        this.mmsPattern = mmsPattern;
+        this.mmsPattern = pattern;
     }
     init() {
         return new rxjs_1.Observable((observer) => {
             this.envVar.init()
                 .subscribe({
                 complete: () => {
-                    this.objectType = this.objectType || this.envVar.getMMSObjectType();
-                    this.objectId = this.objectId || this.envVar.getMMSObjectId();
-                    this.objectFile = this.objectFile || this.envVar.getMMSObjectFile();
+                    this.objectType = this.objectType || this.envVar.getObjectType();
+                    this.objectId = this.objectId || this.envVar.getObjectId();
+                    this.objectFile = this.objectFile || this.envVar.getObjectFile();
                     this.mmsPattern = this.mmsPattern || this.envVar.getMMSPatterName();
                     console.log(`configPath: ${this.configPath}`);
                     this.patternJson = `${this.configPath}/service/pattern.json`;
@@ -38,7 +39,14 @@ class Hzn {
                     this.nodePolicyJson = `${this.configPath}/node.policy.json`;
                     this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
                     this.servicePolicyJson = `${this.configPath}/service.policy.json`;
-                    this.serviceDefinitionJson = `${this.configPath}/service.definition.json`;
+                    if (this.envVar.isTopLevelService()) {
+                        this.serviceDefinitionJson = `${this.configPath}/services/top-level-service/service.definition.json`;
+                        this.servicePatternJson = `${this.configPath}/services/top-level-service/service.pattern.json`;
+                    }
+                    else {
+                        this.serviceDefinitionJson = `${this.configPath}/services/dependent-service/service.definition.json`;
+                        this.servicePatternJson = `${this.configPath}/services/dependent-service/service.pattern.json`;
+                    }
                     observer.complete();
                 },
                 error: (err) => {
@@ -118,7 +126,7 @@ class Hzn {
         });
     }
     publishService() {
-        let arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceJson} --pull-image`;
+        let arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceDefinitionJson} --pull-image`;
         return exports.utils.shell(arg, 'done publishing service', 'failed to publish service');
     }
     publishPattern() {

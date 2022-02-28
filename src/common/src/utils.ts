@@ -421,7 +421,14 @@ export class Utils {
         console.log(`\nWould you like to save config files: Y/n?`)
         prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
           if(question.answer.toUpperCase() === 'Y') {
-            this.copyFile(`sudo cp -rf ${__dirname}/config ${this.homePath}`).then(() => {
+            // Copy config/* to user home
+            let arg = '';
+            if(!existsSync(`${this.homePath}/config`)) {
+              arg = `sudo cp -rf ${__dirname}/config ${this.homePath} && sudo chown -R $(whoami) ${this.homePath}/config && cp ${__dirname}/env-support ${this.hznConfig}/.env-support`;
+            } else if(!existsSync(`${this.hznConfig}/.env-support`)) {
+              arg = `cp ${__dirname}/env-support ${this.hznConfig}/.env-support`;
+            }
+            this.copyFile(arg).then(() => {
               let content = '';
               for(const [key, value] of Object.entries(result)) {
                 content += `${key}=${value}\n`; 
@@ -461,10 +468,10 @@ export class Utils {
   }
   checkDefaultConfig() {
     return new Observable((observer) => {
-      if(existsSync(`${this.hznConfig}/.env-local`) && existsSync(`${this.hznConfig}/.env-hzn.json`)) {
+      if(existsSync(`${this.hznConfig}/.env-local`) && existsSync(`${this.hznConfig}/.env-hzn.json`) && existsSync(`${this.hznConfig}/.env-support`)) {
         observer.complete()
       } else {
-        observer.error('No config files.')
+        observer.error('No config files.  Please run "oh deploy setup"')
       }
     })
   }

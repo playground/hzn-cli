@@ -17,10 +17,11 @@ export declare class Hzn {
     deploymentPolicyJson: string;
     servicePolicyJson: string;
     serviceDefinitionJson: string;
+    servicePatternJson: string;
     envVar: any;
     configPath: string;
     name: string;
-    constructor(env: string, configPath: string, name: string, objectType: string, objectId: string, objectFile: string, mmsPattern: string);
+    constructor(env: string, configPath: string, name: string, objectType: string, objectId: string, objectFile: string, pattern: string);
     init(): Observable<unknown>;
     test(): Observable<unknown>;
     setup(): Observable<unknown>;
