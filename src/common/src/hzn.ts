@@ -149,7 +149,7 @@ export class Hzn {
     return utils.shell(arg, 'done publishing mss pattern', 'failed to publish mms pattern');
   }
   unregisterAgent() {
-    let arg = `hzn unregister -f`;
+    let arg = `hzn unregister -frDv`;
     return utils.shell(arg, 'done unregistering agent', 'failed to unregister agent');
   }
   registerAgent() {
