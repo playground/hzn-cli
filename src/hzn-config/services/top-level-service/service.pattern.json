@@ -1,19 +1,19 @@
 {
-  "name": "pattern-${SERVICE_NAME}-$ARCH",
-  "label": "Edge $SERVICE_NAME Service Pattern for $ARCH",
-  "description": "Pattern for $SERVICE_NAME for $ARCH",
+  "name": "pattern-${MMS_SERVICE_NAME}-$ARCH",
+  "label": "Edge $MMS_SERVICE_NAME Service Pattern for $ARCH",
+  "description": "Pattern for $MMS_SERVICE_NAME for $ARCH",
   "public": false,
   "services": [
     {
-      "serviceUrl": "$SERVICE_NAME",
+      "serviceUrl": "$MMS_SERVICE_NAME",
       "serviceOrgid": "$HZN_ORG_ID",
       "serviceArch": "$ARCH",
       "serviceVersions": [
         {
-          "version": "$SERVICE_VERSION",
+          "version": "$MMS_SERVICE_VERSION",
           "priority":{
             "priority_value": 2,
-            "retries": 2,
+            "retries": 3,
             "retry_durations": 3600,
             "verified_durations": 52
           },
@@ -23,7 +23,7 @@
           "version":"1.0.0",
           "priority":{
             "priority_value": 3,
-            "retries": 2,
+            "retries": 3,
             "retry_durations": 3600,
             "verified_durations": 52
           },

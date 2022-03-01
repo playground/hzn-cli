@@ -16,7 +16,7 @@ export declare class Env {
     getFSSCSSUrl(): string | undefined;
     getServiceName(): string | undefined;
     getServiceVersion(): string | undefined;
-    getSharedVolume(): string | undefined;
+    getMMSSharedVolume(): string | undefined;
     getMyDockerHubId(): string | undefined;
     getDockerImageBase(): string;
     getMMSContainerCreds(): string | undefined;
@@ -25,9 +25,9 @@ export declare class Env {
     getMMSServiceVersion(): string | undefined;
     getMMSContainer(): string | undefined;
     getArch(): string | undefined;
-    getObjectType(): string | undefined;
-    getObjectId(): string | undefined;
-    getObjectFile(): string | undefined;
+    getMMSObjectType(): string | undefined;
+    getMMSObjectId(): string | undefined;
+    getMMSObjectFile(): string | undefined;
     getServiceContainerCreds(): string | undefined;
     getPatternName(): string | undefined;
     getServiceContainer(): string | undefined;

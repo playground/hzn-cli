@@ -89,8 +89,8 @@ class Env {
     getServiceVersion() {
         return pEnv.SERVICE_VERSION;
     }
-    getSharedVolume() {
-        return pEnv.SHARED_VOLUME;
+    getMMSSharedVolume() {
+        return pEnv.MMS_SHARED_VOLUME;
     }
     getMyDockerHubId() {
         return pEnv.YOUR_DOCKERHUB_ID;
@@ -116,14 +116,14 @@ class Env {
     getArch() {
         return pEnv.ARCH;
     }
-    getObjectType() {
-        return pEnv.OBJECT_TYPE;
+    getMMSObjectType() {
+        return pEnv.MMS_OBJECT_TYPE;
     }
-    getObjectId() {
-        return pEnv.OBJECT_ID;
+    getMMSObjectId() {
+        return pEnv.MMS_OBJECT_ID;
     }
-    getObjectFile() {
-        return pEnv.OBJECT_FILE;
+    getMMSObjectFile() {
+        return pEnv.MMS_OBJECT_FILE;
     }
     getServiceContainerCreds() {
         return pEnv.SERVICE_CONTAINER_CREDS;

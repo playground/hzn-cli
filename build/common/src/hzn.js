@@ -25,9 +25,9 @@ class Hzn {
             this.envVar.init()
                 .subscribe({
                 complete: () => {
-                    this.objectType = this.objectType || this.envVar.getObjectType();
-                    this.objectId = this.objectId || this.envVar.getObjectId();
-                    this.objectFile = this.objectFile || this.envVar.getObjectFile();
+                    this.objectType = this.objectType || this.envVar.getMMSObjectType();
+                    this.objectId = this.objectId || this.envVar.getMMSObjectId();
+                    this.objectFile = this.objectFile || this.envVar.getMMSObjectFile();
                     this.mmsPattern = this.mmsPattern || this.envVar.getMMSPatterName();
                     console.log(`configPath: ${this.configPath}`);
                     this.patternJson = `${this.configPath}/services/dependent-service/service.pattern.json`;
