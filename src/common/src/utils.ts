@@ -112,7 +112,7 @@ export class Utils {
     let nodeId = id ? `-d ${id}` : '';
     if(anax && anax.indexOf('open-horizon') > 0) {
       // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download/agent-install.sh
-      return this.shell(`curl -sSL ${anax} | yes | sudo -s -E bash -s -- -i anax: -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`)
+      return this.shell(`curl -sSL ${anax} | yes | sudo -s -E bash -s -- -i anax: -k css: -c css:`)
     } else {
       return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`)
     }  
@@ -713,7 +713,7 @@ export class Utils {
       })  
     })
   }
-  shell(arg: string, success='command executed successfully', error='command failed', options={maxBuffer: 1024 * 3000}) {
+  shell(arg: string, success='command executed successfully', error='command failed', options={maxBuffer: 1024 * 2000}) {
     return new Observable((observer) => {
       console.log(arg);
       let child = exec(arg, options, (err: any, stdout: any, stderr: any) => {
