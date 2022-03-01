@@ -713,7 +713,7 @@ export class Utils {
       })  
     })
   }
-  shell(arg: string, success='command executed successfully', error='command failed', options={maxBuffer: 1024 * 2000}) {
+  shell(arg: string, success='command executed successfully', error='command failed', options={maxBuffer: 1024 * 3000}) {
     return new Observable((observer) => {
       console.log(arg);
       let child = exec(arg, options, (err: any, stdout: any, stderr: any) => {

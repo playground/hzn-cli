@@ -740,7 +740,7 @@ class Utils {
             });
         });
     }
-    shell(arg, success = 'command executed successfully', error = 'command failed', options = { maxBuffer: 1024 * 2000 }) {
+    shell(arg, success = 'command executed successfully', error = 'command failed', options = { maxBuffer: 1024 * 3000 }) {
         return new rxjs_1.Observable((observer) => {
             console.log(arg);
             let child = exec(arg, options, (err, stdout, stderr) => {
