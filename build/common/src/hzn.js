@@ -6,7 +6,7 @@ const env_1 = require("./env");
 const utils_1 = require("./utils");
 exports.utils = new utils_1.Utils();
 class Hzn {
-    constructor(env, configPath, name, objectType, objectId, objectFile, pattern) {
+    constructor(env, configPath, name, objectType, objectId, objectFile, mmsPattern) {
         this.nodePolicyJson = '';
         this.deploymentPolicyJson = '';
         this.servicePolicyJson = '';
@@ -18,7 +18,7 @@ class Hzn {
         this.objectType = objectType;
         this.objectId = objectId;
         this.objectFile = objectFile;
-        this.pattern = pattern;
+        this.mmsPattern = mmsPattern;
     }
     init() {
         return new rxjs_1.Observable((observer) => {
@@ -141,7 +141,7 @@ class Hzn {
         return new rxjs_1.Observable((observer) => {
             this.unregisterAgent().subscribe({
                 complete: () => {
-                    let arg = `hzn register --policy ${this.nodePolicyJson} --pattern "${this.pattern}"`;
+                    let arg = `hzn register --policy ${this.nodePolicyJson} --pattern "${this.mmsPattern}"`;
                     exports.utils.shell(arg, 'done registering agent', 'failed to register agent')
                         .subscribe({
                         complete: () => observer.complete(),
@@ -154,7 +154,7 @@ class Hzn {
         });
     }
     publishMMSObject() {
-        let arg = `hzn mms object publish --type=${this.objectType} --id=${this.objectId} --object=${this.objectFile} --pattern=${this.pattern}`;
+        let arg = `hzn mms object publish --type=${this.objectType} --id=${this.objectId} --object=${this.objectFile} --pattern=${this.mmsPattern}`;
         return exports.utils.shell(arg, 'done publishing object', 'failed to publish object');
     }
     buildAndPublish() {
