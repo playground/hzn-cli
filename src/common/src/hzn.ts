@@ -283,7 +283,14 @@ export class Hzn {
                 }
               })
             }, error: (err) => {
-              observer.error(err);
+              this.registerAgent().subscribe({
+                complete: () => {
+                  observer.next();
+                  observer.complete();
+                }, error: (err) => {
+                  observer.error(err);
+                }
+              })
             }  
           })
         }, error: (err) => {
