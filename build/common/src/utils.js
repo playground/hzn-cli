@@ -115,7 +115,7 @@ class Utils {
         let nodeId = id ? `-d ${id}` : '';
         if (anax && anax.indexOf('open-horizon') > 0) {
             // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download/agent-install.sh
-            return this.shell(`curl -sSL ${anax} | yes | sudo -s -E bash -s -- -i anax: -k css: -c css:`);
+            return this.shell(`curl -sSL ${anax} | sudo -s -E bash -s -- -i anax: -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`);
         }
         else {
             return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`);
@@ -126,7 +126,7 @@ class Utils {
             console.log(`\nWould you like to proceed to uninstall Horzion: Y/n?`);
             prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                 if (question.answer.toUpperCase() === 'Y') {
-                    let arg = `sudo apt purge -y bluehorizon horizon horizon-cli`;
+                    let arg = `sudo apt-get purge -y bluehorizon horizon horizon-cli`;
                     if (process.platform == 'darwin') {
                         arg = `yes | sudo /Users/Shared/horizon-cli/bin/horizon-cli-uninstall.sh && sudo pkgutil --forget com.github.open-horizon.pkg.horizon-cli`;
                     }
