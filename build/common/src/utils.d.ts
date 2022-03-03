@@ -46,6 +46,7 @@ export declare class Utils {
     editServicePolicy(): Observable<unknown>;
     getJsonFromFile(jsonFile: string): any;
     editTypePolicy(filename: string): Observable<unknown>;
+    isNodeConfigured(): Observable<unknown>;
     shell(arg: string, success?: string, error?: string, options?: {
         maxBuffer: number;
     }): Observable<unknown>;

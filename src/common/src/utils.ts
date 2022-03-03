@@ -713,6 +713,27 @@ export class Utils {
       })  
     })
   }
+  isNodeConfigured() {
+    return new Observable((observer) => {
+      let arg = `hzn node list`
+      this.shell(arg)
+      .subscribe({
+        next: (res: any) => {
+          console.log(typeof res == 'string')
+          try {
+            let json = JSON.parse(res)
+            console.log(json.configstate.state)
+            observer.next(json.configstate.state === 'configured')
+            observer.complete()
+          } catch(e) {
+            observer.error(e)
+          }
+        }, error(e) {
+          observer.error(e)
+        }
+      })
+    })  
+  }
   shell(arg: string, success='command executed successfully', error='command failed', options={maxBuffer: 1024 * 2000}) {
     return new Observable((observer) => {
       console.log(arg);

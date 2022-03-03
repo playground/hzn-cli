@@ -740,6 +740,28 @@ class Utils {
             });
         });
     }
+    isNodeConfigured() {
+        return new rxjs_1.Observable((observer) => {
+            let arg = `hzn node list`;
+            this.shell(arg)
+                .subscribe({
+                next: (res) => {
+                    console.log(typeof res == 'string');
+                    try {
+                        let json = JSON.parse(res);
+                        console.log(json.configstate.state);
+                        observer.next(json.configstate.state === 'configured');
+                        observer.complete();
+                    }
+                    catch (e) {
+                        observer.error(e);
+                    }
+                }, error(e) {
+                    observer.error(e);
+                }
+            });
+        });
+    }
     shell(arg, success = 'command executed successfully', error = 'command failed', options = { maxBuffer: 1024 * 2000 }) {
         return new rxjs_1.Observable((observer) => {
             console.log(arg);

@@ -134,8 +134,27 @@ class Hzn {
         return exports.utils.shell(arg, 'done publishing mss pattern', 'failed to publish mms pattern');
     }
     unregisterAgent() {
-        let arg = `hzn unregister -frDv`;
-        return exports.utils.shell(arg, 'done unregistering agent', 'failed to unregister agent');
+        return new rxjs_1.Observable((observer) => {
+            exports.utils.isNodeConfigured()
+                .subscribe({
+                next: (res) => {
+                    if (res) {
+                        let arg = `hzn unregister -frDv`;
+                        exports.utils.shell(arg, 'done unregistering agent', 'failed to unregister agent')
+                            .subscribe({
+                            next: (res) => observer.complete(),
+                            error: (e) => observer.error(e)
+                        });
+                    }
+                    else {
+                        console.log('no need to unregister...');
+                        observer.complete();
+                    }
+                }, error(e) {
+                    observer.complete();
+                }
+            });
+        });
     }
     registerAgent() {
         return new rxjs_1.Observable((observer) => {
@@ -229,16 +248,10 @@ class Hzn {
                 complete: () => {
                     this.publishServiceAndPattern().subscribe({
                         complete: () => {
-                            this.unregisterAgent().subscribe({
+                            this.registerAgent().subscribe({
                                 complete: () => {
-                                    this.registerAgent().subscribe({
-                                        complete: () => {
-                                            observer.next();
-                                            observer.complete();
-                                        }, error: (err) => {
-                                            observer.error(err);
-                                        }
-                                    });
+                                    observer.next();
+                                    observer.complete();
                                 }, error: (err) => {
                                     observer.error(err);
                                 }
@@ -257,25 +270,12 @@ class Hzn {
         return new rxjs_1.Observable((observer) => {
             this.publishServiceAndPattern().subscribe({
                 complete: () => {
-                    this.unregisterAgent().subscribe({
+                    this.registerAgent().subscribe({
                         complete: () => {
-                            this.registerAgent().subscribe({
-                                complete: () => {
-                                    observer.next();
-                                    observer.complete();
-                                }, error: (err) => {
-                                    observer.error(err);
-                                }
-                            });
+                            observer.next();
+                            observer.complete();
                         }, error: (err) => {
-                            this.registerAgent().subscribe({
-                                complete: () => {
-                                    observer.next();
-                                    observer.complete();
-                                }, error: (err) => {
-                                    observer.error(err);
-                                }
-                            });
+                            observer.error(err);
                         }
                     });
                 }, error: (err) => {
@@ -315,6 +315,9 @@ class Hzn {
     }
     listService() {
         return exports.utils.listService(this.name);
+    }
+    isConfigured() {
+        return exports.utils.isNodeConfigured();
     }
     listPattern() {
         return exports.utils.listPattern(this.name);

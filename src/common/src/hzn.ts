@@ -149,8 +149,26 @@ export class Hzn {
     return utils.shell(arg, 'done publishing mss pattern', 'failed to publish mms pattern');
   }
   unregisterAgent() {
-    let arg = `hzn unregister -frDv`;
-    return utils.shell(arg, 'done unregistering agent', 'failed to unregister agent');
+    return new Observable((observer) => {
+      utils.isNodeConfigured()
+      .subscribe({
+        next: (res) => {
+          if(res) {
+            let arg = `hzn unregister -frDv`;
+            utils.shell(arg, 'done unregistering agent', 'failed to unregister agent')
+            .subscribe({
+              next: (res) => observer.complete(),
+              error: (e) => observer.error(e)
+            })      
+          } else {
+            console.log('no need to unregister...')
+            observer.complete()
+          }
+        }, error(e) {
+          observer.complete()
+        }
+      })
+    })  
   }
   registerAgent() {
     return new Observable((observer) => {
@@ -244,19 +262,13 @@ export class Hzn {
         complete: () => {
           this.publishServiceAndPattern().subscribe({
             complete: () => {
-              this.unregisterAgent().subscribe({
+              this.registerAgent().subscribe({
                 complete: () => {
-                  this.registerAgent().subscribe({
-                    complete: () => {
-                      observer.next();
-                      observer.complete();
-                    }, error: (err) => {
-                      observer.error(err);
-                    }
-                  })
+                  observer.next();
+                  observer.complete();
                 }, error: (err) => {
                   observer.error(err);
-                }  
+                }
               })
             }, error: (err) => {
               observer.error(err);
@@ -272,26 +284,13 @@ export class Hzn {
     return new Observable((observer) => {
       this.publishServiceAndPattern().subscribe({
         complete: () => {
-          this.unregisterAgent().subscribe({
+          this.registerAgent().subscribe({
             complete: () => {
-              this.registerAgent().subscribe({
-                complete: () => {
-                  observer.next();
-                  observer.complete();
-                }, error: (err) => {
-                  observer.error(err);
-                }
-              })
+              observer.next();
+              observer.complete();
             }, error: (err) => {
-              this.registerAgent().subscribe({
-                complete: () => {
-                  observer.next();
-                  observer.complete();
-                }, error: (err) => {
-                  observer.error(err);
-                }
-              })
-            }  
+              observer.error(err);
+            }
           })
         }, error: (err) => {
           observer.error(err);
@@ -331,6 +330,9 @@ export class Hzn {
   }
   listService() {
     return utils.listService(this.name);
+  }
+  isConfigured() {
+    return utils.isNodeConfigured()
   }
   listPattern() {
     return utils.listPattern(this.name);
