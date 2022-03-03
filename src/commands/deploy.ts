@@ -35,7 +35,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
       type: 'string', 
       demandOption: true,
       desc: 'Available actions: ' +
-            'addDeploymentPolicy, addNodePolicy, addServicePolicy, appendSupport, buildAndPublish, buildMMSImage, buildPublishAndRegister, ' + 
+            'addDeploymentPolicy, addNodePolicy, addServicePolicy, addPolicy, appendSupport, buildAndPublish, buildMMSImage, buildPublishAndRegister, ' + 
             'buildServiceImage, checkConfigState, createHznKey, dockerImageExists, editPolicy, editDeploymentPolicy, editNodePolicy, editServicePolicy, getDeviceArch, ' +
             'getIpAddress, isConfigured, listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishAndRegister, publishMMSObject, ' +
             'publishMMSPattern, publishMMSService, publishPatterrn, publishService, publishServiceAndPattern, pullDockerImage, pushMMSImage, pushServiceImage, ' +
@@ -63,7 +63,7 @@ export const handler = (argv: Arguments<Options>): void => {
     'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'
   ];
   const promptForUpdate = [
-    'setup', 'test', 'addDeploymentPolicy', 'addNodePolicy', 'addServicePolicy', 'buildAndPublish', 'buildPublishAndRegister', 
+    'setup', 'test', 'addDeploymentPolicy', 'addNodePolicy', 'addServicePolicy', 'addPolicy', 'buildAndPublish', 'buildPublishAndRegister', 
     'buildMMSImage', 'buildServiceImage', 'editDeploymentPoicy', 'editNodePolicy', 'editServicePolicy', 'publishAndRegister', 
     'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService', 
     'publishMMSPattern', 'publishMMSObject', 'pushMMSImage', 'pushServiceImage', 'registerAgent', 'unregisterAgent'

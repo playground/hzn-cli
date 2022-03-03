@@ -5,7 +5,7 @@ import { readFileSync, writeFileSync, copyFileSync , existsSync, exists } from '
 import os from 'os';
 const ifs: any = os.networkInterfaces();
 import prompt from 'prompt';
-const promptSync = require('prompt-sync')();
+export const promptSync = require('prompt-sync')();
 import jsonfile from 'jsonfile';
 import { utils } from '.';
 import { fork } from 'child_process';
@@ -626,10 +626,50 @@ export class Utils {
       resolve(res)   
     })
   }
+  addPolicy(policy: any) {
+    return new Observable((observer) => {
+      let answer;
+      console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n0) To exit`)
+      do {
+        answer = parseInt(promptSync(`Please select the type of policy you would like to add: `))
+        if(answer < 0 || answer > 3) {
+          console.log('\x1b[41m%s\x1b[0m', '\nInvalid, try again.')
+        } 
+      } while(answer < 0 || answer > 3)
+      if(answer == 0) {
+        observer.next(0) 
+        observer.complete()
+      } else if(answer == 1) {
+        console.log('\x1b[32m', '\nAdding Service Policy') 
+        this.addServicePolicy(policy)
+        .subscribe(() => {observer.next(1); observer.complete()})
+      } else if(answer == 2) {
+        console.log('\x1b[32m', '\nAdding Deployment Policy') 
+        this.addDeploymentPolicy(policy)
+        .subscribe(() => {observer.next(2); observer.complete()})
+      } else if(answer == 3) {
+        console.log('\x1b[32m', '\nAdding Node Policy') 
+        this.addNodePolicy(policy)
+        .subscribe(() => {observer.next(3); observer.complete()})
+      }
+    })  
+  }
+  addDeploymentPolicy(policy: any) {
+    let arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('SERVICE_VERSION')}`
+    return utils.shell(arg)
+  }
+  addServicePolicy(policy: any) {
+    let arg = `hzn exchange service addpolicy -f ${policy.servicePolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('SERVICE_VERSION')}_${policy.envVar.getEnvValue('ARCH')}`
+    return utils.shell(arg)
+  }
+  addNodePolicy(policy: any) {
+    let arg = `hzn register --policy ${policy.nodePolicyJson}`
+    return utils.shell(arg)
+  }
   editPolicy() {
     return new Observable((observer) => {
       let answer;
-      console.log('\x1b[36m', `\nType of policies:\n1) Node Policy\n2) Deployment Policy\n3) Service Policy\n0) To exit`)
+      console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n0) To exit`)
       do {
         answer = parseInt(promptSync(`Please select the type of policy you would like to work with: `))
         if(answer < 0 || answer > 3) {
@@ -641,8 +681,8 @@ export class Utils {
           observer.complete()
           break;
         case 1:
-          console.log('\x1b[32m', '\nWorking with Node Policy') 
-          this.editNodePolicy()
+          console.log('\x1b[32m', '\nWorking with Service Policy') 
+          this.editServicePolicy()
           .subscribe(() => observer.complete())
           break;
         case 2:  
@@ -651,8 +691,8 @@ export class Utils {
           .subscribe(() => observer.complete())
           break;
         case 3:  
-          console.log('\x1b[32m', '\nWorking with Service Policy') 
-          this.editServicePolicy()
+          console.log('\x1b[32m', '\nWorking with Node Policy') 
+          this.editNodePolicy()
           .subscribe(() => observer.complete())
           break;
       }

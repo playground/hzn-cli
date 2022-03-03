@@ -3,15 +3,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Utils = void 0;
+exports.Utils = exports.promptSync = void 0;
 const rxjs_1 = require("rxjs");
 const cp = require('child_process'), exec = cp.exec;
 const fs_1 = require("fs");
 const os_1 = __importDefault(require("os"));
 const ifs = os_1.default.networkInterfaces();
 const prompt_1 = __importDefault(require("prompt"));
-const promptSync = require('prompt-sync')();
+exports.promptSync = require('prompt-sync')();
 const jsonfile_1 = __importDefault(require("jsonfile"));
+const _1 = require(".");
 const env = process.env.npm_config_env || 'biz';
 const isBoolean = [
     'TOP_LEVEL_SERVICE'
@@ -229,7 +230,7 @@ class Utils {
                         let propName = 'environment variable';
                         let answer;
                         do {
-                            answer = promptSync(`Would you like to add additional ${propName}: Y/n? `);
+                            answer = (0, exports.promptSync)(`Would you like to add additional ${propName}: Y/n? `);
                             if (answer.toLowerCase() == 'y') {
                                 this.promptType(propName, result, template);
                             }
@@ -301,7 +302,7 @@ class Utils {
                         let propName = 'environment variable';
                         let answer;
                         do {
-                            answer = promptSync(`Would you like to add additional ${propName}: Y/n? `);
+                            answer = (0, exports.promptSync)(`Would you like to add additional ${propName}: Y/n? `);
                             if (answer.toLowerCase() == 'y') {
                                 this.promptType(propName, result, template);
                             }
@@ -605,8 +606,8 @@ class Utils {
         let name;
         let value;
         if (propName === 'properties' || propName === 'environment variable') {
-            name = promptSync(`name (${el.name}): `, { value: el.name }).trim();
-            value = promptSync(`value (${el.value}): `, { value: el.value }).trim();
+            name = (0, exports.promptSync)(`name (${el.name}): `, { value: el.name }).trim();
+            value = (0, exports.promptSync)(`value (${el.value}): `, { value: el.value }).trim();
             if (name.length > 0 && value.length > 0) {
                 if (propName === 'properties') {
                     res.push({ name: name, value: value });
@@ -618,7 +619,7 @@ class Utils {
         }
         else {
             console.dir(el, { depth: null, color: true });
-            value = promptSync(`constraint (${el.value}): `, { value: el.value }).trim();
+            value = (0, exports.promptSync)(`constraint (${el.value}): `, { value: el.value }).trim();
             if (value.length > 0) {
                 res.push(value);
             }
@@ -642,7 +643,7 @@ class Utils {
             }
             const template = propName == 'properties' ? { name: '', value: '' } : { value: '' };
             do {
-                answer = promptSync(`Would you like to add additional ${propName}: Y/n? `);
+                answer = (0, exports.promptSync)(`Would you like to add additional ${propName}: Y/n? `);
                 if (answer.toLowerCase() == 'y') {
                     this.promptType(propName, res, template);
                 }
@@ -650,12 +651,55 @@ class Utils {
             resolve(res);
         });
     }
+    addPolicy(policy) {
+        return new rxjs_1.Observable((observer) => {
+            let answer;
+            console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n0) To exit`);
+            do {
+                answer = parseInt((0, exports.promptSync)(`Please select the type of policy you would like to add: `));
+                if (answer < 0 || answer > 3) {
+                    console.log('\x1b[41m%s\x1b[0m', '\nInvalid, try again.');
+                }
+            } while (answer < 0 || answer > 3);
+            if (answer == 0) {
+                observer.next(0);
+                observer.complete();
+            }
+            else if (answer == 1) {
+                console.log('\x1b[32m', '\nAdding Service Policy');
+                this.addServicePolicy(policy)
+                    .subscribe(() => { observer.next(1); observer.complete(); });
+            }
+            else if (answer == 2) {
+                console.log('\x1b[32m', '\nAdding Deployment Policy');
+                this.addDeploymentPolicy(policy)
+                    .subscribe(() => { observer.next(2); observer.complete(); });
+            }
+            else if (answer == 3) {
+                console.log('\x1b[32m', '\nAdding Node Policy');
+                this.addNodePolicy(policy)
+                    .subscribe(() => { observer.next(3); observer.complete(); });
+            }
+        });
+    }
+    addDeploymentPolicy(policy) {
+        let arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('SERVICE_VERSION')}`;
+        return _1.utils.shell(arg);
+    }
+    addServicePolicy(policy) {
+        let arg = `hzn exchange service addpolicy -f ${policy.servicePolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('SERVICE_VERSION')}_${policy.envVar.getEnvValue('ARCH')}`;
+        return _1.utils.shell(arg);
+    }
+    addNodePolicy(policy) {
+        let arg = `hzn register --policy ${policy.nodePolicyJson}`;
+        return _1.utils.shell(arg);
+    }
     editPolicy() {
         return new rxjs_1.Observable((observer) => {
             let answer;
-            console.log('\x1b[36m', `\nType of policies:\n1) Node Policy\n2) Deployment Policy\n3) Service Policy\n0) To exit`);
+            console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n0) To exit`);
             do {
-                answer = parseInt(promptSync(`Please select the type of policy you would like to work with: `));
+                answer = parseInt((0, exports.promptSync)(`Please select the type of policy you would like to work with: `));
                 if (answer < 0 || answer > 3) {
                     console.log('\x1b[41m%s\x1b[0m', '\nInvalid, try again.');
                 }
@@ -665,8 +709,8 @@ class Utils {
                     observer.complete();
                     break;
                 case 1:
-                    console.log('\x1b[32m', '\nWorking with Node Policy');
-                    this.editNodePolicy()
+                    console.log('\x1b[32m', '\nWorking with Service Policy');
+                    this.editServicePolicy()
                         .subscribe(() => observer.complete());
                     break;
                 case 2:
@@ -675,8 +719,8 @@ class Utils {
                         .subscribe(() => observer.complete());
                     break;
                 case 3:
-                    console.log('\x1b[32m', '\nWorking with Service Policy');
-                    this.editServicePolicy()
+                    console.log('\x1b[32m', '\nWorking with Node Policy');
+                    this.editNodePolicy()
                         .subscribe(() => observer.complete());
                     break;
             }

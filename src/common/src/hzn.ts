@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { Env } from './env';
-import { Utils } from './utils';
+import { Utils, promptSync } from './utils';
 
 export const utils = new Utils();
 
@@ -298,6 +298,15 @@ export class Hzn {
       })
     });
   }
+  getPolicyInfo() {
+    let policyInfo = {
+      envVar: this.envVar,
+      nodePolicyJson: this.nodePolicyJson,
+      servicePolicyJson: this.servicePolicyJson,
+      deploymentPolicyJson: this.deploymentPolicyJson
+    }
+    return policyInfo
+  }
   editPolicy() {
     return utils.editPolicy()
   }
@@ -310,17 +319,17 @@ export class Hzn {
   editServicePolicy() {
     return utils.editServicePolicy()
   }
+  addPolicy() {
+    return utils.addPolicy(this.getPolicyInfo())
+  }
   addDeploymentPolicy() {
-    let arg = `hzn exchange deployment addpolicy -f ${this.deploymentPolicyJson} ${this.envVar.getEnvValue('HZN_ORG_ID')}/policy-${this.envVar.getEnvValue('SERVICE_NAME')}_${this.envVar.getEnvValue('SERVICE_VERSION')}`
-    return utils.shell(arg)
+    return utils.addDeploymentPolicy(this.getPolicyInfo())
   }
   addServicePolicy() {
-    let arg = `hzn exchange service addpolicy -f ${this.servicePolicyJson} ${this.envVar.getEnvValue('HZN_ORG_ID')}/${this.envVar.getEnvValue('SERVICE_NAME')}_${this.envVar.getEnvValue('SERVICE_VERSION')}_${this.envVar.getEnvValue('ARCH')}`
-    return utils.shell(arg)
+    return utils.addServicePolicy(this.getPolicyInfo())
   }
   addNodePolicy() {
-    let arg = `hzn register --policy ${this.nodePolicyJson}`
-    return utils.shell(arg)
+    return utils.addNodePolicy(this.getPolicyInfo())
   }
   showHznInfo() {
     return utils.showHznInfo();

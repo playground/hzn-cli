@@ -284,6 +284,15 @@ class Hzn {
             });
         });
     }
+    getPolicyInfo() {
+        let policyInfo = {
+            envVar: this.envVar,
+            nodePolicyJson: this.nodePolicyJson,
+            servicePolicyJson: this.servicePolicyJson,
+            deploymentPolicyJson: this.deploymentPolicyJson
+        };
+        return policyInfo;
+    }
     editPolicy() {
         return exports.utils.editPolicy();
     }
@@ -295,17 +304,17 @@ class Hzn {
     editServicePolicy() {
         return exports.utils.editServicePolicy();
     }
+    addPolicy() {
+        return exports.utils.addPolicy(this.getPolicyInfo());
+    }
     addDeploymentPolicy() {
-        let arg = `hzn exchange deployment addpolicy -f ${this.deploymentPolicyJson} ${this.envVar.getEnvValue('HZN_ORG_ID')}/policy-${this.envVar.getEnvValue('SERVICE_NAME')}_${this.envVar.getEnvValue('SERVICE_VERSION')}`;
-        return exports.utils.shell(arg);
+        return exports.utils.addDeploymentPolicy(this.getPolicyInfo());
     }
     addServicePolicy() {
-        let arg = `hzn exchange service addpolicy -f ${this.servicePolicyJson} ${this.envVar.getEnvValue('HZN_ORG_ID')}/${this.envVar.getEnvValue('SERVICE_NAME')}_${this.envVar.getEnvValue('SERVICE_VERSION')}_${this.envVar.getEnvValue('ARCH')}`;
-        return exports.utils.shell(arg);
+        return exports.utils.addServicePolicy(this.getPolicyInfo());
     }
     addNodePolicy() {
-        let arg = `hzn register --policy ${this.nodePolicyJson}`;
-        return exports.utils.shell(arg);
+        return exports.utils.addNodePolicy(this.getPolicyInfo());
     }
     showHznInfo() {
         return exports.utils.showHznInfo();

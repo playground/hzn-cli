@@ -1,4 +1,5 @@
 import { Observable } from 'rxjs';
+export declare const promptSync: any;
 export declare class Utils {
     etcDefault: string;
     homePath: string | undefined;
@@ -40,6 +41,10 @@ export declare class Utils {
     policyToProps(policy: string): any;
     promptType(propName: string, res: any, el: any): void;
     goPrompt(props: any, propName: string): Promise<unknown>;
+    addPolicy(policy: any): Observable<unknown>;
+    addDeploymentPolicy(policy: any): Observable<unknown>;
+    addServicePolicy(policy: any): Observable<unknown>;
+    addNodePolicy(policy: any): Observable<unknown>;
     editPolicy(): Observable<unknown>;
     editNodePolicy(): Observable<unknown>;
     editDeploymentPolicy(): Observable<unknown>;
