@@ -1,0 +1,105 @@
+{
+  "services": [
+    {
+      "envVars": {
+        "ARCH": "amd64",
+        "SERVICE_NAME": "house-of-lu",
+        "SERVICE_CONTAINER_NAME": "house-of-lu",
+        "SERVICE_VERSION": "1.1.7",
+        "SERVICE_VERSION_RANGE_UPPER": "1.1.0",
+        "SERVICE_VERSION_RANGE_LOWER": "1.1.0",
+        "SERVICE_CONTAINER_CREDS": "",
+        "VOLUME_MOUNT": "/mms-shared",
+        "SHARED_VOLUME": "shared_volume",
+        "OBJECT_TYPE": "object_detection",
+        "OBJECT_ID": "config.json",
+        "OBJECT_FILE": "config/config.json",
+        "UPDATE_FILE_NAME": "model.zip"
+      },
+      "service": {
+        "org": "$HZN_ORG_ID",
+        "label": "$SERVICE_NAME for $ARCH",
+        "description": "An example running with node js",
+        "documentation": "https://github.com/playground/open-labs/master/edge/services/helloworld/README.md",
+        "url": "$SERVICE_NAME",
+        "version": "$SERVICE_VERSION",
+        "arch": "$ARCH",
+        "public": true,
+        "sharable": "singleton",
+        "requiredServices": [
+          {
+            "org": "$HZN_ORG_ID",
+            "url": "$SERVICE_NAME",
+            "version": "$SERVICE_VERSION_RANGE_UPPER",
+            "versionRange": "$SERVICE_VERSION_RANGE_LOWER",
+            "arch": "$ARCH"
+          }
+        ],
+        "userInput": [
+          { "name": "OBJECT_TYPE", "label": "", "type": "string", "defaultValue": "$OBJECT_TYPE" },
+          { "name": "VOLUME_MOUNT", "label": "", "type": "string", "defaultValue": "$VOLUME_MOUNT" },
+          { "name": "UPDATE_FILE_NAME", "label": "", "type": "string", "defaultValue": "$UPDATE_FILE_NAME" }
+        ],
+        "deployment": {
+          "services": {
+            "$SERVICE_NAME": {
+              "image": "$SERVICE_CONTAINER",
+              "binds": ["$SHARED_VOLUME:$VOLUME_MOUNT:rw"]
+            }
+          }
+        }      
+      }
+    },
+    {
+      "envVars": {
+        "ARCH": "amd64",
+        "SERVICE_NAME": "homehub-mms",
+        "SERVICE_CONTAINER_NAME": "homehub-mms",
+        "SERVICE_VERSION": "1.0.0",
+        "SERVICE_VERSION_RANGE_UPPER": "1.0.0",
+        "SERVICE_VERSION_RANGE_LOWER": "1.0.0",
+        "SERVICE_CONTAINER_CREDS": "",
+        "VOLUME_MOUNT": "/mms-shared",
+        "SHARED_VOLUME": "shared_volume",
+        "OBJECT_TYPE": "object_detection",
+        "OBJECT_ID": "config.json",
+        "OBJECT_FILE": "config/config.json",
+        "UPDATE_FILE_NAME": "model.zip",
+        "TOP_LEVEL_SERVICE": true
+      },
+      "service": {
+        "org": "$HZN_ORG_ID",
+        "label": "$SERVICE_NAME for $ARCH",
+        "description": "An example running with node js",
+        "documentation": "https://github.com/playground/open-labs/master/edge/services/helloworld/README.md",
+        "url": "$SERVICE_NAME",
+        "version": "$SERVICE_VERSION",
+        "arch": "$ARCH",
+        "public": true,
+        "sharable": "singleton",
+        "requiredServices": [
+          {
+            "org": "$HZN_ORG_ID",
+            "url": "$SERVICE_NAME",
+            "version": "$SERVICE_VERSION_RANGE_UPPER",
+            "versionRange": "$SERVICE_VERSION_RANGE_LOWER",
+            "arch": "$ARCH"
+          }
+        ],
+        "userInput": [
+          { "name": "OBJECT_TYPE", "label": "", "type": "string", "defaultValue": "$OBJECT_TYPE" },
+          { "name": "VOLUME_MOUNT", "label": "", "type": "string", "defaultValue": "$VOLUME_MOUNT" },
+          { "name": "UPDATE_FILE_NAME", "label": "", "type": "string", "defaultValue": "$UPDATE_FILE_NAME" }
+        ],
+        "deployment": {
+          "services": {
+            "$SERVICE_NAME": {
+              "image": "$SERVICE_CONTAINER",
+              "binds": ["$SHARED_VOLUME:$VOLUME_MOUNT:rw"]
+            }
+          }
+        }      
+      }
+    }
+  ]
+}

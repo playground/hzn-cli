@@ -13,6 +13,11 @@ export declare class Hzn {
     mmsServiceJson: any;
     mmsPatternJson: any;
     mmsPolicyJson: any;
+    nodePolicyJson: string;
+    deploymentPolicyJson: string;
+    servicePolicyJson: string;
+    serviceDefinitionJson: string;
+    servicePatternJson: string;
     envVar: any;
     configPath: string;
     name: string;
@@ -38,9 +43,24 @@ export declare class Hzn {
     publishServiceAndPattern(): Observable<unknown>;
     buildPublishAndRegister(): Observable<unknown>;
     publishAndRegister(): Observable<unknown>;
+    getPolicyInfo(): {
+        envVar: any;
+        nodePolicyJson: string;
+        servicePolicyJson: string;
+        deploymentPolicyJson: string;
+    };
+    editPolicy(): Observable<unknown>;
+    editDeploymentPolicy(): void;
+    editNodePolicy(): Observable<unknown>;
+    editServicePolicy(): Observable<unknown>;
+    addPolicy(): Observable<unknown>;
+    addDeploymentPolicy(): Observable<unknown>;
+    addServicePolicy(): Observable<unknown>;
+    addNodePolicy(): Observable<unknown>;
     showHznInfo(): Observable<unknown>;
     updateHznInfo(): Observable<unknown>;
     listService(): Observable<unknown>;
+    isConfigured(): Observable<unknown>;
     listPattern(): Observable<unknown>;
     listNode(): Observable<unknown>;
     listObject(): Observable<unknown>;

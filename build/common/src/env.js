@@ -4,7 +4,7 @@ exports.Env = void 0;
 const rxjs_1 = require("rxjs");
 const fs_1 = require("fs");
 const cp = require('child_process'), exec = cp.exec;
-var dotenv = require('dotenv');
+const dotenv = require('dotenv');
 const pEnv = process.env;
 class Env {
     constructor(env, hznConfig) {
@@ -63,6 +63,9 @@ class Env {
         pEnv.PATTERN_NAME = `pattern-${pEnv.SERVICE_NAME}`;
         container = pEnv.SERVICE_CONTAINER_NAME || pEnv.SERVICE_NAME;
         pEnv.SERVICE_CONTAINER = `${pEnv.YOUR_DOCKERHUB_ID}/${container}_${pEnv.ARCH}:${pEnv.SERVICE_VERSION}`.replace(/\r?\n|\r/g, '');
+    }
+    getEnvValue(key) {
+        return pEnv[key];
     }
     getEnv() {
         return this.env;

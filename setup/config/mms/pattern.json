@@ -10,9 +10,36 @@
       "serviceArch": "$ARCH",
       "serviceVersions": [
         {
-          "version": "$MMS_SERVICE_VERSION"
+          "version": "$MMS_SERVICE_VERSION",
+          "priority":{
+            "priority_value": 2,
+            "retries": 3,
+            "retry_durations": 3600,
+            "verified_durations": 52
+          },
+          "upgradePolicy": {}
+        },
+        {
+          "version":"1.0.0",
+          "priority":{
+            "priority_value": 3,
+            "retries": 3,
+            "retry_durations": 3600,
+            "verified_durations": 52
+          },
+          "upgradePolicy": {}
         }
-      ]
+      ],
+      "dataVerification": {},
+      "nodeHealth": {
+        "missing_heartbeat_interval": 1800,
+        "check_agreement_status": 1800
+      }
+    }
+  ],
+  "agreementProtocols": [
+    {
+      "name": "Basic"
     }
   ]
 }

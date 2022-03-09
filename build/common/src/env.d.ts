@@ -8,6 +8,7 @@ export declare class Env {
     constructor(env: string, hznConfig: string);
     init(): Observable<unknown>;
     setAdditionalEnv(): void;
+    getEnvValue(key: string): string | undefined;
     getEnv(): string;
     getOrgId(): string | undefined;
     getExchangeUserAuth(): string | undefined;

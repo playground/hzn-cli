@@ -3,25 +3,48 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Utils = void 0;
+exports.Utils = exports.promptSync = void 0;
 const rxjs_1 = require("rxjs");
 const cp = require('child_process'), exec = cp.exec;
 const fs_1 = require("fs");
 const os_1 = __importDefault(require("os"));
 const ifs = os_1.default.networkInterfaces();
 const prompt_1 = __importDefault(require("prompt"));
+exports.promptSync = require('prompt-sync')();
 const jsonfile_1 = __importDefault(require("jsonfile"));
+const _1 = require(".");
 const env = process.env.npm_config_env || 'biz';
+const isBoolean = [
+    'TOP_LEVEL_SERVICE'
+];
 const notRequired = [
-    'SERVICE_CONTAINER_CREDS', 'MMS_CONTAINER_CREDS', 'MMS_OBJECT_FILE', 'HZN_CUSTOM_NODE_ID', 'UPDATE_FILE_NAME',
+    'SERVICE_CONTAINER_CREDS', 'MMS_CONTAINER_CREDS', 'OBJECT_FILE', 'OBJECT_ID', 'OBJECT_TYPE', 'HZN_CUSTOM_NODE_ID', 'UPDATE_FILE_NAME',
     'SUPPORTED_OS_APPEND', 'SUPPORTED_LINUX_DISTRO_APPEND', 'SUPPORTED_DEBIAN_VARIANTS_APPEND', 'SUPPORTED_DEBIAN_VERSION_APPEND',
     'SUPPORTED_DEBIAN_ARCH_APPEND', 'SUPPORTED_REDHAT_VARIANTS_APPEND', 'SUPPORTED_REDHAT_VERSION_APPEND', 'SUPPORTED_REDHAT_ARCH_APPEND'
+];
+const mustHave = [
+    "SERVICE_NAME",
+    "SERVICE_CONTAINER_NAME",
+    "SERVICE_VERSION",
+    "SERVICE_VERSION_RANGE_UPPER",
+    "SERVICE_VERSION_RANGE_LOWER",
+    "SERVICE_CONTAINER_CREDS",
+    "VOLUME_MOUNT",
+    "MMS_SHARED_VOLUME",
+    "MMS_OBJECT_TYPE",
+    "MMS_OBJECT_ID",
+    "MMS_OBJECT_FILE",
+    "MMS_CONTAINER_CREDS",
+    "MMS_CONTAINER_NAME",
+    "MMS_SERVICE_NAME",
+    "MMS_SERVICE_VERSION",
+    "UPDATE_FILE_NAME"
 ];
 class Utils {
     constructor() {
         this.etcDefault = '/etc/default';
         this.homePath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
-        this.hznConfig = `${this.homePath}/config`;
+        this.hznConfig = `${this.homePath}/hzn-config`;
     }
     init() {
     }
@@ -93,7 +116,7 @@ class Utils {
         let nodeId = id ? `-d ${id}` : '';
         if (anax && anax.indexOf('open-horizon') > 0) {
             // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download/agent-install.sh
-            return this.shell(`curl -sSL ${anax} | yes | sudo -s -E bash -s -- -i anax: -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`);
+            return this.shell(`curl -sSL ${anax} | sudo -s -E bash -s -- -i anax: -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`);
         }
         else {
             return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`);
@@ -104,7 +127,7 @@ class Utils {
             console.log(`\nWould you like to proceed to uninstall Horzion: Y/n?`);
             prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                 if (question.answer.toUpperCase() === 'Y') {
-                    let arg = `sudo apt purge -y bluehorizon horizon horizon-cli`;
+                    let arg = `sudo apt-get purge -y bluehorizon horizon horizon-cli`;
                     if (process.platform == 'darwin') {
                         arg = `yes | sudo /Users/Shared/horizon-cli/bin/horizon-cli-uninstall.sh && sudo pkgutil --forget com.github.open-horizon.pkg.horizon-cli`;
                     }
@@ -201,7 +224,17 @@ class Utils {
                 if (question.answer.toUpperCase() === 'Y') {
                     console.log('\nKey in new value or (leave blank) press Enter to keep current value: ');
                     prompt_1.default.get(props, (err, result) => {
-                        console.log(result);
+                        result = this.filterEnvVars(result);
+                        console.dir(result, { depth: null, color: true });
+                        const template = { name: '', value: '' };
+                        let propName = 'environment variable';
+                        let answer;
+                        do {
+                            answer = (0, exports.promptSync)(`Would you like to add additional ${propName}: Y/n? `);
+                            if (answer.toLowerCase() == 'y') {
+                                this.promptType(propName, result, template);
+                            }
+                        } while (answer.toLowerCase() == 'y');
                         console.log(`\nWould you like to update config files: Y/n?`);
                         prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                             let content = '';
@@ -251,6 +284,10 @@ class Utils {
                 else {
                     props[i] = { name: key, default: value, required: notRequired.indexOf(key) < 0 };
                 }
+                if (isBoolean.indexOf(key) >= 0) {
+                    props[i]['pattern'] = /^(true|false)$/;
+                    props[i]['message'] = 'Must be true or false';
+                }
                 i++;
             }
             console.log(props);
@@ -259,7 +296,17 @@ class Utils {
                 if (question.answer.toUpperCase() === 'Y') {
                     console.log('\nKey in new value or (leave blank) press Enter to keep current value: ');
                     prompt_1.default.get(props, (err, result) => {
-                        console.log(result);
+                        result = this.filterEnvVars(result);
+                        console.dir(result, { depth: null, color: true });
+                        const template = { name: '', value: '' };
+                        let propName = 'environment variable';
+                        let answer;
+                        do {
+                            answer = (0, exports.promptSync)(`Would you like to add additional ${propName}: Y/n? `);
+                            if (answer.toLowerCase() == 'y') {
+                                this.promptType(propName, result, template);
+                            }
+                        } while (answer.toLowerCase() == 'y');
                         console.log(`\nWould you like to save these changes: Y/n?`);
                         prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                             if (question.answer.toUpperCase() === 'Y') {
@@ -363,6 +410,15 @@ class Utils {
             }
         });
     }
+    filterEnvVars(result) {
+        let res = {};
+        for (const [key, value] of Object.entries(result)) {
+            if (typeof value === 'string' && (value.trim().length > 0 || mustHave.indexOf(key) >= 0)) {
+                res[key] = value.trim();
+            }
+        }
+        return res;
+    }
     setupEnvFiles(org) {
         return new rxjs_1.Observable((observer) => {
             // console.log(process.cwd(), __dirname, __filename)
@@ -378,11 +434,20 @@ class Utils {
             });
             console.log('\nKey in new value or (leave blank) press Enter to keep current value: ');
             prompt_1.default.get(props, (err, result) => {
+                result = this.filterEnvVars(result);
                 console.log(result);
                 console.log(`\nWould you like to save config files: Y/n?`);
                 prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                     if (question.answer.toUpperCase() === 'Y') {
-                        this.copyFile(`sudo cp -rf ${__dirname}/config ${this.homePath}`).then(() => {
+                        // Copy config/* to user home
+                        let arg = '';
+                        if (!(0, fs_1.existsSync)(this.hznConfig)) {
+                            arg = `sudo cp -rf ${__dirname}/hzn-config ${this.homePath} && sudo chown -R $(whoami) ${this.hznConfig} && cp ${__dirname}/env-support ${this.hznConfig}/.env-support`;
+                        }
+                        else if (!(0, fs_1.existsSync)(`${this.hznConfig}/.env-support`)) {
+                            arg = `cp ${__dirname}/env-support ${this.hznConfig}/.env-support`;
+                        }
+                        this.copyFile(arg).then(() => {
                             let content = '';
                             for (const [key, value] of Object.entries(result)) {
                                 content += `${key}=${value}\n`;
@@ -423,11 +488,11 @@ class Utils {
     }
     checkDefaultConfig() {
         return new rxjs_1.Observable((observer) => {
-            if ((0, fs_1.existsSync)(`${this.hznConfig}/.env-local`) && (0, fs_1.existsSync)(`${this.hznConfig}/.env-hzn.json`)) {
+            if ((0, fs_1.existsSync)(`${this.hznConfig}/.env-local`) && (0, fs_1.existsSync)(`${this.hznConfig}/.env-hzn.json`) && (0, fs_1.existsSync)(`${this.hznConfig}/.env-support`)) {
                 observer.complete();
             }
             else {
-                observer.error('No config files.');
+                observer.error('No config files.  Please run "oh deploy setup"');
             }
         });
     }
@@ -477,6 +542,10 @@ class Utils {
                                 prop[1] = os_1.default.hostname();
                             }
                             props[i] = { name: prop[0], default: prop[1], required: notRequired.indexOf(prop[0]) < 0 };
+                            if (isBoolean.indexOf(prop[0]) >= 0) {
+                                props[i]['pattern'] = /^(true|false)$/;
+                                props[i]['message'] = 'Must be true or false';
+                            }
                         }
                     }
                 });
@@ -513,6 +582,227 @@ class Utils {
                         observer.complete();
                     }
                 });
+            });
+        });
+    }
+    policyToProps(policy) {
+        let props = {};
+        let keys = Object.keys(policy);
+        keys.forEach((key) => {
+            props[key] = [];
+            policy[key].forEach((el, i) => {
+                if (key === 'properties') {
+                    props[key].push({ name: el.name, value: el.value });
+                }
+                else {
+                    props[key].push({ value: el });
+                }
+            });
+        });
+        console.dir(props, { depth: null, colors: true });
+        return props;
+    }
+    promptType(propName, res, el) {
+        let name;
+        let value;
+        if (propName === 'properties' || propName === 'environment variable') {
+            name = (0, exports.promptSync)(`name (${el.name}): `, { value: el.name }).trim();
+            value = (0, exports.promptSync)(`value (${el.value}): `, { value: el.value }).trim();
+            if (name.length > 0 && value.length > 0) {
+                if (propName === 'properties') {
+                    res.push({ name: name, value: value });
+                }
+                else {
+                    res[name] = value;
+                }
+            }
+        }
+        else {
+            console.dir(el, { depth: null, color: true });
+            value = (0, exports.promptSync)(`constraint (${el.value}): `, { value: el.value }).trim();
+            if (value.length > 0) {
+                res.push(value);
+            }
+        }
+    }
+    goPrompt(props, propName) {
+        return new Promise(async (resolve, reject) => {
+            let res = [];
+            let name;
+            let value;
+            let answer;
+            if (propName == 'properties') {
+                Object.values(props).forEach((el) => {
+                    this.promptType(propName, res, el);
+                });
+            }
+            else {
+                props.forEach((el) => {
+                    this.promptType(propName, res, el);
+                });
+            }
+            const template = propName == 'properties' ? { name: '', value: '' } : { value: '' };
+            do {
+                answer = (0, exports.promptSync)(`Would you like to add additional ${propName}: Y/n? `);
+                if (answer.toLowerCase() == 'y') {
+                    this.promptType(propName, res, template);
+                }
+            } while (answer.toLowerCase() == 'y');
+            resolve(res);
+        });
+    }
+    addPolicy(policy) {
+        return new rxjs_1.Observable((observer) => {
+            let answer;
+            console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n0) To exit`);
+            do {
+                answer = parseInt((0, exports.promptSync)(`Please select the type of policy you would like to add: `));
+                if (answer < 0 || answer > 3) {
+                    console.log('\x1b[41m%s\x1b[0m', '\nInvalid, try again.');
+                }
+            } while (answer < 0 || answer > 3);
+            if (answer == 0) {
+                observer.next(0);
+                observer.complete();
+            }
+            else if (answer == 1) {
+                console.log('\x1b[32m', '\nAdding Service Policy');
+                this.addServicePolicy(policy)
+                    .subscribe(() => { observer.next(1); observer.complete(); });
+            }
+            else if (answer == 2) {
+                console.log('\x1b[32m', '\nAdding Deployment Policy');
+                this.addDeploymentPolicy(policy)
+                    .subscribe(() => { observer.next(2); observer.complete(); });
+            }
+            else if (answer == 3) {
+                console.log('\x1b[32m', '\nAdding Node Policy');
+                this.addNodePolicy(policy)
+                    .subscribe(() => { observer.next(3); observer.complete(); });
+            }
+        });
+    }
+    addDeploymentPolicy(policy) {
+        let arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('SERVICE_VERSION')}`;
+        return _1.utils.shell(arg);
+    }
+    addServicePolicy(policy) {
+        let arg = `hzn exchange service addpolicy -f ${policy.servicePolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('SERVICE_VERSION')}_${policy.envVar.getEnvValue('ARCH')}`;
+        return _1.utils.shell(arg);
+    }
+    addNodePolicy(policy) {
+        let arg = `hzn register --policy ${policy.nodePolicyJson}`;
+        return _1.utils.shell(arg);
+    }
+    editPolicy() {
+        return new rxjs_1.Observable((observer) => {
+            let answer;
+            console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n0) To exit`);
+            do {
+                answer = parseInt((0, exports.promptSync)(`Please select the type of policy you would like to work with: `));
+                if (answer < 0 || answer > 3) {
+                    console.log('\x1b[41m%s\x1b[0m', '\nInvalid, try again.');
+                }
+            } while (answer < 0 || answer > 3);
+            switch (answer) {
+                case 0:
+                    observer.complete();
+                    break;
+                case 1:
+                    console.log('\x1b[32m', '\nWorking with Service Policy');
+                    this.editServicePolicy()
+                        .subscribe(() => observer.complete());
+                    break;
+                case 2:
+                    console.log('\x1b[32m', '\nWorking with Deployment Policy');
+                    this.editDeploymentPolicy()
+                        .subscribe(() => observer.complete());
+                    break;
+                case 3:
+                    console.log('\x1b[32m', '\nWorking with Node Policy');
+                    this.editNodePolicy()
+                        .subscribe(() => observer.complete());
+                    break;
+            }
+        });
+    }
+    editNodePolicy() {
+        return this.editTypePolicy('node.policy.json');
+    }
+    editDeploymentPolicy() {
+        return new rxjs_1.Observable((observer) => {
+        });
+    }
+    editServicePolicy() {
+        return this.editTypePolicy('service.policy.json');
+    }
+    getJsonFromFile(jsonFile) {
+        let json;
+        if ((0, fs_1.existsSync)(`${this.hznConfig}/${jsonFile}`)) {
+            try {
+                json = jsonfile_1.default.readFileSync(`${this.hznConfig}/${jsonFile}`);
+            }
+            catch (e) {
+                console.log(e);
+                json = jsonfile_1.default.readFileSync(`${__dirname}/config/${jsonFile}`);
+            }
+        }
+        else {
+            console.log('notfound');
+            json = jsonfile_1.default.readFileSync(`${__dirname}/config/${jsonFile}`);
+        }
+        return json;
+    }
+    editTypePolicy(filename) {
+        return new rxjs_1.Observable((observer) => {
+            let policy = this.getJsonFromFile(filename);
+            console.dir(policy, { depth: null, colors: true });
+            console.log(`\nWould you like to make changes to this policy: Y/n?`);
+            prompt_1.default.get({ name: 'answer', required: true }, async (err, question) => {
+                if (question.answer.toUpperCase() === 'Y') {
+                    let props = this.policyToProps(policy);
+                    console.log('\nKey in new value or (leave blank) press Enter to keep current value or enter blank space(s) to omit: ');
+                    let keys = Object.keys(props);
+                    let res = {};
+                    for (const key of keys) {
+                        console.log('\x1b[32m', `${key}\n`);
+                        // console.dir(`${key} ${props[key]}\n`)
+                        res[key] = await this.goPrompt(props[key], key);
+                    }
+                    console.dir(res, { depth: null, colors: true });
+                    console.log(`\nWould you like to save this policy: Y/n?`);
+                    prompt_1.default.get({ name: 'answer', required: true }, async (err, question) => {
+                        if (question.answer.toUpperCase() === 'Y') {
+                            jsonfile_1.default.writeFileSync(`${this.hznConfig}/${filename}`, res, { spaces: 2 });
+                            observer.complete();
+                        }
+                    });
+                }
+                else {
+                    observer.complete();
+                }
+            });
+        });
+    }
+    isNodeConfigured() {
+        return new rxjs_1.Observable((observer) => {
+            let arg = `hzn node list`;
+            this.shell(arg)
+                .subscribe({
+                next: (res) => {
+                    console.log(typeof res == 'string');
+                    try {
+                        let json = JSON.parse(res);
+                        console.log(json.configstate.state);
+                        observer.next(json.configstate.state === 'configured');
+                        observer.complete();
+                    }
+                    catch (e) {
+                        observer.error(e);
+                    }
+                }, error(e) {
+                    observer.error(e);
+                }
             });
         });
     }

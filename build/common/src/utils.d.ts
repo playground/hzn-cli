@@ -1,4 +1,5 @@
 import { Observable } from 'rxjs';
+export declare const promptSync: any;
 export declare class Utils {
     etcDefault: string;
     homePath: string | undefined;
@@ -28,6 +29,7 @@ export declare class Utils {
     updateOrgConfig(hznJson: any, org: string, newOrg?: boolean): Observable<unknown>;
     removeOrg(org: string): Observable<unknown>;
     orgCheck(org: string, skipUpdate?: boolean): Observable<unknown>;
+    filterEnvVars(result: any): {};
     setupEnvFiles(org: string): Observable<unknown>;
     updateEnvHzn(org: string): Observable<unknown>;
     checkDefaultConfig(): Observable<unknown>;
@@ -36,6 +38,20 @@ export declare class Utils {
     getPropValueFromFile(file: string, prop: string): string;
     getPropsFromFile(file: string): any[];
     updateHznInfo(): Observable<unknown>;
+    policyToProps(policy: string): any;
+    promptType(propName: string, res: any, el: any): void;
+    goPrompt(props: any, propName: string): Promise<unknown>;
+    addPolicy(policy: any): Observable<unknown>;
+    addDeploymentPolicy(policy: any): Observable<unknown>;
+    addServicePolicy(policy: any): Observable<unknown>;
+    addNodePolicy(policy: any): Observable<unknown>;
+    editPolicy(): Observable<unknown>;
+    editNodePolicy(): Observable<unknown>;
+    editDeploymentPolicy(): Observable<unknown>;
+    editServicePolicy(): Observable<unknown>;
+    getJsonFromFile(jsonFile: string): any;
+    editTypePolicy(filename: string): Observable<unknown>;
+    isNodeConfigured(): Observable<unknown>;
     shell(arg: string, success?: string, error?: string, options?: {
         maxBuffer: number;
     }): Observable<unknown>;

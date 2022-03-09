@@ -6,7 +6,7 @@ const cp = require('child_process');
 const exec = cp.exec;
 const jsonfile = require('jsonfile');
 const homePath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
-const hznConfig = `${homePath}/config`;
+const hznConfig = `${homePath}/hzn-config`;
 const defaultConfig = __dirname;
 const constants = fs.constants;
 
@@ -20,15 +20,14 @@ const template = {
       "SERVICE_VERSION_RANGE_LOWER": "1.0.0",
       "SERVICE_CONTAINER_CREDS": "",
       "VOLUME_MOUNT": "/mms-shared",
-      "MMS_SHARED_VOLUME": "demo_model_mms_helper_shared_volume",
+      "MMS_SHARED_VOLUME": "mms_shared_volume",
+      "MMS_OBJECT_TYPE": "object_detection",
+      "MMS_OBJECT_ID": "config.json",
+      "MMS_OBJECT_FILE": "config/config.json",
       "MMS_CONTAINER_CREDS": "",
       "MMS_CONTAINER_NAME": "mms-service",
       "MMS_SERVICE_NAME": "mms-service",
       "MMS_SERVICE_VERSION": "1.0.0",
-      "MMS_SERVICE_VERSION_RANGE": "1.0.0",
-      "MMS_OBJECT_TYPE": "object_detection",
-      "MMS_OBJECT_ID": "config.json",
-      "MMS_OBJECT_FILE": "config/config.json",
       "UPDATE_FILE_NAME": "model.zip"
     },
     "metaVars": {

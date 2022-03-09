@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { Env } from './env';
-import { Utils } from './utils';
+import { Utils, promptSync } from './utils';
 
 export const utils = new Utils();
 
@@ -16,6 +16,12 @@ export class Hzn {
   mmsServiceJson: any;
   mmsPatternJson: any;
   mmsPolicyJson: any;
+
+  nodePolicyJson: string = '';
+  deploymentPolicyJson: string = '';
+  servicePolicyJson: string = '';
+  serviceDefinitionJson: string = '';
+  servicePatternJson: string = '';
   envVar: any;
   configPath: string;
   name: string;
@@ -39,12 +45,16 @@ export class Hzn {
           this.objectFile = this.objectFile || this.envVar.getMMSObjectFile();
           this.mmsPattern = this.mmsPattern || this.envVar.getMMSPatterName();
           console.log(`configPath: ${this.configPath}`)
-          this.patternJson = `${this.configPath}/service/pattern.json`;
-          this.serviceJson = `${this.configPath}/service/service.json`;
+          this.patternJson = `${this.configPath}/services/dependent-service/service.pattern.json`;
+          this.serviceJson = `${this.configPath}/services/dependent-service/service.definition.json`;
           this.policyJson = `${this.configPath}/service/policy.json`;
-          this.mmsPatternJson = `${this.configPath}/mms/pattern.json`;
-          this.mmsServiceJson = `${this.configPath}/mms/service.json`;
+          this.mmsPatternJson = `${this.configPath}/services/top-level-service/service.pattern.json`;
+          this.mmsServiceJson = `${this.configPath}/services/top-level-service/service.definition.json`;
           this.mmsPolicyJson = `${this.configPath}/mms/policy.json`;
+
+          this.nodePolicyJson = `${this.configPath}/node.policy.json`;
+          this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
+          this.servicePolicyJson = `${this.configPath}/service.policy.json`;
           observer.complete();    
         },
         error: (err) => {
@@ -139,14 +149,32 @@ export class Hzn {
     return utils.shell(arg, 'done publishing mss pattern', 'failed to publish mms pattern');
   }
   unregisterAgent() {
-    let arg = `hzn unregister -f`;
-    return utils.shell(arg, 'done unregistering agent', 'failed to unregister agent');
+    return new Observable((observer) => {
+      utils.isNodeConfigured()
+      .subscribe({
+        next: (res) => {
+          if(res) {
+            let arg = `hzn unregister -frDv`;
+            utils.shell(arg, 'done unregistering agent', 'failed to unregister agent')
+            .subscribe({
+              next: (res) => observer.complete(),
+              error: (e) => observer.error(e)
+            })      
+          } else {
+            console.log('no need to unregister...')
+            observer.complete()
+          }
+        }, error(e) {
+          observer.complete()
+        }
+      })
+    })  
   }
   registerAgent() {
     return new Observable((observer) => {
       this.unregisterAgent().subscribe({
         complete: () => {
-          let arg = `hzn register --policy ${this.mmsPolicyJson} --pattern "${this.mmsPattern}"`;
+          let arg = `hzn register --policy ${this.nodePolicyJson} --pattern "${this.mmsPattern}"`;
           utils.shell(arg, 'done registering agent', 'failed to register agent')
           .subscribe({
             complete: () => observer.complete(),
@@ -234,19 +262,13 @@ export class Hzn {
         complete: () => {
           this.publishServiceAndPattern().subscribe({
             complete: () => {
-              this.unregisterAgent().subscribe({
+              this.registerAgent().subscribe({
                 complete: () => {
-                  this.registerAgent().subscribe({
-                    complete: () => {
-                      observer.next();
-                      observer.complete();
-                    }, error: (err) => {
-                      observer.error(err);
-                    }
-                  })
+                  observer.next();
+                  observer.complete();
                 }, error: (err) => {
                   observer.error(err);
-                }  
+                }
               })
             }, error: (err) => {
               observer.error(err);
@@ -262,25 +284,52 @@ export class Hzn {
     return new Observable((observer) => {
       this.publishServiceAndPattern().subscribe({
         complete: () => {
-          this.unregisterAgent().subscribe({
+          this.registerAgent().subscribe({
             complete: () => {
-              this.registerAgent().subscribe({
-                complete: () => {
-                  observer.next();
-                  observer.complete();
-                }, error: (err) => {
-                  observer.error(err);
-                }
-              })
+              observer.next();
+              observer.complete();
             }, error: (err) => {
               observer.error(err);
-            }  
+            }
           })
         }, error: (err) => {
           observer.error(err);
         }  
       })
     });
+  }
+  getPolicyInfo() {
+    let policyInfo = {
+      envVar: this.envVar,
+      nodePolicyJson: this.nodePolicyJson,
+      servicePolicyJson: this.servicePolicyJson,
+      deploymentPolicyJson: this.deploymentPolicyJson
+    }
+    return policyInfo
+  }
+  editPolicy() {
+    return utils.editPolicy()
+  }
+  editDeploymentPolicy() {
+
+  }
+  editNodePolicy() {
+    return utils.editNodePolicy()
+  }
+  editServicePolicy() {
+    return utils.editServicePolicy()
+  }
+  addPolicy() {
+    return utils.addPolicy(this.getPolicyInfo())
+  }
+  addDeploymentPolicy() {
+    return utils.addDeploymentPolicy(this.getPolicyInfo())
+  }
+  addServicePolicy() {
+    return utils.addServicePolicy(this.getPolicyInfo())
+  }
+  addNodePolicy() {
+    return utils.addNodePolicy(this.getPolicyInfo())
   }
   showHznInfo() {
     return utils.showHznInfo();
@@ -290,6 +339,9 @@ export class Hzn {
   }
   listService() {
     return utils.listService(this.name);
+  }
+  isConfigured() {
+    return utils.isNodeConfigured()
   }
   listPattern() {
     return utils.listPattern(this.name);

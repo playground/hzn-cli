@@ -7,6 +7,11 @@ const utils_1 = require("./utils");
 exports.utils = new utils_1.Utils();
 class Hzn {
     constructor(env, configPath, name, objectType, objectId, objectFile, mmsPattern) {
+        this.nodePolicyJson = '';
+        this.deploymentPolicyJson = '';
+        this.servicePolicyJson = '';
+        this.serviceDefinitionJson = '';
+        this.servicePatternJson = '';
         this.envVar = new env_1.Env(env, exports.utils.getHznConfig());
         this.configPath = configPath;
         this.name = name;
@@ -25,12 +30,15 @@ class Hzn {
                     this.objectFile = this.objectFile || this.envVar.getMMSObjectFile();
                     this.mmsPattern = this.mmsPattern || this.envVar.getMMSPatterName();
                     console.log(`configPath: ${this.configPath}`);
-                    this.patternJson = `${this.configPath}/service/pattern.json`;
-                    this.serviceJson = `${this.configPath}/service/service.json`;
+                    this.patternJson = `${this.configPath}/services/dependent-service/service.pattern.json`;
+                    this.serviceJson = `${this.configPath}/services/dependent-service/service.definition.json`;
                     this.policyJson = `${this.configPath}/service/policy.json`;
-                    this.mmsPatternJson = `${this.configPath}/mms/pattern.json`;
-                    this.mmsServiceJson = `${this.configPath}/mms/service.json`;
+                    this.mmsPatternJson = `${this.configPath}/services/top-level-service/service.pattern.json`;
+                    this.mmsServiceJson = `${this.configPath}/services/top-level-service/service.definition.json`;
                     this.mmsPolicyJson = `${this.configPath}/mms/policy.json`;
+                    this.nodePolicyJson = `${this.configPath}/node.policy.json`;
+                    this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
+                    this.servicePolicyJson = `${this.configPath}/service.policy.json`;
                     observer.complete();
                 },
                 error: (err) => {
@@ -126,14 +134,33 @@ class Hzn {
         return exports.utils.shell(arg, 'done publishing mss pattern', 'failed to publish mms pattern');
     }
     unregisterAgent() {
-        let arg = `hzn unregister -f`;
-        return exports.utils.shell(arg, 'done unregistering agent', 'failed to unregister agent');
+        return new rxjs_1.Observable((observer) => {
+            exports.utils.isNodeConfigured()
+                .subscribe({
+                next: (res) => {
+                    if (res) {
+                        let arg = `hzn unregister -frDv`;
+                        exports.utils.shell(arg, 'done unregistering agent', 'failed to unregister agent')
+                            .subscribe({
+                            next: (res) => observer.complete(),
+                            error: (e) => observer.error(e)
+                        });
+                    }
+                    else {
+                        console.log('no need to unregister...');
+                        observer.complete();
+                    }
+                }, error(e) {
+                    observer.complete();
+                }
+            });
+        });
     }
     registerAgent() {
         return new rxjs_1.Observable((observer) => {
             this.unregisterAgent().subscribe({
                 complete: () => {
-                    let arg = `hzn register --policy ${this.mmsPolicyJson} --pattern "${this.mmsPattern}"`;
+                    let arg = `hzn register --policy ${this.nodePolicyJson} --pattern "${this.mmsPattern}"`;
                     exports.utils.shell(arg, 'done registering agent', 'failed to register agent')
                         .subscribe({
                         complete: () => observer.complete(),
@@ -221,36 +248,6 @@ class Hzn {
                 complete: () => {
                     this.publishServiceAndPattern().subscribe({
                         complete: () => {
-                            this.unregisterAgent().subscribe({
-                                complete: () => {
-                                    this.registerAgent().subscribe({
-                                        complete: () => {
-                                            observer.next();
-                                            observer.complete();
-                                        }, error: (err) => {
-                                            observer.error(err);
-                                        }
-                                    });
-                                }, error: (err) => {
-                                    observer.error(err);
-                                }
-                            });
-                        }, error: (err) => {
-                            observer.error(err);
-                        }
-                    });
-                }, error: (err) => {
-                    observer.error(err);
-                }
-            });
-        });
-    }
-    publishAndRegister() {
-        return new rxjs_1.Observable((observer) => {
-            this.publishServiceAndPattern().subscribe({
-                complete: () => {
-                    this.unregisterAgent().subscribe({
-                        complete: () => {
                             this.registerAgent().subscribe({
                                 complete: () => {
                                     observer.next();
@@ -269,6 +266,56 @@ class Hzn {
             });
         });
     }
+    publishAndRegister() {
+        return new rxjs_1.Observable((observer) => {
+            this.publishServiceAndPattern().subscribe({
+                complete: () => {
+                    this.registerAgent().subscribe({
+                        complete: () => {
+                            observer.next();
+                            observer.complete();
+                        }, error: (err) => {
+                            observer.error(err);
+                        }
+                    });
+                }, error: (err) => {
+                    observer.error(err);
+                }
+            });
+        });
+    }
+    getPolicyInfo() {
+        let policyInfo = {
+            envVar: this.envVar,
+            nodePolicyJson: this.nodePolicyJson,
+            servicePolicyJson: this.servicePolicyJson,
+            deploymentPolicyJson: this.deploymentPolicyJson
+        };
+        return policyInfo;
+    }
+    editPolicy() {
+        return exports.utils.editPolicy();
+    }
+    editDeploymentPolicy() {
+    }
+    editNodePolicy() {
+        return exports.utils.editNodePolicy();
+    }
+    editServicePolicy() {
+        return exports.utils.editServicePolicy();
+    }
+    addPolicy() {
+        return exports.utils.addPolicy(this.getPolicyInfo());
+    }
+    addDeploymentPolicy() {
+        return exports.utils.addDeploymentPolicy(this.getPolicyInfo());
+    }
+    addServicePolicy() {
+        return exports.utils.addServicePolicy(this.getPolicyInfo());
+    }
+    addNodePolicy() {
+        return exports.utils.addNodePolicy(this.getPolicyInfo());
+    }
     showHznInfo() {
         return exports.utils.showHznInfo();
     }
@@ -277,6 +324,9 @@ class Hzn {
     }
     listService() {
         return exports.utils.listService(this.name);
+    }
+    isConfigured() {
+        return exports.utils.isNodeConfigured();
     }
     listPattern() {
         return exports.utils.listPattern(this.name);

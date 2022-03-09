@@ -1,0 +1,13 @@
+{
+  "name": "pattern-${SERVICE_NAME}-$ARCH",
+  "label": "Edge $SERVICE_NAME Service Pattern for $ARCH",
+  "description": "Pattern for $SERVICE_NAME for $ARCH",
+  "services": [
+    {
+      "serviceUrl": "$MMS_SERVICE_NAME",
+      "serviceOrgid": "$HZN_ORG_ID",
+      "serviceArch": "$ARCH",
+      "serviceVersions": [ { "version": "$MMS_SERVICE_VERSION" } ]
+    }
+  ]
+}

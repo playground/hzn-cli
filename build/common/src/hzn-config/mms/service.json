@@ -1,0 +1,33 @@
+{
+  "org": "$HZN_ORG_ID",
+  "label": "$MMS_SERVICE_NAME for $ARCH",
+  "description": "A MMS example running with node js",
+  "documentation": "https://github.com/playground/open-labs/master/edge/services/helloworld/README.md",
+  "url": "$MMS_SERVICE_NAME",
+  "version": "$MMS_SERVICE_VERSION",
+  "arch": "$ARCH",
+  "public": true,
+  "sharable": "singleton",
+  "requiredServices": [
+    {
+      "org": "$HZN_ORG_ID",
+      "url": "$SERVICE_NAME",
+      "version": "$SERVICE_VERSION_RANGE_UPPER",
+      "versionRange": "$SERVICE_VERSION_RANGE_LOWER",
+      "arch": "$ARCH"
+    }
+  ],
+  "userInput": [
+    { "name": "MMS_OBJECT_TYPE", "label": "", "type": "string", "defaultValue": "$MMS_OBJECT_TYPE" },
+    { "name": "MMS_VOLUME_MOUNT", "label": "", "type": "string", "defaultValue": "$VOLUME_MOUNT" },
+    { "name": "UPDATE_FILE_NAME", "label": "", "type": "string", "defaultValue": "$UPDATE_FILE_NAME" }
+  ],
+  "deployment": {
+    "services": {
+      "$MMS_SERVICE_NAME": {
+        "image": "$MMS_CONTAINER",
+        "binds": ["$MMS_SHARED_VOLUME:$VOLUME_MOUNT:rw"]
+      }
+    }
+  }
+}

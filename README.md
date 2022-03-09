@@ -9,7 +9,11 @@ Open Horizon toolkit is a CLI built with Typescript for the NodeJS developers.  
 
 ## Pre-release version of hzn-cli, howto?
 
-```curl -sSL https://raw.githubusercontent.com/playground/hzn-cli/install.sh  --output install.sh && bash ./install.sh```
+### To setup Management Hub
+```curl -sSL https://raw.githubusercontent.com/playground/hzn-cli/main/install-mgmt-hub.sh  --output install-mgmt-hub.sh && bash ./install-mgmt-hub.sh```
+
+### To setup Edge Node Agent
+```curl -sSL https://raw.githubusercontent.com/playground/hzn-cli/main/install.sh  --output install.sh && bash ./install.sh```
 
 OR
 
@@ -22,12 +26,15 @@ After installlation run
 Deploy <action> to Org <org>
 
 Positionals:
-  action  Available actions: buildAndPublish, buildMMSImage,
-          buildPublishAndRegister, buildServiceImage, checkConfigState,
-          createHznKey, dockerImageExists, getDeviceArch, getIpAddress,
-          listDeploymentPolicy, listNode, listNodePattern, listObject,
-          listPattern, listService, publishAndRegister, publishMMSObject,
-          publishMMSPattern, publishMMSService, publishPatterrn, publishService,
+  action  Available actions: addDeploymentPolicy, addNodePolicy,
+          addServicePolicy, addPolicy, appendSupport, buildAndPublish,
+          buildMMSImage, buildPublishAndRegister, buildServiceImage,
+          checkConfigState, createHznKey, dockerImageExists, editPolicy,
+          editDeploymentPolicy, editNodePolicy, editServicePolicy,
+          getDeviceArch, getIpAddress, isConfigured, listDeploymentPolicy,
+          listNode, listNodePattern, listObject, listPattern, listService,
+          publishAndRegister, publishMMSObject, publishMMSPattern,
+          publishMMSService, publishPatterrn, publishService,
           publishServiceAndPattern, pullDockerImage, pushMMSImage,
           pushServiceImage, registerAgent, removeOrg, setup, setupManagementHub,
           showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo
@@ -96,6 +103,9 @@ Publish MMS Object file
 
 *Register agent (org=demo)- 
 ```oh deploy registerAgent --org demo```
+
+Register agent with Policy
+```oh deploy addPolicy```
 
 ## Complete guide to set up an agent on a brand new device running on Ubuntu 20.04
 ```

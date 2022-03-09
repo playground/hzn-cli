@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 import { readFileSync, existsSync } from 'fs';
 const cp = require('child_process'),
 exec = cp.exec;
-var dotenv = require('dotenv');
+const dotenv = require('dotenv');
 
 const pEnv = process.env;
 
@@ -66,6 +66,9 @@ export class Env {
     pEnv.PATTERN_NAME = `pattern-${pEnv.SERVICE_NAME}`;
     container = pEnv.SERVICE_CONTAINER_NAME || pEnv.SERVICE_NAME;
     pEnv.SERVICE_CONTAINER = `${pEnv.YOUR_DOCKERHUB_ID}/${container}_${pEnv.ARCH}:${pEnv.SERVICE_VERSION}`.replace(/\r?\n|\r/g, '')
+  }
+  getEnvValue(key: string) {
+    return pEnv[key];
   }
   getEnv() {
     return this.env;

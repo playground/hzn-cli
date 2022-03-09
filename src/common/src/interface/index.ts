@@ -1,1 +1,1 @@
-export * from './hzn-env-vars';
+export * from './hzn-model';
