@@ -344,13 +344,16 @@ export class Hzn {
   listDeploymentPolicy() {
     return utils.listDeploymentPolicy(this.name);
   }
-  listMMSObject() {
-    let arg = `hzn mms object list -t ${this.objectType} -i ${this.objectId} -d`
-    return utils.shell(arg, 'done listing object', 'failed to list object');
-  }
   deleteObject() {
-    let arg = `hzn mms object delete -t ${this.objectType} -i ${this.objectId} -d`
-    return utils.shell(arg, 'done deleting object', 'failed to delete object');
+    return new Observable((observer) => {
+      let arg = `hzn mms object delete -t ${this.objectType} -i ${this.objectId} -d`
+      utils.shell(arg, 'done deleting object', 'failed to delete object')
+      .subscribe(() => {
+        // delete twice deletes right away
+        utils.shell(arg, 'done deleting object', 'failed to delete object')
+        .subscribe(() => observer.complete())
+      })  
+    })
   }
   checkConfigState() {
     return utils.checkConfigState();
