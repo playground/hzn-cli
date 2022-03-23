@@ -1,0 +1,12 @@
+{
+  "objectID": "config.json",
+  "objectType": "$HZN_DEVICE_ID.hello-mms",
+  "destinationOrgID": "$HZN_ORG_ID",
+  "destinationID": "$HZN_DEVICE_ID",
+  "destinationType": "$HZN_PATTERN",
+  "destinationsList": null,
+  "expiration": "",
+  "version": "",
+  "description": "",
+  "activationTime": ""
+}
