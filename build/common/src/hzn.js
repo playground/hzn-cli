@@ -10,6 +10,7 @@ class Hzn {
         this.nodePolicyJson = '';
         this.deploymentPolicyJson = '';
         this.servicePolicyJson = '';
+        this.objectPolicyJson = '';
         this.serviceDefinitionJson = '';
         this.servicePatternJson = '';
         this.envVar = new env_1.Env(env, exports.utils.getHznConfig());
@@ -39,6 +40,7 @@ class Hzn {
                     this.nodePolicyJson = `${this.configPath}/node.policy.json`;
                     this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
                     this.servicePolicyJson = `${this.configPath}/service.policy.json`;
+                    this.objectPolicyJson = `${this.configPath}/object.policy.json`;
                     observer.complete();
                 },
                 error: (err) => {
@@ -134,27 +136,7 @@ class Hzn {
         return exports.utils.shell(arg, 'done publishing mss pattern', 'failed to publish mms pattern');
     }
     unregisterAgent() {
-        return new rxjs_1.Observable((observer) => {
-            exports.utils.isNodeConfigured()
-                .subscribe({
-                next: (res) => {
-                    if (res) {
-                        let arg = `hzn unregister -frDv`;
-                        exports.utils.shell(arg, 'done unregistering agent', 'failed to unregister agent')
-                            .subscribe({
-                            next: (res) => observer.complete(),
-                            error: (e) => observer.error(e)
-                        });
-                    }
-                    else {
-                        console.log('no need to unregister...');
-                        observer.complete();
-                    }
-                }, error(e) {
-                    observer.complete();
-                }
-            });
-        });
+        return exports.utils.unregisterAgent();
     }
     registerAgent() {
         return new rxjs_1.Observable((observer) => {
@@ -174,6 +156,10 @@ class Hzn {
     }
     publishMMSObject() {
         let arg = `hzn mms object publish --type=${this.objectType} --id=${this.objectId} --object=${this.objectFile} --pattern=${this.mmsPattern}`;
+        return exports.utils.shell(arg, 'done publishing object', 'failed to publish object');
+    }
+    publishMMSObjectPolicy() {
+        let arg = `hzn mms object publish -m ${this.objectPolicyJson} -f ${this.objectFile}`;
         return exports.utils.shell(arg, 'done publishing object', 'failed to publish object');
     }
     buildAndPublish() {
@@ -289,6 +275,7 @@ class Hzn {
             envVar: this.envVar,
             nodePolicyJson: this.nodePolicyJson,
             servicePolicyJson: this.servicePolicyJson,
+            objectPolicyJson: this.objectPolicyJson,
             deploymentPolicyJson: this.deploymentPolicyJson
         };
         return policyInfo;
@@ -335,10 +322,19 @@ class Hzn {
         return exports.utils.listNode(this.name);
     }
     listObject() {
-        return exports.utils.listObject(this.name);
+        const arg = this.name.length > 0 ? `hzn mms object list ${this.name}` : `hzn mms object list -t ${this.objectType} -i ${this.objectId} -d`;
+        return exports.utils.shell(arg, 'done listing object', 'failed to list object');
     }
     listDeploymentPolicy() {
         return exports.utils.listDeploymentPolicy(this.name);
+    }
+    listMMSObject() {
+        let arg = `hzn mms object list -t ${this.objectType} -i ${this.objectId} -d`;
+        return exports.utils.shell(arg, 'done listing object', 'failed to list object');
+    }
+    deleteObject() {
+        let arg = `hzn mms object delete -t ${this.objectType} -i ${this.objectId} -d`;
+        return exports.utils.shell(arg, 'done deleting object', 'failed to delete object');
     }
     checkConfigState() {
         return exports.utils.checkConfigState();

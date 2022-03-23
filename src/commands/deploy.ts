@@ -36,9 +36,9 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
       demandOption: true,
       desc: 'Available actions: ' +
             'addDeploymentPolicy, addNodePolicy, addServicePolicy, addPolicy, appendSupport, buildAndPublish, buildMMSImage, buildPublishAndRegister, ' + 
-            'buildServiceImage, checkConfigState, createHznKey, dockerImageExists, editPolicy, editDeploymentPolicy, editNodePolicy, editServicePolicy, getDeviceArch, ' +
+            'buildServiceImage, checkConfigState, createHznKey, deleteObject, dockerImageExists, editPolicy, editDeploymentPolicy, editNodePolicy, editServicePolicy, getDeviceArch, ' +
             'getIpAddress, isConfigured, listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishAndRegister, publishMMSObject, ' +
-            'publishMMSPattern, publishMMSService, publishPatterrn, publishService, publishServiceAndPattern, pullDockerImage, pushMMSImage, pushServiceImage, ' +
+            'publishMMSObjectPolicy, publishMMSPattern, publishMMSService, publishPatterrn, publishService, publishServiceAndPattern, pullDockerImage, pushMMSImage, pushServiceImage, ' +
 		        'registerAgent, removeOrg, setup, setupManagementHub, showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo'
     });
 
@@ -66,9 +66,9 @@ export const handler = (argv: Arguments<Options>): void => {
     'setup', 'test', 'addDeploymentPolicy', 'addNodePolicy', 'addServicePolicy', 'addPolicy', 'buildAndPublish', 'buildPublishAndRegister', 
     'buildMMSImage', 'buildServiceImage', 'editDeploymentPoicy', 'editNodePolicy', 'editServicePolicy', 'publishAndRegister', 
     'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService', 
-    'publishMMSPattern', 'publishMMSObject', 'pushMMSImage', 'pushServiceImage', 'registerAgent', 'unregisterAgent'
+    'publishMMSPattern', 'publishMMSObject', 'publishMMSObjectPolicy', 'pushMMSImage', 'pushServiceImage', 'registerAgent', 'unregisterAgent'
   ];
-  const runDirectly = ['setupManagementHub', 'uninstallHorizon'];
+  const runDirectly = ['deleteObject', 'setupManagementHub', 'uninstallHorizon'];
 
   if(env.length == 0) {
     let value = utils.getPropValueFromFile(`${utils.getHznConfig()}/.env-local`, 'DEFAULT_ORG')
