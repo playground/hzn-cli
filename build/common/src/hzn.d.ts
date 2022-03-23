@@ -68,7 +68,6 @@ export declare class Hzn {
     listNode(): Observable<unknown>;
     listObject(): Observable<unknown>;
     listDeploymentPolicy(): Observable<unknown>;
-    listMMSObject(): Observable<unknown>;
     deleteObject(): Observable<unknown>;
     checkConfigState(): Observable<unknown>;
     listNodePattern(): Observable<unknown>;
