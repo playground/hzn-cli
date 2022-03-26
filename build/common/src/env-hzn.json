@@ -19,6 +19,8 @@
       "MMS_SERVICE_VERSION": "1.0.0",
       "UPDATE_FILE_NAME": "model.zip"
     },
+    "credential": {
+    },
     "metaVars": {
     }
   },

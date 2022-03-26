@@ -26,8 +26,10 @@ export declare class Utils {
     copyFile(arg: string): Promise<unknown>;
     appendSupport(): Observable<unknown>;
     updateEnvFiles(org: string): Observable<unknown>;
+    shallowEqual(obj1: any, obj2: any): boolean;
     updateOrgConfig(hznJson: any, org: string, newOrg?: boolean): Observable<unknown>;
     removeOrg(org: string): Observable<unknown>;
+    updateCredential(org: string, hznJson: any): void;
     orgCheck(org: string, skipUpdate?: boolean): Observable<unknown>;
     filterEnvVars(result: any): {};
     setupEnvFiles(org: string): Observable<unknown>;

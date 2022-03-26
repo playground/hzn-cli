@@ -41,6 +41,12 @@ const mustHave = [
     "MMS_SERVICE_FALLBACK_VERSION",
     "UPDATE_FILE_NAME"
 ];
+const credentialVars = [
+    "HZN_EXCHANGE_USER_AUTH",
+    "HZN_EXCHANGE_URL",
+    "HZN_FSS_CSSURL",
+    "ANAX"
+];
 class Utils {
     constructor() {
         this.etcDefault = '/etc/default';
@@ -236,11 +242,13 @@ class Utils {
                                 this.promptType(propName, result, template);
                             }
                         } while (answer.toLowerCase() == 'y');
-                        console.log(`\nWould you like to update config files: Y/n?`);
-                        prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                        answer = (0, exports.promptSync)(`\nWould you like to update config files: Y/n?`);
+                        if (answer.toLowerCase() == 'y') {
                             let content = '';
+                            const pEnv = process.env;
                             for (const [key, value] of Object.entries(result)) {
                                 content += `${key}=${value}\n`;
+                                pEnv[key] = '' + value;
                             }
                             (0, fs_1.writeFileSync)('.env-local', content);
                             this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local && sudo chmod 766 ${this.hznConfig}/.env-local`).then(() => {
@@ -250,7 +258,10 @@ class Utils {
                                     error: (err) => observer.error(err)
                                 });
                             });
-                        });
+                        }
+                        else {
+                            observer.complete();
+                        }
                     });
                 }
                 else {
@@ -262,6 +273,19 @@ class Utils {
                 }
             });
         });
+    }
+    shallowEqual(obj1, obj2) {
+        const keys1 = Object.keys(obj1);
+        const keys2 = Object.keys(obj2);
+        if (keys1.length !== keys2.length) {
+            return false;
+        }
+        let diff = false;
+        keys1.some((key) => {
+            diff = obj1[key] !== obj2[key];
+            return diff;
+        });
+        return !diff;
     }
     updateOrgConfig(hznJson, org, newOrg = false) {
         return new rxjs_1.Observable((observer) => {
@@ -375,10 +399,28 @@ class Utils {
             }
         });
     }
+    updateCredential(org, hznJson) {
+        let credential = {};
+        const pEnv = process.env;
+        credentialVars.forEach((key) => {
+            credential[key] = pEnv[key];
+            console.log(key, pEnv[key]);
+        });
+        if (!hznJson[org]['credential']) {
+            hznJson[org]['credential'] = {};
+        }
+        console.log('!update credential');
+        if (!this.shallowEqual(credential, hznJson[org]['credential'])) {
+            hznJson[org]['credential'] = credential;
+            jsonfile_1.default.writeFileSync(`${this.hznConfig}/.env-hzn.json`, hznJson, { spaces: 2 });
+            console.log('update credential');
+        }
+    }
     orgCheck(org, skipUpdate = false) {
         return new rxjs_1.Observable((observer) => {
             let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
             if (hznJson[org]) {
+                this.updateCredential(org, hznJson);
                 if (!skipUpdate) {
                     this.updateOrgConfig(hznJson, org)
                         .subscribe({
