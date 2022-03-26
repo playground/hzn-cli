@@ -409,7 +409,6 @@ class Utils {
         if (!hznJson[org]['credential']) {
             hznJson[org]['credential'] = {};
         }
-        console.log('!update credential');
         if (!this.shallowEqual(credential, hznJson[org]['credential'])) {
             hznJson[org]['credential'] = credential;
             jsonfile_1.default.writeFileSync(`${this.hznConfig}/.env-hzn.json`, hznJson, { spaces: 2 });
