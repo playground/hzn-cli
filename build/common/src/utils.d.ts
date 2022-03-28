@@ -25,6 +25,7 @@ export declare class Utils {
     setupManagementHub(): Observable<unknown>;
     copyFile(arg: string): Promise<unknown>;
     appendSupport(): Observable<unknown>;
+    getPropsFromEnvLocal(org: string): any[];
     updateEnvFiles(org: string): Observable<unknown>;
     shallowEqual(obj1: any, obj2: any): boolean;
     updateOrgConfig(hznJson: any, org: string, newOrg?: boolean): Observable<unknown>;

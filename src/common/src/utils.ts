@@ -215,10 +215,29 @@ export class Utils {
       })
     });  
   }
+  getPropsFromEnvLocal(org: string) {
+    let props = this.getPropsFromFile(`${this.hznConfig}/.env-local`);
+    let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
+    if(hznJson[org] && hznJson[org]['credential']) {
+      let credential = hznJson[org]['credential']
+      Object.keys(credential).forEach((key) => {
+        props.some((el, idx) => {
+          if(el.name === key) {
+            props[idx].default = credential[key]
+            return true
+          } else {
+            return false
+          }
+        })
+      })
+    }
+    return props;
+  }
   updateEnvFiles(org: string) {
     return new Observable((observer) => {
        
-      let props = this.getPropsFromFile(`${this.hznConfig}/.env-local`);
+      // let props = this.getPropsFromFile(`${this.hznConfig}/.env-local`);
+      let props = this.getPropsFromEnvLocal(org)
       console.log(props)
       console.log(`\nWould you like to change any of the above properties: Y/n?`)
       prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
@@ -241,8 +260,13 @@ export class Utils {
             if(answer.toLowerCase() == 'y') {              
               let content = '';
               const pEnv = process.env;
+              let defaultOrg = false
+              answer = promptSync(`\nWould you like to make ${org} the default working environment: Y/n?`)
+              if(answer.toLowerCase() == 'y') {
+                defaultOrg = true
+              }  
               for(const [key, value] of Object.entries(result)) {
-                content += `${key}=${value}\n`;
+                content += key == 'DEFAULT_ORG' ? `${key}=${org}\n` : `${key}=${value}\n`;
                 pEnv[key] = ''+value; 
               }
               writeFileSync('.env-local', content);
@@ -389,7 +413,7 @@ export class Utils {
     })    
   }
   updateCredential(org: string, hznJson: any) {
-    let credential = {}
+    let credential: any = {}
     const pEnv = process.env
     credentialVars.forEach((key) => {
       credential[key] = pEnv[key]

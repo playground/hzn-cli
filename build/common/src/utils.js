@@ -222,9 +222,29 @@ class Utils {
             });
         });
     }
+    getPropsFromEnvLocal(org) {
+        let props = this.getPropsFromFile(`${this.hznConfig}/.env-local`);
+        let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
+        if (hznJson[org] && hznJson[org]['credential']) {
+            let credential = hznJson[org]['credential'];
+            Object.keys(credential).forEach((key) => {
+                props.some((el, idx) => {
+                    if (el.name === key) {
+                        props[idx].default = credential[key];
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                });
+            });
+        }
+        return props;
+    }
     updateEnvFiles(org) {
         return new rxjs_1.Observable((observer) => {
-            let props = this.getPropsFromFile(`${this.hznConfig}/.env-local`);
+            // let props = this.getPropsFromFile(`${this.hznConfig}/.env-local`);
+            let props = this.getPropsFromEnvLocal(org);
             console.log(props);
             console.log(`\nWould you like to change any of the above properties: Y/n?`);
             prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
@@ -246,8 +266,13 @@ class Utils {
                         if (answer.toLowerCase() == 'y') {
                             let content = '';
                             const pEnv = process.env;
+                            let defaultOrg = false;
+                            answer = (0, exports.promptSync)(`\nWould you like to make ${org} the default working environment: Y/n?`);
+                            if (answer.toLowerCase() == 'y') {
+                                defaultOrg = true;
+                            }
                             for (const [key, value] of Object.entries(result)) {
-                                content += `${key}=${value}\n`;
+                                content += key == 'DEFAULT_ORG' ? `${key}=${org}\n` : `${key}=${value}\n`;
                                 pEnv[key] = '' + value;
                             }
                             (0, fs_1.writeFileSync)('.env-local', content);
