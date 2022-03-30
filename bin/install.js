@@ -28,6 +28,7 @@ const template = {
       "MMS_CONTAINER_NAME": "mms-service",
       "MMS_SERVICE_NAME": "mms-service",
       "MMS_SERVICE_VERSION": "1.0.0",
+      "MMS_SERVICE_FALLBACK_VERSION": "1.0.0",
       "UPDATE_FILE_NAME": "model.zip"
     },
     "metaVars": {

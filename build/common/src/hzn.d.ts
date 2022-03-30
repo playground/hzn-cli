@@ -16,6 +16,7 @@ export declare class Hzn {
     nodePolicyJson: string;
     deploymentPolicyJson: string;
     servicePolicyJson: string;
+    objectPolicyJson: string;
     serviceDefinitionJson: string;
     servicePatternJson: string;
     envVar: any;
@@ -39,6 +40,7 @@ export declare class Hzn {
     unregisterAgent(): Observable<unknown>;
     registerAgent(): Observable<unknown>;
     publishMMSObject(): Observable<unknown>;
+    publishMMSObjectPolicy(): Observable<unknown>;
     buildAndPublish(): Observable<unknown>;
     publishServiceAndPattern(): Observable<unknown>;
     buildPublishAndRegister(): Observable<unknown>;
@@ -47,6 +49,7 @@ export declare class Hzn {
         envVar: any;
         nodePolicyJson: string;
         servicePolicyJson: string;
+        objectPolicyJson: string;
         deploymentPolicyJson: string;
     };
     editPolicy(): Observable<unknown>;
@@ -65,6 +68,7 @@ export declare class Hzn {
     listNode(): Observable<unknown>;
     listObject(): Observable<unknown>;
     listDeploymentPolicy(): Observable<unknown>;
+    deleteObject(): Observable<unknown>;
     checkConfigState(): Observable<unknown>;
     listNodePattern(): Observable<unknown>;
     getDeviceArch(): Observable<unknown>;

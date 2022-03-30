@@ -38,6 +38,7 @@ const mustHave = [
     "MMS_CONTAINER_NAME",
     "MMS_SERVICE_NAME",
     "MMS_SERVICE_VERSION",
+    "MMS_SERVICE_FALLBACK_VERSION",
     "UPDATE_FILE_NAME"
 ];
 class Utils {
@@ -651,6 +652,29 @@ class Utils {
             resolve(res);
         });
     }
+    unregisterAgent() {
+        return new rxjs_1.Observable((observer) => {
+            _1.utils.isNodeConfigured()
+                .subscribe({
+                next: (res) => {
+                    if (res) {
+                        let arg = `hzn unregister -frDv`;
+                        _1.utils.shell(arg, 'done unregistering agent', 'failed to unregister agent')
+                            .subscribe({
+                            next: (res) => observer.complete(),
+                            error: (e) => observer.error(e)
+                        });
+                    }
+                    else {
+                        console.log('no need to unregister...');
+                        observer.complete();
+                    }
+                }, error(e) {
+                    observer.complete();
+                }
+            });
+        });
+    }
     addPolicy(policy) {
         return new rxjs_1.Observable((observer) => {
             let answer;
@@ -691,19 +715,31 @@ class Utils {
         return _1.utils.shell(arg);
     }
     addNodePolicy(policy) {
-        let arg = `hzn register --policy ${policy.nodePolicyJson}`;
-        return _1.utils.shell(arg);
+        return new rxjs_1.Observable((observer) => {
+            this.unregisterAgent().subscribe({
+                complete: () => {
+                    let arg = `hzn register --policy ${policy.nodePolicyJson}`;
+                    _1.utils.shell(arg, 'done registering agent with policy', 'failed to register agent')
+                        .subscribe({
+                        complete: () => observer.complete(),
+                        error: (err) => observer.error(err)
+                    });
+                }, error: (err) => {
+                    observer.error(err);
+                }
+            });
+        });
     }
     editPolicy() {
         return new rxjs_1.Observable((observer) => {
             let answer;
-            console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n0) To exit`);
+            console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n4) Object Policy\n0) To exit`);
             do {
                 answer = parseInt((0, exports.promptSync)(`Please select the type of policy you would like to work with: `));
-                if (answer < 0 || answer > 3) {
+                if (answer < 0 || answer > 4) {
                     console.log('\x1b[41m%s\x1b[0m', '\nInvalid, try again.');
                 }
-            } while (answer < 0 || answer > 3);
+            } while (answer < 0 || answer > 4);
             switch (answer) {
                 case 0:
                     observer.complete();
@@ -723,8 +759,16 @@ class Utils {
                     this.editNodePolicy()
                         .subscribe(() => observer.complete());
                     break;
+                case 4:
+                    console.log('\x1b[32m', '\nWorking with Object Policy');
+                    this.editObjectPolicy()
+                        .subscribe(() => observer.complete());
+                    break;
             }
         });
+    }
+    editObjectPolicy() {
+        return this.editTypePolicy('object.policy.json');
     }
     editNodePolicy() {
         return this.editTypePolicy('node.policy.json');
@@ -738,6 +782,7 @@ class Utils {
     }
     getJsonFromFile(jsonFile) {
         let json;
+        console.log(`${this.hznConfig}/${jsonFile}`);
         if ((0, fs_1.existsSync)(`${this.hznConfig}/${jsonFile}`)) {
             try {
                 json = jsonfile_1.default.readFileSync(`${this.hznConfig}/${jsonFile}`);

@@ -1,4 +1,4 @@
-import { Observable, of, firstValueFrom, forkJoin, from } from 'rxjs';
+import { Observable, of, firstValueFrom, Observer, forkJoin, from } from 'rxjs';
 const cp = require('child_process'),
 exec = cp.exec;
 import { readFileSync, writeFileSync, copyFileSync , existsSync, exists } from 'fs';
@@ -35,6 +35,7 @@ const mustHave = [
   "MMS_CONTAINER_NAME",
   "MMS_SERVICE_NAME",
   "MMS_SERVICE_VERSION",
+  "MMS_SERVICE_FALLBACK_VERSION",
   "UPDATE_FILE_NAME"
 ];
 
@@ -626,6 +627,28 @@ export class Utils {
       resolve(res)   
     })
   }
+  unregisterAgent() {
+    return new Observable((observer) => {
+      utils.isNodeConfigured()
+      .subscribe({
+        next: (res) => {
+          if(res) {
+            let arg = `hzn unregister -frDv`;
+            utils.shell(arg, 'done unregistering agent', 'failed to unregister agent')
+            .subscribe({
+              next: (res) => observer.complete(),
+              error: (e) => observer.error(e)
+            })      
+          } else {
+            console.log('no need to unregister...')
+            observer.complete()
+          }
+        }, error(e) {
+          observer.complete()
+        }
+      })
+    })  
+  }
   addPolicy(policy: any) {
     return new Observable((observer) => {
       let answer;
@@ -663,19 +686,31 @@ export class Utils {
     return utils.shell(arg)
   }
   addNodePolicy(policy: any) {
-    let arg = `hzn register --policy ${policy.nodePolicyJson}`
-    return utils.shell(arg)
+    return new Observable((observer) => {
+      this.unregisterAgent().subscribe({
+        complete: () => {
+          let arg = `hzn register --policy ${policy.nodePolicyJson}`
+          utils.shell(arg, 'done registering agent with policy', 'failed to register agent')
+          .subscribe({
+            complete: () => observer.complete(),
+            error: (err) => observer.error(err)
+          })
+        }, error: (err) => {
+          observer.error(err);
+        }    
+      })  
+    })  
   }
   editPolicy() {
     return new Observable((observer) => {
       let answer;
-      console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n0) To exit`)
+      console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n4) Object Policy\n0) To exit`)
       do {
         answer = parseInt(promptSync(`Please select the type of policy you would like to work with: `))
-        if(answer < 0 || answer > 3) {
+        if(answer < 0 || answer > 4) {
           console.log('\x1b[41m%s\x1b[0m', '\nInvalid, try again.')
         } 
-      } while(answer < 0 || answer > 3)
+      } while(answer < 0 || answer > 4)
       switch(answer) {
         case 0: 
           observer.complete()
@@ -695,8 +730,16 @@ export class Utils {
           this.editNodePolicy()
           .subscribe(() => observer.complete())
           break;
+        case 4:  
+          console.log('\x1b[32m', '\nWorking with Object Policy') 
+          this.editObjectPolicy()
+          .subscribe(() => observer.complete())
+          break;
       }
     })  
+  }
+  editObjectPolicy() {
+    return this.editTypePolicy('object.policy.json')
   }
   editNodePolicy() {
     return this.editTypePolicy('node.policy.json')
@@ -710,6 +753,7 @@ export class Utils {
   }
   getJsonFromFile(jsonFile: string) {
     let json;
+    console.log(`${this.hznConfig}/${jsonFile}`)
     if(existsSync(`${this.hznConfig}/${jsonFile}`)) {
       try {
         json = jsonfile.readFileSync(`${this.hznConfig}/${jsonFile}`);
