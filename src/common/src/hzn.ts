@@ -26,7 +26,9 @@ export class Hzn {
   envVar: any;
   configPath: string;
   name: string;
+  org: string;
   constructor(env: string, configPath: string, name: string, objectType: string, objectId: string, objectFile: string, mmsPattern: string) {
+    this.org = env;
     this.envVar = new Env(env, utils.getHznConfig());
     this.configPath = configPath;
     this.name = name;
@@ -57,6 +59,8 @@ export class Hzn {
           this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
           this.servicePolicyJson = `${this.configPath}/service.policy.json`;
           this.objectPolicyJson = `${this.configPath}/object.policy.json`;
+
+          utils.updateHorizon(this.org)
           observer.complete();    
         },
         error: (err) => {

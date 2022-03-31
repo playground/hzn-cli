@@ -13,6 +13,7 @@ class Hzn {
         this.objectPolicyJson = '';
         this.serviceDefinitionJson = '';
         this.servicePatternJson = '';
+        this.org = env;
         this.envVar = new env_1.Env(env, exports.utils.getHznConfig());
         this.configPath = configPath;
         this.name = name;
@@ -41,6 +42,7 @@ class Hzn {
                     this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
                     this.servicePolicyJson = `${this.configPath}/service.policy.json`;
                     this.objectPolicyJson = `${this.configPath}/object.policy.json`;
+                    exports.utils.updateHorizon(this.org);
                     observer.complete();
                 },
                 error: (err) => {

@@ -60,7 +60,7 @@ export const handler = (argv: Arguments<Options>): void => {
   const skipInitialize = ['dockerImageExists'];
   const justRun = [
     'appendSupport', 'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 
-    'listObject', 'listPattern', 'listService', 'removeOrg', 'showHznInfo', 'uninstallHorizon', 'updateHznInfo'
+    'listObject', 'listPattern', 'listService', 'removeOrg'
   ];
   const promptForUpdate = [
     'setup', 'test', 'addDeploymentPolicy', 'addNodePolicy', 'addServicePolicy', 'addPolicy', 'buildAndPublish', 'buildPublishAndRegister', 
@@ -68,7 +68,7 @@ export const handler = (argv: Arguments<Options>): void => {
     'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService', 
     'publishMMSPattern', 'publishMMSObject', 'publishMMSObjectPolicy', 'pushMMSImage', 'pushServiceImage', 'registerAgent', 'unregisterAgent'
   ];
-  const runDirectly = ['deleteObject', 'setupManagementHub', 'uninstallHorizon'];
+  const runDirectly = ['deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon'];
 
   if(env.length == 0) {
     let value = utils.getPropValueFromFile(`${utils.getHznConfig()}/.env-local`, 'DEFAULT_ORG')

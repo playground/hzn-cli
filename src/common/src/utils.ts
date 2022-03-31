@@ -9,6 +9,7 @@ export const promptSync = require('prompt-sync')();
 import jsonfile from 'jsonfile';
 import { utils } from '.';
 import { fork } from 'child_process';
+import { URL } from 'url';
 
 const env = process.env.npm_config_env || 'biz';
 const isBoolean = [
@@ -234,8 +235,7 @@ export class Utils {
     return props;
   }
   updateEnvFiles(org: string) {
-    return new Observable((observer) => {
-       
+    return new Observable((observer) => {       
       // let props = this.getPropsFromFile(`${this.hznConfig}/.env-local`);
       let props = this.getPropsFromEnvLocal(org)
       console.log(props)
@@ -261,14 +261,17 @@ export class Utils {
               let content = '';
               const pEnv = process.env;
               let defaultOrg = false
-              answer = promptSync(`\nWould you like to make ${org} the default working environment: Y/n?`)
-              if(answer.toLowerCase() == 'y') {
-                defaultOrg = true
-              }  
               for(const [key, value] of Object.entries(result)) {
-                content += key == 'DEFAULT_ORG' ? `${key}=${org}\n` : `${key}=${value}\n`;
+                if(key == 'DEFAULT_ORG' && org != value) {
+                  answer = promptSync(`\nWould you like to make ${org} the default working environment: Y/n?`)
+                  if(answer.toLowerCase() == 'y') {
+                    defaultOrg = true
+                  }      
+                }
+                content += key == 'DEFAULT_ORG' && defaultOrg ? `${key}=${org}\n` : `${key}=${value}\n`;
                 pEnv[key] = ''+value; 
               }
+              this.updateCredential(org)
               writeFileSync('.env-local', content);
               this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local && sudo chmod 766 ${this.hznConfig}/.env-local`).then(() => {
                 this.updateEnvHzn(org)
@@ -412,9 +415,10 @@ export class Utils {
       }
     })    
   }
-  updateCredential(org: string, hznJson: any) {
+  updateCredential(org: string) {
     let credential: any = {}
-    const pEnv = process.env
+    const pEnv:any = process.env
+    let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
     credentialVars.forEach((key) => {
       credential[key] = pEnv[key]
       console.log(key, pEnv[key])
@@ -432,7 +436,6 @@ export class Utils {
     return new Observable((observer) => {
       let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
       if(hznJson[org]) {
-        this.updateCredential(org, hznJson)
         if(!skipUpdate) {
           this.updateOrgConfig(hznJson, org)
           .subscribe({
@@ -601,6 +604,40 @@ export class Utils {
       props = [];
     }
     return props;
+  }
+  updateHorizon(org: string) {
+    let horizon = this.nameValueToJson(`${this.etcDefault}/horizon`)
+    let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
+    let template = JSON.parse(readFileSync(`${__dirname}/env-hzn-template.json`).toString())
+    let pEnv: any = process.env;
+    console.log('check update', org, hznJson[org].credential.HZN_FSS_CSSURL, horizon.HZN_FSS_CSSURL)
+    if(hznJson[org].credential.HZN_FSS_CSSURL && hznJson[org].credential.HZN_FSS_CSSURL != horizon.HZN_FSS_CSSURL) {
+      let url: any = new URL(hznJson[org].credential.HZN_FSS_CSSURL)
+      let type = url.port ? template['oh'] : template['ieam']
+      let hostname = `${url.protocol}//${url.hostname}`
+      Object.keys(type).forEach((key) => {
+        horizon[key] = this.tokenReplace(type[key], {HOSTNAME: hostname, HZN_DEVICE_ID: pEnv.HZN_DEVICE_ID, HZN_NODE_ID: pEnv.HZN_NODE_ID})
+      })
+      console.log('do update')
+    }
+    console.dir(horizon)
+
+  }
+  tokenReplace(template: string, obj: any) {
+    //  template = 'Where is ${movie} playing?',
+    //  tokenReplace(template, {movie: movie});
+    return template.replace(/\$\{([^\s\:\}]+)(?:\:([^\s\:\}]+))?\}/g, (match, key) => {
+      return obj[key];
+    });
+  }
+  nameValueToJson(file: string) {
+    let ar = readFileSync(file).toString().split('\n');
+    let json = Object.assign({})
+    ar.forEach((el: string) => {
+      let prop = el.split('=')
+      json[prop[0]] = prop[1]
+    })
+    return json;
   }
   updateHznInfo() {
     return new Observable((observer) => {

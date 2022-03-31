@@ -22,6 +22,7 @@ export declare class Hzn {
     envVar: any;
     configPath: string;
     name: string;
+    org: string;
     constructor(env: string, configPath: string, name: string, objectType: string, objectId: string, objectFile: string, mmsPattern: string);
     init(): Observable<unknown>;
     test(): Observable<unknown>;

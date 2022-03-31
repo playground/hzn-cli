@@ -13,6 +13,7 @@ const prompt_1 = __importDefault(require("prompt"));
 exports.promptSync = require('prompt-sync')();
 const jsonfile_1 = __importDefault(require("jsonfile"));
 const _1 = require(".");
+const url_1 = require("url");
 const env = process.env.npm_config_env || 'biz';
 const isBoolean = [
     'TOP_LEVEL_SERVICE'
@@ -267,14 +268,17 @@ class Utils {
                             let content = '';
                             const pEnv = process.env;
                             let defaultOrg = false;
-                            answer = (0, exports.promptSync)(`\nWould you like to make ${org} the default working environment: Y/n?`);
-                            if (answer.toLowerCase() == 'y') {
-                                defaultOrg = true;
-                            }
                             for (const [key, value] of Object.entries(result)) {
-                                content += key == 'DEFAULT_ORG' ? `${key}=${org}\n` : `${key}=${value}\n`;
+                                if (key == 'DEFAULT_ORG' && org != value) {
+                                    answer = (0, exports.promptSync)(`\nWould you like to make ${org} the default working environment: Y/n?`);
+                                    if (answer.toLowerCase() == 'y') {
+                                        defaultOrg = true;
+                                    }
+                                }
+                                content += key == 'DEFAULT_ORG' && defaultOrg ? `${key}=${org}\n` : `${key}=${value}\n`;
                                 pEnv[key] = '' + value;
                             }
+                            this.updateCredential(org);
                             (0, fs_1.writeFileSync)('.env-local', content);
                             this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local && sudo chmod 766 ${this.hznConfig}/.env-local`).then(() => {
                                 this.updateEnvHzn(org)
@@ -424,9 +428,10 @@ class Utils {
             }
         });
     }
-    updateCredential(org, hznJson) {
+    updateCredential(org) {
         let credential = {};
         const pEnv = process.env;
+        let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
         credentialVars.forEach((key) => {
             credential[key] = pEnv[key];
             console.log(key, pEnv[key]);
@@ -444,7 +449,6 @@ class Utils {
         return new rxjs_1.Observable((observer) => {
             let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
             if (hznJson[org]) {
-                this.updateCredential(org, hznJson);
                 if (!skipUpdate) {
                     this.updateOrgConfig(hznJson, org)
                         .subscribe({
@@ -623,6 +627,39 @@ class Utils {
             props = [];
         }
         return props;
+    }
+    updateHorizon(org) {
+        let horizon = this.nameValueToJson(`${this.etcDefault}/horizon`);
+        let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
+        let template = JSON.parse((0, fs_1.readFileSync)(`${__dirname}/env-hzn-template.json`).toString());
+        let pEnv = process.env;
+        console.log('check update', org, hznJson[org].credential.HZN_FSS_CSSURL, horizon.HZN_FSS_CSSURL);
+        if (hznJson[org].credential.HZN_FSS_CSSURL && hznJson[org].credential.HZN_FSS_CSSURL != horizon.HZN_FSS_CSSURL) {
+            let url = new url_1.URL(hznJson[org].credential.HZN_FSS_CSSURL);
+            let type = url.port ? template['oh'] : template['ieam'];
+            let hostname = `${url.protocol}//${url.hostname}`;
+            Object.keys(type).forEach((key) => {
+                horizon[key] = this.tokenReplace(type[key], { HOSTNAME: hostname, HZN_DEVICE_ID: pEnv.HZN_DEVICE_ID, HZN_NODE_ID: pEnv.HZN_NODE_ID });
+            });
+            console.log('do update');
+        }
+        console.dir(horizon);
+    }
+    tokenReplace(template, obj) {
+        //  template = 'Where is ${movie} playing?',
+        //  tokenReplace(template, {movie: movie});
+        return template.replace(/\$\{([^\s\:\}]+)(?:\:([^\s\:\}]+))?\}/g, (match, key) => {
+            return obj[key];
+        });
+    }
+    nameValueToJson(file) {
+        let ar = (0, fs_1.readFileSync)(file).toString().split('\n');
+        let json = Object.assign({});
+        ar.forEach((el) => {
+            let prop = el.split('=');
+            json[prop[0]] = prop[1];
+        });
+        return json;
     }
     updateHznInfo() {
         return new rxjs_1.Observable((observer) => {

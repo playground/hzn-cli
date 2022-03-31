@@ -1,0 +1,22 @@
+{
+  "oh": {
+    "HZN_EXCHANGE_URL": "${HOSTNAME}:3090/v1",
+    "HZN_FSS_CSSURL": "${HOSTNAME}:9443",
+    "HZN_DEVICE_ID": "${HZN_DEVICE_ID}",
+    "HZN_NODE_ID": "${HZN_NODE_ID}",
+    "HZN_AGBOT_URL": "${HOSTNAME}:3111",
+    "HZN_SDO_SVC_URL": "${HOSTNAME}:9008/api",
+    "HZN_MGMT_HUB_CERT_PATH": "/etc/horizon/agent-install.crt",
+    "HZN_AGENT_PORT": "8510"
+  },
+  "ieam": {
+    "HZN_EXCHANGE_URL": "${HOSTNAME}/edge-exchange/v1",
+    "HZN_FSS_CSSURL": "${HOSTNAME}/edge-css",
+    "HZN_DEVICE_ID": "${HZN_DEVICE_ID}",
+    "HZN_NODE_ID": "${HZN_NODE_ID}",
+    "HZN_AGBOT_URL": "${HOSTNAME}/edge-agbot/",
+    "HZN_SDO_SVC_URL": "${HOSTNAME}/edge-sdo-ocs/api",
+    "HZN_MGMT_HUB_CERT_PATH": "/etc/horizon/agent-install.crt",
+    "HZN_AGENT_PORT": "8510"
+  }
+}

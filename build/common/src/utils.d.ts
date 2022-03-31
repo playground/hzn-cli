@@ -30,7 +30,7 @@ export declare class Utils {
     shallowEqual(obj1: any, obj2: any): boolean;
     updateOrgConfig(hznJson: any, org: string, newOrg?: boolean): Observable<unknown>;
     removeOrg(org: string): Observable<unknown>;
-    updateCredential(org: string, hznJson: any): void;
+    updateCredential(org: string): void;
     orgCheck(org: string, skipUpdate?: boolean): Observable<unknown>;
     filterEnvVars(result: any): {};
     setupEnvFiles(org: string): Observable<unknown>;
@@ -40,6 +40,9 @@ export declare class Utils {
     showHznInfo(): Observable<unknown>;
     getPropValueFromFile(file: string, prop: string): string;
     getPropsFromFile(file: string): any[];
+    updateHorizon(org: string): void;
+    tokenReplace(template: string, obj: any): string;
+    nameValueToJson(file: string): any;
     updateHznInfo(): Observable<unknown>;
     policyToProps(policy: string): any;
     promptType(propName: string, res: any, el: any): void;
