@@ -4,7 +4,7 @@ const cp = require('child_process'),
 exec = cp.exec;
 const dotenv = require('dotenv');
 
-const pEnv = process.env;
+const pEnv: any = process.env;
 
 export class Env {
   env: string;
@@ -26,6 +26,13 @@ export class Env {
       const supportEnv = dotenv.parse(readFileSync(`${this.hznConfig}/.env-support`));
       for(let i in supportEnv) {
         pEnv[i] = supportEnv[i];
+      }
+      const hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
+      const credential = hznJson[this.env].credential
+      if(credential) {
+        Object.keys(credential).forEach((key) => {
+          pEnv[key] = credential[key]
+        })  
       }
       pEnv.HZN_ORG_ID = this.env;
       this.hznJson = JSON.parse(readFileSync(this.hznEnv).toString());

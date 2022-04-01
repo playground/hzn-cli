@@ -60,8 +60,8 @@ export class Hzn {
           this.servicePolicyJson = `${this.configPath}/service.policy.json`;
           this.objectPolicyJson = `${this.configPath}/object.policy.json`;
 
-          utils.updateHorizon(this.org)
-          observer.complete();    
+          utils.updateHorizon(this.org, this.envVar)
+          .subscribe(() => observer.complete())
         },
         error: (err) => {
           console.log(err.message);
@@ -86,13 +86,13 @@ export class Hzn {
   }
   test() {
     return new Observable((observer) => {
-      console.log(`it works...${this.envVar.getArch()}`)
+      console.log(`it works..., your environment is ready to go!`)
       observer.complete();
     });  
   }
   setup() {
     return new Observable((observer) => {
-      console.log(`it works...${this.envVar.getArch()}, your environment is ready to go!`)
+      console.log(`it works..., your environment is ready to go!`)
       observer.complete();
     });  
   }

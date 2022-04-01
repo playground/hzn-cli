@@ -10,6 +10,7 @@ import jsonfile from 'jsonfile';
 import { utils } from '.';
 import { fork } from 'child_process';
 import { URL } from 'url';
+import { Env } from './env';
 
 const env = process.env.npm_config_env || 'biz';
 const isBoolean = [
@@ -48,6 +49,7 @@ const credentialVars = [
 
 export class Utils {
   etcDefault = '/etc/default';
+  etcHorizon = '/etc/horizon';
   homePath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
   hznConfig = `${this.homePath}/hzn-config`;
   constructor() {}
@@ -605,23 +607,49 @@ export class Utils {
     }
     return props;
   }
-  updateHorizon(org: string) {
-    let horizon = this.nameValueToJson(`${this.etcDefault}/horizon`)
-    let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
-    let template = JSON.parse(readFileSync(`${__dirname}/env-hzn-template.json`).toString())
-    let pEnv: any = process.env;
-    console.log('check update', org, hznJson[org].credential.HZN_FSS_CSSURL, horizon.HZN_FSS_CSSURL)
-    if(hznJson[org].credential.HZN_FSS_CSSURL && hznJson[org].credential.HZN_FSS_CSSURL != horizon.HZN_FSS_CSSURL) {
-      let url: any = new URL(hznJson[org].credential.HZN_FSS_CSSURL)
-      let type = url.port ? template['oh'] : template['ieam']
-      let hostname = `${url.protocol}//${url.hostname}`
-      Object.keys(type).forEach((key) => {
-        horizon[key] = this.tokenReplace(type[key], {HOSTNAME: hostname, HZN_DEVICE_ID: pEnv.HZN_DEVICE_ID, HZN_NODE_ID: pEnv.HZN_NODE_ID})
-      })
-      console.log('do update')
-    }
-    console.dir(horizon)
-
+  updateHorizon(org: string, pEnv: Env) {
+    return new Observable((observer) => {
+      let horizon = this.nameValueToJson(`${this.etcDefault}/horizon`)
+      let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
+      let template = JSON.parse(readFileSync(`${__dirname}/env-hzn-template.json`).toString())
+      console.log('check update', org, hznJson[org].credential.HZN_FSS_CSSURL, horizon.HZN_FSS_CSSURL)
+      if(hznJson[org].credential.HZN_FSS_CSSURL && hznJson[org].credential.HZN_FSS_CSSURL != horizon.HZN_FSS_CSSURL) {
+        let url: any = new URL(hznJson[org].credential.HZN_FSS_CSSURL)
+        let type = url.port ? template['oh'] : template['ieam']
+        let hostname = `${url.protocol}//${url.hostname}`
+        let content = ''
+        Object.keys(type).forEach((key) => {
+          content += `${key}=${this.tokenReplace(type[key], {HOSTNAME: hostname, HZN_DEVICE_ID: horizon.HZN_DEVICE_ID, HZN_NODE_ID: horizon.HZN_NODE_ID})}\n`; 
+        })
+        console.log('do update')
+        console.log(content)
+        this.updateCert(org, pEnv)
+        .subscribe({
+          complete: () => {
+            //todo writeHorizon
+            observer.complete()
+          }, error: (err: any) => observer.error(err)
+        })
+      } else {
+        observer.complete()
+      }
+    })  
+  }
+  updateCert(org: string, pEnv: Env) {
+    return new Observable((observer) => {
+      if(existsSync(`${this.etcHorizon}/agent-install-${org}.crt`)) {
+        // todo cp to agent-install.crt
+      } else {
+        let arg = `sudo curl -sSL -u "${pEnv.getOrgId()}/${pEnv.getExchangeUserAuth()}" --insecure -o "${this.etcHorizon}/agent-install-${org}.crt" ${pEnv.getFSSCSSUrl()}/api/v1/objects/IBM/agent_files/agent-install.crt/data`
+        this.shell(arg, 'done updating cert', 'failed to update cert')
+        .subscribe({
+          complete: () => {
+            // todo cp to agent-install.crt
+            observer.complete()
+          }, error: (err: any) => observer.error(err)
+        })
+      }
+    })  
   }
   tokenReplace(template: string, obj: any) {
     //  template = 'Where is ${movie} playing?',
@@ -629,6 +657,17 @@ export class Utils {
     return template.replace(/\$\{([^\s\:\}]+)(?:\:([^\s\:\}]+))?\}/g, (match, key) => {
       return obj[key];
     });
+  }
+  writeHorizon(content: string) {
+    return new Observable((observer) => {
+      this.copyFile(`sudo cp ${this.etcDefault}/horizon ${this.etcDefault}/.horizon`).then(() => {
+        writeFileSync('.horizon', content);
+        this.copyFile(`sudo mv .horizon ${this.etcDefault}/horizon`).then(() => {
+          observer.next();
+          observer.complete();  
+        })
+      })
+    })  
   }
   nameValueToJson(file: string) {
     let ar = readFileSync(file).toString().split('\n');

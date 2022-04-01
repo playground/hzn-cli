@@ -1,7 +1,9 @@
 import { Observable } from 'rxjs';
 export declare const promptSync: any;
+import { Env } from './env';
 export declare class Utils {
     etcDefault: string;
+    etcHorizon: string;
     homePath: string;
     hznConfig: string;
     constructor();
@@ -40,8 +42,10 @@ export declare class Utils {
     showHznInfo(): Observable<unknown>;
     getPropValueFromFile(file: string, prop: string): string;
     getPropsFromFile(file: string): any[];
-    updateHorizon(org: string): void;
+    updateHorizon(org: string, pEnv: Env): Observable<unknown>;
+    updateCert(org: string, pEnv: Env): Observable<unknown>;
     tokenReplace(template: string, obj: any): string;
+    writeHorizon(content: string): Observable<unknown>;
     nameValueToJson(file: string): any;
     updateHznInfo(): Observable<unknown>;
     policyToProps(policy: string): any;

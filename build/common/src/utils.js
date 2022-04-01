@@ -51,6 +51,7 @@ const credentialVars = [
 class Utils {
     constructor() {
         this.etcDefault = '/etc/default';
+        this.etcHorizon = '/etc/horizon';
         this.homePath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
         this.hznConfig = `${this.homePath}/hzn-config`;
     }
@@ -628,28 +629,68 @@ class Utils {
         }
         return props;
     }
-    updateHorizon(org) {
-        let horizon = this.nameValueToJson(`${this.etcDefault}/horizon`);
-        let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
-        let template = JSON.parse((0, fs_1.readFileSync)(`${__dirname}/env-hzn-template.json`).toString());
-        let pEnv = process.env;
-        console.log('check update', org, hznJson[org].credential.HZN_FSS_CSSURL, horizon.HZN_FSS_CSSURL);
-        if (hznJson[org].credential.HZN_FSS_CSSURL && hznJson[org].credential.HZN_FSS_CSSURL != horizon.HZN_FSS_CSSURL) {
-            let url = new url_1.URL(hznJson[org].credential.HZN_FSS_CSSURL);
-            let type = url.port ? template['oh'] : template['ieam'];
-            let hostname = `${url.protocol}//${url.hostname}`;
-            Object.keys(type).forEach((key) => {
-                horizon[key] = this.tokenReplace(type[key], { HOSTNAME: hostname, HZN_DEVICE_ID: pEnv.HZN_DEVICE_ID, HZN_NODE_ID: pEnv.HZN_NODE_ID });
-            });
-            console.log('do update');
-        }
-        console.dir(horizon);
+    updateHorizon(org, pEnv) {
+        return new rxjs_1.Observable((observer) => {
+            let horizon = this.nameValueToJson(`${this.etcDefault}/horizon`);
+            let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
+            let template = JSON.parse((0, fs_1.readFileSync)(`${__dirname}/env-hzn-template.json`).toString());
+            console.log('check update', org, hznJson[org].credential.HZN_FSS_CSSURL, horizon.HZN_FSS_CSSURL);
+            if (hznJson[org].credential.HZN_FSS_CSSURL && hznJson[org].credential.HZN_FSS_CSSURL != horizon.HZN_FSS_CSSURL) {
+                let url = new url_1.URL(hznJson[org].credential.HZN_FSS_CSSURL);
+                let type = url.port ? template['oh'] : template['ieam'];
+                let hostname = `${url.protocol}//${url.hostname}`;
+                let content = '';
+                Object.keys(type).forEach((key) => {
+                    content += `${key}=${this.tokenReplace(type[key], { HOSTNAME: hostname, HZN_DEVICE_ID: horizon.HZN_DEVICE_ID, HZN_NODE_ID: horizon.HZN_NODE_ID })}\n`;
+                });
+                console.log('do update');
+                console.log(content);
+                this.updateCert(org, pEnv)
+                    .subscribe({
+                    complete: () => {
+                        //todo writeHorizon
+                        observer.complete();
+                    }, error: (err) => observer.error(err)
+                });
+            }
+            else {
+                observer.complete();
+            }
+        });
+    }
+    updateCert(org, pEnv) {
+        return new rxjs_1.Observable((observer) => {
+            if ((0, fs_1.existsSync)(`${this.etcHorizon}/agent-install-${org}.crt`)) {
+                // todo cp to agent-install.crt
+            }
+            else {
+                let arg = `sudo curl -sSL -u "${pEnv.getOrgId()}/${pEnv.getExchangeUserAuth()}" --insecure -o "${this.etcHorizon}/agent-install-${org}.crt" ${pEnv.getFSSCSSUrl()}/api/v1/objects/IBM/agent_files/agent-install.crt/data`;
+                this.shell(arg, 'done updating cert', 'failed to update cert')
+                    .subscribe({
+                    complete: () => {
+                        // todo cp to agent-install.crt
+                        observer.complete();
+                    }, error: (err) => observer.error(err)
+                });
+            }
+        });
     }
     tokenReplace(template, obj) {
         //  template = 'Where is ${movie} playing?',
         //  tokenReplace(template, {movie: movie});
         return template.replace(/\$\{([^\s\:\}]+)(?:\:([^\s\:\}]+))?\}/g, (match, key) => {
             return obj[key];
+        });
+    }
+    writeHorizon(content) {
+        return new rxjs_1.Observable((observer) => {
+            this.copyFile(`sudo cp ${this.etcDefault}/horizon ${this.etcDefault}/.horizon`).then(() => {
+                (0, fs_1.writeFileSync)('.horizon', content);
+                this.copyFile(`sudo mv .horizon ${this.etcDefault}/horizon`).then(() => {
+                    observer.next();
+                    observer.complete();
+                });
+            });
         });
     }
     nameValueToJson(file) {

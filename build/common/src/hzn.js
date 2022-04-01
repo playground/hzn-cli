@@ -42,8 +42,8 @@ class Hzn {
                     this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
                     this.servicePolicyJson = `${this.configPath}/service.policy.json`;
                     this.objectPolicyJson = `${this.configPath}/object.policy.json`;
-                    exports.utils.updateHorizon(this.org);
-                    observer.complete();
+                    exports.utils.updateHorizon(this.org, this.envVar)
+                        .subscribe(() => observer.complete());
                 },
                 error: (err) => {
                     console.log(err.message);
@@ -69,13 +69,13 @@ class Hzn {
     }
     test() {
         return new rxjs_1.Observable((observer) => {
-            console.log(`it works...${this.envVar.getArch()}`);
+            console.log(`it works..., your environment is ready to go!`);
             observer.complete();
         });
     }
     setup() {
         return new rxjs_1.Observable((observer) => {
-            console.log(`it works...${this.envVar.getArch()}, your environment is ready to go!`);
+            console.log(`it works..., your environment is ready to go!`);
             observer.complete();
         });
     }
