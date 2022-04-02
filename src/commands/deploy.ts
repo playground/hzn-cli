@@ -1,5 +1,6 @@
 import type { Arguments, CommandBuilder } from 'yargs';
 import { Hzn, utils } from '../common/src/hzn';
+import { IHznParam, justRun, runDirectly, promptForUpdate } from '../common/src/interface';
 import chalk from 'chalk';
 import clear from 'clear';
 import figlet from 'figlet';
@@ -14,6 +15,7 @@ type Options = {
   object_id: string | undefined;
   object: string | undefined;
   pattern: string | undefined;
+  watch: string | undefined;
   skip_config_update: string | undefined;
 };
 export const command: string = 'deploy <action>';
@@ -29,7 +31,8 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
       object_id: {type: 'string', desc: 'Id of object to be published'},
       object: {type: 'string', desc: 'Object file to be published'},
       pattern: {type: 'string', desc: 'Pattern name'},
-      skip_config_update: {type: 'string', desc: 'Do not prompt for config updates'}
+      watch: {type: 'string', desc: 'watch = true/false'},
+      skip_config_update: {type: 'string', desc: 'Do not prompt for config updates = true/false'}
     })
     .positional('action', {
       type: 'string', 
@@ -37,7 +40,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
       desc: 'Available actions: ' +
             'addDeploymentPolicy, addNodePolicy, addServicePolicy, addPolicy, appendSupport, buildAndPublish, buildMMSImage, buildPublishAndRegister, ' + 
             'buildServiceImage, checkConfigState, createHznKey, deleteObject, dockerImageExists, editPolicy, editDeploymentPolicy, editNodePolicy, editServicePolicy, getDeviceArch, ' +
-            'getIpAddress, isConfigured, listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishAndRegister, publishMMSObject, ' +
+            'getIpAddress, isConfigured, listAgreement, listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishAndRegister, publishMMSObject, ' +
             'publishMMSObjectPolicy, publishMMSPattern, publishMMSService, publishPatterrn, publishService, publishServiceAndPattern, pullDockerImage, pushMMSImage, pushServiceImage, ' +
 		        'registerAgent, removeOrg, setup, setupManagementHub, showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo'
     });
@@ -49,26 +52,16 @@ export const handler = (argv: Arguments<Options>): void => {
       figlet.textSync('hzn-cli', { horizontalLayout: 'full' })
     )
   );
-  const { action, org, config_path, name, object_type, object_id, object, pattern, skip_config_update } = argv;
+  const { action, org, config_path, name, object_type, object_id, object, pattern, watch, skip_config_update } = argv;
   let env = org || '';
   const n = name || '';
   const objType = object_type || '';
   const objId = object_id || '';
   const obj = object || '';
   const p = pattern || '';
+  const w = watch || '';
   const configPath = config_path || utils.getHznConfig();
   const skipInitialize = ['dockerImageExists'];
-  const justRun = [
-    'appendSupport', 'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listDeploymentPolicy', 'listNode', 'listNodePattern', 
-    'listObject', 'listPattern', 'listService', 'removeOrg'
-  ];
-  const promptForUpdate = [
-    'setup', 'test', 'addDeploymentPolicy', 'addNodePolicy', 'addServicePolicy', 'addPolicy', 'buildAndPublish', 'buildPublishAndRegister', 
-    'buildMMSImage', 'buildServiceImage', 'editDeploymentPoicy', 'editNodePolicy', 'editServicePolicy', 'publishAndRegister', 
-    'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService', 
-    'publishMMSPattern', 'publishMMSObject', 'publishMMSObjectPolicy', 'pushMMSImage', 'pushServiceImage', 'registerAgent', 'unregisterAgent'
-  ];
-  const runDirectly = ['deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon'];
 
   if(env.length == 0) {
     let value = utils.getPropValueFromFile(`${utils.getHznConfig()}/.env-local`, 'DEFAULT_ORG')
@@ -76,14 +69,25 @@ export const handler = (argv: Arguments<Options>): void => {
   }
   const proceed = () => {
     if(existsSync(`${utils.getHznConfig()}/.env-hzn.json`) && existsSync(`${utils.getHznConfig()}/.env-local`)) {
-      const hzn = new Hzn(env, configPath, n, objType, objId, obj, p);
+      const hznModel = {
+        org: env, 
+        configPath: configPath, 
+        name: n, 
+        objectType: objType, 
+        objectId: objId, 
+        objectFile: obj,
+        action: action,
+        watch: watch && watch === 'true' ? 'watch ' : ''
+      } as IHznParam;
+      const hzn = new Hzn(hznModel);
   
       hzn.init()
       .subscribe({
         complete: () => {
           hzn[action]()
           .subscribe({
-            complete:() => {
+            next: (msg: string) => console.log(msg),
+            complete: () => {
               console.log('process completed.');
               process.exit(0)          
             }

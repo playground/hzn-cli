@@ -56,6 +56,7 @@ class Env {
                 });
             }
             else {
+                console.log(this.envVars.ARCH, 'here');
                 this.setAdditionalEnv();
                 console.log(this.envVars.ARCH);
                 observer.next();

@@ -11,6 +11,7 @@ import { utils } from '.';
 import { fork } from 'child_process';
 import { URL } from 'url';
 import { Env } from './env';
+import { IHznParam } from './interface';
 
 const env = process.env.npm_config_env || 'biz';
 const isBoolean = [
@@ -58,6 +59,10 @@ export class Utils {
   getHznConfig() {
     return this.hznConfig
   }
+  listAgreement(param: IHznParam) {
+    const arg = `${param.watch} hzn agreement list`;
+    return this.shell(arg);
+  }
   listService(name: string) {
     const arg = name.length > 0 ? `hzn exchange service list ${name}` : 'hzn exchange service list';
     return this.shell(arg);
@@ -70,9 +75,26 @@ export class Utils {
     const arg = name.length > 0 ? `hzn exchange node list ${name}` : 'hzn exchange node list';
     return this.shell(arg);
   }
-  listObject(name: string) {
-    const arg = name.length > 0 ? `hzn mms object list ${name}` : 'hzn mms object list';
-    return this.shell(arg);
+  removeNode(name: string) {
+    return new Observable((observer) => { 
+      console.log(`\nAre you sure you want to remove node ${name} from the Horizon Exchange? [y/N]:`)
+      prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
+        if(question.answer.toUpperCase() === 'Y') {
+          const arg = `yes | hzn exchange node remove ${name}`;
+          this.shell(arg)
+          .subscribe({
+            complete: () => {
+              observer.complete()
+            },
+            error: (err) => observer.error(err)
+          })
+        }
+      })  
+    })  
+  }
+  listObject(param: IHznParam) {
+    const arg = param.name.length > 0 ? `${param.watch}hzn mms object list ${param.name}` : `${param.watch}hzn mms object list -t ${param.objectType} -i ${param.objectId} -d`;
+    return utils.shell(arg, 'done listing object', 'failed to list object');
   }
   listDeploymentPolicy(name: string) {
     const arg = name.length > 0 ? `hzn exchange deployment listpolicy ${name}` : 'hzn exchange deployment listpolicy';
@@ -390,6 +412,7 @@ export class Utils {
             })    
           } else {
             console.log(`config files not updated for ${org}`)
+            observer.next({env: org})
             observer.complete();
           }
         }  
@@ -611,9 +634,9 @@ export class Utils {
     return new Observable((observer) => {
       let horizon = this.nameValueToJson(`${this.etcDefault}/horizon`)
       let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
-      let template = JSON.parse(readFileSync(`${__dirname}/env-hzn-template.json`).toString())
       console.log('check update', org, hznJson[org].credential.HZN_FSS_CSSURL, horizon.HZN_FSS_CSSURL)
       if(hznJson[org].credential.HZN_FSS_CSSURL && hznJson[org].credential.HZN_FSS_CSSURL != horizon.HZN_FSS_CSSURL) {
+        let template = JSON.parse(readFileSync(`${__dirname}/env-hzn-template.json`).toString())
         let url: any = new URL(hznJson[org].credential.HZN_FSS_CSSURL)
         let type = url.port ? template['oh'] : template['ieam']
         let hostname = `${url.protocol}//${url.hostname}`
@@ -621,16 +644,18 @@ export class Utils {
         Object.keys(type).forEach((key) => {
           content += `${key}=${this.tokenReplace(type[key], {HOSTNAME: hostname, HZN_DEVICE_ID: horizon.HZN_DEVICE_ID, HZN_NODE_ID: horizon.HZN_NODE_ID})}\n`; 
         })
-        console.log('do update')
+        console.log('update horizon')
         console.log(content)
         this.updateCert(org, pEnv)
         .subscribe({
           complete: () => {
             //todo writeHorizon
-            observer.complete()
+            this.writeHorizon(content)
+            .subscribe(() => observer.complete())
           }, error: (err: any) => observer.error(err)
         })
       } else {
+        observer.next()
         observer.complete()
       }
     })  
@@ -639,13 +664,18 @@ export class Utils {
     return new Observable((observer) => {
       if(existsSync(`${this.etcHorizon}/agent-install-${org}.crt`)) {
         // todo cp to agent-install.crt
+        this.copyFile(`sudo cp ${this.etcHorizon}/agent-install-${org}.crt ${this.etcHorizon}/agent-install.crt`).then(() => {
+          observer.complete()
+        })
       } else {
         let arg = `sudo curl -sSL -u "${pEnv.getOrgId()}/${pEnv.getExchangeUserAuth()}" --insecure -o "${this.etcHorizon}/agent-install-${org}.crt" ${pEnv.getFSSCSSUrl()}/api/v1/objects/IBM/agent_files/agent-install.crt/data`
         this.shell(arg, 'done updating cert', 'failed to update cert')
         .subscribe({
           complete: () => {
             // todo cp to agent-install.crt
-            observer.complete()
+            this.copyFile(`sudo cp ${this.etcHorizon}/agent-install-${org}.crt ${this.etcHorizon}/agent-install.crt`).then(() => {
+              observer.complete()
+            })  
           }, error: (err: any) => observer.error(err)
         })
       }
@@ -966,7 +996,8 @@ export class Utils {
         if(!err) {
           // console.log(stdout);
           console.log(success);
-          observer.next(stdout);
+          observer.next('');
+          // observer.next(stdout);
           observer.complete();
         } else {
           console.log(`${error}: ${err}`);

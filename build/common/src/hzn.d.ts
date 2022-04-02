@@ -1,5 +1,6 @@
 import { Observable } from 'rxjs';
 import { Utils } from './utils';
+import { IHznParam } from './interface';
 export declare const utils: Utils;
 export declare class Hzn {
     objectType: any;
@@ -23,7 +24,8 @@ export declare class Hzn {
     configPath: string;
     name: string;
     org: string;
-    constructor(env: string, configPath: string, name: string, objectType: string, objectId: string, objectFile: string, mmsPattern: string);
+    param: IHznParam;
+    constructor(param: IHznParam);
     init(): Observable<unknown>;
     test(): Observable<unknown>;
     setup(): Observable<unknown>;
@@ -63,10 +65,12 @@ export declare class Hzn {
     addNodePolicy(): Observable<unknown>;
     showHznInfo(): Observable<unknown>;
     updateHznInfo(): Observable<unknown>;
+    listAgreement(): Observable<unknown>;
     listService(): Observable<unknown>;
     isConfigured(): Observable<unknown>;
     listPattern(): Observable<unknown>;
     listNode(): Observable<unknown>;
+    removeNode(): Observable<unknown>;
     listObject(): Observable<unknown>;
     listDeploymentPolicy(): Observable<unknown>;
     deleteObject(): Observable<unknown>;

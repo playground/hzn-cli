@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs';
 export declare const promptSync: any;
 import { Env } from './env';
+import { IHznParam } from './interface';
 export declare class Utils {
     etcDefault: string;
     etcHorizon: string;
@@ -9,10 +10,12 @@ export declare class Utils {
     constructor();
     init(): void;
     getHznConfig(): string;
+    listAgreement(param: IHznParam): Observable<unknown>;
     listService(name: string): Observable<unknown>;
     listPattern(name: string): Observable<unknown>;
     listNode(name: string): Observable<unknown>;
-    listObject(name: string): Observable<unknown>;
+    removeNode(name: string): Observable<unknown>;
+    listObject(param: IHznParam): Observable<unknown>;
     listDeploymentPolicy(name: string): Observable<unknown>;
     createHznKey(org: string, id: string): Observable<unknown>;
     checkConfigState(): Observable<unknown>;

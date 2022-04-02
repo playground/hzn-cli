@@ -1,3 +1,17 @@
+export declare const justRun: string[];
+export declare const promptForUpdate: string[];
+export declare const runDirectly: string[];
+export interface IHznParam {
+    org: string;
+    configPath: string;
+    name: string;
+    objectType: string;
+    objectId: string;
+    objectFile: string;
+    mmsPattern: string;
+    action: string;
+    watch: string;
+}
 export declare class RequiredService {
     org: string;
     url: string;

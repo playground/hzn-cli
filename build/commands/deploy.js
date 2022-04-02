@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handler = exports.builder = exports.desc = exports.command = void 0;
 const hzn_1 = require("../common/src/hzn");
+const interface_1 = require("../common/src/interface");
 const chalk_1 = __importDefault(require("chalk"));
 const clear_1 = __importDefault(require("clear"));
 const figlet_1 = __importDefault(require("figlet"));
@@ -20,7 +21,8 @@ const builder = (yargs) => yargs
     object_id: { type: 'string', desc: 'Id of object to be published' },
     object: { type: 'string', desc: 'Object file to be published' },
     pattern: { type: 'string', desc: 'Pattern name' },
-    skip_config_update: { type: 'string', desc: 'Do not prompt for config updates' }
+    watch: { type: 'string', desc: 'watch = true/false' },
+    skip_config_update: { type: 'string', desc: 'Do not prompt for config updates = true/false' }
 })
     .positional('action', {
     type: 'string',
@@ -28,7 +30,7 @@ const builder = (yargs) => yargs
     desc: 'Available actions: ' +
         'addDeploymentPolicy, addNodePolicy, addServicePolicy, addPolicy, appendSupport, buildAndPublish, buildMMSImage, buildPublishAndRegister, ' +
         'buildServiceImage, checkConfigState, createHznKey, deleteObject, dockerImageExists, editPolicy, editDeploymentPolicy, editNodePolicy, editServicePolicy, getDeviceArch, ' +
-        'getIpAddress, isConfigured, listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishAndRegister, publishMMSObject, ' +
+        'getIpAddress, isConfigured, listAgreement, listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishAndRegister, publishMMSObject, ' +
         'publishMMSObjectPolicy, publishMMSPattern, publishMMSService, publishPatterrn, publishService, publishServiceAndPattern, pullDockerImage, pushMMSImage, pushServiceImage, ' +
         'registerAgent, removeOrg, setup, setupManagementHub, showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo'
 });
@@ -36,38 +38,39 @@ exports.builder = builder;
 const handler = (argv) => {
     (0, clear_1.default)();
     console.log(chalk_1.default.greenBright(figlet_1.default.textSync('hzn-cli', { horizontalLayout: 'full' })));
-    const { action, org, config_path, name, object_type, object_id, object, pattern, skip_config_update } = argv;
+    const { action, org, config_path, name, object_type, object_id, object, pattern, watch, skip_config_update } = argv;
     let env = org || '';
     const n = name || '';
     const objType = object_type || '';
     const objId = object_id || '';
     const obj = object || '';
     const p = pattern || '';
+    const w = watch || '';
     const configPath = config_path || hzn_1.utils.getHznConfig();
     const skipInitialize = ['dockerImageExists'];
-    const justRun = [
-        'appendSupport', 'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listDeploymentPolicy', 'listNode', 'listNodePattern',
-        'listObject', 'listPattern', 'listService', 'removeOrg'
-    ];
-    const promptForUpdate = [
-        'setup', 'test', 'addDeploymentPolicy', 'addNodePolicy', 'addServicePolicy', 'addPolicy', 'buildAndPublish', 'buildPublishAndRegister',
-        'buildMMSImage', 'buildServiceImage', 'editDeploymentPoicy', 'editNodePolicy', 'editServicePolicy', 'publishAndRegister',
-        'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService',
-        'publishMMSPattern', 'publishMMSObject', 'publishMMSObjectPolicy', 'pushMMSImage', 'pushServiceImage', 'registerAgent', 'unregisterAgent'
-    ];
-    const runDirectly = ['deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon'];
     if (env.length == 0) {
         let value = hzn_1.utils.getPropValueFromFile(`${hzn_1.utils.getHznConfig()}/.env-local`, 'DEFAULT_ORG');
         env = value.length > 0 ? value : 'biz';
     }
     const proceed = () => {
         if ((0, fs_1.existsSync)(`${hzn_1.utils.getHznConfig()}/.env-hzn.json`) && (0, fs_1.existsSync)(`${hzn_1.utils.getHznConfig()}/.env-local`)) {
-            const hzn = new hzn_1.Hzn(env, configPath, n, objType, objId, obj, p);
+            const hznModel = {
+                org: env,
+                configPath: configPath,
+                name: n,
+                objectType: objType,
+                objectId: objId,
+                objectFile: obj,
+                action: action,
+                watch: watch && watch === 'true' ? 'watch ' : ''
+            };
+            const hzn = new hzn_1.Hzn(hznModel);
             hzn.init()
                 .subscribe({
                 complete: () => {
                     hzn[action]()
                         .subscribe({
+                        next: (msg) => console.log(msg),
                         complete: () => {
                             console.log('process completed.');
                             process.exit(0);
@@ -84,9 +87,9 @@ const handler = (argv) => {
             console.log(`${configPath}/.env-hzn.json file not fouund.`);
         }
     };
-    if (action && skipInitialize.concat(runDirectly).concat(justRun).concat(promptForUpdate).includes(action)) {
+    if (action && skipInitialize.concat(interface_1.runDirectly).concat(interface_1.justRun).concat(interface_1.promptForUpdate).includes(action)) {
         console.log('$$$ ', action, env);
-        if (runDirectly.indexOf(action) >= 0) {
+        if (interface_1.runDirectly.indexOf(action) >= 0) {
             hzn_1.utils[action]()
                 .subscribe({
                 complete: () => process.exit(0),
@@ -103,7 +106,7 @@ const handler = (argv) => {
                     if (skipInitialize.indexOf(action) >= 0) {
                         proceed();
                     }
-                    else if (justRun.indexOf(action) >= 0) {
+                    else if (interface_1.justRun.indexOf(action) >= 0) {
                         hzn_1.utils.orgCheck(env, true)
                             .subscribe({
                             complete: () => proceed(),
@@ -113,7 +116,7 @@ const handler = (argv) => {
                             }
                         });
                     }
-                    else if (promptForUpdate.indexOf(action) < 0 || skip_config_update) {
+                    else if (interface_1.promptForUpdate.indexOf(action) < 0 || skip_config_update) {
                         hzn_1.utils.orgCheck(env, skip_config_update === 'true')
                             .subscribe({
                             complete: () => proceed(),
