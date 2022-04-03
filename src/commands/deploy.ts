@@ -21,6 +21,10 @@ type Options = {
 export const command: string = 'deploy <action>';
 export const desc: string = 'Deploy <action> to Org <org>';
 
+let availableActions = 'Available actions:'
+runDirectly.concat(justRun).concat(promptForUpdate).sort().forEach((action) => {
+  availableActions += ` ${action}`
+}) 
 export const builder: CommandBuilder<Options, Options> = (yargs) =>
   yargs
     .options({
@@ -37,12 +41,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
     .positional('action', {
       type: 'string', 
       demandOption: true,
-      desc: 'Available actions: ' +
-            'addDeploymentPolicy, addNodePolicy, addServicePolicy, addPolicy, appendSupport, buildAndPublish, buildMMSImage, buildPublishAndRegister, ' + 
-            'buildServiceImage, checkConfigState, createHznKey, deleteObject, dockerImageExists, editPolicy, editDeploymentPolicy, editNodePolicy, editServicePolicy, getDeviceArch, ' +
-            'getIpAddress, isConfigured, listAgreement, listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishAndRegister, publishMMSObject, ' +
-            'publishMMSObjectPolicy, publishMMSPattern, publishMMSService, publishPatterrn, publishService, publishServiceAndPattern, pullDockerImage, pushMMSImage, pushServiceImage, ' +
-		        'registerAgent, removeOrg, setup, setupManagementHub, showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo'
+      desc: availableActions
     });
 
 export const handler = (argv: Arguments<Options>): void => {

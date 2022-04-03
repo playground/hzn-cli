@@ -1,6 +1,6 @@
 export const justRun = [
   'appendSupport', 'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement', 
-  'listDeploymentPolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg',
+  'listDeploymentPolicy', 'listExchangeNode', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 'removeOrg',
   'removeNode'
 ];
 export const promptForUpdate = [

@@ -12,6 +12,10 @@ const figlet_1 = __importDefault(require("figlet"));
 const fs_1 = require("fs");
 exports.command = 'deploy <action>';
 exports.desc = 'Deploy <action> to Org <org>';
+let availableActions = 'Available actions:';
+interface_1.runDirectly.concat(interface_1.justRun).concat(interface_1.promptForUpdate).sort().forEach((action) => {
+    availableActions += ` ${action}`;
+});
 const builder = (yargs) => yargs
     .options({
     org: { type: 'string', desc: 'Organization to be deployed to' },
@@ -27,12 +31,7 @@ const builder = (yargs) => yargs
     .positional('action', {
     type: 'string',
     demandOption: true,
-    desc: 'Available actions: ' +
-        'addDeploymentPolicy, addNodePolicy, addServicePolicy, addPolicy, appendSupport, buildAndPublish, buildMMSImage, buildPublishAndRegister, ' +
-        'buildServiceImage, checkConfigState, createHznKey, deleteObject, dockerImageExists, editPolicy, editDeploymentPolicy, editNodePolicy, editServicePolicy, getDeviceArch, ' +
-        'getIpAddress, isConfigured, listAgreement, listDeploymentPolicy, listNode, listNodePattern, listObject, listPattern, listService, publishAndRegister, publishMMSObject, ' +
-        'publishMMSObjectPolicy, publishMMSPattern, publishMMSService, publishPatterrn, publishService, publishServiceAndPattern, pullDockerImage, pushMMSImage, pushServiceImage, ' +
-        'registerAgent, removeOrg, setup, setupManagementHub, showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo'
+    desc: availableActions
 });
 exports.builder = builder;
 const handler = (argv) => {
