@@ -168,7 +168,8 @@ class Utils {
         }
     }
     checkConfigState() {
-        return this.shell(`hzn node list | jq '.configstate.state,.organization,.configuration.exchange_api,.configuration.mms_api'`);
+        const arg = `hzn node list | jq '.configstate.state,.organization,.configuration.exchange_api,.configuration.mms_api'`;
+        return this.shell(arg, 'check node configure state', 'failed to execute', true);
     }
     listNodePattern() {
         return this.shell(`hzn node list | jq .pattern`);
@@ -199,6 +200,10 @@ class Utils {
             });
         });
     }
+    cleanUp() {
+        const arg = `rm -rf ${this.homePath}/.hzn && sudo rm ${process.cwd()}/agent-install.* && sudo rm ${this.etcDefault}/horizon && sudo rm -rf ${this.etcHorizon}`;
+        return this.shell(arg);
+    }
     installHznCli(anax, id) {
         let nodeId = id ? `-d ${id}` : '';
         if (anax && anax.indexOf('open-horizon') > 0) {
@@ -221,7 +226,7 @@ class Utils {
                     this.shell(arg)
                         .subscribe({
                         complete: () => {
-                            this.shell(`rm -rf ${this.homePath}/.hzn`)
+                            this.cleanUp()
                                 .subscribe({
                                 complete: () => observer.complete(),
                                 error: (err) => observer.error(err)
@@ -356,7 +361,7 @@ class Utils {
                             }
                             (0, fs_1.writeFileSync)('.env-local', content);
                             this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local && sudo chmod 766 ${this.hznConfig}/.env-local`).then(() => {
-                                this.updateEnvHzn(org)
+                                this.updateAndSaveCredential(org, content)
                                     .subscribe({
                                     complete: () => {
                                         this.switchEnvironment(org, pEnv)
@@ -374,11 +379,7 @@ class Utils {
                     });
                 }
                 else {
-                    this.updateEnvHzn(org)
-                        .subscribe({
-                        complete: () => observer.complete(),
-                        error: (err) => observer.error(err)
-                    });
+                    observer.complete();
                 }
             });
         });
@@ -392,22 +393,17 @@ class Utils {
                     console.log('configure', res, res.replace(/"/g, '').split('\n'));
                     let resNode = res.replace(/"/g, '').split('\n');
                     let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
-                    if (resNode && (resNode[0] === 'configured' && resNode[1] !== org || resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL) >= 0)) {
+                    if (resNode && resNode[0].length > 0 && (resNode[0] === 'configured' && resNode[1] !== org || resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL) < 0)) {
+                        // console.log(hznJson[org].credential.HZN_EXCHANGE_URL, resNode[2], resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL))
                         answer = (0, exports.promptSync)(`\nThis node is registered with ${resNode[1]}, must unregister before switching to ${org}, unregister Y/n? `);
                         if (answer.toLowerCase() == 'y') {
                             this.uninstallHorizon()
                                 .subscribe({
                                 complete: () => {
-                                    let arg = `sudo rm ${this.etcHorizon}/agent-install.crt`;
-                                    this.shell(arg)
+                                    this.installHznCli(pEnv.ANAX, pEnv.HZN_CUSTOM_NODE_ID)
                                         .subscribe({
-                                        complete: () => {
-                                            this.installHznCli(pEnv.ANAX, pEnv.HZN_CUSTOM_NODE_ID)
-                                                .subscribe({
-                                                complete: () => observer.complete(),
-                                                error: (err) => observer.error(err)
-                                            });
-                                        }, error: (err) => observer.error(err)
+                                        complete: () => observer.complete(),
+                                        error: (err) => observer.error(err)
                                     });
                                 }, error: (err) => observer.error(err)
                             });
@@ -435,6 +431,7 @@ class Utils {
                         }
                     }
                     else {
+                        observer.next();
                         observer.complete();
                         // this.updateAndSaveCredential(org, content)
                         // .subscribe({
