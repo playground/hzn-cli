@@ -13,10 +13,16 @@ export declare class Utils {
     listAgreement(param: IHznParam): Observable<unknown>;
     listService(name: string): Observable<unknown>;
     listPattern(name: string): Observable<unknown>;
-    listNode(name: string): Observable<unknown>;
-    removeNode(name: string): Observable<unknown>;
-    listObject(param: IHznParam): Observable<unknown>;
+    listNode(param: IHznParam): Observable<unknown>;
+    listExchangeNode(param: IHznParam): Observable<unknown>;
+    listPolicy(): Observable<unknown>;
+    listServicePolicy(name: string): Observable<unknown>;
     listDeploymentPolicy(name: string): Observable<unknown>;
+    removeDeploymentPolicy(name: string): Observable<unknown>;
+    areYouSure(arg: string, msg: string): Observable<unknown>;
+    removeNode(name: string): Observable<unknown>;
+    removeNode2(name: string): Observable<unknown>;
+    listObject(param: IHznParam): Observable<unknown>;
     createHznKey(org: string, id: string): Observable<unknown>;
     checkConfigState(): Observable<unknown>;
     listNodePattern(): Observable<unknown>;
@@ -32,6 +38,8 @@ export declare class Utils {
     appendSupport(): Observable<unknown>;
     getPropsFromEnvLocal(org: string): any[];
     updateEnvFiles(org: string): Observable<unknown>;
+    switchEnvironment(org: string, pEnv?: any): Observable<unknown>;
+    updateAndSaveCredential(org: string, content: string): Observable<unknown>;
     shallowEqual(obj1: any, obj2: any): boolean;
     updateOrgConfig(hznJson: any, org: string, newOrg?: boolean): Observable<unknown>;
     removeOrg(org: string): Observable<unknown>;
@@ -67,7 +75,7 @@ export declare class Utils {
     getJsonFromFile(jsonFile: string): any;
     editTypePolicy(filename: string): Observable<unknown>;
     isNodeConfigured(): Observable<unknown>;
-    shell(arg: string, success?: string, error?: string, options?: {
+    shell(arg: string, success?: string, error?: string, prnStdout?: boolean, options?: {
         maxBuffer: number;
     }): Observable<unknown>;
 }

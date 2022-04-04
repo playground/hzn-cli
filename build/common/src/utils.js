@@ -72,11 +72,72 @@ class Utils {
         const arg = name.length > 0 ? `hzn exchange pattern list ${name}` : 'hzn exchange pattern list';
         return this.shell(arg);
     }
-    listNode(name) {
-        const arg = name.length > 0 ? `hzn exchange node list ${name}` : 'hzn exchange node list';
+    listNode(param) {
+        const arg = 'hzn node list';
         return this.shell(arg);
     }
+    listExchangeNode(param) {
+        const arg = param.name.length > 0 ? `hzn exchange node list ${param.name}` : 'hzn exchange node list';
+        return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
+    }
+    listPolicy() {
+        const arg = 'hzn policy list';
+        return this.shell(arg);
+    }
+    listServicePolicy(name) {
+        const arg = `hzn exchange listpolicy ${name}`;
+        return this.shell(arg);
+    }
+    listDeploymentPolicy(name) {
+        const arg = name.length > 0 ? `hzn exchange deployment listpolicy ${name}` : 'hzn exchange deployment listpolicy';
+        return this.shell(arg, 'command executed successfully', 'failed to execute command', false);
+    }
+    removeDeploymentPolicy(name) {
+        return new rxjs_1.Observable((observer) => {
+            const arg = `yes | hzn exchange deployment removepolicy ${name}`;
+            const msg = `\nAre you sure you want to remove ${name} deployment policy from the Horizon Exchange? [y/N]:`;
+            this.areYouSure(arg, msg)
+                .subscribe({
+                complete: () => {
+                    observer.complete();
+                },
+                error: (err) => observer.error(err)
+            });
+        });
+    }
+    areYouSure(arg, msg) {
+        return new rxjs_1.Observable((observer) => {
+            console.log(msg);
+            prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                if (question.answer.toUpperCase() === 'Y') {
+                    this.shell(arg)
+                        .subscribe({
+                        complete: () => {
+                            observer.complete();
+                        },
+                        error: (err) => observer.error(err)
+                    });
+                }
+                else {
+                    observer.complete();
+                }
+            });
+        });
+    }
     removeNode(name) {
+        return new rxjs_1.Observable((observer) => {
+            const arg = `yes | hzn exchange node remove ${name}`;
+            const msg = `\nAre you sure you want to remove node ${name} from the Horizon Exchange? [y/N]:`;
+            this.areYouSure(arg, msg)
+                .subscribe({
+                complete: () => {
+                    observer.complete();
+                },
+                error: (err) => observer.error(err)
+            });
+        });
+    }
+    removeNode2(name) {
         return new rxjs_1.Observable((observer) => {
             console.log(`\nAre you sure you want to remove node ${name} from the Horizon Exchange? [y/N]:`);
             prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
@@ -97,10 +158,6 @@ class Utils {
         const arg = param.name.length > 0 ? `${param.watch}hzn mms object list ${param.name}` : `${param.watch}hzn mms object list -t ${param.objectType} -i ${param.objectId} -d`;
         return _1.utils.shell(arg, 'done listing object', 'failed to list object');
     }
-    listDeploymentPolicy(name) {
-        const arg = name.length > 0 ? `hzn exchange deployment listpolicy ${name}` : 'hzn exchange deployment listpolicy';
-        return this.shell(arg);
-    }
     createHznKey(org, id) {
         if (org && id) {
             return this.shell(`hzn key create ${org} ${id}`);
@@ -111,7 +168,7 @@ class Utils {
         }
     }
     checkConfigState() {
-        return this.shell(`hzn node list | jq .configstate.state`);
+        return this.shell(`hzn node list | jq '.configstate.state,.organization,.configuration.exchange_api,.configuration.mms_api'`);
     }
     listNodePattern() {
         return this.shell(`hzn node list | jq .pattern`);
@@ -292,21 +349,22 @@ class Utils {
                             let defaultOrg = false;
                             for (const [key, value] of Object.entries(result)) {
                                 if (key == 'DEFAULT_ORG' && org != value) {
-                                    answer = (0, exports.promptSync)(`\nWould you like to make ${org} the default working environment: Y/n?`);
-                                    if (answer.toLowerCase() == 'y') {
-                                        defaultOrg = true;
-                                    }
+                                    defaultOrg = true;
                                 }
                                 content += key == 'DEFAULT_ORG' && defaultOrg ? `${key}=${org}\n` : `${key}=${value}\n`;
                                 pEnv[key] = '' + value;
                             }
-                            this.updateCredential(org);
                             (0, fs_1.writeFileSync)('.env-local', content);
                             this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local && sudo chmod 766 ${this.hznConfig}/.env-local`).then(() => {
                                 this.updateEnvHzn(org)
                                     .subscribe({
-                                    complete: () => observer.complete(),
-                                    error: (err) => observer.error(err)
+                                    complete: () => {
+                                        this.switchEnvironment(org, pEnv)
+                                            .subscribe({
+                                            complete: () => observer.complete(),
+                                            error: (err) => observer.error(err)
+                                        });
+                                    }, error: (err) => observer.error(err)
                                 });
                             });
                         }
@@ -322,6 +380,85 @@ class Utils {
                         error: (err) => observer.error(err)
                     });
                 }
+            });
+        });
+    }
+    switchEnvironment(org, pEnv = process.env) {
+        return new rxjs_1.Observable((observer) => {
+            let answer;
+            this.checkConfigState()
+                .subscribe({
+                next: (res) => {
+                    console.log('configure', res, res.replace(/"/g, '').split('\n'));
+                    let resNode = res.replace(/"/g, '').split('\n');
+                    let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
+                    if (resNode && (resNode[0] === 'configured' && resNode[1] !== org || resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL) >= 0)) {
+                        answer = (0, exports.promptSync)(`\nThis node is registered with ${resNode[1]}, must unregister before switching to ${org}, unregister Y/n? `);
+                        if (answer.toLowerCase() == 'y') {
+                            this.uninstallHorizon()
+                                .subscribe({
+                                complete: () => {
+                                    let arg = `sudo rm ${this.etcHorizon}/agent-install.crt`;
+                                    this.shell(arg)
+                                        .subscribe({
+                                        complete: () => {
+                                            this.installHznCli(pEnv.ANAX, pEnv.HZN_CUSTOM_NODE_ID)
+                                                .subscribe({
+                                                complete: () => observer.complete(),
+                                                error: (err) => observer.error(err)
+                                            });
+                                        }, error: (err) => observer.error(err)
+                                    });
+                                }, error: (err) => observer.error(err)
+                            });
+                            // unregister then switch
+                            // this.unregisterAgent()              
+                            // .subscribe({
+                            //   complete: () => {
+                            //     this.updateAndSaveCredential(org, content)
+                            //     .subscribe({
+                            //       complete: () => {
+                            //         // updateHorizon
+                            //         this.updateHorizon(org, pEnv)
+                            //         .subscribe({
+                            //           complete: () => observer.complete(),
+                            //           error: (err) => observer.error(err)
+                            //         })  
+                            //       }, error: (err) => observer.error(err)
+                            //     })
+                            //   },
+                            //   error: (err) => observer.error(err)
+                            // })  
+                        }
+                        else {
+                            observer.error('do nothing.');
+                        }
+                    }
+                    else {
+                        observer.complete();
+                        // this.updateAndSaveCredential(org, content)
+                        // .subscribe({
+                        //   complete: () => {
+                        //     observer.next() 
+                        //     observer.complete()
+                        //   }, error: (err) => observer.error(err)
+                        // })
+                    }
+                },
+                error: (err) => observer.error(err)
+            });
+        });
+    }
+    updateAndSaveCredential(org, content) {
+        return new rxjs_1.Observable((observer) => {
+            this.updateCredential(org);
+            (0, fs_1.writeFileSync)('.env-local', content);
+            this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local && sudo chmod 766 ${this.hznConfig}/.env-local`).then(() => {
+                this.updateEnvHzn(org)
+                    .subscribe({
+                    complete: () => observer.complete(),
+                    error: (err) => observer.error(err)
+                });
             });
         });
     }
@@ -880,7 +1017,7 @@ class Utils {
         });
     }
     addDeploymentPolicy(policy) {
-        let arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('SERVICE_VERSION')}`;
+        let arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('SERVICE_VERSION')}_${policy.envVar.getEnvValue('ARCH')}`;
         return _1.utils.shell(arg);
     }
     addServicePolicy(policy) {
@@ -1024,15 +1161,14 @@ class Utils {
             });
         });
     }
-    shell(arg, success = 'command executed successfully', error = 'command failed', options = { maxBuffer: 1024 * 2000 }) {
+    shell(arg, success = 'command executed successfully', error = 'command failed', prnStdout = true, options = { maxBuffer: 1024 * 2000 }) {
         return new rxjs_1.Observable((observer) => {
             console.log(arg);
             let child = exec(arg, options, (err, stdout, stderr) => {
                 if (!err) {
                     // console.log(stdout);
                     console.log(success);
-                    observer.next('');
-                    // observer.next(stdout);
+                    observer.next(prnStdout ? stdout : '');
                     observer.complete();
                 }
                 else {
