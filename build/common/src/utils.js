@@ -379,7 +379,11 @@ class Utils {
                     });
                 }
                 else {
-                    observer.complete();
+                    this.updateEnvHzn(org)
+                        .subscribe({
+                        complete: () => observer.complete(),
+                        error: (err) => observer.error(err)
+                    });
                 }
             });
         });
@@ -390,7 +394,7 @@ class Utils {
             this.checkConfigState()
                 .subscribe({
                 next: (res) => {
-                    console.log('configure', res, res.replace(/"/g, '').split('\n'));
+                    console.log('configure', res.replace(/"/g, '').split('\n'));
                     let resNode = res.replace(/"/g, '').split('\n');
                     let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
                     if (resNode && resNode[0].length > 0 && (resNode[0] === 'configured' && resNode[1] !== org || resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL) < 0)) {

@@ -210,9 +210,9 @@ export class Utils {
       return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`)
     }  
   }
-  uninstallHorizon() {
+  uninstallHorizon(msg = 'Would you like to proceed to uninstall Horzion: Y/n?') {
     return new Observable((observer) => { 
-      console.log(`\nWould you like to proceed to uninstall Horzion: Y/n?`)
+      console.log(`\n${msg}`)
       prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
         if(question.answer.toUpperCase() === 'Y') {
           let arg = `sudo apt-get purge -y bluehorizon horizon horizon-cli`
@@ -371,7 +371,11 @@ export class Utils {
             }
           })        
         } else {
-          observer.complete()
+          this.updateEnvHzn(org)
+          .subscribe({
+            complete: () => observer.complete(),
+            error: (err) => observer.error(err)
+          })
         }
       })
     });  
@@ -382,14 +386,14 @@ export class Utils {
       this.checkConfigState()
       .subscribe({
         next: (res: string) => {
-          console.log('configure', res, res.replace(/"/g, '').split('\n'))
+          console.log('configure', res.replace(/"/g, '').split('\n'))
           let resNode = res.replace(/"/g, '').split('\n')
           let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
           if(resNode && resNode[0].length > 0 && (resNode[0] === 'configured' && resNode[1] !== org || resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL) < 0)) {
           // console.log(hznJson[org].credential.HZN_EXCHANGE_URL, resNode[2], resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL))
             answer = promptSync(`\nThis node is registered with ${resNode[1]}, must unregister before switching to ${org}, unregister Y/n? `)
             if(answer.toLowerCase() == 'y') {
-              this.uninstallHorizon()
+              this.uninstallHorizon('Would you like to proceed to reinstall Horzion: Y/n?')
               .subscribe({
                 complete: () => {
                   this.installHznCli(pEnv.ANAX, pEnv.HZN_CUSTOM_NODE_ID)
