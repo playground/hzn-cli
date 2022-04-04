@@ -22,6 +22,13 @@ class Env {
             for (let i in supportEnv) {
                 pEnv[i] = supportEnv[i];
             }
+            const hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
+            const credential = hznJson[this.env].credential;
+            if (credential) {
+                Object.keys(credential).forEach((key) => {
+                    pEnv[key] = credential[key];
+                });
+            }
             pEnv.HZN_ORG_ID = this.env;
             this.hznJson = JSON.parse((0, fs_1.readFileSync)(this.hznEnv).toString());
             // console.log(process.cwd(), this.env, this.hznJson)
@@ -49,6 +56,7 @@ class Env {
                 });
             }
             else {
+                console.log(this.envVars.ARCH, 'here');
                 this.setAdditionalEnv();
                 console.log(this.envVars.ARCH);
                 observer.next();

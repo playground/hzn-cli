@@ -4,33 +4,35 @@ exports.Hzn = exports.utils = void 0;
 const rxjs_1 = require("rxjs");
 const env_1 = require("./env");
 const utils_1 = require("./utils");
+const interface_1 = require("./interface");
 exports.utils = new utils_1.Utils();
 class Hzn {
-    constructor(env, configPath, name, objectType, objectId, objectFile, mmsPattern) {
+    constructor(param) {
         this.nodePolicyJson = '';
         this.deploymentPolicyJson = '';
         this.servicePolicyJson = '';
         this.objectPolicyJson = '';
         this.serviceDefinitionJson = '';
         this.servicePatternJson = '';
-        this.envVar = new env_1.Env(env, exports.utils.getHznConfig());
-        this.configPath = configPath;
-        this.name = name;
-        this.objectType = objectType;
-        this.objectId = objectId;
-        this.objectFile = objectFile;
-        this.mmsPattern = mmsPattern;
+        this.param = param;
+        this.org = param.org;
+        this.envVar = new env_1.Env(param.org, exports.utils.getHznConfig());
+        this.configPath = param.configPath;
+        this.name = param.name;
+        this.objectType = param.objectType;
+        this.objectId = param.objectId;
+        this.objectFile = param.objectFile;
+        this.mmsPattern = param.mmsPattern;
     }
     init() {
         return new rxjs_1.Observable((observer) => {
             this.envVar.init()
                 .subscribe({
                 complete: () => {
-                    this.objectType = this.objectType || this.envVar.getMMSObjectType();
-                    this.objectId = this.objectId || this.envVar.getMMSObjectId();
-                    this.objectFile = this.objectFile || this.envVar.getMMSObjectFile();
-                    this.mmsPattern = this.mmsPattern || this.envVar.getMMSPatterName();
-                    console.log(`configPath: ${this.configPath}`);
+                    this.param.objectType = this.objectType = this.objectType || this.envVar.getMMSObjectType();
+                    this.param.objectId = this.objectId = this.objectId || this.envVar.getMMSObjectId();
+                    this.param.objectFile = this.objectFile = this.objectFile || this.envVar.getMMSObjectFile();
+                    this.param.mmsPattern = this.mmsPattern = this.mmsPattern || this.envVar.getMMSPatterName();
                     this.patternJson = `${this.configPath}/services/dependent-service/service.pattern.json`;
                     this.serviceJson = `${this.configPath}/services/dependent-service/service.definition.json`;
                     this.policyJson = `${this.configPath}/service/policy.json`;
@@ -41,7 +43,15 @@ class Hzn {
                     this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
                     this.servicePolicyJson = `${this.configPath}/service.policy.json`;
                     this.objectPolicyJson = `${this.configPath}/object.policy.json`;
-                    observer.complete();
+                    if (interface_1.promptForUpdate.indexOf(this.param.action) >= 0) {
+                        exports.utils.updateHorizon(this.org, this.envVar)
+                            .subscribe(() => {
+                            observer.complete();
+                        });
+                    }
+                    else {
+                        observer.complete();
+                    }
                 },
                 error: (err) => {
                     console.log(err.message);
@@ -67,13 +77,13 @@ class Hzn {
     }
     test() {
         return new rxjs_1.Observable((observer) => {
-            console.log(`it works...${this.envVar.getArch()}`);
+            console.log(`it works..., your environment is ready to go!`);
             observer.complete();
         });
     }
     setup() {
         return new rxjs_1.Observable((observer) => {
-            console.log(`it works...${this.envVar.getArch()}, your environment is ready to go!`);
+            console.log(`it works..., your environment is ready to go!`);
             observer.complete();
         });
     }
@@ -309,6 +319,9 @@ class Hzn {
     updateHznInfo() {
         return exports.utils.updateHznInfo();
     }
+    listAgreement() {
+        return exports.utils.listAgreement(this.param);
+    }
     listService() {
         return exports.utils.listService(this.name);
     }
@@ -321,9 +334,11 @@ class Hzn {
     listNode() {
         return exports.utils.listNode(this.name);
     }
+    removeNode() {
+        return this.param.name.length > 0 ? exports.utils.removeNode(`${this.param.org}/${this.param.name}`) : (0, rxjs_1.of)('Please specify node name');
+    }
     listObject() {
-        const arg = this.name.length > 0 ? `hzn mms object list ${this.name}` : `hzn mms object list -t ${this.objectType} -i ${this.objectId} -d`;
-        return exports.utils.shell(arg, 'done listing object', 'failed to list object');
+        return exports.utils.listObject(this.param);
     }
     listDeploymentPolicy() {
         return exports.utils.listDeploymentPolicy(this.name);

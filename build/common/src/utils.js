@@ -13,6 +13,7 @@ const prompt_1 = __importDefault(require("prompt"));
 exports.promptSync = require('prompt-sync')();
 const jsonfile_1 = __importDefault(require("jsonfile"));
 const _1 = require(".");
+const url_1 = require("url");
 const env = process.env.npm_config_env || 'biz';
 const isBoolean = [
     'TOP_LEVEL_SERVICE'
@@ -41,9 +42,16 @@ const mustHave = [
     "MMS_SERVICE_FALLBACK_VERSION",
     "UPDATE_FILE_NAME"
 ];
+const credentialVars = [
+    "HZN_EXCHANGE_USER_AUTH",
+    "HZN_EXCHANGE_URL",
+    "HZN_FSS_CSSURL",
+    "ANAX"
+];
 class Utils {
     constructor() {
         this.etcDefault = '/etc/default';
+        this.etcHorizon = '/etc/horizon';
         this.homePath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
         this.hznConfig = `${this.homePath}/hzn-config`;
     }
@@ -51,6 +59,10 @@ class Utils {
     }
     getHznConfig() {
         return this.hznConfig;
+    }
+    listAgreement(param) {
+        const arg = `${param.watch} hzn agreement list`;
+        return this.shell(arg);
     }
     listService(name) {
         const arg = name.length > 0 ? `hzn exchange service list ${name}` : 'hzn exchange service list';
@@ -64,9 +76,26 @@ class Utils {
         const arg = name.length > 0 ? `hzn exchange node list ${name}` : 'hzn exchange node list';
         return this.shell(arg);
     }
-    listObject(name) {
-        const arg = name.length > 0 ? `hzn mms object list ${name}` : 'hzn mms object list';
-        return this.shell(arg);
+    removeNode(name) {
+        return new rxjs_1.Observable((observer) => {
+            console.log(`\nAre you sure you want to remove node ${name} from the Horizon Exchange? [y/N]:`);
+            prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                if (question.answer.toUpperCase() === 'Y') {
+                    const arg = `yes | hzn exchange node remove ${name}`;
+                    this.shell(arg)
+                        .subscribe({
+                        complete: () => {
+                            observer.complete();
+                        },
+                        error: (err) => observer.error(err)
+                    });
+                }
+            });
+        });
+    }
+    listObject(param) {
+        const arg = param.name.length > 0 ? `${param.watch}hzn mms object list ${param.name}` : `${param.watch}hzn mms object list -t ${param.objectType} -i ${param.objectId} -d`;
+        return _1.utils.shell(arg, 'done listing object', 'failed to list object');
     }
     listDeploymentPolicy(name) {
         const arg = name.length > 0 ? `hzn exchange deployment listpolicy ${name}` : 'hzn exchange deployment listpolicy';
@@ -216,9 +245,29 @@ class Utils {
             });
         });
     }
+    getPropsFromEnvLocal(org) {
+        let props = this.getPropsFromFile(`${this.hznConfig}/.env-local`);
+        let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
+        if (hznJson[org] && hznJson[org]['credential']) {
+            let credential = hznJson[org]['credential'];
+            Object.keys(credential).forEach((key) => {
+                props.some((el, idx) => {
+                    if (el.name === key) {
+                        props[idx].default = credential[key];
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                });
+            });
+        }
+        return props;
+    }
     updateEnvFiles(org) {
         return new rxjs_1.Observable((observer) => {
-            let props = this.getPropsFromFile(`${this.hznConfig}/.env-local`);
+            // let props = this.getPropsFromFile(`${this.hznConfig}/.env-local`);
+            let props = this.getPropsFromEnvLocal(org);
             console.log(props);
             console.log(`\nWould you like to change any of the above properties: Y/n?`);
             prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
@@ -236,12 +285,22 @@ class Utils {
                                 this.promptType(propName, result, template);
                             }
                         } while (answer.toLowerCase() == 'y');
-                        console.log(`\nWould you like to update config files: Y/n?`);
-                        prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                        answer = (0, exports.promptSync)(`\nWould you like to update config files: Y/n?`);
+                        if (answer.toLowerCase() == 'y') {
                             let content = '';
+                            const pEnv = process.env;
+                            let defaultOrg = false;
                             for (const [key, value] of Object.entries(result)) {
-                                content += `${key}=${value}\n`;
+                                if (key == 'DEFAULT_ORG' && org != value) {
+                                    answer = (0, exports.promptSync)(`\nWould you like to make ${org} the default working environment: Y/n?`);
+                                    if (answer.toLowerCase() == 'y') {
+                                        defaultOrg = true;
+                                    }
+                                }
+                                content += key == 'DEFAULT_ORG' && defaultOrg ? `${key}=${org}\n` : `${key}=${value}\n`;
+                                pEnv[key] = '' + value;
                             }
+                            this.updateCredential(org);
                             (0, fs_1.writeFileSync)('.env-local', content);
                             this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local && sudo chmod 766 ${this.hznConfig}/.env-local`).then(() => {
                                 this.updateEnvHzn(org)
@@ -250,7 +309,10 @@ class Utils {
                                     error: (err) => observer.error(err)
                                 });
                             });
-                        });
+                        }
+                        else {
+                            observer.complete();
+                        }
                     });
                 }
                 else {
@@ -262,6 +324,19 @@ class Utils {
                 }
             });
         });
+    }
+    shallowEqual(obj1, obj2) {
+        const keys1 = Object.keys(obj1);
+        const keys2 = Object.keys(obj2);
+        if (keys1.length !== keys2.length) {
+            return false;
+        }
+        let diff = false;
+        keys1.some((key) => {
+            diff = obj1[key] !== obj2[key];
+            return diff;
+        });
+        return !diff;
     }
     updateOrgConfig(hznJson, org, newOrg = false) {
         return new rxjs_1.Observable((observer) => {
@@ -347,6 +422,7 @@ class Utils {
                     }
                     else {
                         console.log(`config files not updated for ${org}`);
+                        observer.next({ env: org });
                         observer.complete();
                     }
                 }
@@ -374,6 +450,23 @@ class Utils {
                 observer.error(`${org} doesn't exist in your environment config.`);
             }
         });
+    }
+    updateCredential(org) {
+        let credential = {};
+        const pEnv = process.env;
+        let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
+        credentialVars.forEach((key) => {
+            credential[key] = pEnv[key];
+            console.log(key, pEnv[key]);
+        });
+        if (!hznJson[org]['credential']) {
+            hznJson[org]['credential'] = {};
+        }
+        if (!this.shallowEqual(credential, hznJson[org]['credential'])) {
+            hznJson[org]['credential'] = credential;
+            jsonfile_1.default.writeFileSync(`${this.hznConfig}/.env-hzn.json`, hznJson, { spaces: 2 });
+            console.log('update credential');
+        }
     }
     orgCheck(org, skipUpdate = false) {
         return new rxjs_1.Observable((observer) => {
@@ -557,6 +650,86 @@ class Utils {
             props = [];
         }
         return props;
+    }
+    updateHorizon(org, pEnv) {
+        return new rxjs_1.Observable((observer) => {
+            let horizon = this.nameValueToJson(`${this.etcDefault}/horizon`);
+            let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
+            console.log('check update', org, hznJson[org].credential.HZN_FSS_CSSURL, horizon.HZN_FSS_CSSURL);
+            if (hznJson[org].credential.HZN_FSS_CSSURL && hznJson[org].credential.HZN_FSS_CSSURL != horizon.HZN_FSS_CSSURL) {
+                let template = JSON.parse((0, fs_1.readFileSync)(`${__dirname}/env-hzn-template.json`).toString());
+                let url = new url_1.URL(hznJson[org].credential.HZN_FSS_CSSURL);
+                let type = url.port ? template['oh'] : template['ieam'];
+                let hostname = `${url.protocol}//${url.hostname}`;
+                let content = '';
+                Object.keys(type).forEach((key) => {
+                    content += `${key}=${this.tokenReplace(type[key], { HOSTNAME: hostname, HZN_DEVICE_ID: horizon.HZN_DEVICE_ID, HZN_NODE_ID: horizon.HZN_NODE_ID })}\n`;
+                });
+                console.log('update horizon');
+                console.log(content);
+                this.updateCert(org, pEnv)
+                    .subscribe({
+                    complete: () => {
+                        //todo writeHorizon
+                        this.writeHorizon(content)
+                            .subscribe(() => observer.complete());
+                    }, error: (err) => observer.error(err)
+                });
+            }
+            else {
+                observer.next();
+                observer.complete();
+            }
+        });
+    }
+    updateCert(org, pEnv) {
+        return new rxjs_1.Observable((observer) => {
+            if ((0, fs_1.existsSync)(`${this.etcHorizon}/agent-install-${org}.crt`)) {
+                // todo cp to agent-install.crt
+                this.copyFile(`sudo cp ${this.etcHorizon}/agent-install-${org}.crt ${this.etcHorizon}/agent-install.crt`).then(() => {
+                    observer.complete();
+                });
+            }
+            else {
+                let arg = `sudo curl -sSL -u "${pEnv.getOrgId()}/${pEnv.getExchangeUserAuth()}" --insecure -o "${this.etcHorizon}/agent-install-${org}.crt" ${pEnv.getFSSCSSUrl()}/api/v1/objects/IBM/agent_files/agent-install.crt/data`;
+                this.shell(arg, 'done updating cert', 'failed to update cert')
+                    .subscribe({
+                    complete: () => {
+                        // todo cp to agent-install.crt
+                        this.copyFile(`sudo cp ${this.etcHorizon}/agent-install-${org}.crt ${this.etcHorizon}/agent-install.crt`).then(() => {
+                            observer.complete();
+                        });
+                    }, error: (err) => observer.error(err)
+                });
+            }
+        });
+    }
+    tokenReplace(template, obj) {
+        //  template = 'Where is ${movie} playing?',
+        //  tokenReplace(template, {movie: movie});
+        return template.replace(/\$\{([^\s\:\}]+)(?:\:([^\s\:\}]+))?\}/g, (match, key) => {
+            return obj[key];
+        });
+    }
+    writeHorizon(content) {
+        return new rxjs_1.Observable((observer) => {
+            this.copyFile(`sudo cp ${this.etcDefault}/horizon ${this.etcDefault}/.horizon`).then(() => {
+                (0, fs_1.writeFileSync)('.horizon', content);
+                this.copyFile(`sudo mv .horizon ${this.etcDefault}/horizon`).then(() => {
+                    observer.next();
+                    observer.complete();
+                });
+            });
+        });
+    }
+    nameValueToJson(file) {
+        let ar = (0, fs_1.readFileSync)(file).toString().split('\n');
+        let json = Object.assign({});
+        ar.forEach((el) => {
+            let prop = el.split('=');
+            json[prop[0]] = prop[1];
+        });
+        return json;
     }
     updateHznInfo() {
         return new rxjs_1.Observable((observer) => {
@@ -858,7 +1031,8 @@ class Utils {
                 if (!err) {
                     // console.log(stdout);
                     console.log(success);
-                    observer.next(stdout);
+                    observer.next('');
+                    // observer.next(stdout);
                     observer.complete();
                 }
                 else {

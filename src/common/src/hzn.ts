@@ -1,6 +1,7 @@
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Env } from './env';
 import { Utils, promptSync } from './utils';
+import { IHznParam, justRun, runDirectly, promptForUpdate } from './interface'
 
 export const utils = new Utils();
 
@@ -26,14 +27,19 @@ export class Hzn {
   envVar: any;
   configPath: string;
   name: string;
-  constructor(env: string, configPath: string, name: string, objectType: string, objectId: string, objectFile: string, mmsPattern: string) {
-    this.envVar = new Env(env, utils.getHznConfig());
-    this.configPath = configPath;
-    this.name = name;
-    this.objectType = objectType;
-    this.objectId = objectId;
-    this.objectFile = objectFile;
-    this.mmsPattern = mmsPattern;
+  org: string;
+  param: IHznParam;
+
+  constructor(param: IHznParam) {
+    this.param = param;
+    this.org = param.org;
+    this.envVar = new Env(param.org, utils.getHznConfig());
+    this.configPath = param.configPath;
+    this.name = param.name;
+    this.objectType = param.objectType;
+    this.objectId = param.objectId;
+    this.objectFile = param.objectFile;
+    this.mmsPattern = param.mmsPattern;
   }
 
   init() {
@@ -41,11 +47,11 @@ export class Hzn {
       this.envVar.init()
       .subscribe({
         complete: () => {
-          this.objectType = this.objectType || this.envVar.getMMSObjectType();
-          this.objectId = this.objectId || this.envVar.getMMSObjectId();
-          this.objectFile = this.objectFile || this.envVar.getMMSObjectFile();
-          this.mmsPattern = this.mmsPattern || this.envVar.getMMSPatterName();
-          console.log(`configPath: ${this.configPath}`)
+          this.param.objectType = this.objectType = this.objectType || this.envVar.getMMSObjectType();
+          this.param.objectId = this.objectId = this.objectId || this.envVar.getMMSObjectId();
+          this.param.objectFile = this.objectFile = this.objectFile || this.envVar.getMMSObjectFile();
+          this.param.mmsPattern = this.mmsPattern = this.mmsPattern || this.envVar.getMMSPatterName();
+
           this.patternJson = `${this.configPath}/services/dependent-service/service.pattern.json`;
           this.serviceJson = `${this.configPath}/services/dependent-service/service.definition.json`;
           this.policyJson = `${this.configPath}/service/policy.json`;
@@ -57,7 +63,15 @@ export class Hzn {
           this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
           this.servicePolicyJson = `${this.configPath}/service.policy.json`;
           this.objectPolicyJson = `${this.configPath}/object.policy.json`;
-          observer.complete();    
+
+          if(promptForUpdate.indexOf(this.param.action) >= 0) {
+            utils.updateHorizon(this.org, this.envVar)
+            .subscribe(() => {
+              observer.complete()
+            })  
+          } else {
+            observer.complete()
+          }
         },
         error: (err) => {
           console.log(err.message);
@@ -82,13 +96,13 @@ export class Hzn {
   }
   test() {
     return new Observable((observer) => {
-      console.log(`it works...${this.envVar.getArch()}`)
+      console.log(`it works..., your environment is ready to go!`)
       observer.complete();
     });  
   }
   setup() {
     return new Observable((observer) => {
-      console.log(`it works...${this.envVar.getArch()}, your environment is ready to go!`)
+      console.log(`it works..., your environment is ready to go!`)
       observer.complete();
     });  
   }
@@ -325,6 +339,9 @@ export class Hzn {
   updateHznInfo() {
     return utils.updateHznInfo();
   }
+  listAgreement() {
+    return utils.listAgreement(this.param);
+  }
   listService() {
     return utils.listService(this.name);
   }
@@ -337,9 +354,11 @@ export class Hzn {
   listNode() {
     return utils.listNode(this.name);
   }
+  removeNode() {
+    return this.param.name.length > 0 ? utils.removeNode(`${this.param.org}/${this.param.name}`) : of('Please specify node name')
+  }
   listObject() {
-    const arg = this.name.length > 0 ? `hzn mms object list ${this.name}` : `hzn mms object list -t ${this.objectType} -i ${this.objectId} -d`;
-    return utils.shell(arg, 'done listing object', 'failed to list object');
+    return utils.listObject(this.param);
   }
   listDeploymentPolicy() {
     return utils.listDeploymentPolicy(this.name);

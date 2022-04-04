@@ -31,6 +31,8 @@ const template = {
       "MMS_SERVICE_FALLBACK_VERSION": "1.0.0",
       "UPDATE_FILE_NAME": "model.zip"
     },
+    "credential": {
+    },
     "metaVars": {
     }
   },
