@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Service = exports.Deployment = exports.Container = exports.RequiredService = exports.runDirectly = exports.promptForUpdate = exports.justRun = void 0;
 exports.justRun = [
-    'appendSupport', 'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement',
+    'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement',
     'listDeploymentPolicy', 'listExchangeNode', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService',
     'removeDeploymentPolicy', 'removeOrg', 'removeNode'
 ];
@@ -12,7 +12,9 @@ exports.promptForUpdate = [
     'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService',
     'publishMMSPattern', 'publishMMSObject', 'publishMMSObjectPolicy', 'pushMMSImage', 'pushServiceImage', 'registerAgent', 'unregisterAgent'
 ];
-exports.runDirectly = ['deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon'];
+exports.runDirectly = [
+    'appendSupport', 'deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon'
+];
 class RequiredService {
     constructor() {
         this.org = '$HZN_ORG_ID';

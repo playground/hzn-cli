@@ -214,9 +214,9 @@ class Utils {
             return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`);
         }
     }
-    uninstallHorizon() {
+    uninstallHorizon(msg = 'Would you like to proceed to uninstall Horzion: Y/n?') {
         return new rxjs_1.Observable((observer) => {
-            console.log(`\nWould you like to proceed to uninstall Horzion: Y/n?`);
+            console.log(`\n${msg}`);
             prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                 if (question.answer.toUpperCase() === 'Y') {
                     let arg = `sudo apt-get purge -y bluehorizon horizon horizon-cli`;
@@ -401,7 +401,7 @@ class Utils {
                         // console.log(hznJson[org].credential.HZN_EXCHANGE_URL, resNode[2], resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL))
                         answer = (0, exports.promptSync)(`\nThis node is registered with ${resNode[1]}, must unregister before switching to ${org}, unregister Y/n? `);
                         if (answer.toLowerCase() == 'y') {
-                            this.uninstallHorizon()
+                            this.uninstallHorizon('Would you like to proceed to reinstall Horzion: Y/n?')
                                 .subscribe({
                                 complete: () => {
                                     this.installHznCli(pEnv.ANAX, pEnv.HZN_CUSTOM_NODE_ID)

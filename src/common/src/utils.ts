@@ -403,37 +403,12 @@ export class Utils {
                   })    
                 }, error: (err) => observer.error(err)
               })
-              // unregister then switch
-              // this.unregisterAgent()              
-              // .subscribe({
-              //   complete: () => {
-              //     this.updateAndSaveCredential(org, content)
-              //     .subscribe({
-              //       complete: () => {
-              //         // updateHorizon
-              //         this.updateHorizon(org, pEnv)
-              //         .subscribe({
-              //           complete: () => observer.complete(),
-              //           error: (err) => observer.error(err)
-              //         })  
-              //       }, error: (err) => observer.error(err)
-              //     })
-              //   },
-              //   error: (err) => observer.error(err)
-              // })  
             } else {
               observer.error('do nothing.')
             }                      
           } else {
             observer.next()
             observer.complete()
-            // this.updateAndSaveCredential(org, content)
-            // .subscribe({
-            //   complete: () => {
-            //     observer.next() 
-            //     observer.complete()
-            //   }, error: (err) => observer.error(err)
-            // })
           }
         },
         error: (err) => observer.error(err)

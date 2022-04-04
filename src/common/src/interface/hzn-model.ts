@@ -1,5 +1,5 @@
 export const justRun = [
-  'appendSupport', 'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement', 
+  'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement', 
   'listDeploymentPolicy', 'listExchangeNode', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 
   'removeDeploymentPolicy', 'removeOrg', 'removeNode'
 ];
@@ -9,7 +9,9 @@ export const promptForUpdate = [
   'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService', 
   'publishMMSPattern', 'publishMMSObject', 'publishMMSObjectPolicy', 'pushMMSImage', 'pushServiceImage', 'registerAgent', 'unregisterAgent'
 ];
-export const runDirectly = ['deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon'];
+export const runDirectly = [
+  'appendSupport', 'deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon'
+];
 
 export interface IHznParam {
   org: string;
