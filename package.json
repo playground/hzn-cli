@@ -9,10 +9,15 @@
   "scripts": {
     "start": "nodemon -e ts --watch 'src/**/*.ts' --exec 'npm run build'",
     "build": "npx tsc && chmod +x build/*.js && chmod +x build/**/*.js && cp src/env-* build/common/src && cp -r src/hzn-config build/common/src",
+    "build:watch": "onchange 'src/**/*.ts' -- npm run build",
     "local": "npm run build && npm i -g && oh",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install",
     "postinstall": "bin/install.js",
-    "precommit": "npm run build"
+    "precommit": "npm run build",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch && npm run build:watch",
+    "clean": "rm -rf coverage src/**/*.js src/**/*.map",
+    "view:coverage": "serve coverage/lcov-report"
   },
   "keywords": [
     "IEAM",
@@ -28,10 +33,17 @@
   "author": "ljeff@us.ibm.com",
   "license": "ISC",
   "devDependencies": {
+    "@types/jest": "^27.4.1",
     "@types/node": "^17.0.18",
+    "@types/source-map-support": "^0.5.4",
     "@types/yargs": "^17.0.2",
     "@typescript-eslint/parser": "^5.12.0",
+    "jest": "^27.5.1",
     "nodemon": "^2.0.15",
+    "onchange": "^7.1.0",
+    "serve": "^13.0.2",
+    "source-map-support": "^0.5.21",
+    "ts-jest": "^27.1.4",
     "ts-node": "^10.5.0",
     "typescript": "^4.5.5"
   },
