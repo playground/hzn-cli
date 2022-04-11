@@ -57,6 +57,9 @@ class Utils {
     }
     init() {
     }
+    getEtcDefault() {
+        return this.etcDefault;
+    }
     getHznConfig() {
         return this.hznConfig;
     }

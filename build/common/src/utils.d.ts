@@ -9,6 +9,7 @@ export declare class Utils {
     hznConfig: string;
     constructor();
     init(): void;
+    getEtcDefault(): string;
     getHznConfig(): string;
     listAgreement(param: IHznParam): Observable<unknown>;
     listService(name: string): Observable<unknown>;

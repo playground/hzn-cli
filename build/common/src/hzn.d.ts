@@ -25,6 +25,7 @@ export declare class Hzn {
     name: string;
     org: string;
     param: IHznParam;
+    utils: Utils;
     constructor(param: IHznParam);
     init(): Observable<unknown>;
     test(): Observable<unknown>;

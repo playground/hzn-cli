@@ -14,6 +14,7 @@ class Hzn {
         this.objectPolicyJson = '';
         this.serviceDefinitionJson = '';
         this.servicePatternJson = '';
+        this.utils = exports.utils;
         this.param = param;
         this.org = param.org;
         this.envVar = new env_1.Env(param.org, exports.utils.getHznConfig());

@@ -1,7 +1,8 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/src'],
+  testMatch: ['**/?(*.)+(spec|test).(js|ts|tsx)'],
+  roots: ['<rootDir>/src', '<rootDir>/tests'],
   transform: {
       '^.+\\.tsx?$': 'ts-jest'
   },
@@ -13,6 +14,7 @@ module.exports = {
           statements: 80
       }
   },
+  typeAcquisition: { "include": ["jest"] },
   coverageReporters: ['json', 'lcov', 'text', 'clover'],
   setupFiles: ['dotenv/config']
 };

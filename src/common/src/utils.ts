@@ -53,8 +53,12 @@ export class Utils {
   etcHorizon = '/etc/horizon';
   homePath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
   hznConfig = `${this.homePath}/hzn-config`;
-  constructor() {}
+  constructor() {
+  }
   init() {
+  }
+  getEtcDefault() {
+    return this.etcDefault
   }
   getHznConfig() {
     return this.hznConfig

@@ -29,8 +29,10 @@ export class Hzn {
   name: string;
   org: string;
   param: IHznParam;
+  utils: Utils;
 
   constructor(param: IHznParam) {
+    this.utils = utils;
     this.param = param;
     this.org = param.org;
     this.envVar = new Env(param.org, utils.getHznConfig());
