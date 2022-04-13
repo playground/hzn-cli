@@ -4,6 +4,7 @@ import { Utils } from '../../src/common/src/utils';
 import { Env } from '../../src/common/src/env';
 import { IHznParam, justRun, runDirectly, promptForUpdate } from '../../src/common/src/interface'
 
+console.log(process.cwd(), __dirname)
 describe('Hzn', () => {
   let instance: Hzn;
   let param: IHznParam = {

@@ -2,6 +2,7 @@ import { Hzn } from '../../src/common/src/hzn';
 import { Utils } from '../../src/common/src/utils';
 import { Env } from '../../src/common/src/env';
 import { IHznParam, justRun, runDirectly, promptForUpdate } from '../../src/common/src/interface';
+import { } from '../helpers/mock';
 
 describe('Hzn', () => {
   let instance: Hzn;

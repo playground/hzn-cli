@@ -22,7 +22,7 @@ export interface IHznParam {
   objectFile: string;
   mmsPattern: string;
   action: string;
-  watch: string;
+  watch?: string;
 }
 export class RequiredService {
   org = '$HZN_ORG_ID';
