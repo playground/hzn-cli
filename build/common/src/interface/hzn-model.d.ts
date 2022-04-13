@@ -11,6 +11,7 @@ export interface IHznParam {
     mmsPattern: string;
     action: string;
     watch?: string;
+    filter?: string;
 }
 export declare class RequiredService {
     org: string;

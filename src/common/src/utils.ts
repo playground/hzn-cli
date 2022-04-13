@@ -1,3 +1,4 @@
+declare var require: any
 import { Observable, of, firstValueFrom, Observer, forkJoin, from } from 'rxjs';
 const cp = require('child_process'),
 exec = cp.exec;
@@ -67,8 +68,25 @@ export class Utils {
     const arg = `${param.watch} hzn agreement list`;
     return this.shell(arg);
   }
-  listService(name: string) {
-    const arg = name.length > 0 ? `hzn exchange service list ${name}` : 'hzn exchange service list';
+  listService(param: IHznParam) {
+    return new Observable((observer) => {
+      this.listAllServices(param)
+      .subscribe({
+        next: (res: string) => {
+          const pEnv: any = process.env;
+          let services: string[] = res.replace(/\r?\n|\r|\[|\]|"/g, '').split(',')
+          let filter = param.filter && param.filter.length > 0 ? param.filter : pEnv.ARCH
+          let archFilter = services.filter((r) => r.indexOf(filter) > 0)
+          console.log(`Services for ${filter}:\n${archFilter.join(',\n')}`)
+          observer.next('')
+          observer.complete()
+        },
+        error: (err: any) => observer.error(err)
+      })
+    })  
+  }
+  listAllServices(param: IHznParam) {
+    const arg = param.name.length > 0 ? `hzn exchange service list ${param.name} --org ${param.org}` : `hzn exchange service list --org ${param.org}`;
     return this.shell(arg);
   }
   listPattern(name: string) {
@@ -85,15 +103,15 @@ export class Utils {
   }
   listPolicy() {
     const arg = 'hzn policy list'
-    return this.shell(arg)
+    return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
   }
   listServicePolicy(name: string) {
-    const arg = `hzn exchange listpolicy ${name}`
-    return this.shell(arg)
+    const arg = `hzn exchange service listpolicy ${name}`
+    return this.shell(arg);
   }
   listDeploymentPolicy(name: string) {
     const arg = name.length > 0 ? `hzn exchange deployment listpolicy ${name}` : 'hzn exchange deployment listpolicy';
-    return this.shell(arg, 'command executed successfully', 'failed to execute command', false);
+    return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
   }
   removeDeploymentPolicy(name: string) {
     return new Observable((observer) => {
@@ -312,7 +330,7 @@ export class Utils {
       let credential = hznJson[org]['credential']
       Object.keys(credential).forEach((key) => {
         props.some((el, idx) => {
-          if(el.name === key) {
+          if(el.name === key && credential[key] && credential[key].length > 0) {
             props[idx].default = credential[key]
             return true
           } else {
@@ -597,8 +615,7 @@ export class Utils {
               error: (err) => observer.error(err) 
             })
           } else {
-            console.log(`config files is not setup for ${org}`);
-            observer.error(`config files is not setup for ${org}`)
+            observer.error(`config files are not setup for ${org}`)
           }
         })      
       }

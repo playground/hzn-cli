@@ -68,6 +68,7 @@ export declare class Hzn {
     updateHznInfo(): Observable<unknown>;
     listAgreement(): Observable<unknown>;
     listService(): Observable<unknown>;
+    listAllServices(): Observable<unknown>;
     isConfigured(): Observable<unknown>;
     listPattern(): Observable<unknown>;
     listNode(): Observable<unknown>;

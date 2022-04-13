@@ -1,7 +1,8 @@
 export const justRun = [
   'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement', 
-  'listDeploymentPolicy', 'listExchangeNode', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService', 
-  'removeDeploymentPolicy', 'removeOrg', 'removeNode'
+  'listDeploymentPolicy', 'listExchangeNode', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 
+  'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'removeDeploymentPolicy', 'removeOrg', 
+  'removeNode'
 ];
 export const promptForUpdate = [
   'setup', 'test', 'addDeploymentPolicy', 'addNodePolicy', 'addServicePolicy', 'addPolicy', 'buildAndPublish', 'buildPublishAndRegister', 
@@ -23,6 +24,7 @@ export interface IHznParam {
   mmsPattern: string;
   action: string;
   watch?: string;
+  filter?: string;
 }
 export class RequiredService {
   org = '$HZN_ORG_ID';

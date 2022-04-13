@@ -12,7 +12,8 @@ export declare class Utils {
     getEtcDefault(): string;
     getHznConfig(): string;
     listAgreement(param: IHznParam): Observable<unknown>;
-    listService(name: string): Observable<unknown>;
+    listService(param: IHznParam): Observable<unknown>;
+    listAllServices(param: IHznParam): Observable<unknown>;
     listPattern(name: string): Observable<unknown>;
     listNode(param: IHznParam): Observable<unknown>;
     listExchangeNode(param: IHznParam): Observable<unknown>;

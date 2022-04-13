@@ -345,7 +345,10 @@ export class Hzn {
     return utils.listAgreement(this.param);
   }
   listService() {
-    return utils.listService(this.name);
+    return utils.listService(this.param);
+  }
+  listAllServices() {
+    return utils.listAllServices(this.param);
   }
   isConfigured() {
     return utils.isNodeConfigured()
@@ -369,7 +372,7 @@ export class Hzn {
     return utils.listPolicy()
   }
   listServicePolicy() {
-    return this.param.name.length > 0 ? utils.listServicePolicy(`${this.param.org}/${this.param.name}`) : of('Please specify node name')    
+    return this.param.name.length > 0 ? utils.listServicePolicy(`${this.param.org}/${this.param.name}`) : of('Please specify service policy name')    
   }
   listDeploymentPolicy() {
     return utils.listDeploymentPolicy(this.param.name);

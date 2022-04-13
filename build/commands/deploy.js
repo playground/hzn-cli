@@ -26,6 +26,7 @@ const builder = (yargs) => yargs
     object: { type: 'string', desc: 'Object file to be published' },
     pattern: { type: 'string', desc: 'Pattern name' },
     watch: { type: 'string', desc: 'watch = true/false' },
+    filter: { type: 'string', desc: 'filter search result = arm, amd64, arm64 & etc' },
     skip_config_update: { type: 'string', desc: 'Do not prompt for config updates = true/false' }
 })
     .positional('action', {
@@ -37,14 +38,13 @@ exports.builder = builder;
 const handler = (argv) => {
     (0, clear_1.default)();
     console.log(chalk_1.default.greenBright(figlet_1.default.textSync('hzn-cli', { horizontalLayout: 'full' })));
-    const { action, org, config_path, name, object_type, object_id, object, pattern, watch, skip_config_update } = argv;
+    const { action, org, config_path, name, object_type, object_id, object, pattern, watch, filter, skip_config_update } = argv;
     let env = org || '';
     const n = name || '';
     const objType = object_type || '';
     const objId = object_id || '';
     const obj = object || '';
     const p = pattern || '';
-    const w = watch || '';
     const configPath = config_path || hzn_1.utils.getHznConfig();
     const skipInitialize = ['dockerImageExists'];
     if (env.length == 0) {
@@ -56,12 +56,13 @@ const handler = (argv) => {
             const hznModel = {
                 org: env,
                 configPath: configPath,
-                name: n,
-                objectType: objType,
-                objectId: objId,
-                objectFile: obj,
+                name: name || '',
+                objectType: object_type || '',
+                objectId: object_id || '',
+                objectFile: object || '',
                 action: action,
-                watch: watch && watch === 'true' ? 'watch ' : ''
+                watch: watch && watch === 'true' ? 'watch ' : '',
+                filter: filter
             };
             const hzn = new hzn_1.Hzn(hznModel);
             hzn.init()
