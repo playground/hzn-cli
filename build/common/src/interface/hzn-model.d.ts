@@ -10,7 +10,7 @@ export interface IHznParam {
     objectFile: string;
     mmsPattern: string;
     action: string;
-    watch: string;
+    watch?: string;
 }
 export declare class RequiredService {
     org: string;
