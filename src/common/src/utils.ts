@@ -53,8 +53,12 @@ export class Utils {
   etcHorizon = '/etc/horizon';
   homePath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
   hznConfig = `${this.homePath}/hzn-config`;
-  constructor() {}
+  constructor() {
+  }
   init() {
+  }
+  getEtcDefault() {
+    return this.etcDefault
   }
   getHznConfig() {
     return this.hznConfig
@@ -71,12 +75,72 @@ export class Utils {
     const arg = name.length > 0 ? `hzn exchange pattern list ${name}` : 'hzn exchange pattern list';
     return this.shell(arg);
   }
-  listNode(name: string) {
-    const arg = name.length > 0 ? `hzn exchange node list ${name}` : 'hzn exchange node list';
+  listNode(param: IHznParam) {
+    const arg = 'hzn node list';
     return this.shell(arg);
   }
-  removeNode(name: string) {
+  listExchangeNode(param: IHznParam) {
+    const arg = param.name.length > 0 ? `hzn exchange node list ${param.name}` : 'hzn exchange node list';
+    return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
+  }
+  listPolicy() {
+    const arg = 'hzn policy list'
+    return this.shell(arg)
+  }
+  listServicePolicy(name: string) {
+    const arg = `hzn exchange listpolicy ${name}`
+    return this.shell(arg)
+  }
+  listDeploymentPolicy(name: string) {
+    const arg = name.length > 0 ? `hzn exchange deployment listpolicy ${name}` : 'hzn exchange deployment listpolicy';
+    return this.shell(arg, 'command executed successfully', 'failed to execute command', false);
+  }
+  removeDeploymentPolicy(name: string) {
+    return new Observable((observer) => {
+      const arg = `yes | hzn exchange deployment removepolicy ${name}`
+      const msg = `\nAre you sure you want to remove ${name} deployment policy from the Horizon Exchange? [y/N]:`
+      this.areYouSure(arg, msg)
+      .subscribe({
+        complete: () => {
+          observer.complete()
+        },
+        error: (err) => observer.error(err)
+      })
+    })  
+  }
+  areYouSure(arg: string, msg: string) {
     return new Observable((observer) => { 
+      console.log(msg)
+      prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
+        if(question.answer.toUpperCase() === 'Y') {
+          this.shell(arg)
+          .subscribe({
+            complete: () => {
+              observer.complete()
+            },
+            error: (err) => observer.error(err)
+          })
+        } else {
+          observer.complete()
+        }
+      })  
+    })  
+  }
+  removeNode(name: string) {
+    return new Observable((observer) => {
+      const arg = `yes | hzn exchange node remove ${name}`;
+      const msg = `\nAre you sure you want to remove node ${name} from the Horizon Exchange? [y/N]:`
+      this.areYouSure(arg, msg)
+      .subscribe({
+        complete: () => {
+          observer.complete()
+        },
+        error: (err) => observer.error(err)
+      })
+    })  
+  }
+  removeNode2(name: string) {
+    return new Observable((observer) => {
       console.log(`\nAre you sure you want to remove node ${name} from the Horizon Exchange? [y/N]:`)
       prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
         if(question.answer.toUpperCase() === 'Y') {
@@ -96,10 +160,6 @@ export class Utils {
     const arg = param.name.length > 0 ? `${param.watch}hzn mms object list ${param.name}` : `${param.watch}hzn mms object list -t ${param.objectType} -i ${param.objectId} -d`;
     return utils.shell(arg, 'done listing object', 'failed to list object');
   }
-  listDeploymentPolicy(name: string) {
-    const arg = name.length > 0 ? `hzn exchange deployment listpolicy ${name}` : 'hzn exchange deployment listpolicy';
-    return this.shell(arg);
-  }
   createHznKey(org: string, id: string) {
     if(org && id) {
       return this.shell(`hzn key create ${org} ${id}`);  
@@ -109,7 +169,8 @@ export class Utils {
     }
   }
   checkConfigState() {
-    return this.shell(`hzn node list | jq .configstate.state`);  
+    const arg = `hzn node list | jq '.configstate.state,.organization,.configuration.exchange_api,.configuration.mms_api'`
+    return this.shell(arg, 'check node configure state', 'failed to execute', true);  
   }
   listNodePattern() {
     return this.shell(`hzn node list | jq .pattern`);  
@@ -140,6 +201,10 @@ export class Utils {
       })
     });
   }
+  cleanUp() {
+    const arg = `rm -rf ${this.homePath}/.hzn && sudo rm ${process.cwd()}/agent-install.* && sudo rm ${this.etcDefault}/horizon && sudo rm -rf ${this.etcHorizon}`
+    return this.shell(arg)
+  }
   installHznCli(anax: string, id: null) {
     let nodeId = id ? `-d ${id}` : '';
     if(anax && anax.indexOf('open-horizon') > 0) {
@@ -149,9 +214,9 @@ export class Utils {
       return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`)
     }  
   }
-  uninstallHorizon() {
+  uninstallHorizon(msg = 'Would you like to proceed to uninstall Horzion: Y/n?') {
     return new Observable((observer) => { 
-      console.log(`\nWould you like to proceed to uninstall Horzion: Y/n?`)
+      console.log(`\n${msg}`)
       prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
         if(question.answer.toUpperCase() === 'Y') {
           let arg = `sudo apt-get purge -y bluehorizon horizon horizon-cli`
@@ -161,7 +226,7 @@ export class Utils {
           this.shell(arg)
           .subscribe({
             complete: () => {
-              this.shell(`rm -rf ${this.homePath}/.hzn`)
+              this.cleanUp()
               .subscribe({
                 complete: () => observer.complete(),
                 error: (err) => observer.error(err)    
@@ -287,21 +352,22 @@ export class Utils {
               let defaultOrg = false
               for(const [key, value] of Object.entries(result)) {
                 if(key == 'DEFAULT_ORG' && org != value) {
-                  answer = promptSync(`\nWould you like to make ${org} the default working environment: Y/n?`)
-                  if(answer.toLowerCase() == 'y') {
-                    defaultOrg = true
-                  }      
+                  defaultOrg = true
                 }
                 content += key == 'DEFAULT_ORG' && defaultOrg ? `${key}=${org}\n` : `${key}=${value}\n`;
                 pEnv[key] = ''+value; 
               }
-              this.updateCredential(org)
               writeFileSync('.env-local', content);
               this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local && sudo chmod 766 ${this.hznConfig}/.env-local`).then(() => {
-                this.updateEnvHzn(org)
+              this.updateAndSaveCredential(org, content)
                 .subscribe({
-                  complete: () => observer.complete(),
-                  error: (err) => observer.error(err)
+                  complete: () => {
+                    this.switchEnvironment(org, pEnv)
+                    .subscribe({
+                      complete: () => observer.complete(),
+                      error: (err) => observer.error(err)
+                    })
+                  }, error: (err) => observer.error(err)
                 })
               })  
             } else {
@@ -317,6 +383,54 @@ export class Utils {
         }
       })
     });  
+  }
+  switchEnvironment(org: string, pEnv: any = process.env) {
+    return new Observable((observer) => {
+      let answer: string;
+      this.checkConfigState()
+      .subscribe({
+        next: (res: string) => {
+          console.log('configure', res.replace(/"/g, '').split('\n'))
+          let resNode = res.replace(/"/g, '').split('\n')
+          let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
+          if(resNode && resNode[0].length > 0 && (resNode[0] === 'configured' && resNode[1] !== org || resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL) < 0)) {
+          // console.log(hznJson[org].credential.HZN_EXCHANGE_URL, resNode[2], resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL))
+            answer = promptSync(`\nThis node is registered with ${resNode[1]}, must unregister before switching to ${org}, unregister Y/n? `)
+            if(answer.toLowerCase() == 'y') {
+              this.uninstallHorizon('Would you like to proceed to reinstall Horzion: Y/n?')
+              .subscribe({
+                complete: () => {
+                  this.installHznCli(pEnv.ANAX, pEnv.HZN_CUSTOM_NODE_ID)
+                  .subscribe({
+                    complete: () => observer.complete(),
+                    error: (err) => observer.error(err)
+                  })    
+                }, error: (err) => observer.error(err)
+              })
+            } else {
+              observer.error('do nothing.')
+            }                      
+          } else {
+            observer.next()
+            observer.complete()
+          }
+        },
+        error: (err) => observer.error(err)
+      })  
+    })
+  }
+  updateAndSaveCredential(org: string, content: string) {
+    return new Observable((observer) => {
+      this.updateCredential(org)
+      writeFileSync('.env-local', content);
+      this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local && sudo chmod 766 ${this.hznConfig}/.env-local`).then(() => {
+        this.updateEnvHzn(org)
+        .subscribe({
+          complete: () => observer.complete(),
+          error: (err) => observer.error(err)
+        })
+      })  
+    })
   }
   shallowEqual(obj1: any, obj2: any) {
     const keys1 = Object.keys(obj1);
@@ -849,7 +963,7 @@ export class Utils {
     })  
   }
   addDeploymentPolicy(policy: any) {
-    let arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('SERVICE_VERSION')}`
+    let arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('SERVICE_VERSION')}_${policy.envVar.getEnvValue('ARCH')}`
     return utils.shell(arg)
   }
   addServicePolicy(policy: any) {
@@ -989,15 +1103,14 @@ export class Utils {
       })
     })  
   }
-  shell(arg: string, success='command executed successfully', error='command failed', options={maxBuffer: 1024 * 2000}) {
+  shell(arg: string, success='command executed successfully', error='command failed', prnStdout=true, options={maxBuffer: 1024 * 2000}) {
     return new Observable((observer) => {
       console.log(arg);
       let child = exec(arg, options, (err: any, stdout: any, stderr: any) => {
         if(!err) {
           // console.log(stdout);
           console.log(success);
-          observer.next('');
-          // observer.next(stdout);
+          observer.next(prnStdout ? stdout : '');
           observer.complete();
         } else {
           console.log(`${error}: ${err}`);

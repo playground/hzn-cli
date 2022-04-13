@@ -55,3 +55,8 @@ dist-old
 history*.txt
 notes/
 temp/
+
+# unit test
+src/**/*.js
+src/**/*.map
+coverage

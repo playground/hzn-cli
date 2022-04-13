@@ -29,8 +29,10 @@ export class Hzn {
   name: string;
   org: string;
   param: IHznParam;
+  utils: Utils;
 
   constructor(param: IHznParam) {
+    this.utils = utils;
     this.param = param;
     this.org = param.org;
     this.envVar = new Env(param.org, utils.getHznConfig());
@@ -65,7 +67,7 @@ export class Hzn {
           this.objectPolicyJson = `${this.configPath}/object.policy.json`;
 
           if(promptForUpdate.indexOf(this.param.action) >= 0) {
-            utils.updateHorizon(this.org, this.envVar)
+            utils.switchEnvironment(this.org)
             .subscribe(() => {
               observer.complete()
             })  
@@ -352,7 +354,10 @@ export class Hzn {
     return utils.listPattern(this.name);
   }
   listNode() {
-    return utils.listNode(this.name);
+    return utils.listNode(this.param);
+  }
+  listExchangeNode() {
+    return utils.listExchangeNode(this.param);
   }
   removeNode() {
     return this.param.name.length > 0 ? utils.removeNode(`${this.param.org}/${this.param.name}`) : of('Please specify node name')
@@ -360,8 +365,17 @@ export class Hzn {
   listObject() {
     return utils.listObject(this.param);
   }
+  listPolicy() {
+    return utils.listPolicy()
+  }
+  listServicePolicy() {
+    return this.param.name.length > 0 ? utils.listServicePolicy(`${this.param.org}/${this.param.name}`) : of('Please specify node name')    
+  }
   listDeploymentPolicy() {
-    return utils.listDeploymentPolicy(this.name);
+    return utils.listDeploymentPolicy(this.param.name);
+  }
+  removeDeploymentPolicy() {
+    return this.param.name.length > 0 ? utils.removeDeploymentPolicy(`${this.param.org}/${this.param.name}`) : of('Please specify deployment policy name')    
   }
   deleteObject() {
     return new Observable((observer) => {

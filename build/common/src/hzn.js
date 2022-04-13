@@ -14,6 +14,7 @@ class Hzn {
         this.objectPolicyJson = '';
         this.serviceDefinitionJson = '';
         this.servicePatternJson = '';
+        this.utils = exports.utils;
         this.param = param;
         this.org = param.org;
         this.envVar = new env_1.Env(param.org, exports.utils.getHznConfig());
@@ -44,7 +45,7 @@ class Hzn {
                     this.servicePolicyJson = `${this.configPath}/service.policy.json`;
                     this.objectPolicyJson = `${this.configPath}/object.policy.json`;
                     if (interface_1.promptForUpdate.indexOf(this.param.action) >= 0) {
-                        exports.utils.updateHorizon(this.org, this.envVar)
+                        exports.utils.switchEnvironment(this.org)
                             .subscribe(() => {
                             observer.complete();
                         });
@@ -332,7 +333,10 @@ class Hzn {
         return exports.utils.listPattern(this.name);
     }
     listNode() {
-        return exports.utils.listNode(this.name);
+        return exports.utils.listNode(this.param);
+    }
+    listExchangeNode() {
+        return exports.utils.listExchangeNode(this.param);
     }
     removeNode() {
         return this.param.name.length > 0 ? exports.utils.removeNode(`${this.param.org}/${this.param.name}`) : (0, rxjs_1.of)('Please specify node name');
@@ -340,8 +344,17 @@ class Hzn {
     listObject() {
         return exports.utils.listObject(this.param);
     }
+    listPolicy() {
+        return exports.utils.listPolicy();
+    }
+    listServicePolicy() {
+        return this.param.name.length > 0 ? exports.utils.listServicePolicy(`${this.param.org}/${this.param.name}`) : (0, rxjs_1.of)('Please specify node name');
+    }
     listDeploymentPolicy() {
-        return exports.utils.listDeploymentPolicy(this.name);
+        return exports.utils.listDeploymentPolicy(this.param.name);
+    }
+    removeDeploymentPolicy() {
+        return this.param.name.length > 0 ? exports.utils.removeDeploymentPolicy(`${this.param.org}/${this.param.name}`) : (0, rxjs_1.of)('Please specify deployment policy name');
     }
     deleteObject() {
         return new rxjs_1.Observable((observer) => {
