@@ -2,6 +2,7 @@ import { Observable, of } from 'rxjs';
 import { Env } from './env';
 import { Utils, promptSync } from './utils';
 import { IHznParam, justRun, runDirectly, promptForUpdate } from './interface'
+import { existsSync } from 'fs';
 
 export const utils = new Utils();
 
@@ -120,7 +121,12 @@ export class Hzn {
     return utils.shell(arg, 'done pushing service docker image', 'failed to push service docker image');
   }
   buildMMSImage() {
+    let dockerFile = `Dockerfile-mms-${this.envVar.getArch()}`.replace(/\r?\n|\r/g, '')
     let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile-mms-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
+    if(!existsSync(`./${dockerFile}`)) {
+      arg = `docker build -t ${this.envVar.getMMSContainer()} -f ${__dirname}/hzn-config/setup/${dockerFile} ${__dirname}/hzn-config/setup`.replace(/\r?\n|\r/g, '');
+    }
+    // let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile-mms-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
     return utils.shell(arg, 'done building mms docker image', 'failed to build mms docker image');
   }
   pushMMSImage() {

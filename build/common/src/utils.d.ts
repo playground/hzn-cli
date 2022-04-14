@@ -5,7 +5,7 @@ import { IHznParam } from './interface';
 export declare class Utils {
     etcDefault: string;
     etcHorizon: string;
-    homePath: string;
+    homePath: any;
     hznConfig: string;
     constructor();
     init(): void;

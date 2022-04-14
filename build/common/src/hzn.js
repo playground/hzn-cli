@@ -5,6 +5,7 @@ const rxjs_1 = require("rxjs");
 const env_1 = require("./env");
 const utils_1 = require("./utils");
 const interface_1 = require("./interface");
+const fs_1 = require("fs");
 exports.utils = new utils_1.Utils();
 class Hzn {
     constructor(param) {
@@ -100,7 +101,12 @@ class Hzn {
         return exports.utils.shell(arg, 'done pushing service docker image', 'failed to push service docker image');
     }
     buildMMSImage() {
+        let dockerFile = `Dockerfile-mms-${this.envVar.getArch()}`.replace(/\r?\n|\r/g, '');
         let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile-mms-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
+        if (!(0, fs_1.existsSync)(`./${dockerFile}`)) {
+            arg = `docker build -t ${this.envVar.getMMSContainer()} -f ${__dirname}/hzn-config/setup/${dockerFile} ${__dirname}/hzn-config/setup`.replace(/\r?\n|\r/g, '');
+        }
+        // let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile-mms-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
         return exports.utils.shell(arg, 'done building mms docker image', 'failed to build mms docker image');
     }
     pushMMSImage() {

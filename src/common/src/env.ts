@@ -1,3 +1,5 @@
+declare var require: any
+
 import { Observable } from 'rxjs';
 import { readFileSync, existsSync } from 'fs';
 const cp = require('child_process'),

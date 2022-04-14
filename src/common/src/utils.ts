@@ -1,4 +1,6 @@
 declare var require: any
+declare var process: any
+
 import { Observable, of, firstValueFrom, Observer, forkJoin, from } from 'rxjs';
 const cp = require('child_process'),
 exec = cp.exec;
@@ -887,9 +889,9 @@ export class Utils {
     let name: string; 
     let value: string;
     if(propName === 'properties' || propName === 'environment variable') {
-      name = promptSync(`name (${el.name}): `, {value: el.name}).trim();
-      value = promptSync(`value (${el.value}): `, {value: el.value}).trim();
-      if(name.length > 0 && value.length > 0) {
+      name = promptSync(`name (${el.name}): `, {value: el.name});
+      value = promptSync(`value (${el.value}): `, {value: el.value});
+      if(typeof value == 'string' ? name.trim().length > 0 && value.trim().length > 0 : name.trim().length > 0) {
         if(propName === 'properties') {
           res.push({name: name, value: value})  
         } else {
@@ -898,8 +900,8 @@ export class Utils {
       }            
     } else {
       console.dir(el, {depth: null, color: true})
-      value = promptSync(`constraint (${el.value}): `, {value: el.value}).trim();
-      if(value.length > 0) {
+      value = promptSync(`constraint (${el.value}): `, {value: el.value});
+      if(value && value.trim().length > 0) {
         res.push(value)
       }
     }

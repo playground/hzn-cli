@@ -912,9 +912,10 @@ class Utils {
         let name;
         let value;
         if (propName === 'properties' || propName === 'environment variable') {
-            name = (0, exports.promptSync)(`name (${el.name}): `, { value: el.name }).trim();
-            value = (0, exports.promptSync)(`value (${el.value}): `, { value: el.value }).trim();
-            if (name.length > 0 && value.length > 0) {
+            name = (0, exports.promptSync)(`name (${el.name}): `, { value: el.name });
+            value = (0, exports.promptSync)(`value (${el.value}): `, { value: el.value });
+            console.log(name, value, typeof name, typeof value);
+            if (typeof value == 'string' ? name.trim().length > 0 && value.trim().length > 0 : name.trim().length > 0) {
                 if (propName === 'properties') {
                     res.push({ name: name, value: value });
                 }
@@ -925,8 +926,8 @@ class Utils {
         }
         else {
             console.dir(el, { depth: null, color: true });
-            value = (0, exports.promptSync)(`constraint (${el.value}): `, { value: el.value }).trim();
-            if (value.length > 0) {
+            value = (0, exports.promptSync)(`constraint (${el.value}): `, { value: el.value });
+            if (value && value.trim().length > 0) {
                 res.push(value);
             }
         }
