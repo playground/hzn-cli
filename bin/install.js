@@ -108,6 +108,8 @@ const updateJsonFile = (fname, index) => {
   Object.keys(template[index]).forEach((child) => {
     let node = template[index][child];
     Object.keys(json).forEach((org) => {
+      !json[org] && (json[org] = {})
+      !json[org][child] && (json[org][child] = {})
       if(!newJson[org]) {
         newJson[org] = {}
       }
