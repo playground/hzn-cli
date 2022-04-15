@@ -178,7 +178,7 @@ export class Utils {
   }
   listObject(param: IHznParam) {
     const arg = param.name.length > 0 ? `${param.watch}hzn mms object list ${param.name}` : `${param.watch}hzn mms object list -t ${param.objectType} -i ${param.objectId} -d`;
-    return utils.shell(arg, 'done listing object', 'failed to list object');
+    return utils.shell(arg, 'done listing object', 'failed to list object', false);
   }
   createHznKey(org: string, id: string) {
     if(org && id) {

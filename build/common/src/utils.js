@@ -176,7 +176,7 @@ class Utils {
     }
     listObject(param) {
         const arg = param.name.length > 0 ? `${param.watch}hzn mms object list ${param.name}` : `${param.watch}hzn mms object list -t ${param.objectType} -i ${param.objectId} -d`;
-        return _1.utils.shell(arg, 'done listing object', 'failed to list object');
+        return _1.utils.shell(arg, 'done listing object', 'failed to list object', false);
     }
     createHznKey(org, id) {
         if (org && id) {
@@ -914,7 +914,6 @@ class Utils {
         if (propName === 'properties' || propName === 'environment variable') {
             name = (0, exports.promptSync)(`name (${el.name}): `, { value: el.name });
             value = (0, exports.promptSync)(`value (${el.value}): `, { value: el.value });
-            console.log(name, value, typeof name, typeof value);
             if (typeof value == 'string' ? name.trim().length > 0 && value.trim().length > 0 : name.trim().length > 0) {
                 if (propName === 'properties') {
                     res.push({ name: name, value: value });
