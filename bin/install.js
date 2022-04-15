@@ -110,12 +110,8 @@ const updateJsonFile = (fname, index) => {
     Object.keys(json).forEach((org) => {
       !json[org] && (json[org] = {})
       !json[org][child] && (json[org][child] = {})
-      if(!newJson[org]) {
-        newJson[org] = {}
-      }
-      if(!newJson[org][child]) {
-        newJson[org][child] = {}
-      }
+      !newJson[org] && (newJson[org] = {})
+      !newJson[org][child] && (newJson[org][child] = {})
       Object.keys(node).forEach((key) => {
         if(!json[org][child][key]) {
           newJson[org][child][key] = node[key];
