@@ -333,7 +333,7 @@ export class Hzn {
     return utils.editServicePolicy()
   }
   addPolicy() {
-    return utils.addPolicy(this.getPolicyInfo())
+    return utils.addPolicy(this.param, this.getPolicyInfo())
   }
   addDeploymentPolicy() {
     return utils.addDeploymentPolicy(this.getPolicyInfo())
@@ -342,7 +342,10 @@ export class Hzn {
     return utils.addServicePolicy(this.getPolicyInfo())
   }
   addNodePolicy() {
-    return utils.addNodePolicy(this.getPolicyInfo())
+    return utils.addNodePolicy(this.param, this.getPolicyInfo())
+  }
+  addRemoteNodePolicy() {
+    return this.param.name.length > 0 ? utils.addRemoteNodePolicy(this.param, this.getPolicyInfo()) : of('Please specify remote node name')    
   }
   showHznInfo() {
     return utils.showHznInfo();

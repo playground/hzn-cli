@@ -312,7 +312,7 @@ class Hzn {
         return exports.utils.editServicePolicy();
     }
     addPolicy() {
-        return exports.utils.addPolicy(this.getPolicyInfo());
+        return exports.utils.addPolicy(this.param, this.getPolicyInfo());
     }
     addDeploymentPolicy() {
         return exports.utils.addDeploymentPolicy(this.getPolicyInfo());
@@ -321,7 +321,10 @@ class Hzn {
         return exports.utils.addServicePolicy(this.getPolicyInfo());
     }
     addNodePolicy() {
-        return exports.utils.addNodePolicy(this.getPolicyInfo());
+        return exports.utils.addNodePolicy(this.param, this.getPolicyInfo());
+    }
+    addRemoteNodePolicy() {
+        return this.param.name.length > 0 ? exports.utils.addRemoteNodePolicy(this.param, this.getPolicyInfo()) : (0, rxjs_1.of)('Please specify remote node name');
     }
     showHznInfo() {
         return exports.utils.showHznInfo();

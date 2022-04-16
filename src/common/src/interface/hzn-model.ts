@@ -1,5 +1,5 @@
 export const justRun = [
-  'addDeploymentPolicy', 'addNodePolicy', 'addServicePolicy', 'addPolicy',
+  'addPolicy', 'addRemoteNodePolicy',
   'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement', 
   'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 
   'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'removeDeploymentPolicy', 'removeOrg', 

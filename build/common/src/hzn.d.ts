@@ -65,6 +65,7 @@ export declare class Hzn {
     addDeploymentPolicy(): Observable<unknown>;
     addServicePolicy(): Observable<unknown>;
     addNodePolicy(): Observable<unknown>;
+    addRemoteNodePolicy(): Observable<unknown>;
     showHznInfo(): Observable<unknown>;
     updateHznInfo(): Observable<unknown>;
     listAgreement(): Observable<unknown>;

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Service = exports.Deployment = exports.Container = exports.RequiredService = exports.loop = exports.runDirectly = exports.promptForUpdate = exports.justRun = void 0;
 exports.justRun = [
-    'addDeploymentPolicy', 'addNodePolicy', 'addServicePolicy', 'addPolicy',
+    'addPolicy', 'addRemoteNodePolicy',
     'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement',
     'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern',
     'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'removeDeploymentPolicy', 'removeOrg',

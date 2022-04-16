@@ -88,7 +88,7 @@ class Utils {
     }
     listAllServices(param) {
         const arg = param.name.length > 0 ? `hzn exchange service list ${param.name} --org ${param.org}` : `hzn exchange service list --org ${param.org}`;
-        return this.shell(arg);
+        return param.name.length > 0 ? this.shell(arg, 'commande executed successfully', 'failed to execute command', false) : this.shell(arg);
     }
     listPattern(name) {
         const arg = name.length > 0 ? `hzn exchange pattern list ${name}` : 'hzn exchange pattern list';
@@ -112,7 +112,7 @@ class Utils {
     }
     listServicePolicy(name) {
         const arg = `hzn exchange service listpolicy ${name}`;
-        return this.shell(arg);
+        return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
     }
     listDeploymentPolicy(name) {
         const arg = name.length > 0 ? `hzn exchange deployment listpolicy ${name}` : 'hzn exchange deployment listpolicy';
@@ -220,7 +220,7 @@ class Utils {
             return this.shell(`curl -sSL ${anax} | sudo -s -E bash -s -- -i anax: -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`);
         }
         else {
-            return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`);
+            return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`);
         }
     }
     uninstallHorizon(msg = 'Would you like to proceed to uninstall Horzion: Y/n?') {
@@ -971,7 +971,7 @@ class Utils {
     }
     promptEditPolicy() {
     }
-    addPolicy(policy) {
+    addPolicy(param, policy) {
         return new rxjs_1.Observable((observer) => {
             let answer;
             console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n0) To exit`);
@@ -997,7 +997,7 @@ class Utils {
             }
             else if (answer == 3) {
                 console.log('\x1b[32m', '\nAdding Node Policy');
-                this.addNodePolicy(policy)
+                this.addNodePolicy(param, policy)
                     .subscribe(() => { observer.next(3); observer.complete(); });
             }
         });
@@ -1010,11 +1010,11 @@ class Utils {
         let arg = `hzn exchange service addpolicy -f ${policy.servicePolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('SERVICE_VERSION')}_${policy.envVar.getEnvValue('ARCH')}`;
         return _1.utils.shell(arg);
     }
-    addNodePolicy(policy) {
+    addNodePolicy(param, policy) {
         return new rxjs_1.Observable((observer) => {
             this.unregisterAgent().subscribe({
                 complete: () => {
-                    let arg = `hzn register --policy ${policy.nodePolicyJson}`;
+                    let arg = param.name.length > 0 ? `hzn register --policy ${policy.nodePolicyJson} --name ${param.name}` : `hzn register --policy ${policy.nodePolicyJson}`;
                     _1.utils.shell(arg, 'done registering agent with policy', 'failed to register agent')
                         .subscribe({
                         complete: () => observer.complete(),
@@ -1023,6 +1023,16 @@ class Utils {
                 }, error: (err) => {
                     observer.error(err);
                 }
+            });
+        });
+    }
+    addRemoteNodePolicy(param, policy) {
+        return new rxjs_1.Observable((observer) => {
+            let arg = `hzn register --policy ${policy.nodePolicyJson} --name ${param.name}`;
+            _1.utils.shell(arg, 'done registering remote agent with policy', 'failed to register remote agent')
+                .subscribe({
+                complete: () => observer.complete(),
+                error: (err) => observer.error(err)
             });
         });
     }

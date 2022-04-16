@@ -67,10 +67,11 @@ export declare class Utils {
     goPrompt(props: any, propName: string): Promise<unknown>;
     unregisterAgent(): Observable<unknown>;
     promptEditPolicy(): void;
-    addPolicy(policy: any): Observable<unknown>;
+    addPolicy(param: IHznParam, policy: any): Observable<unknown>;
     addDeploymentPolicy(policy: any): Observable<unknown>;
     addServicePolicy(policy: any): Observable<unknown>;
-    addNodePolicy(policy: any): Observable<unknown>;
+    addNodePolicy(param: IHznParam, policy: any): Observable<unknown>;
+    addRemoteNodePolicy(param: IHznParam, policy: any): Observable<unknown>;
     promptPolicySelection(): any;
     reviewPolicy(): Observable<unknown>;
     reviewPolicyType(filename: string): void;
