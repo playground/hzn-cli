@@ -317,6 +317,9 @@ export class Hzn {
     }
     return policyInfo
   }
+  reviewPolicy() {
+    return utils.reviewPolicy()
+  }
   editPolicy() {
     return utils.editPolicy()
   }
@@ -376,6 +379,9 @@ export class Hzn {
   }
   listPolicy() {
     return utils.listPolicy()
+  }
+  listExchangeNodePolicy() {
+    return this.param.name.length > 0 ? utils.listExchangeNodePolicy(this.param) : of('Please specify node name')    
   }
   listServicePolicy() {
     return this.param.name.length > 0 ? utils.listServicePolicy(`${this.param.org}/${this.param.name}`) : of('Please specify service policy name')    

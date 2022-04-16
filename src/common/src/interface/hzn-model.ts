@@ -1,11 +1,12 @@
 export const justRun = [
+  'addDeploymentPolicy', 'addNodePolicy', 'addServicePolicy', 'addPolicy',
   'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement', 
-  'listDeploymentPolicy', 'listExchangeNode', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 
+  'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 
   'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'removeDeploymentPolicy', 'removeOrg', 
-  'removeNode'
+  'removeNode', 'reviewPolicy'
 ];
 export const promptForUpdate = [
-  'setup', 'test', 'addDeploymentPolicy', 'addNodePolicy', 'addServicePolicy', 'addPolicy', 'buildAndPublish', 'buildPublishAndRegister', 
+  'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister', 
   'buildMMSImage', 'buildServiceImage', 'editDeploymentPoicy', 'editNodePolicy', 'editServicePolicy', 'publishAndRegister', 
   'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService', 
   'publishMMSPattern', 'publishMMSObject', 'publishMMSObjectPolicy', 'pushMMSImage', 'pushServiceImage', 'registerAgent', 'unregisterAgent'
@@ -13,6 +14,9 @@ export const promptForUpdate = [
 export const runDirectly = [
   'appendSupport', 'deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon'
 ];
+export const loop = [
+  'addPolicy', 'editPolicy', 'reviewPolicy'
+]
 
 export interface IHznParam {
   org: string;

@@ -56,6 +56,7 @@ export declare class Hzn {
         objectPolicyJson: string;
         deploymentPolicyJson: string;
     };
+    reviewPolicy(): Observable<unknown>;
     editPolicy(): Observable<unknown>;
     editDeploymentPolicy(): void;
     editNodePolicy(): Observable<unknown>;
@@ -76,6 +77,7 @@ export declare class Hzn {
     removeNode(): Observable<unknown>;
     listObject(): Observable<unknown>;
     listPolicy(): Observable<unknown>;
+    listExchangeNodePolicy(): Observable<unknown>;
     listServicePolicy(): Observable<unknown>;
     listDeploymentPolicy(): Observable<unknown>;
     removeDeploymentPolicy(): Observable<unknown>;

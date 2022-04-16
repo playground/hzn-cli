@@ -68,14 +68,36 @@ const handler = (argv) => {
             hzn.init()
                 .subscribe({
                 complete: () => {
-                    hzn[action]()
-                        .subscribe({
-                        next: (msg) => console.log(msg),
-                        complete: () => {
-                            console.log('process completed.');
-                            process.exit(0);
-                        }
-                    });
+                    if (interface_1.loop.includes(action)) {
+                        let processing = false;
+                        setInterval(() => {
+                            if (!processing) {
+                                processing = true;
+                                hzn[action]()
+                                    .subscribe({
+                                    next: (answer) => {
+                                        if (answer == 0) {
+                                            console.log('process completed.');
+                                            process.exit(0);
+                                        }
+                                        else {
+                                            processing = false;
+                                        }
+                                    }
+                                });
+                            }
+                        }, 1000);
+                    }
+                    else {
+                        hzn[action]()
+                            .subscribe({
+                            next: (msg) => console.log(msg),
+                            complete: () => {
+                                console.log('process completed.');
+                                process.exit(0);
+                            }
+                        });
+                    }
                 },
                 error: (err) => {
                     console.log(err);
@@ -88,7 +110,7 @@ const handler = (argv) => {
         }
     };
     if (action && skipInitialize.concat(interface_1.runDirectly).concat(interface_1.justRun).concat(interface_1.promptForUpdate).includes(action)) {
-        console.log('$$$ ', action, env);
+        console.log(action, env);
         if (interface_1.runDirectly.indexOf(action) >= 0) {
             hzn_1.utils[action]()
                 .subscribe({

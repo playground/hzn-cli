@@ -297,6 +297,9 @@ class Hzn {
         };
         return policyInfo;
     }
+    reviewPolicy() {
+        return exports.utils.reviewPolicy();
+    }
     editPolicy() {
         return exports.utils.editPolicy();
     }
@@ -355,6 +358,9 @@ class Hzn {
     }
     listPolicy() {
         return exports.utils.listPolicy();
+    }
+    listExchangeNodePolicy() {
+        return this.param.name.length > 0 ? exports.utils.listExchangeNodePolicy(this.param) : (0, rxjs_1.of)('Please specify node name');
     }
     listServicePolicy() {
         return this.param.name.length > 0 ? exports.utils.listServicePolicy(`${this.param.org}/${this.param.name}`) : (0, rxjs_1.of)('Please specify service policy name');

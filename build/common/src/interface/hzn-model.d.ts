@@ -1,6 +1,7 @@
 export declare const justRun: string[];
 export declare const promptForUpdate: string[];
 export declare const runDirectly: string[];
+export declare const loop: string[];
 export interface IHznParam {
     org: string;
     configPath: string;

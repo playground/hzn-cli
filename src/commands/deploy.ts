@@ -1,6 +1,6 @@
 import type { Arguments, CommandBuilder } from 'yargs';
 import { Hzn, utils } from '../common/src/hzn';
-import { IHznParam, justRun, runDirectly, promptForUpdate } from '../common/src/interface';
+import { IHznParam, justRun, runDirectly, promptForUpdate, loop } from '../common/src/interface';
 import chalk from 'chalk';
 import clear from 'clear';
 import figlet from 'figlet';
@@ -85,14 +85,34 @@ export const handler = (argv: Arguments<Options>): void => {
       hzn.init()
       .subscribe({
         complete: () => {
-          hzn[action]()
-          .subscribe({
-            next: (msg: string) => console.log(msg),
-            complete: () => {
-              console.log('process completed.');
-              process.exit(0)          
-            }
-          })
+          if(loop.includes(action)) {
+            let processing = false
+            setInterval(() => {
+              if(!processing) {
+                processing = true
+                hzn[action]()
+                .subscribe({
+                  next: (answer: number) => {
+                    if(answer == 0) {
+                      console.log('process completed.');
+                      process.exit(0)                    
+                    } else {
+                      processing = false
+                    }
+                  }
+                })      
+              }
+            }, 1000)
+          } else {
+            hzn[action]()
+            .subscribe({
+              next: (msg: string) => console.log(msg),
+              complete: () => {
+                console.log('process completed.');
+                process.exit(0)          
+              }
+            })  
+          }
         },
         error: (err) => {
           console.log(err);      
@@ -105,7 +125,7 @@ export const handler = (argv: Arguments<Options>): void => {
   }
 
   if(action && skipInitialize.concat(runDirectly).concat(justRun).concat(promptForUpdate).includes(action)) {
-    console.log('$$$ ', action, env);
+    console.log(action, env);
     if(runDirectly.indexOf(action) >= 0) {
       utils[action]()
       .subscribe({

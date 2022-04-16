@@ -79,7 +79,9 @@ export class Utils {
           let services: string[] = res.replace(/\r?\n|\r|\[|\]|"/g, '').split(',')
           let filter = param.filter && param.filter.length > 0 ? param.filter : pEnv.ARCH
           let archFilter = services.filter((r) => r.indexOf(filter) > 0)
-          console.log(`Services for ${filter}:\n${archFilter.join(',\n')}`)
+          if(archFilter.length < services.length) {
+            console.log(`Services for ${filter}:\n${archFilter.join(',\n')}`)
+          }
           observer.next('')
           observer.complete()
         },
@@ -93,11 +95,11 @@ export class Utils {
   }
   listPattern(name: string) {
     const arg = name.length > 0 ? `hzn exchange pattern list ${name}` : 'hzn exchange pattern list';
-    return this.shell(arg);
+    return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
   }
   listNode(param: IHznParam) {
     const arg = 'hzn node list';
-    return this.shell(arg);
+    return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
   }
   listExchangeNode(param: IHznParam) {
     const arg = param.name.length > 0 ? `hzn exchange node list ${param.name}` : 'hzn exchange node list';
@@ -105,6 +107,10 @@ export class Utils {
   }
   listPolicy() {
     const arg = 'hzn policy list'
+    return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
+  }
+  listExchangeNodePolicy(param: IHznParam) {
+    const arg = `hzn exchange node listpolicy ${param.name}`;
     return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
   }
   listServicePolicy(name: string) {
@@ -157,23 +163,6 @@ export class Utils {
         },
         error: (err) => observer.error(err)
       })
-    })  
-  }
-  removeNode2(name: string) {
-    return new Observable((observer) => {
-      console.log(`\nAre you sure you want to remove node ${name} from the Horizon Exchange? [y/N]:`)
-      prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
-        if(question.answer.toUpperCase() === 'Y') {
-          const arg = `yes | hzn exchange node remove ${name}`;
-          this.shell(arg)
-          .subscribe({
-            complete: () => {
-              observer.complete()
-            },
-            error: (err) => observer.error(err)
-          })
-        }
-      })  
     })  
   }
   listObject(param: IHznParam) {
@@ -953,6 +942,9 @@ export class Utils {
       })
     })  
   }
+  promptEditPolicy() {
+
+  }
   addPolicy(policy: any) {
     return new Observable((observer) => {
       let answer;
@@ -1005,34 +997,74 @@ export class Utils {
       })  
     })  
   }
-  editPolicy() {
+  promptPolicySelection() {
+    let answer;
+    console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n4) Object Policy\n0) To exit`)
+    do {
+      answer = parseInt(promptSync(`Please select the type of policy you would like to work with: `))
+      if(answer < 0 || answer > 4) {
+        console.log('\x1b[41m%s\x1b[0m', '\nInvalid, try again.')
+      } 
+    } while(answer < 0 || answer > 4)
+    return answer
+  }
+  reviewPolicy() {    
     return new Observable((observer) => {
-      let answer;
-      console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n4) Object Policy\n0) To exit`)
-      do {
-        answer = parseInt(promptSync(`Please select the type of policy you would like to work with: `))
-        if(answer < 0 || answer > 4) {
-          console.log('\x1b[41m%s\x1b[0m', '\nInvalid, try again.')
-        } 
-      } while(answer < 0 || answer > 4)
+      let answer = this.promptPolicySelection();
       switch(answer) {
         case 0: 
+          observer.next(0) 
+          observer.complete()
+          break;
+        case 1:
+          console.log('\x1b[32m', '\nReview Service Policy') 
+          this.reviewPolicyType('service.policy.json')
+          observer.next(1); observer.complete()
+          break;
+        case 2:  
+          console.log('\x1b[32m', '\nReview Deployment Policy') 
+          this.reviewPolicyType('deployment.policy.json')
+          observer.next(2); observer.complete()
+          break;
+        case 3:  
+          console.log('\x1b[32m', '\nReview Node Policy') 
+          this.reviewPolicyType('node.policy.json')
+          observer.next(3); observer.complete()
+          break;
+        case 4:  
+          console.log('\x1b[32m', '\nReview Object Policy') 
+          this.reviewPolicyType('object.policy.json')
+          observer.next(4); observer.complete()
+          break;
+      }
+    })  
+  }
+  reviewPolicyType(filename: string) {
+    let policy = this.getJsonFromFile(filename);
+    console.dir(policy, {depth: null, colors: true})
+  }
+  editPolicy() {
+    return new Observable((observer) => {
+      let answer = this.promptPolicySelection();
+      switch(answer) {
+        case 0: 
+          observer.next(0) 
           observer.complete()
           break;
         case 1:
           console.log('\x1b[32m', '\nWorking with Service Policy') 
           this.editServicePolicy()
-          .subscribe(() => observer.complete())
+          .subscribe(() => {observer.next(1); observer.complete()})
           break;
         case 2:  
           console.log('\x1b[32m', '\nWorking with Deployment Policy') 
           this.editDeploymentPolicy()
-          .subscribe(() => observer.complete())
+          .subscribe(() => {observer.next(2); observer.complete()})
           break;
         case 3:  
           console.log('\x1b[32m', '\nWorking with Node Policy') 
           this.editNodePolicy()
-          .subscribe(() => observer.complete())
+          .subscribe(() => {observer.next(3); observer.complete()})
           break;
         case 4:  
           console.log('\x1b[32m', '\nWorking with Object Policy') 
@@ -1092,10 +1124,12 @@ export class Utils {
           prompt.get({name: 'answer', required: true}, async (err: any, question: any) => {
             if(question.answer.toUpperCase() === 'Y') {
               jsonfile.writeFileSync(`${this.hznConfig}/${filename}`, res, {spaces: 2});
-              observer.complete()
             }
+            observer.next()
+            observer.complete()
           })
         } else {
+          observer.next()
           observer.complete()
         }    
       })  

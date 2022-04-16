@@ -18,12 +18,12 @@ export declare class Utils {
     listNode(param: IHznParam): Observable<unknown>;
     listExchangeNode(param: IHznParam): Observable<unknown>;
     listPolicy(): Observable<unknown>;
+    listExchangeNodePolicy(param: IHznParam): Observable<unknown>;
     listServicePolicy(name: string): Observable<unknown>;
     listDeploymentPolicy(name: string): Observable<unknown>;
     removeDeploymentPolicy(name: string): Observable<unknown>;
     areYouSure(arg: string, msg: string): Observable<unknown>;
     removeNode(name: string): Observable<unknown>;
-    removeNode2(name: string): Observable<unknown>;
     listObject(param: IHznParam): Observable<unknown>;
     createHznKey(org: string, id: string): Observable<unknown>;
     checkConfigState(): Observable<unknown>;
@@ -66,10 +66,14 @@ export declare class Utils {
     promptType(propName: string, res: any, el: any): void;
     goPrompt(props: any, propName: string): Promise<unknown>;
     unregisterAgent(): Observable<unknown>;
+    promptEditPolicy(): void;
     addPolicy(policy: any): Observable<unknown>;
     addDeploymentPolicy(policy: any): Observable<unknown>;
     addServicePolicy(policy: any): Observable<unknown>;
     addNodePolicy(policy: any): Observable<unknown>;
+    promptPolicySelection(): any;
+    reviewPolicy(): Observable<unknown>;
+    reviewPolicyType(filename: string): void;
     editPolicy(): Observable<unknown>;
     editObjectPolicy(): Observable<unknown>;
     editNodePolicy(): Observable<unknown>;
