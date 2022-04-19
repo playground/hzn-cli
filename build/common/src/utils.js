@@ -67,17 +67,36 @@ class Utils {
         const arg = `${param.watch} hzn agreement list`;
         return this.shell(arg);
     }
-    listService(name) {
-        const arg = name.length > 0 ? `hzn exchange service list ${name}` : 'hzn exchange service list';
-        return this.shell(arg);
+    listService(param) {
+        return new rxjs_1.Observable((observer) => {
+            this.listAllServices(param)
+                .subscribe({
+                next: (res) => {
+                    const pEnv = process.env;
+                    let services = res.replace(/\r?\n|\r|\[|\]|"/g, '').split(',');
+                    let filter = param.filter && param.filter.length > 0 ? param.filter : pEnv.ARCH;
+                    let archFilter = services.filter((r) => r.indexOf(filter) > 0);
+                    if (archFilter.length < services.length) {
+                        console.log(`Services for ${filter}:\n${archFilter.join(',\n')}`);
+                    }
+                    observer.next('');
+                    observer.complete();
+                },
+                error: (err) => observer.error(err)
+            });
+        });
+    }
+    listAllServices(param) {
+        const arg = param.name.length > 0 ? `hzn exchange service list ${param.name} --org ${param.org}` : `hzn exchange service list --org ${param.org}`;
+        return param.name.length > 0 ? this.shell(arg, 'commande executed successfully', 'failed to execute command', false) : this.shell(arg);
     }
     listPattern(name) {
         const arg = name.length > 0 ? `hzn exchange pattern list ${name}` : 'hzn exchange pattern list';
-        return this.shell(arg);
+        return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
     }
     listNode(param) {
         const arg = 'hzn node list';
-        return this.shell(arg);
+        return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
     }
     listExchangeNode(param) {
         const arg = param.name.length > 0 ? `hzn exchange node list ${param.name}` : 'hzn exchange node list';
@@ -85,15 +104,19 @@ class Utils {
     }
     listPolicy() {
         const arg = 'hzn policy list';
-        return this.shell(arg);
+        return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
+    }
+    listExchangeNodePolicy(param) {
+        const arg = `hzn exchange node listpolicy ${param.name}`;
+        return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
     }
     listServicePolicy(name) {
-        const arg = `hzn exchange listpolicy ${name}`;
-        return this.shell(arg);
+        const arg = `hzn exchange service listpolicy ${name}`;
+        return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
     }
     listDeploymentPolicy(name) {
         const arg = name.length > 0 ? `hzn exchange deployment listpolicy ${name}` : 'hzn exchange deployment listpolicy';
-        return this.shell(arg, 'command executed successfully', 'failed to execute command', false);
+        return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
     }
     removeDeploymentPolicy(name) {
         return new rxjs_1.Observable((observer) => {
@@ -140,26 +163,9 @@ class Utils {
             });
         });
     }
-    removeNode2(name) {
-        return new rxjs_1.Observable((observer) => {
-            console.log(`\nAre you sure you want to remove node ${name} from the Horizon Exchange? [y/N]:`);
-            prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
-                if (question.answer.toUpperCase() === 'Y') {
-                    const arg = `yes | hzn exchange node remove ${name}`;
-                    this.shell(arg)
-                        .subscribe({
-                        complete: () => {
-                            observer.complete();
-                        },
-                        error: (err) => observer.error(err)
-                    });
-                }
-            });
-        });
-    }
     listObject(param) {
         const arg = param.name.length > 0 ? `${param.watch}hzn mms object list ${param.name}` : `${param.watch}hzn mms object list -t ${param.objectType} -i ${param.objectId} -d`;
-        return _1.utils.shell(arg, 'done listing object', 'failed to list object');
+        return _1.utils.shell(arg, 'done listing object', 'failed to list object', false);
     }
     createHznKey(org, id) {
         if (org && id) {
@@ -214,7 +220,7 @@ class Utils {
             return this.shell(`curl -sSL ${anax} | sudo -s -E bash -s -- -i anax: -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`);
         }
         else {
-            return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`);
+            return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`);
         }
     }
     uninstallHorizon(msg = 'Would you like to proceed to uninstall Horzion: Y/n?') {
@@ -317,7 +323,7 @@ class Utils {
             let credential = hznJson[org]['credential'];
             Object.keys(credential).forEach((key) => {
                 props.some((el, idx) => {
-                    if (el.name === key) {
+                    if (el.name === key && credential[key] && credential[key].length > 0) {
                         props[idx].default = credential[key];
                         return true;
                     }
@@ -613,8 +619,7 @@ class Utils {
                         });
                     }
                     else {
-                        console.log(`config files is not setup for ${org}`);
-                        observer.error(`config files is not setup for ${org}`);
+                        observer.error(`config files are not setup for ${org}`);
                     }
                 });
             }
@@ -896,9 +901,9 @@ class Utils {
         let name;
         let value;
         if (propName === 'properties' || propName === 'environment variable') {
-            name = (0, exports.promptSync)(`name (${el.name}): `, { value: el.name }).trim();
-            value = (0, exports.promptSync)(`value (${el.value}): `, { value: el.value }).trim();
-            if (name.length > 0 && value.length > 0) {
+            name = (0, exports.promptSync)(`name (${el.name}): `, { value: el.name });
+            value = (0, exports.promptSync)(`value (${el.value}): `, { value: el.value });
+            if (typeof value == 'string' ? name.trim().length > 0 && value.trim().length > 0 : name.trim().length > 0) {
                 if (propName === 'properties') {
                     res.push({ name: name, value: value });
                 }
@@ -909,8 +914,8 @@ class Utils {
         }
         else {
             console.dir(el, { depth: null, color: true });
-            value = (0, exports.promptSync)(`constraint (${el.value}): `, { value: el.value }).trim();
-            if (value.length > 0) {
+            value = (0, exports.promptSync)(`constraint (${el.value}): `, { value: el.value });
+            if (value && value.trim().length > 0) {
                 res.push(value);
             }
         }
@@ -964,7 +969,9 @@ class Utils {
             });
         });
     }
-    addPolicy(policy) {
+    promptEditPolicy() {
+    }
+    addPolicy(param, policy) {
         return new rxjs_1.Observable((observer) => {
             let answer;
             console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n0) To exit`);
@@ -990,7 +997,7 @@ class Utils {
             }
             else if (answer == 3) {
                 console.log('\x1b[32m', '\nAdding Node Policy');
-                this.addNodePolicy(policy)
+                this.addNodePolicy(param, policy)
                     .subscribe(() => { observer.next(3); observer.complete(); });
             }
         });
@@ -1003,11 +1010,11 @@ class Utils {
         let arg = `hzn exchange service addpolicy -f ${policy.servicePolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('SERVICE_VERSION')}_${policy.envVar.getEnvValue('ARCH')}`;
         return _1.utils.shell(arg);
     }
-    addNodePolicy(policy) {
+    addNodePolicy(param, policy) {
         return new rxjs_1.Observable((observer) => {
             this.unregisterAgent().subscribe({
                 complete: () => {
-                    let arg = `hzn register --policy ${policy.nodePolicyJson}`;
+                    let arg = param.name.length > 0 ? `hzn register --policy ${policy.nodePolicyJson} --name ${param.name}` : `hzn register --policy ${policy.nodePolicyJson}`;
                     _1.utils.shell(arg, 'done registering agent with policy', 'failed to register agent')
                         .subscribe({
                         complete: () => observer.complete(),
@@ -1019,34 +1026,88 @@ class Utils {
             });
         });
     }
-    editPolicy() {
+    addRemoteNodePolicy(param, policy) {
         return new rxjs_1.Observable((observer) => {
-            let answer;
-            console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n4) Object Policy\n0) To exit`);
-            do {
-                answer = parseInt((0, exports.promptSync)(`Please select the type of policy you would like to work with: `));
-                if (answer < 0 || answer > 4) {
-                    console.log('\x1b[41m%s\x1b[0m', '\nInvalid, try again.');
-                }
-            } while (answer < 0 || answer > 4);
+            let arg = `hzn register --policy ${policy.nodePolicyJson} --name ${param.name}`;
+            _1.utils.shell(arg, 'done registering remote agent with policy', 'failed to register remote agent')
+                .subscribe({
+                complete: () => observer.complete(),
+                error: (err) => observer.error(err)
+            });
+        });
+    }
+    promptPolicySelection() {
+        let answer;
+        console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n4) Object Policy\n0) To exit`);
+        do {
+            answer = parseInt((0, exports.promptSync)(`Please select the type of policy you would like to work with: `));
+            if (answer < 0 || answer > 4) {
+                console.log('\x1b[41m%s\x1b[0m', '\nInvalid, try again.');
+            }
+        } while (answer < 0 || answer > 4);
+        return answer;
+    }
+    reviewPolicy() {
+        return new rxjs_1.Observable((observer) => {
+            let answer = this.promptPolicySelection();
             switch (answer) {
                 case 0:
+                    observer.next(0);
+                    observer.complete();
+                    break;
+                case 1:
+                    console.log('\x1b[32m', '\nReview Service Policy');
+                    this.reviewPolicyType('service.policy.json');
+                    observer.next(1);
+                    observer.complete();
+                    break;
+                case 2:
+                    console.log('\x1b[32m', '\nReview Deployment Policy');
+                    this.reviewPolicyType('deployment.policy.json');
+                    observer.next(2);
+                    observer.complete();
+                    break;
+                case 3:
+                    console.log('\x1b[32m', '\nReview Node Policy');
+                    this.reviewPolicyType('node.policy.json');
+                    observer.next(3);
+                    observer.complete();
+                    break;
+                case 4:
+                    console.log('\x1b[32m', '\nReview Object Policy');
+                    this.reviewPolicyType('object.policy.json');
+                    observer.next(4);
+                    observer.complete();
+                    break;
+            }
+        });
+    }
+    reviewPolicyType(filename) {
+        let policy = this.getJsonFromFile(filename);
+        console.dir(policy, { depth: null, colors: true });
+    }
+    editPolicy() {
+        return new rxjs_1.Observable((observer) => {
+            let answer = this.promptPolicySelection();
+            switch (answer) {
+                case 0:
+                    observer.next(0);
                     observer.complete();
                     break;
                 case 1:
                     console.log('\x1b[32m', '\nWorking with Service Policy');
                     this.editServicePolicy()
-                        .subscribe(() => observer.complete());
+                        .subscribe(() => { observer.next(1); observer.complete(); });
                     break;
                 case 2:
                     console.log('\x1b[32m', '\nWorking with Deployment Policy');
                     this.editDeploymentPolicy()
-                        .subscribe(() => observer.complete());
+                        .subscribe(() => { observer.next(2); observer.complete(); });
                     break;
                 case 3:
                     console.log('\x1b[32m', '\nWorking with Node Policy');
                     this.editNodePolicy()
-                        .subscribe(() => observer.complete());
+                        .subscribe(() => { observer.next(3); observer.complete(); });
                     break;
                 case 4:
                     console.log('\x1b[32m', '\nWorking with Object Policy');
@@ -1108,11 +1169,13 @@ class Utils {
                     prompt_1.default.get({ name: 'answer', required: true }, async (err, question) => {
                         if (question.answer.toUpperCase() === 'Y') {
                             jsonfile_1.default.writeFileSync(`${this.hznConfig}/${filename}`, res, { spaces: 2 });
-                            observer.complete();
                         }
+                        observer.next();
+                        observer.complete();
                     });
                 }
                 else {
+                    observer.next();
                     observer.complete();
                 }
             });

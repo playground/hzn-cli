@@ -1,19 +1,24 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Service = exports.Deployment = exports.Container = exports.RequiredService = exports.runDirectly = exports.promptForUpdate = exports.justRun = void 0;
+exports.Service = exports.Deployment = exports.Container = exports.RequiredService = exports.loop = exports.runDirectly = exports.promptForUpdate = exports.justRun = void 0;
 exports.justRun = [
+    'addPolicy', 'addRemoteNodePolicy',
     'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement',
-    'listDeploymentPolicy', 'listExchangeNode', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 'listService',
-    'removeDeploymentPolicy', 'removeOrg', 'removeNode'
+    'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern',
+    'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'removeDeploymentPolicy', 'removeOrg',
+    'removeNode', 'reviewPolicy'
 ];
 exports.promptForUpdate = [
-    'setup', 'test', 'addDeploymentPolicy', 'addNodePolicy', 'addServicePolicy', 'addPolicy', 'buildAndPublish', 'buildPublishAndRegister',
+    'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister',
     'buildMMSImage', 'buildServiceImage', 'editDeploymentPoicy', 'editNodePolicy', 'editServicePolicy', 'publishAndRegister',
     'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService',
     'publishMMSPattern', 'publishMMSObject', 'publishMMSObjectPolicy', 'pushMMSImage', 'pushServiceImage', 'registerAgent', 'unregisterAgent'
 ];
 exports.runDirectly = [
     'appendSupport', 'deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon'
+];
+exports.loop = [
+    'addPolicy', 'editPolicy', 'reviewPolicy'
 ];
 class RequiredService {
     constructor() {

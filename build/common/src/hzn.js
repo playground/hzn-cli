@@ -5,6 +5,7 @@ const rxjs_1 = require("rxjs");
 const env_1 = require("./env");
 const utils_1 = require("./utils");
 const interface_1 = require("./interface");
+const fs_1 = require("fs");
 exports.utils = new utils_1.Utils();
 class Hzn {
     constructor(param) {
@@ -100,7 +101,12 @@ class Hzn {
         return exports.utils.shell(arg, 'done pushing service docker image', 'failed to push service docker image');
     }
     buildMMSImage() {
+        let dockerFile = `Dockerfile-mms-${this.envVar.getArch()}`.replace(/\r?\n|\r/g, '');
         let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile-mms-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
+        if (!(0, fs_1.existsSync)(`./${dockerFile}`)) {
+            arg = `docker build -t ${this.envVar.getMMSContainer()} -f ${__dirname}/hzn-config/setup/${dockerFile} ${__dirname}/hzn-config/setup`.replace(/\r?\n|\r/g, '');
+        }
+        // let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile-mms-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
         return exports.utils.shell(arg, 'done building mms docker image', 'failed to build mms docker image');
     }
     pushMMSImage() {
@@ -291,6 +297,9 @@ class Hzn {
         };
         return policyInfo;
     }
+    reviewPolicy() {
+        return exports.utils.reviewPolicy();
+    }
     editPolicy() {
         return exports.utils.editPolicy();
     }
@@ -303,7 +312,7 @@ class Hzn {
         return exports.utils.editServicePolicy();
     }
     addPolicy() {
-        return exports.utils.addPolicy(this.getPolicyInfo());
+        return exports.utils.addPolicy(this.param, this.getPolicyInfo());
     }
     addDeploymentPolicy() {
         return exports.utils.addDeploymentPolicy(this.getPolicyInfo());
@@ -312,7 +321,10 @@ class Hzn {
         return exports.utils.addServicePolicy(this.getPolicyInfo());
     }
     addNodePolicy() {
-        return exports.utils.addNodePolicy(this.getPolicyInfo());
+        return exports.utils.addNodePolicy(this.param, this.getPolicyInfo());
+    }
+    addRemoteNodePolicy() {
+        return this.param.name.length > 0 ? exports.utils.addRemoteNodePolicy(this.param, this.getPolicyInfo()) : (0, rxjs_1.of)('Please specify remote node name');
     }
     showHznInfo() {
         return exports.utils.showHznInfo();
@@ -324,7 +336,10 @@ class Hzn {
         return exports.utils.listAgreement(this.param);
     }
     listService() {
-        return exports.utils.listService(this.name);
+        return exports.utils.listService(this.param);
+    }
+    listAllServices() {
+        return exports.utils.listAllServices(this.param);
     }
     isConfigured() {
         return exports.utils.isNodeConfigured();
@@ -347,8 +362,11 @@ class Hzn {
     listPolicy() {
         return exports.utils.listPolicy();
     }
+    listExchangeNodePolicy() {
+        return this.param.name.length > 0 ? exports.utils.listExchangeNodePolicy(this.param) : (0, rxjs_1.of)('Please specify node name');
+    }
     listServicePolicy() {
-        return this.param.name.length > 0 ? exports.utils.listServicePolicy(`${this.param.org}/${this.param.name}`) : (0, rxjs_1.of)('Please specify node name');
+        return this.param.name.length > 0 ? exports.utils.listServicePolicy(`${this.param.org}/${this.param.name}`) : (0, rxjs_1.of)('Please specify service policy name');
     }
     listDeploymentPolicy() {
         return exports.utils.listDeploymentPolicy(this.param.name);

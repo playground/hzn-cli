@@ -2,6 +2,7 @@ import { Observable, of } from 'rxjs';
 import { Env } from './env';
 import { Utils, promptSync } from './utils';
 import { IHznParam, justRun, runDirectly, promptForUpdate } from './interface'
+import { existsSync } from 'fs';
 
 export const utils = new Utils();
 
@@ -120,7 +121,12 @@ export class Hzn {
     return utils.shell(arg, 'done pushing service docker image', 'failed to push service docker image');
   }
   buildMMSImage() {
+    let dockerFile = `Dockerfile-mms-${this.envVar.getArch()}`.replace(/\r?\n|\r/g, '')
     let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile-mms-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
+    if(!existsSync(`./${dockerFile}`)) {
+      arg = `docker build -t ${this.envVar.getMMSContainer()} -f ${__dirname}/hzn-config/setup/${dockerFile} ${__dirname}/hzn-config/setup`.replace(/\r?\n|\r/g, '');
+    }
+    // let arg = `docker build -t ${this.envVar.getMMSContainer()} -f Dockerfile-mms-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
     return utils.shell(arg, 'done building mms docker image', 'failed to build mms docker image');
   }
   pushMMSImage() {
@@ -311,6 +317,9 @@ export class Hzn {
     }
     return policyInfo
   }
+  reviewPolicy() {
+    return utils.reviewPolicy()
+  }
   editPolicy() {
     return utils.editPolicy()
   }
@@ -324,7 +333,7 @@ export class Hzn {
     return utils.editServicePolicy()
   }
   addPolicy() {
-    return utils.addPolicy(this.getPolicyInfo())
+    return utils.addPolicy(this.param, this.getPolicyInfo())
   }
   addDeploymentPolicy() {
     return utils.addDeploymentPolicy(this.getPolicyInfo())
@@ -333,7 +342,10 @@ export class Hzn {
     return utils.addServicePolicy(this.getPolicyInfo())
   }
   addNodePolicy() {
-    return utils.addNodePolicy(this.getPolicyInfo())
+    return utils.addNodePolicy(this.param, this.getPolicyInfo())
+  }
+  addRemoteNodePolicy() {
+    return this.param.name.length > 0 ? utils.addRemoteNodePolicy(this.param, this.getPolicyInfo()) : of('Please specify remote node name')    
   }
   showHznInfo() {
     return utils.showHznInfo();
@@ -345,7 +357,10 @@ export class Hzn {
     return utils.listAgreement(this.param);
   }
   listService() {
-    return utils.listService(this.name);
+    return utils.listService(this.param);
+  }
+  listAllServices() {
+    return utils.listAllServices(this.param);
   }
   isConfigured() {
     return utils.isNodeConfigured()
@@ -368,8 +383,11 @@ export class Hzn {
   listPolicy() {
     return utils.listPolicy()
   }
+  listExchangeNodePolicy() {
+    return this.param.name.length > 0 ? utils.listExchangeNodePolicy(this.param) : of('Please specify node name')    
+  }
   listServicePolicy() {
-    return this.param.name.length > 0 ? utils.listServicePolicy(`${this.param.org}/${this.param.name}`) : of('Please specify node name')    
+    return this.param.name.length > 0 ? utils.listServicePolicy(`${this.param.org}/${this.param.name}`) : of('Please specify service policy name')    
   }
   listDeploymentPolicy() {
     return utils.listDeploymentPolicy(this.param.name);

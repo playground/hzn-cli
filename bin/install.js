@@ -32,6 +32,10 @@ const template = {
       "UPDATE_FILE_NAME": "model.zip"
     },
     "credential": {
+      "HZN_EXCHANGE_USER_AUTH": "",
+      "HZN_EXCHANGE_URL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-exchange/v1",
+      "HZN_FSS_CSSURL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-css",
+      "ANAX": "api/v1/objects/IBM/agent_files/agent-install.sh/data"
     },
     "metaVars": {
     }
@@ -104,12 +108,10 @@ const updateJsonFile = (fname, index) => {
   Object.keys(template[index]).forEach((child) => {
     let node = template[index][child];
     Object.keys(json).forEach((org) => {
-      if(!newJson[org]) {
-        newJson[org] = {}
-      }
-      if(!newJson[org][child]) {
-        newJson[org][child] = {}
-      }
+      !json[org] && (json[org] = {})
+      !json[org][child] && (json[org][child] = {})
+      !newJson[org] && (newJson[org] = {})
+      !newJson[org][child] && (newJson[org][child] = {})
       Object.keys(node).forEach((key) => {
         if(!json[org][child][key]) {
           newJson[org][child][key] = node[key];

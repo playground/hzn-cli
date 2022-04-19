@@ -9,6 +9,7 @@ declare type Options = {
     object: string | undefined;
     pattern: string | undefined;
     watch: string | undefined;
+    filter: string | undefined;
     skip_config_update: string | undefined;
 };
 export declare const command: string;

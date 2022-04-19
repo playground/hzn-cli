@@ -1,6 +1,6 @@
 import type { Arguments, CommandBuilder } from 'yargs';
 import { Hzn, utils } from '../common/src/hzn';
-import { IHznParam, justRun, runDirectly, promptForUpdate } from '../common/src/interface';
+import { IHznParam, justRun, runDirectly, promptForUpdate, loop } from '../common/src/interface';
 import chalk from 'chalk';
 import clear from 'clear';
 import figlet from 'figlet';
@@ -16,6 +16,7 @@ type Options = {
   object: string | undefined;
   pattern: string | undefined;
   watch: string | undefined;
+  filter: string | undefined;
   skip_config_update: string | undefined;
 };
 export const command: string = 'deploy <action>';
@@ -36,6 +37,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
       object: {type: 'string', desc: 'Object file to be published'},
       pattern: {type: 'string', desc: 'Pattern name'},
       watch: {type: 'string', desc: 'watch = true/false'},
+      filter: {type: 'string', desc: 'filter search result = arm, amd64, arm64 & etc'},
       skip_config_update: {type: 'string', desc: 'Do not prompt for config updates = true/false'}
     })
     .positional('action', {
@@ -51,14 +53,13 @@ export const handler = (argv: Arguments<Options>): void => {
       figlet.textSync('hzn-cli', { horizontalLayout: 'full' })
     )
   );
-  const { action, org, config_path, name, object_type, object_id, object, pattern, watch, skip_config_update } = argv;
+  const { action, org, config_path, name, object_type, object_id, object, pattern, watch, filter, skip_config_update } = argv;
   let env = org || '';
   const n = name || '';
   const objType = object_type || '';
   const objId = object_id || '';
   const obj = object || '';
   const p = pattern || '';
-  const w = watch || '';
   const configPath = config_path || utils.getHznConfig();
   const skipInitialize = ['dockerImageExists'];
 
@@ -71,26 +72,47 @@ export const handler = (argv: Arguments<Options>): void => {
       const hznModel = {
         org: env, 
         configPath: configPath, 
-        name: n, 
-        objectType: objType, 
-        objectId: objId, 
-        objectFile: obj,
+        name: name || '', 
+        objectType: object_type || '', 
+        objectId: object_id || '', 
+        objectFile: object || '',
         action: action,
-        watch: watch && watch === 'true' ? 'watch ' : ''
+        watch: watch && watch === 'true' ? 'watch ' : '',
+        filter: filter
       } as IHznParam;
       const hzn = new Hzn(hznModel);
   
       hzn.init()
       .subscribe({
         complete: () => {
-          hzn[action]()
-          .subscribe({
-            next: (msg: string) => console.log(msg),
-            complete: () => {
-              console.log('process completed.');
-              process.exit(0)          
-            }
-          })
+          if(loop.includes(action)) {
+            let processing = false
+            setInterval(() => {
+              if(!processing) {
+                processing = true
+                hzn[action]()
+                .subscribe({
+                  next: (answer: number) => {
+                    if(answer == 0) {
+                      console.log('process completed.');
+                      process.exit(0)                    
+                    } else {
+                      processing = false
+                    }
+                  }
+                })      
+              }
+            }, 1000)
+          } else {
+            hzn[action]()
+            .subscribe({
+              next: (msg: string) => console.log(msg),
+              complete: () => {
+                console.log('process completed.');
+                process.exit(0)          
+              }
+            })  
+          }
         },
         error: (err) => {
           console.log(err);      
@@ -103,7 +125,7 @@ export const handler = (argv: Arguments<Options>): void => {
   }
 
   if(action && skipInitialize.concat(runDirectly).concat(justRun).concat(promptForUpdate).includes(action)) {
-    console.log('$$$ ', action, env);
+    console.log(action, env);
     if(runDirectly.indexOf(action) >= 0) {
       utils[action]()
       .subscribe({

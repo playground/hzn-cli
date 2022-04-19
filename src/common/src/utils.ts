@@ -1,3 +1,6 @@
+declare var require: any
+declare var process: any
+
 import { Observable, of, firstValueFrom, Observer, forkJoin, from } from 'rxjs';
 const cp = require('child_process'),
 exec = cp.exec;
@@ -67,17 +70,36 @@ export class Utils {
     const arg = `${param.watch} hzn agreement list`;
     return this.shell(arg);
   }
-  listService(name: string) {
-    const arg = name.length > 0 ? `hzn exchange service list ${name}` : 'hzn exchange service list';
-    return this.shell(arg);
+  listService(param: IHznParam) {
+    return new Observable((observer) => {
+      this.listAllServices(param)
+      .subscribe({
+        next: (res: string) => {
+          const pEnv: any = process.env;
+          let services: string[] = res.replace(/\r?\n|\r|\[|\]|"/g, '').split(',')
+          let filter = param.filter && param.filter.length > 0 ? param.filter : pEnv.ARCH
+          let archFilter = services.filter((r) => r.indexOf(filter) > 0)
+          if(archFilter.length < services.length) {
+            console.log(`Services for ${filter}:\n${archFilter.join(',\n')}`)
+          }
+          observer.next('')
+          observer.complete()
+        },
+        error: (err: any) => observer.error(err)
+      })
+    })  
+  }
+  listAllServices(param: IHznParam) {
+    const arg = param.name.length > 0 ? `hzn exchange service list ${param.name} --org ${param.org}` : `hzn exchange service list --org ${param.org}`;
+    return param.name.length > 0 ? this.shell(arg, 'commande executed successfully', 'failed to execute command', false) : this.shell(arg)
   }
   listPattern(name: string) {
     const arg = name.length > 0 ? `hzn exchange pattern list ${name}` : 'hzn exchange pattern list';
-    return this.shell(arg);
+    return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
   }
   listNode(param: IHznParam) {
     const arg = 'hzn node list';
-    return this.shell(arg);
+    return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
   }
   listExchangeNode(param: IHznParam) {
     const arg = param.name.length > 0 ? `hzn exchange node list ${param.name}` : 'hzn exchange node list';
@@ -85,15 +107,19 @@ export class Utils {
   }
   listPolicy() {
     const arg = 'hzn policy list'
-    return this.shell(arg)
+    return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
+  }
+  listExchangeNodePolicy(param: IHznParam) {
+    const arg = `hzn exchange node listpolicy ${param.name}`;
+    return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
   }
   listServicePolicy(name: string) {
-    const arg = `hzn exchange listpolicy ${name}`
-    return this.shell(arg)
+    const arg = `hzn exchange service listpolicy ${name}`
+    return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
   }
   listDeploymentPolicy(name: string) {
     const arg = name.length > 0 ? `hzn exchange deployment listpolicy ${name}` : 'hzn exchange deployment listpolicy';
-    return this.shell(arg, 'command executed successfully', 'failed to execute command', false);
+    return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
   }
   removeDeploymentPolicy(name: string) {
     return new Observable((observer) => {
@@ -139,26 +165,9 @@ export class Utils {
       })
     })  
   }
-  removeNode2(name: string) {
-    return new Observable((observer) => {
-      console.log(`\nAre you sure you want to remove node ${name} from the Horizon Exchange? [y/N]:`)
-      prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
-        if(question.answer.toUpperCase() === 'Y') {
-          const arg = `yes | hzn exchange node remove ${name}`;
-          this.shell(arg)
-          .subscribe({
-            complete: () => {
-              observer.complete()
-            },
-            error: (err) => observer.error(err)
-          })
-        }
-      })  
-    })  
-  }
   listObject(param: IHznParam) {
     const arg = param.name.length > 0 ? `${param.watch}hzn mms object list ${param.name}` : `${param.watch}hzn mms object list -t ${param.objectType} -i ${param.objectId} -d`;
-    return utils.shell(arg, 'done listing object', 'failed to list object');
+    return utils.shell(arg, 'done listing object', 'failed to list object', false);
   }
   createHznKey(org: string, id: string) {
     if(org && id) {
@@ -211,7 +220,7 @@ export class Utils {
       // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download/agent-install.sh
       return this.shell(`curl -sSL ${anax} | sudo -s -E bash -s -- -i anax: -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`)
     } else {
-      return this.shell(`curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`)
+      return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`)
     }  
   }
   uninstallHorizon(msg = 'Would you like to proceed to uninstall Horzion: Y/n?') {
@@ -312,7 +321,7 @@ export class Utils {
       let credential = hznJson[org]['credential']
       Object.keys(credential).forEach((key) => {
         props.some((el, idx) => {
-          if(el.name === key) {
+          if(el.name === key && credential[key] && credential[key].length > 0) {
             props[idx].default = credential[key]
             return true
           } else {
@@ -597,8 +606,7 @@ export class Utils {
               error: (err) => observer.error(err) 
             })
           } else {
-            console.log(`config files is not setup for ${org}`);
-            observer.error(`config files is not setup for ${org}`)
+            observer.error(`config files are not setup for ${org}`)
           }
         })      
       }
@@ -870,9 +878,9 @@ export class Utils {
     let name: string; 
     let value: string;
     if(propName === 'properties' || propName === 'environment variable') {
-      name = promptSync(`name (${el.name}): `, {value: el.name}).trim();
-      value = promptSync(`value (${el.value}): `, {value: el.value}).trim();
-      if(name.length > 0 && value.length > 0) {
+      name = promptSync(`name (${el.name}): `, {value: el.name});
+      value = promptSync(`value (${el.value}): `, {value: el.value});
+      if(typeof value == 'string' ? name.trim().length > 0 && value.trim().length > 0 : name.trim().length > 0) {
         if(propName === 'properties') {
           res.push({name: name, value: value})  
         } else {
@@ -881,8 +889,8 @@ export class Utils {
       }            
     } else {
       console.dir(el, {depth: null, color: true})
-      value = promptSync(`constraint (${el.value}): `, {value: el.value}).trim();
-      if(value.length > 0) {
+      value = promptSync(`constraint (${el.value}): `, {value: el.value});
+      if(value && value.trim().length > 0) {
         res.push(value)
       }
     }
@@ -934,7 +942,10 @@ export class Utils {
       })
     })  
   }
-  addPolicy(policy: any) {
+  promptEditPolicy() {
+
+  }
+  addPolicy(param: IHznParam, policy: any) {
     return new Observable((observer) => {
       let answer;
       console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n0) To exit`)
@@ -957,7 +968,7 @@ export class Utils {
         .subscribe(() => {observer.next(2); observer.complete()})
       } else if(answer == 3) {
         console.log('\x1b[32m', '\nAdding Node Policy') 
-        this.addNodePolicy(policy)
+        this.addNodePolicy(param, policy)
         .subscribe(() => {observer.next(3); observer.complete()})
       }
     })  
@@ -970,11 +981,11 @@ export class Utils {
     let arg = `hzn exchange service addpolicy -f ${policy.servicePolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('SERVICE_VERSION')}_${policy.envVar.getEnvValue('ARCH')}`
     return utils.shell(arg)
   }
-  addNodePolicy(policy: any) {
+  addNodePolicy(param: IHznParam, policy: any) {
     return new Observable((observer) => {
       this.unregisterAgent().subscribe({
         complete: () => {
-          let arg = `hzn register --policy ${policy.nodePolicyJson}`
+          let arg = param.name.length > 0 ? `hzn register --policy ${policy.nodePolicyJson} --name ${param.name}` : `hzn register --policy ${policy.nodePolicyJson}`
           utils.shell(arg, 'done registering agent with policy', 'failed to register agent')
           .subscribe({
             complete: () => observer.complete(),
@@ -986,34 +997,84 @@ export class Utils {
       })  
     })  
   }
-  editPolicy() {
+  addRemoteNodePolicy(param: IHznParam, policy: any) {
     return new Observable((observer) => {
-      let answer;
-      console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n4) Object Policy\n0) To exit`)
-      do {
-        answer = parseInt(promptSync(`Please select the type of policy you would like to work with: `))
-        if(answer < 0 || answer > 4) {
-          console.log('\x1b[41m%s\x1b[0m', '\nInvalid, try again.')
-        } 
-      } while(answer < 0 || answer > 4)
+      let arg = `hzn register --policy ${policy.nodePolicyJson} --name ${param.name}`
+      utils.shell(arg, 'done registering remote agent with policy', 'failed to register remote agent')
+      .subscribe({
+        complete: () => observer.complete(),
+        error: (err) => observer.error(err)
+      })
+    })
+  }
+  promptPolicySelection() {
+    let answer;
+    console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n4) Object Policy\n0) To exit`)
+    do {
+      answer = parseInt(promptSync(`Please select the type of policy you would like to work with: `))
+      if(answer < 0 || answer > 4) {
+        console.log('\x1b[41m%s\x1b[0m', '\nInvalid, try again.')
+      } 
+    } while(answer < 0 || answer > 4)
+    return answer
+  }
+  reviewPolicy() {    
+    return new Observable((observer) => {
+      let answer = this.promptPolicySelection();
       switch(answer) {
         case 0: 
+          observer.next(0) 
+          observer.complete()
+          break;
+        case 1:
+          console.log('\x1b[32m', '\nReview Service Policy') 
+          this.reviewPolicyType('service.policy.json')
+          observer.next(1); observer.complete()
+          break;
+        case 2:  
+          console.log('\x1b[32m', '\nReview Deployment Policy') 
+          this.reviewPolicyType('deployment.policy.json')
+          observer.next(2); observer.complete()
+          break;
+        case 3:  
+          console.log('\x1b[32m', '\nReview Node Policy') 
+          this.reviewPolicyType('node.policy.json')
+          observer.next(3); observer.complete()
+          break;
+        case 4:  
+          console.log('\x1b[32m', '\nReview Object Policy') 
+          this.reviewPolicyType('object.policy.json')
+          observer.next(4); observer.complete()
+          break;
+      }
+    })  
+  }
+  reviewPolicyType(filename: string) {
+    let policy = this.getJsonFromFile(filename);
+    console.dir(policy, {depth: null, colors: true})
+  }
+  editPolicy() {
+    return new Observable((observer) => {
+      let answer = this.promptPolicySelection();
+      switch(answer) {
+        case 0: 
+          observer.next(0) 
           observer.complete()
           break;
         case 1:
           console.log('\x1b[32m', '\nWorking with Service Policy') 
           this.editServicePolicy()
-          .subscribe(() => observer.complete())
+          .subscribe(() => {observer.next(1); observer.complete()})
           break;
         case 2:  
           console.log('\x1b[32m', '\nWorking with Deployment Policy') 
           this.editDeploymentPolicy()
-          .subscribe(() => observer.complete())
+          .subscribe(() => {observer.next(2); observer.complete()})
           break;
         case 3:  
           console.log('\x1b[32m', '\nWorking with Node Policy') 
           this.editNodePolicy()
-          .subscribe(() => observer.complete())
+          .subscribe(() => {observer.next(3); observer.complete()})
           break;
         case 4:  
           console.log('\x1b[32m', '\nWorking with Object Policy') 
@@ -1073,10 +1134,12 @@ export class Utils {
           prompt.get({name: 'answer', required: true}, async (err: any, question: any) => {
             if(question.answer.toUpperCase() === 'Y') {
               jsonfile.writeFileSync(`${this.hznConfig}/${filename}`, res, {spaces: 2});
-              observer.complete()
             }
+            observer.next()
+            observer.complete()
           })
         } else {
+          observer.next()
           observer.complete()
         }    
       })  
