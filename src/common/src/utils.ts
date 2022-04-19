@@ -571,6 +571,9 @@ export class Utils {
       credential[key] = pEnv[key]
       console.log(key, pEnv[key])
     })
+    if(!hznJson[org]) {
+      hznJson[org] = {}
+    }
     if(!hznJson[org]['credential']) {
       hznJson[org]['credential'] = {}
     }
