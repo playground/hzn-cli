@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { Utils } from './utils';
-import { IHznParam } from './interface';
+import { IHznParam, IPolicy } from './interface';
 export declare const utils: Utils;
 export declare class Hzn {
     objectType: any;
@@ -49,13 +49,8 @@ export declare class Hzn {
     publishServiceAndPattern(): Observable<unknown>;
     buildPublishAndRegister(): Observable<unknown>;
     publishAndRegister(): Observable<unknown>;
-    getPolicyInfo(): {
-        envVar: any;
-        nodePolicyJson: string;
-        servicePolicyJson: string;
-        objectPolicyJson: string;
-        deploymentPolicyJson: string;
-    };
+    getPolicyInfo(): IPolicy;
+    reviewServiceDefinition(): Observable<unknown>;
     reviewPolicy(): Observable<unknown>;
     editPolicy(): Observable<unknown>;
     editDeploymentPolicy(): void;

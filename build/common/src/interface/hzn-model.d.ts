@@ -13,6 +13,14 @@ export interface IHznParam {
     action: string;
     watch?: string;
     filter?: string;
+    policy: IPolicy;
+}
+export interface IPolicy {
+    envVar: string;
+    nodePolicyJson: string;
+    servicePolicyJson: string;
+    objectPolicyJson: string;
+    deploymentPolicyJson: string;
 }
 export declare class RequiredService {
     org: string;

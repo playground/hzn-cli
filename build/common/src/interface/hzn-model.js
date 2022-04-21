@@ -6,7 +6,7 @@ exports.justRun = [
     'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement',
     'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern',
     'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'removeDeploymentPolicy', 'removeOrg',
-    'removeNode', 'reviewPolicy'
+    'removeNode', 'reviewPolicy', 'reviewServiceDefinition'
 ];
 exports.promptForUpdate = [
     'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister',
@@ -18,7 +18,7 @@ exports.runDirectly = [
     'appendSupport', 'deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon'
 ];
 exports.loop = [
-    'addPolicy', 'editPolicy', 'reviewPolicy'
+    'addPolicy', 'editPolicy', 'reviewPolicy', 'reviewServiceDefinition'
 ];
 class RequiredService {
     constructor() {

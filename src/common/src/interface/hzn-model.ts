@@ -3,7 +3,7 @@ export const justRun = [
   'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement', 
   'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 
   'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'removeDeploymentPolicy', 'removeOrg', 
-  'removeNode', 'reviewPolicy'
+  'removeNode', 'reviewPolicy', 'reviewServiceDefinition'
 ];
 export const promptForUpdate = [
   'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister', 
@@ -15,7 +15,7 @@ export const runDirectly = [
   'appendSupport', 'deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon'
 ];
 export const loop = [
-  'addPolicy', 'editPolicy', 'reviewPolicy'
+  'addPolicy', 'editPolicy', 'reviewPolicy', 'reviewServiceDefinition'
 ]
 
 export interface IHznParam {
@@ -29,6 +29,14 @@ export interface IHznParam {
   action: string;
   watch?: string;
   filter?: string;
+  policy: IPolicy;
+}
+export interface IPolicy {
+  envVar: string;
+  nodePolicyJson: string;
+  servicePolicyJson: string;
+  objectPolicyJson: string;
+  deploymentPolicyJson: string;
 }
 export class RequiredService {
   org = '$HZN_ORG_ID';
