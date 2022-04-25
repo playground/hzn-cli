@@ -582,7 +582,8 @@ class Utils {
             console.log(key, pEnv[key]);
         });
         if (!hznJson[org]) {
-            hznJson[org] = {};
+            let template = JSON.parse((0, fs_1.readFileSync)(`${__dirname}/env-hzn-template.json`).toString());
+            hznJson[org] = template.properties;
         }
         if (!hznJson[org]['credential']) {
             hznJson[org]['credential'] = {};
