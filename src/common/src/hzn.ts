@@ -1,7 +1,7 @@
 import { Observable, of } from 'rxjs';
 import { Env } from './env';
 import { Utils, promptSync } from './utils';
-import { IHznParam, justRun, runDirectly, promptForUpdate } from './interface'
+import { IHznParam, IPolicy, justRun, runDirectly, promptForUpdate } from './interface'
 import { existsSync } from 'fs';
 
 export const utils = new Utils();
@@ -67,6 +67,8 @@ export class Hzn {
           this.servicePolicyJson = `${this.configPath}/service.policy.json`;
           this.objectPolicyJson = `${this.configPath}/object.policy.json`;
 
+          this.param.policy = this.getPolicyInfo()
+          
           if(promptForUpdate.indexOf(this.param.action) >= 0) {
             utils.switchEnvironment(this.org)
             .subscribe(() => {
@@ -308,7 +310,7 @@ export class Hzn {
     });
   }
   getPolicyInfo() {
-    let policyInfo = {
+    let policyInfo: IPolicy = {
       envVar: this.envVar,
       nodePolicyJson: this.nodePolicyJson,
       servicePolicyJson: this.servicePolicyJson,
@@ -316,6 +318,9 @@ export class Hzn {
       deploymentPolicyJson: this.deploymentPolicyJson
     }
     return policyInfo
+  }
+  reviewServiceDefinition() {
+    return utils.reviewServiceDefinition()
   }
   reviewPolicy() {
     return utils.reviewPolicy()

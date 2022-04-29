@@ -70,11 +70,14 @@ export declare class Utils {
     addPolicy(param: IHznParam, policy: any): Observable<unknown>;
     addDeploymentPolicy(policy: any): Observable<unknown>;
     addServicePolicy(policy: any): Observable<unknown>;
+    addObjectPolicy(param: IHznParam): Observable<unknown>;
     addNodePolicy(param: IHznParam, policy: any): Observable<unknown>;
     addRemoteNodePolicy(param: IHznParam, policy: any): Observable<unknown>;
-    promptPolicySelection(): any;
+    promptPolicySelection(msg?: string): any;
+    promptServiceSelection(): any;
+    reviewServiceDefinition(): Observable<unknown>;
     reviewPolicy(): Observable<unknown>;
-    reviewPolicyType(filename: string): void;
+    displayFileContent(filename: string): void;
     editPolicy(): Observable<unknown>;
     editObjectPolicy(): Observable<unknown>;
     editNodePolicy(): Observable<unknown>;

@@ -18,5 +18,30 @@
     "HZN_SDO_SVC_URL": "${HOSTNAME}/edge-sdo-ocs/api",
     "HZN_MGMT_HUB_CERT_PATH": "/etc/horizon/agent-install.crt",
     "HZN_AGENT_PORT": "8510"
+  },
+  "properties": {
+    "envVars": {
+      "SERVICE_NAME": "your-service-name",
+      "SERVICE_CONTAINER_NAME": "your-service-name",
+      "SERVICE_VERSION": "1.0.0",
+      "SERVICE_VERSION_RANGE_UPPER": "1.0.0",
+      "SERVICE_VERSION_RANGE_LOWER": "1.0.0",
+      "SERVICE_CONTAINER_CREDS": "",
+      "VOLUME_MOUNT": "/mms-shared",
+      "MMS_SHARED_VOLUME": "mms_shared_volume",
+      "MMS_OBJECT_TYPE": "object_detection",
+      "MMS_OBJECT_ID": "config.json",
+      "MMS_OBJECT_FILE": "config/config.json",
+      "MMS_CONTAINER_CREDS": "",
+      "MMS_CONTAINER_NAME": "mms-service",
+      "MMS_SERVICE_NAME": "mms-service",
+      "MMS_SERVICE_VERSION": "1.0.0",
+      "MMS_SERVICE_FALLBACK_VERSION": "1.0.0",
+      "UPDATE_FILE_NAME": "model.zip"
+    },
+    "credential": {
+    },
+    "metaVars": {
+    }
   }
 }

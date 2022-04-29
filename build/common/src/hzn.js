@@ -45,6 +45,7 @@ class Hzn {
                     this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
                     this.servicePolicyJson = `${this.configPath}/service.policy.json`;
                     this.objectPolicyJson = `${this.configPath}/object.policy.json`;
+                    this.param.policy = this.getPolicyInfo();
                     if (interface_1.promptForUpdate.indexOf(this.param.action) >= 0) {
                         exports.utils.switchEnvironment(this.org)
                             .subscribe(() => {
@@ -296,6 +297,9 @@ class Hzn {
             deploymentPolicyJson: this.deploymentPolicyJson
         };
         return policyInfo;
+    }
+    reviewServiceDefinition() {
+        return exports.utils.reviewServiceDefinition();
     }
     reviewPolicy() {
         return exports.utils.reviewPolicy();

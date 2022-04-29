@@ -238,7 +238,7 @@ class Utils {
                             this.cleanUp()
                                 .subscribe({
                                 complete: () => observer.complete(),
-                                error: (err) => observer.error(err)
+                                error: (err) => observer.complete() //ignore error when files do not exist    
                             });
                         },
                         error: (err) => observer.error(err)
@@ -581,6 +581,10 @@ class Utils {
             credential[key] = pEnv[key];
             console.log(key, pEnv[key]);
         });
+        if (!hznJson[org]) {
+            let template = JSON.parse((0, fs_1.readFileSync)(`${__dirname}/env-hzn-template.json`).toString());
+            hznJson[org] = template.properties;
+        }
         if (!hznJson[org]['credential']) {
             hznJson[org]['credential'] = {};
         }
@@ -973,14 +977,7 @@ class Utils {
     }
     addPolicy(param, policy) {
         return new rxjs_1.Observable((observer) => {
-            let answer;
-            console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n0) To exit`);
-            do {
-                answer = parseInt((0, exports.promptSync)(`Please select the type of policy you would like to add: `));
-                if (answer < 0 || answer > 3) {
-                    console.log('\x1b[41m%s\x1b[0m', '\nInvalid, try again.');
-                }
-            } while (answer < 0 || answer > 3);
+            let answer = this.promptPolicySelection(`Please select the type of policy you would like to add: `);
             if (answer == 0) {
                 observer.next(0);
                 observer.complete();
@@ -1000,6 +997,11 @@ class Utils {
                 this.addNodePolicy(param, policy)
                     .subscribe(() => { observer.next(3); observer.complete(); });
             }
+            else if (answer == 4) {
+                console.log('\x1b[32m', '\nAdding Object Policy');
+                this.addObjectPolicy(param)
+                    .subscribe(() => { observer.next(4); observer.complete(); });
+            }
         });
     }
     addDeploymentPolicy(policy) {
@@ -1009,6 +1011,10 @@ class Utils {
     addServicePolicy(policy) {
         let arg = `hzn exchange service addpolicy -f ${policy.servicePolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('SERVICE_VERSION')}_${policy.envVar.getEnvValue('ARCH')}`;
         return _1.utils.shell(arg);
+    }
+    addObjectPolicy(param) {
+        let arg = `hzn mms object publish -m ${param.policy.objectPolicyJson} -f ${param.objectFile}`;
+        return _1.utils.shell(arg, 'done publishing object', 'failed to publish object', false);
     }
     addNodePolicy(param, policy) {
         return new rxjs_1.Observable((observer) => {
@@ -1036,16 +1042,50 @@ class Utils {
             });
         });
     }
-    promptPolicySelection() {
+    promptPolicySelection(msg = `Please select the type of policy you would like to work with: `) {
         let answer;
         console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n4) Object Policy\n0) To exit`);
         do {
-            answer = parseInt((0, exports.promptSync)(`Please select the type of policy you would like to work with: `));
+            answer = parseInt((0, exports.promptSync)(msg));
             if (answer < 0 || answer > 4) {
                 console.log('\x1b[41m%s\x1b[0m', '\nInvalid, try again.');
             }
         } while (answer < 0 || answer > 4);
         return answer;
+    }
+    promptServiceSelection() {
+        let answer;
+        console.log('\x1b[36m', `\nType of service definitions:\n1) Top Level Service\n2) Dependent Service\n0) To exit`);
+        do {
+            answer = parseInt((0, exports.promptSync)(`Please make your selection: `));
+            if (answer < 0 || answer > 4) {
+                console.log('\x1b[41m%s\x1b[0m', '\nInvalid, try again.');
+            }
+        } while (answer < 0 || answer > 4);
+        return answer;
+    }
+    reviewServiceDefinition() {
+        return new rxjs_1.Observable((observer) => {
+            let answer = this.promptServiceSelection();
+            switch (answer) {
+                case 0:
+                    observer.next(0);
+                    observer.complete();
+                    break;
+                case 1:
+                    console.log('\x1b[32m', '\nReview Top Level Service Definition');
+                    this.displayFileContent(`services/top-level-service/service.definition.json`);
+                    observer.next(1);
+                    observer.complete();
+                    break;
+                case 2:
+                    console.log('\x1b[32m', '\nReview Dependent Service Definition');
+                    this.displayFileContent(`services/dependent-service/service.definition.json`);
+                    observer.next(2);
+                    observer.complete();
+                    break;
+            }
+        });
     }
     reviewPolicy() {
         return new rxjs_1.Observable((observer) => {
@@ -1057,32 +1097,32 @@ class Utils {
                     break;
                 case 1:
                     console.log('\x1b[32m', '\nReview Service Policy');
-                    this.reviewPolicyType('service.policy.json');
+                    this.displayFileContent('service.policy.json');
                     observer.next(1);
                     observer.complete();
                     break;
                 case 2:
                     console.log('\x1b[32m', '\nReview Deployment Policy');
-                    this.reviewPolicyType('deployment.policy.json');
+                    this.displayFileContent('deployment.policy.json');
                     observer.next(2);
                     observer.complete();
                     break;
                 case 3:
                     console.log('\x1b[32m', '\nReview Node Policy');
-                    this.reviewPolicyType('node.policy.json');
+                    this.displayFileContent('node.policy.json');
                     observer.next(3);
                     observer.complete();
                     break;
                 case 4:
                     console.log('\x1b[32m', '\nReview Object Policy');
-                    this.reviewPolicyType('object.policy.json');
+                    this.displayFileContent('object.policy.json');
                     observer.next(4);
                     observer.complete();
                     break;
             }
         });
     }
-    reviewPolicyType(filename) {
+    displayFileContent(filename) {
         let policy = this.getJsonFromFile(filename);
         console.dir(policy, { depth: null, colors: true });
     }
