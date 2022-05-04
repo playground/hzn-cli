@@ -37,10 +37,10 @@ class Hzn {
                     this.param.mmsPattern = this.mmsPattern = this.mmsPattern || this.envVar.getMMSPatterName();
                     this.patternJson = `${this.configPath}/services/dependent-service/service.pattern.json`;
                     this.serviceJson = `${this.configPath}/services/dependent-service/service.definition.json`;
-                    this.policyJson = `${this.configPath}/service/policy.json`;
+                    // this.policyJson = `${this.configPath}/service/policy.json`;
                     this.mmsPatternJson = `${this.configPath}/services/top-level-service/service.pattern.json`;
                     this.mmsServiceJson = `${this.configPath}/services/top-level-service/service.definition.json`;
-                    this.mmsPolicyJson = `${this.configPath}/mms/policy.json`;
+                    // this.mmsPolicyJson = `${this.configPath}/mms/policy.json`;
                     this.nodePolicyJson = `${this.configPath}/node.policy.json`;
                     this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
                     this.servicePolicyJson = `${this.configPath}/service.policy.json`;
@@ -93,8 +93,31 @@ class Hzn {
     appendSupport() {
         return exports.utils.appendSupport();
     }
+    buildTailscaleImage() {
+        let buildArg = this.envVar.getEnvValue('BUILD_ARGS');
+        let buildArgs = buildArg ? buildArg.split(',') : [];
+        buildArg = '';
+        buildArgs.forEach((argName) => {
+            let argValue = this.envVar.getEnvValue(argName);
+            if (argValue) {
+                buildArg += ` --build-arg ${argName}=${argValue}`;
+            }
+        });
+        let dockerFile = `Dockerfile-${this.envVar.getArch()}`.replace(/\r?\n|\r/g, '');
+        let arg = `docker build ${buildArg} -t ${this.envVar.getServiceContainer()} -f ${__dirname}/hzn-config/setup/tailscale/${dockerFile} ${__dirname}/hzn-config/setup/tailscale`.replace(/\r?\n|\r/g, '');
+        return exports.utils.shell(arg, 'done building tailscale service docker image', 'failed to build tailscale service docker image');
+    }
     buildServiceImage() {
-        let arg = `docker build -t ${this.envVar.getServiceContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
+        let buildArg = this.envVar.getEnvValue('BUILD_ARGS');
+        let buildArgs = buildArg ? buildArg.split(',') : [];
+        buildArg = '';
+        buildArgs.forEach((argName) => {
+            let argValue = this.envVar.getEnvValue(argName);
+            if (argValue) {
+                buildArg += ` --build-arg ${argName}=${argValue}`;
+            }
+        });
+        let arg = `docker build ${buildArg} -t ${this.envVar.getServiceContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
         return exports.utils.shell(arg, 'done building service docker image', 'failed to build service docker image');
     }
     pushServiceImage() {
@@ -138,6 +161,9 @@ class Hzn {
         });
     }
     publishService() {
+        if (this.param.name.length > 0) {
+            this.serviceJson = this.param.name;
+        }
         let arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceJson} --pull-image`;
         return exports.utils.shell(arg, 'done publishing service', 'failed to publish service');
     }

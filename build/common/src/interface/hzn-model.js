@@ -1,24 +1,27 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Service = exports.Deployment = exports.Container = exports.RequiredService = exports.loop = exports.runDirectly = exports.promptForUpdate = exports.justRun = void 0;
+exports.Service = exports.Deployment = exports.Container = exports.RequiredService = exports.tailscaleBuildArg = exports.loop = exports.runDirectly = exports.promptForUpdate = exports.justRun = void 0;
 exports.justRun = [
     'addPolicy', 'addRemoteNodePolicy',
     'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement',
     'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern',
-    'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'removeDeploymentPolicy', 'removeOrg',
-    'removeNode', 'reviewPolicy', 'reviewServiceDefinition'
+    'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'pushMMSImage', 'pushServiceImage',
+    'removeDeploymentPolicy', 'removeOrg', 'removeNode', 'reviewPolicy', 'reviewServiceDefinition'
 ];
 exports.promptForUpdate = [
-    'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister',
-    'buildMMSImage', 'buildServiceImage', 'editDeploymentPoicy', 'editNodePolicy', 'editServicePolicy', 'publishAndRegister',
+    'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister', 'buildMMSImage', 'buildServiceImage', 'buildTailscaleImage',
+    'editDeploymentPoicy', 'editNodePolicy', 'editServicePolicy', 'publishAndRegister',
     'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService',
-    'publishMMSPattern', 'publishMMSObject', 'publishMMSObjectPolicy', 'pushMMSImage', 'pushServiceImage', 'registerAgent', 'unregisterAgent'
+    'publishMMSPattern', 'publishMMSObject', 'publishMMSObjectPolicy', 'registerAgent', 'unregisterAgent'
 ];
 exports.runDirectly = [
     'appendSupport', 'deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon'
 ];
 exports.loop = [
     'addPolicy', 'editPolicy', 'reviewPolicy', 'reviewServiceDefinition'
+];
+exports.tailscaleBuildArg = [
+    'ROUTES', 'AUTHKEY', 'SHARED_VOLUME'
 ];
 class RequiredService {
     constructor() {

@@ -1,7 +1,7 @@
 import { Observable, of } from 'rxjs';
 import { Env } from './env';
 import { Utils, promptSync } from './utils';
-import { IHznParam, IPolicy, justRun, runDirectly, promptForUpdate } from './interface'
+import { IHznParam, IPolicy, tailscaleBuildArg, promptForUpdate } from './interface'
 import { existsSync } from 'fs';
 
 export const utils = new Utils();
@@ -13,11 +13,9 @@ export class Hzn {
   pattern: any;
   serviceJson: any;
   patternJson: any;
-  policyJson: any;
   mmsPattern: any;
   mmsServiceJson: any;
   mmsPatternJson: any;
-  mmsPolicyJson: any;
 
   nodePolicyJson: string = '';
   deploymentPolicyJson: string = '';
@@ -57,10 +55,10 @@ export class Hzn {
 
           this.patternJson = `${this.configPath}/services/dependent-service/service.pattern.json`;
           this.serviceJson = `${this.configPath}/services/dependent-service/service.definition.json`;
-          this.policyJson = `${this.configPath}/service/policy.json`;
+          // this.policyJson = `${this.configPath}/service/policy.json`;
           this.mmsPatternJson = `${this.configPath}/services/top-level-service/service.pattern.json`;
           this.mmsServiceJson = `${this.configPath}/services/top-level-service/service.definition.json`;
-          this.mmsPolicyJson = `${this.configPath}/mms/policy.json`;
+          // this.mmsPolicyJson = `${this.configPath}/mms/policy.json`;
 
           this.nodePolicyJson = `${this.configPath}/node.policy.json`;
           this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
@@ -114,8 +112,31 @@ export class Hzn {
   appendSupport() {
     return utils.appendSupport()
   }
+  buildTailscaleImage() {
+    let buildArg = this.envVar.getEnvValue('BUILD_ARGS')
+    let buildArgs = buildArg ? buildArg.split(',') : []
+    buildArg = ''
+    buildArgs.forEach((argName: string) => {
+      let argValue = this.envVar.getEnvValue(argName)
+      if(argValue) {
+        buildArg += ` --build-arg ${argName}=${argValue}`
+      }
+    })
+    let dockerFile = `Dockerfile-${this.envVar.getArch()}`.replace(/\r?\n|\r/g, '')
+    let arg = `docker build ${buildArg} -t ${this.envVar.getServiceContainer()} -f ${__dirname}/hzn-config/setup/tailscale/${dockerFile} ${__dirname}/hzn-config/setup/tailscale`.replace(/\r?\n|\r/g, '');
+    return utils.shell(arg, 'done building tailscale service docker image', 'failed to build tailscale service docker image');
+  }
   buildServiceImage() {
-    let arg = `docker build -t ${this.envVar.getServiceContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
+    let buildArg = this.envVar.getEnvValue('BUILD_ARGS')
+    let buildArgs = buildArg ? buildArg.split(',') : []
+    buildArg = ''
+    buildArgs.forEach((argName: string) => {
+      let argValue = this.envVar.getEnvValue(argName)
+      if(argValue) {
+        buildArg += ` --build-arg ${argName}=${argValue}`
+      }
+    })
+    let arg = `docker build ${buildArg} -t ${this.envVar.getServiceContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
     return utils.shell(arg, 'done building service docker image', 'failed to build service docker image');
   }
   pushServiceImage() {
@@ -159,6 +180,9 @@ export class Hzn {
     })
   }
   publishService() {
+    if(this.param.name.length > 0) {
+      this.serviceJson = this.param.name;
+    }
     let arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceJson} --pull-image`;
     return utils.shell(arg, 'done publishing service', 'failed to publish service');
   }

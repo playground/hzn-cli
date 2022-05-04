@@ -9,11 +9,9 @@ export declare class Hzn {
     pattern: any;
     serviceJson: any;
     patternJson: any;
-    policyJson: any;
     mmsPattern: any;
     mmsServiceJson: any;
     mmsPatternJson: any;
-    mmsPolicyJson: any;
     nodePolicyJson: string;
     deploymentPolicyJson: string;
     servicePolicyJson: string;
@@ -31,6 +29,7 @@ export declare class Hzn {
     test(): Observable<unknown>;
     setup(): Observable<unknown>;
     appendSupport(): Observable<unknown>;
+    buildTailscaleImage(): Observable<unknown>;
     buildServiceImage(): Observable<unknown>;
     pushServiceImage(): Observable<unknown>;
     buildMMSImage(): Observable<unknown>;

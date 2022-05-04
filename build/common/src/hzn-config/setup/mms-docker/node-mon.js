@@ -5,6 +5,7 @@ exec = cp.exec;
 let timer;
 
 const find = (name) => {
+  // letsbreakthis.now()
   findProcess('name', name, true)
   .then(function (list) {
     if(!list.find(exist)) {
