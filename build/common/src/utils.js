@@ -216,10 +216,15 @@ class Utils {
     installHznCli(anax, id) {
         let nodeId = id ? `-d ${id}` : '';
         if (anax && anax.indexOf('open-horizon') > 0) {
-            // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download/agent-install.sh
-            return this.shell(`curl -sSL ${anax} | sudo -s -E bash -s -- -i anax: -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`);
+            // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download
+            let tag = 'anax:';
+            if (anax.indexOf('latest') < 0) {
+                tag = anax.replace('download', 'tag');
+            }
+            return this.shell(`curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`);
         }
         else {
+            // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data
             return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`);
         }
     }
@@ -407,12 +412,17 @@ class Utils {
                     let resNode = res.replace(/"/g, '').split('\n');
                     let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
                     if (resNode && resNode[0].length > 0 && (resNode[0] === 'configured' && resNode[1] !== org || resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL) < 0)) {
-                        // console.log(hznJson[org].credential.HZN_EXCHANGE_URL, resNode[2], resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL))
+                        console.log(hznJson[org].credential.HZN_EXCHANGE_URL, resNode[2], resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL));
                         answer = (0, exports.promptSync)(`\nThis node is registered with ${resNode[1]}, must unregister before switching to ${org}, unregister Y/n? `);
                         if (answer.toLowerCase() == 'y') {
                             this.uninstallHorizon('Would you like to proceed to reinstall Horzion: Y/n?')
                                 .subscribe({
                                 complete: () => {
+                                    if (!pEnv.HZN_ORG_ID) {
+                                        pEnv.HZN_ORG_ID = pEnv.DEFAULT_ORG;
+                                    }
+                                    // should fix this in .env-local
+                                    pEnv.HZN_NODE_ID = pEnv.HZN_CUSTOM_NODE_ID;
                                     this.installHznCli(pEnv.ANAX, pEnv.HZN_CUSTOM_NODE_ID)
                                         .subscribe({
                                         complete: () => observer.complete(),

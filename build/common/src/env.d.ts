@@ -32,5 +32,6 @@ export declare class Env {
     getPatternName(): any;
     getServiceContainer(): any;
     getAnax(): any;
+    getInputFilePath(): any;
     getHznNodeID(): any;
 }
