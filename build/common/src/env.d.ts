@@ -34,4 +34,5 @@ export declare class Env {
     getAnax(): any;
     getInputFilePath(): any;
     getHznNodeID(): any;
+    getHznCSS(): any;
 }

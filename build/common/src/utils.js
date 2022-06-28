@@ -210,18 +210,18 @@ class Utils {
         });
     }
     cleanUp() {
-        const arg = `rm -rf ${this.homePath}/.hzn && sudo rm ${process.cwd()}/agent-install.* && sudo rm ${this.etcDefault}/horizon && sudo rm -rf ${this.etcHorizon}`;
+        const arg = `rm -rf ${this.homePath}/.hzn && sudo rm ${process.cwd()}/agent-install* && sudo rm ${this.etcDefault}/horizon && sudo rm -rf ${this.etcHorizon}`;
         return this.shell(arg);
     }
-    installHznCli(anax, id) {
+    installHznCli(anax, id, css = true) {
         let nodeId = id ? `-d ${id}` : '';
         if (anax && anax.indexOf('open-horizon') > 0) {
             // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download
-            let tag = 'anax:';
+            let tag = css ? 'css:' : 'anax:';
             if (anax.indexOf('latest') < 0) {
                 tag = anax.replace('download', 'tag');
             }
-            return this.shell(`curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`);
+            return this.shell(`curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`);
         }
         else {
             // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data
@@ -421,9 +421,9 @@ class Utils {
                                     if (!pEnv.HZN_ORG_ID) {
                                         pEnv.HZN_ORG_ID = pEnv.DEFAULT_ORG;
                                     }
-                                    // should fix this in .env-local
-                                    pEnv.HZN_NODE_ID = pEnv.HZN_CUSTOM_NODE_ID;
-                                    this.installHznCli(pEnv.ANAX, pEnv.HZN_CUSTOM_NODE_ID)
+                                    let nodeId = pEnv.HZN_CUSTOM_NODE_ID ? pEnv.HZN_CUSTOM_NODE_ID : '';
+                                    pEnv.NODE_ID = nodeId;
+                                    this.installHznCli(pEnv.ANAX, nodeId)
                                         .subscribe({
                                         complete: () => observer.complete(),
                                         error: (err) => observer.error(err)

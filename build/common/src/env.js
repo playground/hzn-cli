@@ -17,6 +17,7 @@ class Env {
             const localEnv = dotenv.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-local`));
             for (let i in localEnv) {
                 pEnv[i] = localEnv[i];
+                console.log(pEnv[i]);
             }
             const supportEnv = dotenv.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-support`));
             for (let i in supportEnv) {
@@ -150,6 +151,9 @@ class Env {
     }
     getHznNodeID() {
         return pEnv.HZN_CUSTOM_NODE_ID || null;
+    }
+    getHznCSS() {
+        return pEnv.HZN_CSS || true;
     }
 }
 exports.Env = Env;
