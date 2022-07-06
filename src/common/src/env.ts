@@ -160,4 +160,7 @@ export class Env {
   getHznCSS() {
     return pEnv.HZN_CSS || true;
   }
+  getHznDeviceToken() {
+    return pEnv.HZN_DEVICE_TOKEN || 'some-device-token'
+  }
 }

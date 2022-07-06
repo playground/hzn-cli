@@ -155,6 +155,9 @@ class Env {
     getHznCSS() {
         return pEnv.HZN_CSS || true;
     }
+    getHznDeviceToken() {
+        return pEnv.HZN_DEVICE_TOKEN || 'some-device-token';
+    }
 }
 exports.Env = Env;
 //# sourceMappingURL=env.js.map

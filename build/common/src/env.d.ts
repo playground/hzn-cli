@@ -35,4 +35,5 @@ export declare class Env {
     getInputFilePath(): any;
     getHznNodeID(): any;
     getHznCSS(): any;
+    getHznDeviceToken(): any;
 }

@@ -213,8 +213,8 @@ class Utils {
         const arg = `rm -rf ${this.homePath}/.hzn && sudo rm ${process.cwd()}/agent-install* && sudo rm ${this.etcDefault}/horizon && sudo rm -rf ${this.etcHorizon}`;
         return this.shell(arg);
     }
-    installHznCli(anax, id, css = true) {
-        let nodeId = id ? `-d ${id}` : '';
+    installHznCli(anax, id, css = true, deviceToken = 'some-device-token') {
+        let nodeId = id ? `-d ${id}:${deviceToken}` : '';
         if (anax && anax.indexOf('open-horizon') > 0) {
             // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download
             let tag = css ? 'css:' : 'anax:';
