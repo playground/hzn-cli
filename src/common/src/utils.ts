@@ -215,7 +215,7 @@ export class Utils {
     return this.shell(arg)
   }
   installHznCli(anax: string, id: null, css = true, deviceToken = 'some-device-token') {
-    let nodeId = id ? `-d ${id}:${deviceToken}` : '';
+    let nodeId = id ? `-a ${id}:${deviceToken}` : '';
     if(anax && anax.indexOf('open-horizon') > 0) {
       // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download
       let tag = css ? 'css:' : 'anax:'
