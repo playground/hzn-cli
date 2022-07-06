@@ -430,7 +430,7 @@ export class Hzn {
     return utils.installPrereq();
   }
   installHznCli() {
-    return utils.installHznCli(this.envVar.getAnax(), this.envVar.getHznNodeID(), this.envVar.getHznCSS() !== 'false', this.envVar.getHznDeviceToken());
+    return utils.installHznCli(this.envVar.getAnax(), this.envVar.getHznNodeID(), this.envVar.getHznCSS() !== 'false');
   }
   uninstallHorizon() {
     return utils.uninstallHorizon();
