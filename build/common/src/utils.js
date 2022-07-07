@@ -214,7 +214,7 @@ class Utils {
         return this.shell(arg);
     }
     installHznCli(anax, id, css = true, deviceToken = 'some-device-token') {
-        let nodeId = id ? `-d ${id}:${deviceToken}` : '';
+        let nodeId = id ? `-a ${id}:${deviceToken}` : '';
         if (anax && anax.indexOf('open-horizon') > 0) {
             // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download
             let tag = css ? 'css:' : 'anax:';
@@ -262,6 +262,8 @@ class Utils {
             const props = [
                 { name: 'HZN_LISTEN_IP', default: ips ? ips[0] : '', ipList: ips, required: true },
                 { name: 'HZN_TRANSPORT', default: 'https', required: true },
+                { name: 'EXCHANGE_IMAGE_NAME', default: '', required: false },
+                { name: 'OH_ANAX_RELEASES', default: 'https://github.com/open-horizon/anax/releases/latest/download', required: true },
                 { name: 'EXCHANGE_USER_ORG', default: 'myorg', required: true }
             ];
             console.log(props);
