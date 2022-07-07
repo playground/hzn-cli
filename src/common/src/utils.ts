@@ -211,15 +211,20 @@ export class Utils {
     });
   }
   cleanUp() {
-    const arg = `rm -rf ${this.homePath}/.hzn && sudo rm ${process.cwd()}/agent-install.* && sudo rm ${this.etcDefault}/horizon && sudo rm -rf ${this.etcHorizon}`
+    const arg = `rm -rf ${this.homePath}/.hzn && sudo rm ${process.cwd()}/agent-install* && sudo rm ${this.etcDefault}/horizon && sudo rm -rf ${this.etcHorizon}`
     return this.shell(arg)
   }
-  installHznCli(anax: string, id: null) {
-    let nodeId = id ? `-d ${id}` : '';
+  installHznCli(anax: string, id: null, css = true, deviceToken = 'some-device-token') {
+    let nodeId = id ? `-a ${id}:${deviceToken}` : '';
     if(anax && anax.indexOf('open-horizon') > 0) {
-      // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download/agent-install.sh
-      return this.shell(`curl -sSL ${anax} | sudo -s -E bash -s -- -i anax: -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`)
+      // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download
+      let tag = css ? 'css:' : 'anax:'
+      if(anax.indexOf('latest') < 0) {
+        tag = anax.replace('download', 'tag')
+      }
+      return this.shell(`curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`)
     } else {
+      // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data
       return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`)
     }  
   }
@@ -256,6 +261,8 @@ export class Utils {
       const props = [
         {name: 'HZN_LISTEN_IP', default: ips ? ips[0]: '', ipList: ips, required: true},
         {name: 'HZN_TRANSPORT', default: 'https', required: true},
+        {name: 'EXCHANGE_IMAGE_NAME', default: '', required: false},
+        {name: 'OH_ANAX_RELEASES', default: 'https://github.com/open-horizon/anax/releases/latest/download', required: true},
         {name: 'EXCHANGE_USER_ORG', default: 'myorg', required: true}
       ]
       console.log(props)
@@ -403,13 +410,18 @@ export class Utils {
           let resNode = res.replace(/"/g, '').split('\n')
           let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
           if(resNode && resNode[0].length > 0 && (resNode[0] === 'configured' && resNode[1] !== org || resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL) < 0)) {
-          // console.log(hznJson[org].credential.HZN_EXCHANGE_URL, resNode[2], resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL))
+          console.log(hznJson[org].credential.HZN_EXCHANGE_URL, resNode[2], resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL))
             answer = promptSync(`\nThis node is registered with ${resNode[1]}, must unregister before switching to ${org}, unregister Y/n? `)
             if(answer.toLowerCase() == 'y') {
               this.uninstallHorizon('Would you like to proceed to reinstall Horzion: Y/n?')
               .subscribe({
                 complete: () => {
-                  this.installHznCli(pEnv.ANAX, pEnv.HZN_CUSTOM_NODE_ID)
+                  if(!pEnv.HZN_ORG_ID) {
+                    pEnv.HZN_ORG_ID = pEnv.DEFAULT_ORG
+                  }
+                  let nodeId = pEnv.HZN_CUSTOM_NODE_ID ? pEnv.HZN_CUSTOM_NODE_ID : '';
+                  pEnv.NODE_ID = nodeId
+                  this.installHznCli(pEnv.ANAX, nodeId)
                   .subscribe({
                     complete: () => observer.complete(),
                     error: (err) => observer.error(err)

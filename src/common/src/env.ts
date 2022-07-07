@@ -24,6 +24,7 @@ export class Env {
       const localEnv = dotenv.parse(readFileSync(`${this.hznConfig}/.env-local`));
       for(let i in localEnv) {
         pEnv[i] = localEnv[i];
+        console.log(pEnv[i])
       }
       const supportEnv = dotenv.parse(readFileSync(`${this.hznConfig}/.env-support`));
       for(let i in supportEnv) {
@@ -150,8 +151,16 @@ export class Env {
   getAnax() {
     return pEnv.ANAX || null;
   }
-
+  getInputFilePath() {
+    return pEnv.INPUT_FILE_PATH || null;
+  }
   getHznNodeID() {
     return pEnv.HZN_CUSTOM_NODE_ID || null;
+  }
+  getHznCSS() {
+    return pEnv.HZN_CSS || false;
+  }
+  getHznDeviceToken() {
+    return pEnv.HZN_DEVICE_TOKEN || 'some-device-token'
   }
 }

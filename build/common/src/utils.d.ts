@@ -34,7 +34,7 @@ export declare class Utils {
     aptUpdate(): Observable<unknown>;
     installPrereq(): Observable<unknown>;
     cleanUp(): Observable<unknown>;
-    installHznCli(anax: string, id: null): Observable<unknown>;
+    installHznCli(anax: string, id: null, css?: boolean, deviceToken?: string): Observable<unknown>;
     uninstallHorizon(msg?: string): Observable<unknown>;
     setupManagementHub(): Observable<unknown>;
     copyFile(arg: string): Promise<unknown>;
