@@ -221,7 +221,7 @@ class Utils {
             if (anax.indexOf('latest') < 0) {
                 tag = anax.replace('download', 'tag');
             }
-            return this.shell(`curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`);
+            return this.shell(`sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`);
         }
         else {
             // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data
