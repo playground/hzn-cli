@@ -10,7 +10,7 @@ Open Horizon toolkit is a CLI built with Typescript for the NodeJS developers.  
 ## Pre-release version of hzn-cli, howto?
 
 ### Docker image
-Containerized version is available here ```docker pull playbox21/hzn-cli:0.2.31```
+Containerized version is available here ```docker pull playbox21/hzn-cli[amd64|arm]:0.2.31```
 
 ### To setup Management Hub
 ```curl -sSL https://raw.githubusercontent.com/playground/hzn-cli/main/install-mgmt-hub.sh  --output install-mgmt-hub.sh && bash ./install-mgmt-hub.sh```
