@@ -1,7 +1,16 @@
 FROM ubuntu:20.04
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
-RUN apt-get update -y && apt-get install -y apt-utils vim curl sudo
+RUN apt-get update -y && apt-get install -y apt-utils vim curl openssh-server sudo
+
+RUN useradd -rm -d /home/ubuntu -s /bin/bash -g root -G sudo -u 1000 ieam 
+RUN  echo 'ieam:ieam' | chpasswd
+
+RUN service ssh start
+
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd","-D"]
 
 # RUN adduser --disabled-password --gecos '' oh
 # RUN adduser oh sudo
@@ -15,4 +24,12 @@ RUN apt-get -y install nodejs
 RUN npm install -g npm
 RUN npm install -g hzn-cli
 
-ENTRYPOINT ["oh", "deploy", "setup"]
+COPY ./input.sh /oh
+COPY ./agent-install.sh /oh
+RUN ["chmod", "+x", "/oh/input.sh"]
+RUN ["chmod", "+x", "/oh/agent-install.sh"]
+
+ENTRYPOINT ["sh", "/oh/input.sh"]
+#CMD ./input.sh
+
+
