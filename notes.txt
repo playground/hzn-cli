@@ -1,0 +1,67 @@
+https://github.com/open-horizon/anax/tree/master/anax-in-container
+
+cd go/src/github.com/open-horizon/anax
+
+docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+
+export arch=arm64
+export USE_DOCKER_BUILDX=true
+export opsys=Linux
+export ANAX_IMAGE_VERSION=1.0.0
+export DOCKER_IMAGE_VERSION=1.0.0  should be ANAX_IMAGE_VERSION
+
+make anax-image
+
+docker run -d -t --name amd64_anax --privileged -p 127.0.0.1:8081:8510 -v /var/run/docker.sock:/var/run/docker.sock -v /var/tmp/horizon:/var/tmp/horizon openhorizon/amd64_anax:1.0.0
+
+export HORIZON_URL='http://localhost:8081'
+
+
+Dockerfile.ubi.amd64
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.0
+
+LABEL vendor="IBM"
+LABEL summary="The agent in a general purpose container."
+LABEL description="A container which holds the edge node agent, to be used in environments where there is no operating sys>
+
+ARG DOCKER_VER=19.03.8
+
+# yum is not installed, use microdnf instead
+# shadow-utils contains groupadd and adduser commands
+# install docker cli
+# create required directories
+RUN microdnf update -y --nodocs && microdnf clean all && microdnf install --nodocs -y shadow-utils sudo \
+    && microdnf install --nodocs -y openssl ca-certificates \
+    && microdnf install -y wget iptables vim-minimal procps tar \
+    && wget -O jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 \
+    && chmod +x ./jq \
+    && mv jq /usr/bin \
+    && curl -4fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VER}.tgz \
+    && tar xzvf docker-${DOCKER_VER}.tgz --strip 1 -C /usr/bin docker/docker \
+    && rm docker-${DOCKER_VER}.tgz \
+    && mkdir -p /licenses /usr/horizon/bin /usr/horizon/web /var/horizon \
+    && mkdir -p /etc/horizon/agbot/policy.d /etc/horizon/policy.d /etc/horizon/trust
+
+RUN microdnf install nodejs
+RUN npm cache clean -f
+RUN npm install -g n
+RUN n stable
+RUN npm install -g hzn-cli
+
+# add license file
+COPY LICENSE.txt /licenses
+
+# copy the horizon configurations
+COPY config/anax.json /etc/horizon/
+COPY config/hzn.json /etc/horizon/
+
+# copy anax and hzn binaries
+ADD anax /usr/horizon/bin/
+ADD hzn /usr/bin/
+
+WORKDIR /root
+COPY script/anax.service /root/
+
+# You can add a 2nd arg to this on the docker run cmd or the CMD statement in another dockerfile, to configure a specific >
+ENTRYPOINT ["/root/anax.service", "start"]
+

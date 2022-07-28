@@ -402,42 +402,48 @@ export class Utils {
   }
   switchEnvironment(org: string, pEnv: any = process.env) {
     return new Observable((observer) => {
-      let answer: string;
-      this.checkConfigState()
-      .subscribe({
-        next: (res: string) => {
-          console.log('configure', res.replace(/"/g, '').split('\n'))
-          let resNode = res.replace(/"/g, '').split('\n')
-          let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
-          if(resNode && resNode[0].length > 0 && (resNode[0] === 'configured' && resNode[1] !== org || resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL) < 0)) {
-          console.log(hznJson[org].credential.HZN_EXCHANGE_URL, resNode[2], resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL))
-            answer = promptSync(`\nThis node is registered with ${resNode[1]}, must unregister before switching to ${org}, unregister Y/n? `)
-            if(answer.toLowerCase() == 'y') {
-              this.uninstallHorizon('Would you like to proceed to reinstall Horzion: Y/n?')
-              .subscribe({
-                complete: () => {
-                  if(!pEnv.HZN_ORG_ID) {
-                    pEnv.HZN_ORG_ID = pEnv.DEFAULT_ORG
-                  }
-                  let nodeId = pEnv.HZN_CUSTOM_NODE_ID ? pEnv.HZN_CUSTOM_NODE_ID : '';
-                  pEnv.NODE_ID = nodeId
-                  this.installHznCli(pEnv.ANAX, nodeId)
-                  .subscribe({
-                    complete: () => observer.complete(),
-                    error: (err) => observer.error(err)
-                  })    
-                }, error: (err) => observer.error(err)
-              })
+      if(pEnv.ANAX_IN_CONTAINER == 'true') {
+        console.log('Anax in container', pEnv.ANAX_IN_CONTAINER)
+        observer.next()
+        observer.complete()
+      } else {
+        let answer: string;
+        this.checkConfigState()
+        .subscribe({
+          next: (res: string) => {
+            console.log('configure', res.replace(/"/g, '').split('\n'))
+            let resNode = res.replace(/"/g, '').split('\n')
+            let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
+            if(resNode && resNode[0].length > 0 && (resNode[0] === 'configured' && resNode[1] !== org || resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL) < 0)) {
+            console.log(hznJson[org].credential.HZN_EXCHANGE_URL, resNode[2], resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL))
+              answer = promptSync(`\nThis node is registered with ${resNode[1]}, must unregister before switching to ${org}, unregister Y/n? `)
+              if(answer.toLowerCase() == 'y') {
+                this.uninstallHorizon('Would you like to proceed to reinstall Horzion: Y/n?')
+                .subscribe({
+                  complete: () => {
+                    if(!pEnv.HZN_ORG_ID) {
+                      pEnv.HZN_ORG_ID = pEnv.DEFAULT_ORG
+                    }
+                    let nodeId = pEnv.HZN_CUSTOM_NODE_ID ? pEnv.HZN_CUSTOM_NODE_ID : '';
+                    pEnv.NODE_ID = nodeId
+                    this.installHznCli(pEnv.ANAX, nodeId)
+                    .subscribe({
+                      complete: () => observer.complete(),
+                      error: (err) => observer.error(err)
+                    })    
+                  }, error: (err) => observer.error(err)
+                })
+              } else {
+                observer.error('do nothing.')
+              }                      
             } else {
-              observer.error('do nothing.')
-            }                      
-          } else {
-            observer.next()
-            observer.complete()
-          }
-        },
-        error: (err) => observer.error(err)
-      })  
+              observer.next()
+              observer.complete()
+            }
+          },
+          error: (err) => observer.error(err)
+        })  
+      }
     })
   }
   updateAndSaveCredential(org: string, content: string) {

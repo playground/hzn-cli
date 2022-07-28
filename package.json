@@ -1,6 +1,6 @@
 {
   "name": "hzn-cli",
-  "version": "0.2.31",
+  "version": "0.2.32",
   "description": "Open Horizon CLI toolkit helps streamline the process of preparing node agents and perform tasks between orgs environments",
   "main": "./build/index.js",
   "bin": {
