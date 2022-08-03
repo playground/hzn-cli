@@ -1,35 +1,46 @@
 FROM ubuntu:20.04
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
-RUN apt-get update -y && apt-get install -y apt-utils vim curl openssh-server sudo
-
-RUN useradd -rm -d /home/ubuntu -s /bin/bash -g root -G sudo -u 1000 ieam 
-RUN  echo 'ieam:ieam' | chpasswd
-
-RUN service ssh start
-
-EXPOSE 22
-
-CMD ["/usr/sbin/sshd","-D"]
+RUN apt-get update -y && apt-get install -y apt-utils vim curl sudo
 
 # RUN adduser --disabled-password --gecos '' oh
 # RUN adduser oh sudo
 # RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 # USER oh
 
-WORKDIR /oh
+ARG HZN_ORG_ID
+ARG HZN_EXCHANGE_USER_AUTH
+ARG HZN_EXCHANGE_URL
+ARG HZN_FSS_CSSURL
+ARG HZN_AGBOT_URL
+ARG HZN_SDO_SVC_URL
+ARG FILE=horizon-agent-linux-deb-amd64.tar.gz
+
+ENV HZN_ORG_ID $HZN_ORG_ID
+ENV HZN_EXCHANGE_USER_AUTH $HZN_EXCHANGE_USER_AUTH
+ENV HZN_EXCHANGE_URL $HZN_EXCHANGE_URL
+ENV HZN_FSS_CSSURL $HZN_FSS_CSSURL
+ENV HZN_AGBOT_URL $HZN_AGBOT_URL
+ENV HZN_SDO_SVC_URL $HZN_SDO_SVC_URL
+
+RUN useradd -rm -d /home/ubuntu -s /bin/bash -g root -G sudo -u 1000 oh 
+RUN  echo 'oh:oh' | chpasswd
 
 RUN curl -sL https://deb.nodesource.com/setup_16.x  | bash -
 RUN apt-get -y install nodejs
 RUN npm install -g npm
 RUN npm install -g hzn-cli
 
-COPY ./input.sh /oh
-COPY ./agent-install.sh /oh
-RUN ["chmod", "+x", "/oh/input.sh"]
-RUN ["chmod", "+x", "/oh/agent-install.sh"]
+COPY ./agent-install.sh .
+RUN ["chmod", "+x", "./agent-install.sh"]
 
-ENTRYPOINT ["sh", "/oh/input.sh"]
+RUN curl -sSL https://github.com/open-horizon/anax/releases/download/v2.30.0-902/$FILE -o $FILE
+RUN tar -zxvf $FILE
+RUN /bin/bash agent-install.sh -C
+
+USER oh
+
+# CMD ["oh", "deploy", "setup", "--org", $HZN_ORG_ID]
 #CMD ./input.sh
 
 
