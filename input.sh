@@ -1,18 +1,5 @@
 #!/bin/bash
 
-echo "Input HZN_ORG_ID"
-read org_id
-export HZN_ORG_ID=${org_id}
-echo "Input HZN_FSS_CSSURL"
-read css_url
-export HZN_FSS_CSSURL=${css_url}
-echo "Input HZN_EXCHANGE_URL"
-read exchange_url
-export HZN_EXCHANGE_URL=${exchange_url}
-echo "Input HZN_EXCHANGE_USER_AUTH"
-read user_auth
-export HZN_EXCHANGE_USER_AUTH=${user_auth}
-
 ARCH=$(uname -m)
 echo $ARCH
 FILE="horizon-agent-linux-deb-amd64.tar.gz"
@@ -29,11 +16,19 @@ else
  FILE="horizon-agent-linux-deb-amd64.tar.gz"
 fi
 
-curl -sSL https://github.com/open-horizon/anax/releases/latest/download/${FILE} -o ${FILE}
-tar -zxvf ${FILE}
-/bin/bash /oh/agent-install.sh -C
+curl -sSL https://raw.githubusercontent.com/open-horizon/anax/master/agent-install/agent-install.sh -o agent-install.sh
 
-oh deploy setup --org myorg
+chmod 755 ./agent-install.sh
+
+/bin/bash ./agent-install.sh -i "css:" --container
+# if [ "${css}" = "true" ]
+# then
+#  ./agent-install.sh -i css: --container
+# else
+#  ./agent-install.sh --container
+# fi
+
+# oh deploy setup --org $org_id
 #docker run -v /var/run/docker.sock:/var/run/docker.sock -ti docker
 # echo "Docker login"
 # read docker_user
