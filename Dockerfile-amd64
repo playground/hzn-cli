@@ -11,8 +11,9 @@ RUN npm install -g hzn-cli
 WORKDIR /oh
 
 COPY ./input.sh /oh
+COPY ./agent-install.sh /oh
 
 RUN ["chmod", "+x", "/oh/input.sh"]
+RUN ["chmod", "+x", "/oh/agent-install.sh"]
+
 ENTRYPOINT ["sh", "/oh/input.sh"]
-
-
