@@ -16,6 +16,10 @@ else
  FILE="horizon-agent-linux-deb-amd64.tar.gz"
 fi
 
+BASEDIR=$(dirname $0)
+echo ${BASEDIR}
+cd ${BASEDIR}
+
 echo ${version}
 echo ${css}
 if [ "${css}" = "true" ]
