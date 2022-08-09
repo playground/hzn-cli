@@ -21,7 +21,7 @@ echo ${css}
 if [ "${css}" = "true" ]
 then
   ./agent-install.sh -i css: -C
-elif [ "${version}" = ""]
+elif [ "${version}" = "" ]
 then 
   curl -sSL https://github.com/open-horizon/anax/releases/latest/download/${FILE} -o ${FILE}
   tar -zxvf ${FILE}

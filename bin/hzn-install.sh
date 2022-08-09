@@ -22,19 +22,20 @@ read version
 echo ${version}
 echo ${css}
 
-if [ "${container}" = "true"]
+if [ "${container}" = "true" ]
 then
+  echo "here..."
   curl -sSL https://raw.githubusercontent.com/open-horizon/anax/master/agent-install/agent-install.sh -o agent-install.sh && chmod +x agent-install.sh
   if [ "${css}" = "true" ]
   then
     sudo -s -E ./agent-install.sh -i css: --container
-  elif [ "${version}" = ""]
+  elif [ "${version}" = "" ]
   then 
     curl -sSL https://github.com/open-horizon/anax/releases/latest/download/${FILE} -o ${FILE}
     tar -zxvf ${FILE}
     sudo -s -E ./agent-install.sh --container
   else
-    curl -sSL https://github.com/open-horizon/anax/releases/download/${version}/${FILE} -o ${FILE} 
+    curl -sSL https://github.com/open-horizon/anax/releases/download/v${version}/${FILE} -o ${FILE} 
     tar -zxvf ${FILE}
     sudo -s -E ./agent-install.sh --container
   fi
@@ -43,16 +44,18 @@ else
   if [ "${css}" = "true" ]
   then
     ./agent-install.sh -i css: -C
-  elif [ "${version}" = ""]
+  elif [ "${version}" = "" ]
   then 
     curl -sSL https://github.com/open-horizon/anax/releases/latest/download/${FILE} -o ${FILE}
     tar -zxvf ${FILE}
     ./agent-install.sh -C
   else
-    curl -sSL https://github.com/open-horizon/anax/releases/download/${version}/${FILE} -o ${FILE} 
+    curl -sSL https://github.com/open-horizon/anax/releases/download/v${version}/${FILE} -o ${FILE} 
     tar -zxvf ${FILE}
     ./agent-install.sh -C
   fi
+  rm ${FILE}
+  rm agent-install.sh
 fi
 
 
