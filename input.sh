@@ -3,13 +3,13 @@
 ARCH=$(uname -m)
 echo $ARCH
 FILE="horizon-agent-linux-deb-amd64.tar.gz"
-if [ "$ARCH" = "x86_64" ]
+if [ "${ARCH}" = "x86_64" ]
 then
  FILE="horizon-agent-linux-deb-amd64.tar.gz"
-elif [ "$ARCH" = "armv7l" ]
+elif [ "${ARCH}" = "armv7l" ]
 then
  FILE="horizon-agent-linux-deb-armhf.tar.gz"
-elif [ "$ARCH" = "arrch64" ]
+elif [ "${ARCH}" = "aarch64" ]
 then
  FILE="horizon-agent-linux-deb-arm64.tar.gz"
 else
