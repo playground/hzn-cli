@@ -16,6 +16,9 @@ else
  FILE="horizon-agent-linux-deb-amd64.tar.gz"
 fi
 
+echo "Input Version, leave blank to get latest:"
+read version
+
 echo ${version}
 echo ${css}
 
