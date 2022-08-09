@@ -1,0 +1,19 @@
+FROM ubuntu:20.04
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+
+RUN apt-get update -y && apt-get install -y apt-utils vim curl sudo
+
+RUN curl -sL https://deb.nodesource.com/setup_16.x  | bash -
+RUN apt-get -y install nodejs
+RUN npm install -g npm
+RUN npm install -g hzn-cli
+
+WORKDIR /oh
+
+COPY ./input.sh /oh
+COPY ./agent-install.sh /oh
+
+RUN ["chmod", "+x", "/oh/input.sh"]
+RUN ["chmod", "+x", "/oh/agent-install.sh"]
+
+ENTRYPOINT ["sh", "/oh/input.sh"]

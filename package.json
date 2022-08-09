@@ -1,6 +1,6 @@
 {
   "name": "hzn-cli",
-  "version": "0.2.31",
+  "version": "0.2.33",
   "description": "Open Horizon CLI toolkit helps streamline the process of preparing node agents and perform tasks between orgs environments",
   "main": "./build/index.js",
   "bin": {
@@ -12,6 +12,7 @@
     "build:watch": "onchange 'src/**/*.ts' -- npm run build",
     "local": "npm run build && npm i -g && oh",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install",
+    "install:local-hzn": "curl -sSL https://raw.githubusercontent.com/open-horizon/anax/master/agent-install/agent-install.sh -o agent-install.sh && chmod +x agent-install.sh && ./agent-install.sh i :css -C",
     "postinstall": "bin/install.js",
     "precommit": "npm run build",
     "test": "jest --coverage",

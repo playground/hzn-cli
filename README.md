@@ -12,6 +12,24 @@ Open Horizon toolkit is a CLI built with Typescript for the NodeJS developers.  
 ### Docker image
 Containerized version is available here ```docker pull playbox21/hzn-cli[amd64|arm]:0.2.31```
 
+```
+docker run -d -it --name hzn-cli --privileged --network="host" -v /var/run/docker.sock:/var/run/docker.sock \
+-e HZN_ORG_ID=biz \
+-e HZN_EXCHANGE_USER_AUTH= \
+-e HZN_FSS_CSSURL= \
+-e HZN_EXCHANGE_URL= \
+-e HORIZON_URL=http://localhost:8081 \
+playbox21/hzn-cli_amd64:0.2.31
+```
+### To run Anax in container
+```
+export HZN_ORG_ID=biz \
+export HZN_EXCHANGE_USER_AUTH= \
+export HZN_FSS_CSSURL= \
+export HZN_EXCHANGE_URL= 
+```
+```curl -sSL https://raw.githubusercontent.com/open-horizon/anax/master/agent-install/agent-install.sh -o agent-install.sh && chmod +x agent-install.sh && sudo -s -E ./agent-install.sh -i 'css:' --container```
+
 ### To setup Management Hub
 ```curl -sSL https://raw.githubusercontent.com/playground/hzn-cli/main/install-mgmt-hub.sh  --output install-mgmt-hub.sh && bash ./install-mgmt-hub.sh```
 
