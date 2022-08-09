@@ -18,6 +18,7 @@ fi
 
 BASEDIR=$(dirname $0)
 echo ${BASEDIR}
+cd ${BASEDIR}
 echo container ${container}
 filename=""
 
