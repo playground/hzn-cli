@@ -18,6 +18,7 @@ fi
 
 BASEDIR=$(dirname $0)
 echo ${BASEDIR}
+echo container ${container}
 filename=""
 
 echo "Input Version, leave blank to get latest:"
@@ -63,11 +64,11 @@ else
   filename="horizon-cli_"
   filename+=${version}
   filename+="_amd64.deb"
-  rm filename 
+  rm ${filename} 
   filename="horizon_"
   filename+=${version}
   filename+="_amd64.deb"
-  rm filename 
+  rm ${filename} 
 fi
 
 

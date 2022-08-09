@@ -13,7 +13,7 @@
     "local": "npm run build && npm i -g && oh",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install",
     "install:anax-hzn-cli": "cd bin && ./hzn-install.sh",
-    "install:anax-in-container": "container=true cd bin && ./hzn-install.sh",
+    "install:anax-in-container": "cd bin && container=true ./hzn-install.sh",
     "postinstall": "bin/install.js",
     "precommit": "npm run build",
     "test": "jest --coverage",
