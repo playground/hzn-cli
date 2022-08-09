@@ -16,16 +16,23 @@ else
  FILE="horizon-agent-linux-deb-amd64.tar.gz"
 fi
 
+echo ${version}
+echo ${css}
 if [ "${css}" = "true" ]
 then
- ./agent-install.sh -i css: -C
-else
+  ./agent-install.sh -i css: -C
+elif [ "${version}" = ""]
+then 
   curl -sSL https://github.com/open-horizon/anax/releases/latest/download/${FILE} -o ${FILE}
   tar -zxvf ${FILE}
- ./agent-install.sh -C
+  ./agent-install.sh -C
+else
+  curl -sSL https://github.com/open-horizon/anax/releases/download/${version}/${FILE} -o ${FILE} 
+  tar -zxvf ${FILE}
+  ./agent-install.sh -C
 fi
 
-export HORIZON_URL=http://horizon1:8510
+export HORIZON_URL=http://localhost:8081
 watch hzn agreement list    
 # oh deploy setup --org $org_id
 #docker run -v /var/run/docker.sock:/var/run/docker.sock -ti docker
