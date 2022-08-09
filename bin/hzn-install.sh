@@ -21,7 +21,20 @@ echo ${css}
 
 if [ "${container}" = "true"]
 then
-  curl -sSL https://raw.githubusercontent.com/open-horizon/anax/master/agent-install/agent-install.sh -o agent-install.sh && chmod +x agent-install.sh && sudo -s -E ./agent-install.sh -i 'css:' --container
+  curl -sSL https://raw.githubusercontent.com/open-horizon/anax/master/agent-install/agent-install.sh -o agent-install.sh && chmod +x agent-install.sh
+  if [ "${css}" = "true" ]
+  then
+    sudo -s -E ./agent-install.sh -i css: --container
+  elif [ "${version}" = ""]
+  then 
+    curl -sSL https://github.com/open-horizon/anax/releases/latest/download/${FILE} -o ${FILE}
+    tar -zxvf ${FILE}
+    sudo -s -E ./agent-install.sh --container
+  else
+    curl -sSL https://github.com/open-horizon/anax/releases/download/${version}/${FILE} -o ${FILE} 
+    tar -zxvf ${FILE}
+    sudo -s -E ./agent-install.sh --container
+  fi
   rm agent-install.sh
 else
   if [ "${css}" = "true" ]
