@@ -13,7 +13,7 @@
     "local": "npm run build && npm i -g && oh",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install",
     "install:anax-hzn-cli": "curl -sSL https://raw.githubusercontent.com/open-horizon/anax/master/agent-install/agent-install.sh -o agent-install.sh && chmod +x agent-install.sh && sudo -s -E ./agent-install.sh i :css -C",
-    "install:anax-in-container": "curl -sSL https://raw.githubusercontent.com/open-horizon/anax/master/agent-install/agent-install.sh -o agent-install.sh && chmod +x agent-install.sh && sudo -s -E ./agent-install.sh -i 'css:' --container",
+    "install:anax-in-container": "container=true bin/hzn-install.sh",
     "postinstall": "bin/install.js",
     "precommit": "npm run build",
     "test": "jest --coverage",
