@@ -3,15 +3,18 @@
 ARCH=$(uname -m)
 echo $ARCH
 FILE="horizon-agent-linux-deb-amd64.tar.gz"
-if [ "$ARCH" = "x86_64" ]
+ARCHEXT="_amd64.deb"
+if [ "${ARCH}" = "x86_64" ]
 then
  FILE="horizon-agent-linux-deb-amd64.tar.gz"
-elif [ "$ARCH" = "armv7l" ]
+elif [ "${ARCH}" = "armv7l" ]
 then
  FILE="horizon-agent-linux-deb-armhf.tar.gz"
-elif [ "$ARCH" = "arrch64" ]
+ ARCHEXT="_armhf.deb"
+elif [ "${ARCH}" = "arrch64" ]
 then
  FILE="horizon-agent-linux-deb-arm64.tar.gz"
+ ARCHEXT="_arm64.deb"
 else
  FILE="horizon-agent-linux-deb-amd64.tar.gz"
 fi
@@ -64,11 +67,11 @@ else
   rm agent-install.sh
   filename="bin/horizon-cli_"
   filename+=${version}
-  filename+="_amd64.deb"
+  filename+=${ARCHEXT}
   rm ${filename} 
   filename="bin/horizon_"
   filename+=${version}
-  filename+="_amd64.deb"
+  filename+=${ARCHEXT}
   rm ${filename} 
 fi
 
