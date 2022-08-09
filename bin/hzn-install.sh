@@ -62,11 +62,11 @@ else
   fi
   rm ${FILE}
   rm agent-install.sh
-  filename="horizon-cli_"
+  filename="bin/horizon-cli_"
   filename+=${version}
   filename+="_amd64.deb"
   rm ${filename} 
-  filename="horizon_"
+  filename="bin/horizon_"
   filename+=${version}
   filename+="_amd64.deb"
   rm ${filename} 

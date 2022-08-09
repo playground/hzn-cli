@@ -23,10 +23,12 @@ then
   ./agent-install.sh -i css: -C
 elif [ "${version}" = "" ]
 then 
+  echo curl -sSL https://github.com/open-horizon/anax/releases/latest/download/${FILE} -o ${FILE}
   curl -sSL https://github.com/open-horizon/anax/releases/latest/download/${FILE} -o ${FILE}
   tar -zxvf ${FILE}
   ./agent-install.sh -C
 else
+  echo curl -sSL https://github.com/open-horizon/anax/releases/download/${version}/${FILE} -o ${FILE} 
   curl -sSL https://github.com/open-horizon/anax/releases/download/${version}/${FILE} -o ${FILE} 
   tar -zxvf ${FILE}
   ./agent-install.sh -C
