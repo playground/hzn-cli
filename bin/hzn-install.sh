@@ -16,6 +16,10 @@ else
  FILE="horizon-agent-linux-deb-amd64.tar.gz"
 fi
 
+BASEDIR=$(dirname $0)
+echo ${BASEDIR}
+filename=""
+
 echo "Input Version, leave blank to get latest:"
 read version
 
@@ -56,6 +60,14 @@ else
   fi
   rm ${FILE}
   rm agent-install.sh
+  filename="horizon-cli_"
+  filename+=${version}
+  filename+="_amd64.deb"
+  rm filename 
+  filename="horizon_"
+  filename+=${version}
+  filename+="_amd64.deb"
+  rm filename 
 fi
 
 
