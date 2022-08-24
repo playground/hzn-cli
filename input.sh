@@ -1,18 +1,5 @@
 #!/bin/bash
 
-echo "Input HZN_ORG_ID"
-read org_id
-export HZN_ORG_ID=${org_id}
-echo "Input HZN_FSS_CSSURL"
-read css_url
-export HZN_FSS_CSSURL=${css_url}
-echo "Input HZN_EXCHANGE_URL"
-read exchange_url
-export HZN_EXCHANGE_URL=${exchange_url}
-echo "Input HZN_EXCHANGE_USER_AUTH"
-read user_auth
-export HZN_EXCHANGE_USER_AUTH=${user_auth}
-
 ARCH=$(uname -m)
 echo $ARCH
 FILE="horizon-agent-linux-deb-amd64.tar.gz"
@@ -29,10 +16,25 @@ else
  FILE="horizon-agent-linux-deb-amd64.tar.gz"
 fi
 
-curl -sSL https://github.com/open-horizon/anax/releases/latest/download/${FILE} -o ${FILE}
-tar -zxvf ${FILE}
-/bin/bash /oh/agent-install.sh -C
+echo ${version}
+echo ${css}
+if [ "${css}" = "true" ]
+then
+  ./agent-install.sh -i css: -C
+elif [ "${version}" = ""]
+then 
+  curl -sSL https://github.com/open-horizon/anax/releases/latest/download/${FILE} -o ${FILE}
+  tar -zxvf ${FILE}
+  ./agent-install.sh -C
+else
+  curl -sSL https://github.com/open-horizon/anax/releases/download/${version}/${FILE} -o ${FILE} 
+  tar -zxvf ${FILE}
+  ./agent-install.sh -C
+fi
 
+export HORIZON_URL=http://localhost:8081
+watch hzn agreement list    
+# oh deploy setup --org $org_id
 #docker run -v /var/run/docker.sock:/var/run/docker.sock -ti docker
 # echo "Docker login"
 # read docker_user

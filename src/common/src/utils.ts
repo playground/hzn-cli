@@ -414,7 +414,7 @@ export class Utils {
             console.log('configure', res.replace(/"/g, '').split('\n'))
             let resNode = res.replace(/"/g, '').split('\n')
             let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
-            if(resNode && resNode[0].length > 0 && (resNode[0] === 'configured' && resNode[1] !== org || resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL) < 0)) {
+            if(resNode && resNode[0].length > 0 && resNode[0] === 'configured' && (resNode[1] !== org || resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL) < 0)) {
             console.log(hznJson[org].credential.HZN_EXCHANGE_URL, resNode[2], resNode[2].indexOf(hznJson[org].credential.HZN_EXCHANGE_URL))
               answer = promptSync(`\nThis node is registered with ${resNode[1]}, must unregister before switching to ${org}, unregister Y/n? `)
               if(answer.toLowerCase() == 'y') {
