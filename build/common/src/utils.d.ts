@@ -51,6 +51,7 @@ export declare class Utils {
     filterEnvVars(result: any): {};
     setupEnvFiles(org: string): Observable<unknown>;
     updateEnvHzn(org: string): Observable<unknown>;
+    checkSystemFiles(): Promise<unknown>;
     checkDefaultConfig(): Observable<unknown>;
     getHznInfo(): string[];
     showHznInfo(): Observable<unknown>;

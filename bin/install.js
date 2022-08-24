@@ -125,7 +125,43 @@ const updateJsonFile = (fname, index) => {
   jsonfile.writeFileSync(fname, newJson, {spaces: 2});
 }
 
-const postInstall = () => {
+const checkSystemFiles = () => {
+  return new Promise((resolve, reject) => {
+    console.log('checking config files are in tact')
+    let cwd = process.cwd()
+    let files = {
+      env: ['env-hzn.json', 'env-local', 'env-support'],
+      json: ['deployment.policy.json', 'service.policy.json', 'node.policy.json', 'object.policy.json']
+    }
+    if(!fs.existsSync(hznConfig)) {
+      fs.mkdirSync(hznConfig)
+    }
+    files.env.forEach((f) => {
+      if(!fs.existsSync(`${hznConfig}/.${f}`)) {
+        fs.copyFileSync(`${cwd}/src/${f}`, `${hznConfig}/.${f}`)
+      }  
+    })
+    files.json.forEach((f) => {
+      if(!fs.existsSync(`${hznConfig}/${f}`)) {
+        fs.copyFileSync(`${cwd}/src/hzn-config/${f}`, `${hznConfig}/${f}`)
+      }  
+    })
+    if(!fs.existsSync(`${hznConfig}/services`)) {
+      let arg = `cp -R ${cwd}/src/hzn-config/services ${hznConfig}`
+      exec(arg, (err, stdout, stderr) => {
+        if(err) {
+          console.log(`Error: ${err}`);
+        }
+        resolve('done checking...')  
+      });  
+    } else {
+      resolve('done checking...')  
+    }
+  })
+}
+
+const postInstall = async () => {
+  await checkSystemFiles()
   let arg = ''
   if(fs.existsSync(`${hznConfig}/.env-local`)) {
     updateEnvFile(`${hznConfig}/.env-local`, 'envLocal')

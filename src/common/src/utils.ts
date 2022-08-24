@@ -4,7 +4,7 @@ declare var process: any
 import { Observable, of, firstValueFrom, Observer, forkJoin, from } from 'rxjs';
 const cp = require('child_process'),
 exec = cp.exec;
-import { readFileSync, writeFileSync, copyFileSync , existsSync, exists } from 'fs';
+import { readFileSync, writeFileSync, copyFileSync , existsSync, exists, mkdirSync } from 'fs';
 import os from 'os';
 const ifs: any = os.networkInterfaces();
 import prompt from 'prompt';
@@ -707,13 +707,50 @@ export class Utils {
       })
     })
   }
+  checkSystemFiles() {
+    return new Promise((resolve, reject) => {
+      console.log('checking config files are in tact')
+      let cwd = __dirname
+      let files = {
+        env: ['env-hzn.json', 'env-local', 'env-support'],
+        json: ['deployment.policy.json', 'service.policy.json', 'node.policy.json', 'object.policy.json']
+      }
+      if(!existsSync(this.hznConfig)) {
+        mkdirSync(this.hznConfig)
+      }
+      files.env.forEach((f) => {
+        if(!existsSync(`${this.hznConfig}/.${f}`)) {
+          copyFileSync(`${cwd}/${f}`, `${this.hznConfig}/.${f}`)
+        }  
+      })
+      files.json.forEach((f) => {
+        if(!existsSync(`${this.hznConfig}/${f}`)) {
+          copyFileSync(`${cwd}/hzn-config/${f}`, `${this.hznConfig}/${f}`)
+        }  
+      })
+      if(!existsSync(`${this.hznConfig}/services`)) {
+        let arg = `cp -R ${cwd}/hzn-config/services ${this.hznConfig}`
+        utils.shell(arg)
+        .subscribe({
+          complete: () => resolve('done checking...'),
+          error: (err) => resolve('done checking...')    
+        })
+      } else {
+        resolve('done checking...')  
+      }
+    })
+  }
   checkDefaultConfig() {
     return new Observable((observer) => {
-      if(existsSync(`${this.hznConfig}/.env-local`) && existsSync(`${this.hznConfig}/.env-hzn.json`) && existsSync(`${this.hznConfig}/.env-support`)) {
-        observer.complete()
-      } else {
-        observer.error('No config files.  Please run "oh deploy setup"')
-      }
+      (async() => {
+        await utils.checkSystemFiles()
+
+        if(existsSync(`${this.hznConfig}/.env-local`) && existsSync(`${this.hznConfig}/.env-hzn.json`) && existsSync(`${this.hznConfig}/.env-support`)) {
+          observer.complete()
+        } else {
+          observer.error('No config files.  Please run "oh deploy setup"')
+        }
+      })()
     })
   }
   getHznInfo() {
