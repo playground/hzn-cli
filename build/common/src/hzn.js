@@ -93,6 +93,9 @@ class Hzn {
     appendSupport() {
         return exports.utils.appendSupport();
     }
+    installAnaxInContainer() {
+        return exports.utils.installAnaxOrCli(true);
+    }
     buildServiceImage() {
         let arg = `docker build -t ${this.envVar.getServiceContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
         return exports.utils.shell(arg, 'done building service docker image', 'failed to build service docker image');
@@ -139,6 +142,12 @@ class Hzn {
     }
     publishService() {
         let arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceJson} --pull-image`;
+        if (this.envVar.getDockerRegistry() && this.envVar.getDockerToken()) {
+            if (this.envVar.getServiceContainerName() != this.envVar.getServiceName()) {
+                this.envVar.setServiceContainer(`${this.envVar.getServiceContainerName()}:${this.envVar.getServiceVersion()}`);
+            }
+            arg += ` -r "${this.envVar.getDockerRegistry()}:${this.envVar.getMyDockerHubId()}:${this.envVar.getDockerToken()}"`;
+        }
         return exports.utils.shell(arg, 'done publishing service', 'failed to publish service');
     }
     publishPattern() {
@@ -147,6 +156,12 @@ class Hzn {
     }
     publishMMSService() {
         let arg = `hzn exchange service publish -O ${this.envVar.getMMSContainerCreds()} -f ${this.mmsServiceJson} --pull-image`;
+        if (this.envVar.getDockerRegistry() && this.envVar.getDockerToken()) {
+            if (this.envVar.getMMSContainerName() != this.envVar.getMMSServiceName()) {
+                this.envVar.setMMSContainer(`${this.envVar.getMMSContainerName()}:${this.envVar.getMMSServiceVersion()}`);
+            }
+            arg += ` -r "${this.envVar.getDockerRegistry()}:${this.envVar.getMyDockerHubId()}:${this.envVar.getDockerToken()}"`;
+        }
         return exports.utils.shell(arg, 'done publishing mms service', 'failed to publish mms service');
     }
     publishMMSPattern() {

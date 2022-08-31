@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Service = exports.Deployment = exports.Container = exports.RequiredService = exports.loop = exports.runDirectly = exports.promptForUpdate = exports.justRun = void 0;
+exports.Service = exports.Deployment = exports.Container = exports.RequiredService = exports.supportPlatform = exports.installPrompt = exports.installTar = exports.loop = exports.runDirectly = exports.promptForUpdate = exports.justRun = void 0;
 exports.justRun = [
     'addPolicy', 'addRemoteNodePolicy',
-    'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement',
+    'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'installAnaxInContainer', 'listAgreement',
     'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern',
     'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'removeDeploymentPolicy', 'removeOrg',
     'removeNode', 'reviewPolicy', 'reviewServiceDefinition'
@@ -20,6 +20,19 @@ exports.runDirectly = [
 exports.loop = [
     'addPolicy', 'editPolicy', 'reviewPolicy', 'reviewServiceDefinition'
 ];
+exports.installTar = {
+    "x86_64": "horizon-agent-linux-deb-amd64.tar.gz",
+    "arrch64": "horizon-agent-linux-deb-arm64.tar.gz",
+    "armv7l": "horizon-agent-linux-deb-armhf.tar.gz"
+};
+exports.installPrompt = {
+    "version": "latest"
+};
+exports.supportPlatform = {
+    "arm64": "linux/arm64",
+    "amd64": "linux/amd64",
+    "arm": "linux/arm/v7"
+};
 class RequiredService {
     constructor() {
         this.org = '$HZN_ORG_ID';

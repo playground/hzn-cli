@@ -119,8 +119,14 @@ class Env {
     getMMSServiceVersion() {
         return pEnv.MMS_SERVICE_VERSION;
     }
+    getMMSContainerName() {
+        return pEnv.MMS_CONTAINER_NAME;
+    }
     getMMSContainer() {
         return pEnv.MMS_CONTAINER;
+    }
+    setMMSContainer(container) {
+        pEnv.MMS_CONTAINER = container;
     }
     getArch() {
         return pEnv.ARCH;
@@ -137,11 +143,17 @@ class Env {
     getServiceContainerCreds() {
         return pEnv.SERVICE_CONTAINER_CREDS;
     }
+    getServiceContainerName() {
+        return pEnv.SERVICE_CONTAINER_NAME;
+    }
     getPatternName() {
         return pEnv.PATTERN_NAME;
     }
     getServiceContainer() {
         return pEnv.SERVICE_CONTAINER;
+    }
+    setServiceContainer(container) {
+        pEnv.SERVICE_CONTAINER = container;
     }
     getAnax() {
         return pEnv.ANAX || null;
@@ -157,6 +169,12 @@ class Env {
     }
     getHznDeviceToken() {
         return pEnv.HZN_DEVICE_TOKEN || 'some-device-token';
+    }
+    getDockerRegistry() {
+        return pEnv.DOCKER_REGISTRY || null;
+    }
+    getDockerToken() {
+        return pEnv.DOCKER_TOKEN || null;
     }
 }
 exports.Env = Env;
