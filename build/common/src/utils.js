@@ -724,14 +724,51 @@ class Utils {
             });
         });
     }
-    checkDefaultConfig() {
-        return new rxjs_1.Observable((observer) => {
-            if ((0, fs_1.existsSync)(`${this.hznConfig}/.env-local`) && (0, fs_1.existsSync)(`${this.hznConfig}/.env-hzn.json`) && (0, fs_1.existsSync)(`${this.hznConfig}/.env-support`)) {
-                observer.complete();
+    checkSystemFiles() {
+        return new Promise((resolve, reject) => {
+            console.log('checking config files are in tact');
+            let cwd = __dirname;
+            let files = {
+                env: ['env-hzn.json', 'env-local', 'env-support'],
+                json: ['deployment.policy.json', 'service.policy.json', 'node.policy.json', 'object.policy.json']
+            };
+            if (!(0, fs_1.existsSync)(this.hznConfig)) {
+                (0, fs_1.mkdirSync)(this.hznConfig);
+            }
+            files.env.forEach((f) => {
+                if (!(0, fs_1.existsSync)(`${this.hznConfig}/.${f}`)) {
+                    (0, fs_1.copyFileSync)(`${cwd}/${f}`, `${this.hznConfig}/.${f}`);
+                }
+            });
+            files.json.forEach((f) => {
+                if (!(0, fs_1.existsSync)(`${this.hznConfig}/${f}`)) {
+                    (0, fs_1.copyFileSync)(`${cwd}/hzn-config/${f}`, `${this.hznConfig}/${f}`);
+                }
+            });
+            if (!(0, fs_1.existsSync)(`${this.hznConfig}/services`)) {
+                let arg = `cp -R ${cwd}/hzn-config/services ${this.hznConfig}`;
+                _1.utils.shell(arg)
+                    .subscribe({
+                    complete: () => resolve('done checking...'),
+                    error: (err) => resolve('done checking...')
+                });
             }
             else {
-                observer.error('No config files.  Please run "oh deploy setup"');
+                resolve('done checking...');
             }
+        });
+    }
+    checkDefaultConfig() {
+        return new rxjs_1.Observable((observer) => {
+            (async () => {
+                await _1.utils.checkSystemFiles();
+                if ((0, fs_1.existsSync)(`${this.hznConfig}/.env-local`) && (0, fs_1.existsSync)(`${this.hznConfig}/.env-hzn.json`) && (0, fs_1.existsSync)(`${this.hznConfig}/.env-support`)) {
+                    observer.complete();
+                }
+                else {
+                    observer.error('No config files.  Please run "oh deploy setup"');
+                }
+            })();
         });
     }
     getHznInfo() {
