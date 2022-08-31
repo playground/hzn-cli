@@ -23,17 +23,23 @@ export declare class Env {
     getMMSPatterName(): any;
     getMMSServiceName(): any;
     getMMSServiceVersion(): any;
+    getMMSContainerName(): any;
     getMMSContainer(): any;
+    setMMSContainer(container: string): void;
     getArch(): any;
     getMMSObjectType(): any;
     getMMSObjectId(): any;
     getMMSObjectFile(): any;
     getServiceContainerCreds(): any;
+    getServiceContainerName(): any;
     getPatternName(): any;
     getServiceContainer(): any;
+    setServiceContainer(container: string): void;
     getAnax(): any;
     getInputFilePath(): any;
     getHznNodeID(): any;
     getHznCSS(): any;
     getHznDeviceToken(): any;
+    getDockerRegistry(): any;
+    getDockerToken(): any;
 }

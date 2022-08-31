@@ -44,6 +44,7 @@ export declare class Utils {
     switchEnvironment(org: string, pEnv?: any): Observable<unknown>;
     updateAndSaveCredential(org: string, content: string): Observable<unknown>;
     shallowEqual(obj1: any, obj2: any): boolean;
+    installAnaxOrCli(container?: boolean): Observable<unknown>;
     updateOrgConfig(hznJson: any, org: string, newOrg?: boolean): Observable<unknown>;
     removeOrg(org: string): Observable<unknown>;
     updateCredential(org: string): void;

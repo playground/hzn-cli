@@ -114,6 +114,9 @@ export class Hzn {
   appendSupport() {
     return utils.appendSupport()
   }
+  installAnaxInContainer() {
+    return utils.installAnaxOrCli(true)
+  }
   buildServiceImage() {
     let arg = `docker build -t ${this.envVar.getServiceContainer()} -f Dockerfile-${this.envVar.getArch()} .`.replace(/\r?\n|\r/g, '');
     return utils.shell(arg, 'done building service docker image', 'failed to build service docker image');
@@ -160,6 +163,12 @@ export class Hzn {
   }
   publishService() {
     let arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceJson} --pull-image`;
+    if(this.envVar.getDockerRegistry() && this.envVar.getDockerToken()) {
+      if(this.envVar.getServiceContainerName() != this.envVar.getServiceName()) {
+        this.envVar.setServiceContainer(`${this.envVar.getServiceContainerName()}:${this.envVar.getServiceVersion()}`)
+      }  
+      arg += ` -r "${this.envVar.getDockerRegistry()}:${this.envVar.getMyDockerHubId()}:${this.envVar.getDockerToken()}"`;
+    }
     return utils.shell(arg, 'done publishing service', 'failed to publish service');
   }
   publishPattern() {
@@ -168,6 +177,12 @@ export class Hzn {
   }
   publishMMSService() {
     let arg = `hzn exchange service publish -O ${this.envVar.getMMSContainerCreds()} -f ${this.mmsServiceJson} --pull-image`;
+    if(this.envVar.getDockerRegistry() && this.envVar.getDockerToken()) {
+      if(this.envVar.getMMSContainerName() != this.envVar.getMMSServiceName()) {
+        this.envVar.setMMSContainer(`${this.envVar.getMMSContainerName()}:${this.envVar.getMMSServiceVersion()}`)
+      }
+      arg += ` -r "${this.envVar.getDockerRegistry()}:${this.envVar.getMyDockerHubId()}:${this.envVar.getDockerToken()}"`;
+    }
     return utils.shell(arg, 'done publishing mms service', 'failed to publish mms service');
   }
   publishMMSPattern() {

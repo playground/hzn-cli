@@ -14,7 +14,7 @@ import { utils } from '.';
 import { fork } from 'child_process';
 import { URL } from 'url';
 import { Env } from './env';
-import { IHznParam } from './interface';
+import { IHznParam, installPrompt } from './interface';
 
 const env = process.env.npm_config_env || 'biz';
 const isBoolean = [
@@ -23,7 +23,8 @@ const isBoolean = [
 const notRequired = [
   'SERVICE_CONTAINER_CREDS', 'MMS_CONTAINER_CREDS', 'OBJECT_FILE', 'OBJECT_ID', 'OBJECT_TYPE', 'HZN_CUSTOM_NODE_ID', 'UPDATE_FILE_NAME',
   'SUPPORTED_OS_APPEND', 'SUPPORTED_LINUX_DISTRO_APPEND', 'SUPPORTED_DEBIAN_VARIANTS_APPEND', 'SUPPORTED_DEBIAN_VERSION_APPEND',
-  'SUPPORTED_DEBIAN_ARCH_APPEND', 'SUPPORTED_REDHAT_VARIANTS_APPEND', 'SUPPORTED_REDHAT_VERSION_APPEND', 'SUPPORTED_REDHAT_ARCH_APPEND'
+  'SUPPORTED_DEBIAN_ARCH_APPEND', 'SUPPORTED_REDHAT_VARIANTS_APPEND', 'SUPPORTED_REDHAT_VERSION_APPEND', 'SUPPORTED_REDHAT_ARCH_APPEND',
+  'DOCKER_REGISTRY', 'DOCKER_TOKEN'
 ];
 const mustHave = [
   "SERVICE_NAME",
@@ -301,7 +302,7 @@ export class Utils {
           console.log('\nKey in new value or (leave blank) press Enter to keep current value: ')
           prompt.get(props, (err: any, result: any) => {
             console.log(result)
-            console.log(`\nWould you like to update config files: Y/n?`)
+            console.log(`\nWould you like to update append support files: Y/n?`)
             prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
               let content = '';
               for(const [key, value] of Object.entries(result)) {
@@ -471,6 +472,28 @@ export class Utils {
       return diff
     })
     return !diff;    
+  }
+  installAnaxOrCli(container = true) {
+    return new Observable((observer) => {
+      console.log(os.arch())
+      let props: any[] = [];
+      let i = 0;
+      for(const [key, value] of Object.entries(installPrompt)) {
+        props[i] = {name: key, default: value, required: true};
+        if(key.indexOf('version') >= 0) {
+          props[i]['pattern'] = /^(css|latest|(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$)$/
+          props[i]['message'] = 'Must be css, latest or version #'
+        }
+        i++;
+      }
+      prompt.get(props, (err: any, result: any) => {
+        result = this.filterEnvVars(result)
+        console.dir(result, {depth: null, color: true})
+
+        observer.next()
+        observer.complete()
+      })
+    })   
   }
   updateOrgConfig(hznJson: any, org: string, newOrg = false) {
     return new Observable((observer) => {
@@ -1030,7 +1053,7 @@ export class Utils {
     })  
   }
   addDeploymentPolicy(policy: any) {
-    let arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('SERVICE_VERSION')}_${policy.envVar.getEnvValue('ARCH')}`
+    let arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('MMS_SERVICE_NAME')}_${policy.envVar.getEnvValue('MMS_SERVICE_VERSION')}_${policy.envVar.getEnvValue('ARCH')}`
     return utils.shell(arg)
   }
   addServicePolicy(policy: any) {

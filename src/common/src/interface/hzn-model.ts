@@ -1,6 +1,6 @@
 export const justRun = [
   'addPolicy', 'addRemoteNodePolicy',
-  'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement', 
+  'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'installAnaxInContainer', 'listAgreement', 
   'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 
   'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'removeDeploymentPolicy', 'removeOrg', 
   'removeNode', 'reviewPolicy', 'reviewServiceDefinition'
@@ -17,7 +17,19 @@ export const runDirectly = [
 export const loop = [
   'addPolicy', 'editPolicy', 'reviewPolicy', 'reviewServiceDefinition'
 ]
-
+export const installTar = {
+  "x86_64": "horizon-agent-linux-deb-amd64.tar.gz",
+  "arrch64": "horizon-agent-linux-deb-arm64.tar.gz",
+  "armv7l": "horizon-agent-linux-deb-armhf.tar.gz"
+}
+export const installPrompt = {
+  "version": "latest"
+}
+export const supportPlatform = {
+  "arm64": "linux/arm64",
+  "amd64": "linux/amd64",
+  "arm": "linux/arm/v7"
+}
 export interface IHznParam {
   org: string;
   configPath: string;
