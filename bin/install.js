@@ -29,7 +29,9 @@ const template = {
       "MMS_OBJECT_TYPE": "object_detection",
       "MMS_OBJECT_ID": "config.json",
       "MMS_OBJECT_FILE": "config/config.json",
-      "UPDATE_FILE_NAME": "model.zip"
+      "UPDATE_FILE_NAME": "model.zip",
+      "EDGE_OWNER": "",
+      "EDGE_DEPLOY": ""
     },
     "credential": {
       "HZN_EXCHANGE_USER_AUTH": "",
