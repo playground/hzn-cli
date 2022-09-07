@@ -193,6 +193,9 @@ export class Env {
   getHznCSS() {
     return pEnv.HZN_CSS || false;
   }
+  getServiceFlags() {
+    return pEnv.SERVICE_FLAGS || '--pull-image'
+  }
   getHznDeviceToken() {
     return pEnv.HZN_DEVICE_TOKEN || 'some-device-token'
   }

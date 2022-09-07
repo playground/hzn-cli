@@ -42,6 +42,7 @@ export declare class Env {
     getInputFilePath(): any;
     getHznNodeID(): any;
     getHznCSS(): any;
+    getServiceFlags(): any;
     getHznDeviceToken(): any;
     getDockerRegistry(): any;
     getDockerToken(): any;
