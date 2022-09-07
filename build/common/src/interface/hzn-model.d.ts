@@ -2,6 +2,19 @@ export declare const justRun: string[];
 export declare const promptForUpdate: string[];
 export declare const runDirectly: string[];
 export declare const loop: string[];
+export declare const installTar: {
+    x86_64: string;
+    arrch64: string;
+    armv7l: string;
+};
+export declare const installPrompt: {
+    version: string;
+};
+export declare const supportPlatform: {
+    arm64: string;
+    amd64: string;
+    arm: string;
+};
 export interface IHznParam {
     org: string;
     configPath: string;

@@ -31,6 +31,7 @@ export declare class Hzn {
     test(): Observable<unknown>;
     setup(): Observable<unknown>;
     appendSupport(): Observable<unknown>;
+    installAnaxInContainer(): Observable<unknown>;
     buildServiceImage(): Observable<unknown>;
     pushServiceImage(): Observable<unknown>;
     buildMMSImage(): Observable<unknown>;
