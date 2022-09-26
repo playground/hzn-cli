@@ -78,6 +78,21 @@ export class Env {
     container = pEnv.SERVICE_CONTAINER_NAME || pEnv.SERVICE_NAME;
     pEnv.SERVICE_CONTAINER = `${pEnv.YOUR_DOCKERHUB_ID}/${container}_${pEnv.ARCH}:${pEnv.SERVICE_VERSION}`.replace(/\r?\n|\r/g, '')
   }
+  updateContainerAndServiceNames() {
+    console.log('update', this.getEdgeDeploy(), this.getEdgeOwner())
+    if(this.getServiceContainerName() != this.getServiceName()) {
+      this.setServiceContainer(`${this.getServiceContainerName()}:${this.getServiceVersion()}`)
+    }
+    // if(this.getEdgeDeploy() && this.getEdgeOwner()) {
+    //   this.setServiceName(`${this.getEdgeOwner()}.${this.getEdgeDeploy()}.${this.getServiceName()}`)
+    // }
+    if(this.getMMSContainerName() != this.getMMSServiceName()) {
+      this.setMMSContainer(`${this.getMMSContainerName()}:${this.getMMSServiceVersion()}`)
+    }
+    // if(this.getEdgeDeploy() && this.getEdgeOwner()) {
+    //   this.setMMSServiceName(`${this.getEdgeOwner()}.${this.getEdgeDeploy()}.${this.getMMSServiceName()}`)
+    // }  
+  }
   getEnvValue(key: string) {
     return pEnv[key];
   }
@@ -100,6 +115,9 @@ export class Env {
   getServiceName() {
     return pEnv.SERVICE_NAME;
   }
+  setServiceName(name: string) {
+    pEnv.SERVICE_NAME = name;
+  }
   getServiceVersion() {
     return pEnv.SERVICE_VERSION;
   }
@@ -120,6 +138,9 @@ export class Env {
   }
   getMMSServiceName() {
     return pEnv.MMS_SERVICE_NAME;
+  }
+  setMMSServiceName(name: string) {
+    pEnv.MMS_SERVICE_NAME = name;
   }
   getMMSServiceVersion() {
     return pEnv.MMS_SERVICE_VERSION;
@@ -172,6 +193,9 @@ export class Env {
   getHznCSS() {
     return pEnv.HZN_CSS || false;
   }
+  getServiceFlags() {
+    return pEnv.SERVICE_FLAGS || '--pull-image'
+  }
   getHznDeviceToken() {
     return pEnv.HZN_DEVICE_TOKEN || 'some-device-token'
   }
@@ -180,5 +204,11 @@ export class Env {
   }
   getDockerToken() {
     return pEnv.DOCKER_TOKEN || null;
+  }
+  getEdgeOwner() {
+    return pEnv.EDGE_OWNER || null;
+  }
+  getEdgeDeploy() {
+    return pEnv.EDGE_DEPLOY || null;
   }
 }

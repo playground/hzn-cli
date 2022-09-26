@@ -2,14 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Service = exports.Deployment = exports.Container = exports.RequiredService = exports.supportPlatform = exports.installPrompt = exports.installTar = exports.loop = exports.runDirectly = exports.promptForUpdate = exports.justRun = void 0;
 exports.justRun = [
-    'addPolicy', 'addRemoteNodePolicy',
+    'addRemoteNodePolicy',
     'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'installAnaxInContainer', 'listAgreement',
     'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern',
     'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'removeDeploymentPolicy', 'removeOrg',
     'removeNode', 'reviewPolicy', 'reviewServiceDefinition'
 ];
 exports.promptForUpdate = [
-    'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister',
+    'addPolicy', 'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister',
     'buildMMSImage', 'buildServiceImage', 'editDeploymentPoicy', 'editNodePolicy', 'editServicePolicy', 'publishAndRegister',
     'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService',
     'publishMMSPattern', 'publishMMSObject', 'publishMMSObjectPolicy', 'pushMMSImage', 'pushServiceImage', 'registerAgent', 'unregisterAgent'
