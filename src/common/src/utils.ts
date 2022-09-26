@@ -234,7 +234,7 @@ export class Utils {
       console.log(`\n${msg}`)
       prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
         if(question.answer.toUpperCase() === 'Y') {
-          let arg = `sudo apt-get purge -y bluehorizon horizon horizon-cli`
+          let arg = `sudo apt-get purge -y bluehorizon horizon horizon-cli && sudo rm agent-install.* -y`
           if(process.platform == 'darwin') {
             arg = `yes | sudo /Users/Shared/horizon-cli/bin/horizon-cli-uninstall.sh && sudo pkgutil --forget com.github.open-horizon.pkg.horizon-cli`
           }  
@@ -368,10 +368,11 @@ export class Utils {
               const pEnv = process.env;
               let defaultOrg = false
               for(const [key, value] of Object.entries(result)) {
-                if(key == 'DEFAULT_ORG' && org != value) {
-                  defaultOrg = true
-                }
-                content += key == 'DEFAULT_ORG' && defaultOrg ? `${key}=${org}\n` : `${key}=${value}\n`;
+                // if(key == 'DEFAULT_ORG' && org != value) {
+                //   defaultOrg = true
+                // }
+                // content += key == 'DEFAULT_ORG' && defaultOrg ? `${key}=${org}\n` : `${key}=${value}\n`;
+                content += key == 'DEFAULT_ORG' ? `${key}=${org}\n` : `${key}=${value}\n`;
                 pEnv[key] = ''+value; 
               }
               writeFileSync('.env-local', content);
@@ -662,6 +663,8 @@ export class Utils {
     for(const [key, value] of Object.entries(result)) {
       if(typeof value === 'string' && (value.trim().length > 0 || mustHave.indexOf(key) >= 0)) {
         res[key] = value.trim()
+      } else {
+        delete process.env[key]
       }
     }
     return res;    
