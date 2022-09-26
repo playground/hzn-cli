@@ -29,7 +29,9 @@ const template = {
       "MMS_OBJECT_TYPE": "object_detection",
       "MMS_OBJECT_ID": "config.json",
       "MMS_OBJECT_FILE": "config/config.json",
-      "UPDATE_FILE_NAME": "model.zip"
+      "UPDATE_FILE_NAME": "model.zip",
+      "EDGE_OWNER": "",
+      "EDGE_DEPLOY": ""
     },
     "credential": {
       "HZN_EXCHANGE_USER_AUTH": "",
@@ -42,8 +44,6 @@ const template = {
   },
   envLocal: {
     "YOUR_DOCKERHUB_ID": "",
-    "DOCKER_REGISTRY": "",
-    "DOCKER_TOKEN": "",
     "HZN_EXCHANGE_USER_AUTH": "",
     "HZN_EXCHANGE_URL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-exchange/v1",
     "HZN_FSS_CSSURL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-css",
