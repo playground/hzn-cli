@@ -235,7 +235,7 @@ class Utils {
             console.log(`\n${msg}`);
             prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                 if (question.answer.toUpperCase() === 'Y') {
-                    let arg = `sudo apt-get purge -y bluehorizon horizon horizon-cli`;
+                    let arg = `sudo apt-get purge -y bluehorizon horizon horizon-cli && sudo rm agent-install.* -y`;
                     if (process.platform == 'darwin') {
                         arg = `yes | sudo /Users/Shared/horizon-cli/bin/horizon-cli-uninstall.sh && sudo pkgutil --forget com.github.open-horizon.pkg.horizon-cli`;
                     }
@@ -347,7 +347,12 @@ class Utils {
     updateEnvFiles(org) {
         return new rxjs_1.Observable((observer) => {
             // let props = this.getPropsFromFile(`${this.hznConfig}/.env-local`);
-            let props = this.getPropsFromEnvLocal(org);
+            const props = this.getPropsFromEnvLocal(org);
+            props.forEach((prop, idx) => {
+                if (prop[0] == 'DEFAULT_ORG') {
+                    props[idx][1] = org;
+                }
+            });
             console.log(props);
             console.log(`\nWould you like to change any of the above properties: Y/n?`);
             prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
@@ -369,12 +374,8 @@ class Utils {
                         if (answer.toLowerCase() == 'y') {
                             let content = '';
                             const pEnv = process.env;
-                            let defaultOrg = false;
                             for (const [key, value] of Object.entries(result)) {
-                                if (key == 'DEFAULT_ORG' && org != value) {
-                                    defaultOrg = true;
-                                }
-                                content += key == 'DEFAULT_ORG' && defaultOrg ? `${key}=${org}\n` : `${key}=${value}\n`;
+                                // content += key == 'DEFAULT_ORG' ? `${key}=${org}\n` : `${key}=${value}\n`;
                                 pEnv[key] = '' + value;
                             }
                             (0, fs_1.writeFileSync)('.env-local', content);
@@ -676,6 +677,9 @@ class Utils {
         for (const [key, value] of Object.entries(result)) {
             if (typeof value === 'string' && (value.trim().length > 0 || mustHave.indexOf(key) >= 0)) {
                 res[key] = value.trim();
+            }
+            else {
+                delete process.env[key];
             }
         }
         return res;
@@ -1084,11 +1088,13 @@ class Utils {
         });
     }
     addDeploymentPolicy(policy) {
-        let arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('MMS_SERVICE_NAME')}_${policy.envVar.getEnvValue('MMS_SERVICE_VERSION')}_${policy.envVar.getEnvValue('ARCH')}`;
+        // const arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('MMS_SERVICE_NAME')}_${policy.envVar.getEnvValue('MMS_SERVICE_VERSION')}_${policy.envVar.getEnvValue('ARCH')}`
+        const arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('MMS_SERVICE_NAME')}_${policy.envVar.getEnvValue('ARCH')}`;
         return _1.utils.shell(arg);
     }
     addServicePolicy(policy) {
-        let arg = `hzn exchange service addpolicy -f ${policy.servicePolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('SERVICE_VERSION')}_${policy.envVar.getEnvValue('ARCH')}`;
+        // const arg = `hzn exchange service addpolicy -f ${policy.servicePolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('SERVICE_VERSION')}_${policy.envVar.getEnvValue('ARCH')}`
+        const arg = `hzn exchange service addpolicy -f ${policy.servicePolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('ARCH')}`;
         return _1.utils.shell(arg);
     }
     addObjectPolicy(param) {

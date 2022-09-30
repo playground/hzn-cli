@@ -163,11 +163,11 @@ export class Hzn {
     })
   }
   publishService() {
-    // let arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceJson} --pull-image`;
-    // if(this.envVar.getDockerRegistry() && this.envVar.getDockerToken()) {
-    //   arg += ` -r "${this.envVar.getDockerRegistry()}:${this.envVar.getMyDockerHubId()}:${this.envVar.getDockerToken()}"`;
-    // }
-    const arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceJson} ${this.envVar.getServiceFlags()}`;
+    let arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceJson} --pull-image`;
+    if(this.envVar.getDockerRegistry() && this.envVar.getDockerToken()) {
+      arg += ` -r "${this.envVar.getDockerRegistry()}:${this.envVar.getMyDockerHubId()}:${this.envVar.getDockerToken()}"`;
+    }
+    // const arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceJson} ${this.envVar.getServiceFlags()}`;
     return utils.shell(arg, 'done publishing service', 'failed to publish service');
   }
   publishPattern() {
@@ -175,11 +175,11 @@ export class Hzn {
     return utils.shell(arg, 'done publishing service pattern', 'failed to publish service pattern');
   }
   publishMMSService() {
-    // let arg = `hzn exchange service publish -O ${this.envVar.getMMSContainerCreds()} -f ${this.mmsServiceJson} --pull-image`;
-    // if(this.envVar.getDockerRegistry() && this.envVar.getDockerToken()) {
-    //   arg += ` -r "${this.envVar.getDockerRegistry()}:${this.envVar.getMyDockerHubId()}:${this.envVar.getDockerToken()}"`;
-    // }
-    const arg = `hzn exchange service publish -O ${this.envVar.getMMSContainerCreds()} -f ${this.mmsServiceJson} ${this.envVar.getServiceFlags()}`;
+    let arg = `hzn exchange service publish -O ${this.envVar.getMMSContainerCreds()} -f ${this.mmsServiceJson} --pull-image`;
+    if(this.envVar.getDockerRegistry() && this.envVar.getDockerToken()) {
+      arg += ` -r "${this.envVar.getDockerRegistry()}:${this.envVar.getMyDockerHubId()}:${this.envVar.getDockerToken()}"`;
+    }
+    // const arg = `hzn exchange service publish -O ${this.envVar.getMMSContainerCreds()} -f ${this.mmsServiceJson} ${this.envVar.getServiceFlags()}`;
     return utils.shell(arg, 'done publishing mms service', 'failed to publish mms service');
   }
   publishMMSPattern() {
