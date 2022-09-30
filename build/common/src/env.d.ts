@@ -12,6 +12,7 @@ export declare class Env {
     getEnvValue(key: string): any;
     getEnv(): string;
     getOrgId(): any;
+    setOrgId(orgId?: any): void;
     getExchangeUserAuth(): any;
     getExchangeUrl(): any;
     getFSSCSSUrl(): any;

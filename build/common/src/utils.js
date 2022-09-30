@@ -215,6 +215,19 @@ class Utils {
         const arg = `rm -rf ${this.homePath}/.hzn && sudo rm ${process.cwd()}/agent-install* && sudo rm ${this.etcDefault}/horizon && sudo rm -rf ${this.etcHorizon}`;
         return this.shell(arg);
     }
+    installCliOnly(anax) {
+        const tarFile = process.platform == 'darwin' ? interface_1.installTar['darwin'] : interface_1.installTar[os_1.default.arch()];
+        console.log(tarFile, process.cwd());
+        process.env['INPUT_FILE_PATH'] = process.cwd();
+        if (anax && anax.indexOf('open-horizon') > 0) {
+            const arg = `curl -sSL https://github.com/open-horizon/anax/releases/latest/download/${tarFile} -o ${tarFile} && tar -zxvf ${tarFile}`;
+            return this.shell(`${arg} && sudo curl -sSL ${anax}/agent-install.sh -o agent-install.sh && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -C`);
+        }
+        else {
+            // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data
+            return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:'`);
+        }
+    }
     installHznCli(anax, id, css = true, deviceToken = 'some-device-token') {
         let nodeId = id ? `-a ${id}:${deviceToken}` : '';
         if (anax && anax.indexOf('open-horizon') > 0) {
@@ -348,12 +361,12 @@ class Utils {
         return new rxjs_1.Observable((observer) => {
             // let props = this.getPropsFromFile(`${this.hznConfig}/.env-local`);
             const props = this.getPropsFromEnvLocal(org);
+            console.log(props);
             props.forEach((prop, idx) => {
-                if (prop[0] == 'DEFAULT_ORG') {
-                    props[idx][1] = org;
+                if (props[idx].name == 'DEFAULT_ORG') {
+                    props[idx].default = org;
                 }
             });
-            console.log(props);
             console.log(`\nWould you like to change any of the above properties: Y/n?`);
             prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                 if (question.answer.toUpperCase() === 'Y') {
@@ -375,7 +388,7 @@ class Utils {
                             let content = '';
                             const pEnv = process.env;
                             for (const [key, value] of Object.entries(result)) {
-                                // content += key == 'DEFAULT_ORG' ? `${key}=${org}\n` : `${key}=${value}\n`;
+                                content += key == 'DEFAULT_ORG' ? `${key}=${org}\n` : `${key}=${value}\n`;
                                 pEnv[key] = '' + value;
                             }
                             (0, fs_1.writeFileSync)('.env-local', content);
@@ -481,6 +494,16 @@ class Utils {
             return diff;
         });
         return !diff;
+    }
+    promptCliOrAnax(msg = `Install CLI only (Y/n):  `) {
+        let answer;
+        do {
+            answer = (0, exports.promptSync)(msg).toUpperCase();
+            if (answer != 'Y' && answer != 'N') {
+                console.log('Y/n', '\nInvalid, try again.');
+            }
+        } while (answer != 'Y' && answer != 'N');
+        return answer;
     }
     installAnaxOrCli(container = true) {
         return new rxjs_1.Observable((observer) => {

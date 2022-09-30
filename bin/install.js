@@ -44,6 +44,8 @@ const template = {
   },
   envLocal: {
     "YOUR_DOCKERHUB_ID": "",
+    "DOCKER_REGISTRY": "",
+    "DOCKER_TOKEN": "",
     "HZN_EXCHANGE_USER_AUTH": "",
     "HZN_EXCHANGE_URL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-exchange/v1",
     "HZN_FSS_CSSURL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-css",
