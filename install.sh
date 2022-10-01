@@ -63,4 +63,7 @@ echo "==> Checking oh version"
 oh --version
 
 echo "==> Setting up hzn environment..."
-oh deploy setup
+echo "Input HZN_ORG_ID"
+org_id="myorg"
+read org_id
+oh deploy setup --org ${org_id}
