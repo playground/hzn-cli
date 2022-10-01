@@ -4,8 +4,12 @@ export declare const runDirectly: string[];
 export declare const loop: string[];
 export declare const installTar: {
     x86_64: string;
+    x64: string;
+    darwin: string;
     arrch64: string;
+    arm64: string;
     armv7l: string;
+    arm: string;
 };
 export declare const installPrompt: {
     version: string;

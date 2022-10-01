@@ -98,6 +98,9 @@ class Env {
         console.log(pEnv.HZN_ORG_ID);
         return pEnv.HZN_ORG_ID;
     }
+    setOrgId(orgId = pEnv.DEFAULT_ORG) {
+        pEnv.HZN_ORG_ID = orgId;
+    }
     getExchangeUserAuth() {
         return pEnv.HZN_EXCHANGE_USER_AUTH;
     }
