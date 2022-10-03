@@ -13,6 +13,7 @@
     "local": "npm run build && npm i -g && oh && npm run postinstall",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install",
     "publishObjectPolicy": "oh deploy publishMMSObjectPolicy --object=/Users/jeff/Downloads/demo-model/demo/version1/model.zip",
+    "listObject": "hzn mms object list -t sweetest1.fyre.ibm.com.chunk_object_detection -i chunk_config.json",
     "install:anax-hzn-cli": "bin/hzn-install.sh",
     "install:anax-in-container": "container=true bin/hzn-install.sh",
     "postinstall": "bin/install.js",
