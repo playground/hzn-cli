@@ -13,6 +13,7 @@ export declare class Utils {
     getHznConfig(): string;
     listAgreement(param: IHznParam): Observable<unknown>;
     listService(param: IHznParam): Observable<unknown>;
+    removeService(name: string): Observable<unknown>;
     listAllServices(param: IHznParam): Observable<unknown>;
     listPattern(name: string): Observable<unknown>;
     listNode(param: IHznParam): Observable<unknown>;
@@ -25,6 +26,7 @@ export declare class Utils {
     areYouSure(arg: string, msg: string): Observable<unknown>;
     removeNode(name: string): Observable<unknown>;
     listObject(param: IHznParam): Observable<unknown>;
+    removeObject(param: IHznParam): Observable<unknown>;
     createHznKey(org: string, id: string): Observable<unknown>;
     checkConfigState(): Observable<unknown>;
     listNodePattern(): Observable<unknown>;

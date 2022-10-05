@@ -400,6 +400,9 @@ export class Hzn {
   listAllServices() {
     return utils.listAllServices(this.param);
   }
+  removeService() {
+    return this.param.name.length > 0 ? utils.removeService(`${this.param.org}/${this.param.name}`) : of('Please specify service name')
+  }
   isConfigured() {
     return utils.isNodeConfigured()
   }
@@ -417,6 +420,9 @@ export class Hzn {
   }
   listObject() {
     return utils.listObject(this.param);
+  }
+  removeObject() {
+    return utils.removeObject(this.param)
   }
   listPolicy() {
     return utils.listPolicy()

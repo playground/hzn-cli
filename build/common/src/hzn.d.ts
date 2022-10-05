@@ -69,12 +69,14 @@ export declare class Hzn {
     listAgreement(): Observable<unknown>;
     listService(): Observable<unknown>;
     listAllServices(): Observable<unknown>;
+    removeService(): Observable<unknown>;
     isConfigured(): Observable<unknown>;
     listPattern(): Observable<unknown>;
     listNode(): Observable<unknown>;
     listExchangeNode(): Observable<unknown>;
     removeNode(): Observable<unknown>;
     listObject(): Observable<unknown>;
+    removeObject(): Observable<unknown>;
     listPolicy(): Observable<unknown>;
     listExchangeNodePolicy(): Observable<unknown>;
     listServicePolicy(): Observable<unknown>;

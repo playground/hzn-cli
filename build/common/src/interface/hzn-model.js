@@ -5,14 +5,15 @@ exports.justRun = [
     'addRemoteNodePolicy',
     'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'installAnaxInContainer', 'listAgreement',
     'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern',
-    'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'removeDeploymentPolicy', 'removeOrg',
-    'removeNode', 'reviewPolicy', 'reviewServiceDefinition'
+    'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'publishMMSObject', 'publishMMSObjectPattern', 'publishMMSObjectPolicy',
+    'removeDeploymentPolicy', 'removeObject', 'removeOrg',
+    'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition'
 ];
 exports.promptForUpdate = [
     'addPolicy', 'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister',
     'buildMMSImage', 'buildServiceImage', 'editDeploymentPoicy', 'editNodePolicy', 'editServicePolicy', 'publishAndRegister',
     'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService',
-    'publishMMSPattern', 'publishMMSObject', 'publishMMSObjectPattern', 'publishMMSObjectPolicy', 'pushMMSImage', 'pushServiceImage', 'registerAgent'
+    'publishMMSPattern', 'pushMMSImage', 'pushServiceImage', 'registerAgent'
 ];
 exports.runDirectly = [
     'appendSupport', 'deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent'

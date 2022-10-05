@@ -90,6 +90,19 @@ export class Utils {
       })
     })  
   }
+  removeService(name: string) {
+    return new Observable((observer) => {
+      const arg = `yes | hzn exchange service remove ${name}`
+      const msg = `\nAre you sure you want to remove ${name} service from the Horizon Exchange? [y/N]:`
+      this.areYouSure(arg, msg)
+      .subscribe({
+        complete: () => {
+          observer.complete()
+        },
+        error: (err) => observer.error(err)
+      })
+    })  
+  }
   listAllServices(param: IHznParam) {
     const arg = param.name.length > 0 ? `hzn exchange service list ${param.name} --org ${param.org}` : `hzn exchange service list --org ${param.org}`;
     return param.name.length > 0 ? this.shell(arg, 'commande executed successfully', 'failed to execute command', false) : this.shell(arg)
@@ -169,6 +182,20 @@ export class Utils {
   listObject(param: IHznParam) {
     const arg = param.name.length > 0 ? `${param.watch}hzn mms object list ${param.name}` : `${param.watch}hzn mms object list -t ${param.objectType} -i ${param.objectId} -d`;
     return utils.shell(arg, 'done listing object', 'failed to list object', false);
+  }
+  removeObject(param: IHznParam) {
+    return new Observable((observer) => {
+      const object = `--type=${param.objectType} --id=${param.objectId}`
+      const arg = `yes | hzn mms object delete ${object}`
+      const msg = `\nAre you sure you want to remove object with ${object} from MMS? [y/N]:`
+      this.areYouSure(arg, msg)
+      .subscribe({
+        complete: () => {
+          observer.complete()
+        },
+        error: (err) => observer.error(err)
+      })
+    })  
   }
   createHznKey(org: string, id: string) {
     if(org && id) {

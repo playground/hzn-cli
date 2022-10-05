@@ -379,6 +379,9 @@ class Hzn {
     listAllServices() {
         return exports.utils.listAllServices(this.param);
     }
+    removeService() {
+        return this.param.name.length > 0 ? exports.utils.removeService(`${this.param.org}/${this.param.name}`) : (0, rxjs_1.of)('Please specify service name');
+    }
     isConfigured() {
         return exports.utils.isNodeConfigured();
     }
@@ -396,6 +399,9 @@ class Hzn {
     }
     listObject() {
         return exports.utils.listObject(this.param);
+    }
+    removeObject() {
+        return exports.utils.removeObject(this.param);
     }
     listPolicy() {
         return exports.utils.listPolicy();
