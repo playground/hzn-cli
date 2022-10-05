@@ -135,7 +135,7 @@ const checkSystemFiles = () => {
     let cwd = process.cwd()
     let files = {
       env: ['env-hzn.json', 'env-local', 'env-support'],
-      json: ['deployment.policy.json', 'service.policy.json', 'node.policy.json', 'object.policy.json']
+      json: ['deployment.policy.json', 'service.policy.json', 'node.policy.json', 'object.policy.json', 'object.pattern.json']
     }
     if(!fs.existsSync(hznConfig)) {
       fs.mkdirSync(hznConfig)

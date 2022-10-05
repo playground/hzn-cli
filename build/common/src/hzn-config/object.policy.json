@@ -3,20 +3,15 @@
   "objectType": "$MMS_OBJECT_TYPE",
   "destinationOrgID": "$HZN_ORG_ID",
   "destinationPolicy": {
-      "properties": [
-          {
-              "type": "deployment",
-              "name": "homehub",
-              "value": "Home Automation"
-          }
+      "constraints": [
+        "workersafety == Worker Safety"
       ],
-      "constraints": [],
       "services": [
           {
               "orgID": "$HZN_ORG_ID",
               "arch": "$ARCH",
               "serviceName": "$MMS_SERVICE_NAME",
-              "version": "$MMS_SERVICE_VERSION"
+              "version": "[$MMS_SERVICE_VERSION,INFINITY)"
           }
       ]
   },

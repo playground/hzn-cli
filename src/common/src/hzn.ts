@@ -23,6 +23,7 @@ export class Hzn {
   deploymentPolicyJson: string = '';
   servicePolicyJson: string = '';
   objectPolicyJson: string = '';
+  objectPatternJson: string = '';
   serviceDefinitionJson: string = '';
   servicePatternJson: string = '';
   envVar: any;
@@ -66,6 +67,7 @@ export class Hzn {
           this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
           this.servicePolicyJson = `${this.configPath}/service.policy.json`;
           this.objectPolicyJson = `${this.configPath}/object.policy.json`;
+          this.objectPatternJson = `${this.configPath}/object.pattern.json`;
 
           this.param.policy = this.getPolicyInfo()
           this.envVar.updateContainerAndServiceNames()
@@ -222,6 +224,10 @@ export class Hzn {
   }
   publishMMSObject() {
     let arg = `hzn mms object publish --type=${this.objectType} --id=${this.objectId} --object=${this.objectFile} --pattern=${this.mmsPattern}`
+    return utils.shell(arg, 'done publishing object', 'failed to publish object');
+  }
+  publishMMSObjectPattern() {
+    let arg = `hzn mms object publish -m ${this.objectPatternJson} -f ${this.objectFile}`
     return utils.shell(arg, 'done publishing object', 'failed to publish object');
   }
   publishMMSObjectPolicy() {

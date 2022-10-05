@@ -69,7 +69,7 @@ export declare class Utils {
     policyToProps(policy: string): any;
     promptType(propName: string, res: any, el: any): void;
     goPrompt(props: any, propName: string): Promise<unknown>;
-    unregisterAgent(): Observable<unknown>;
+    unregisterAgent(msg?: string): Observable<unknown>;
     promptEditPolicy(): void;
     addPolicy(param: IHznParam, policy: any): Observable<unknown>;
     addDeploymentPolicy(policy: any): Observable<unknown>;

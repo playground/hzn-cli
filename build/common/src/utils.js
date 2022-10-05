@@ -171,7 +171,7 @@ class Utils {
     }
     createHznKey(org, id) {
         if (org && id) {
-            return this.shell(`hzn key create ${org} ${id}`);
+            return this.shell(`hzn key create ${org} ${id} -f`);
         }
         else {
             console.log('please provide both <YOUR_DOCKERHUB_ID> and <HZN_ORG_ID> in .env-hzn.json');
@@ -212,7 +212,12 @@ class Utils {
         });
     }
     cleanUp() {
-        const arg = `rm -rf ${this.homePath}/.hzn && sudo rm ${process.cwd()}/agent-install* && sudo rm ${this.etcDefault}/horizon && sudo rm -rf ${this.etcHorizon}`;
+        console.log('cleaning up', (0, fs_1.existsSync)(`${this.etcDefault}/horizon`));
+        let arg = (0, fs_1.existsSync)(`${process.cwd()}/agent-install.cfg`) ? `rm ${process.cwd()}/agent-install.* -y && ` : '';
+        arg += (0, fs_1.existsSync)(this.etcHorizon) ? `sudo rm ${this.etcHorizon} -y && ` : '';
+        arg += (0, fs_1.existsSync)(`${this.etcDefault}/horizon`) ? `sudo rm ${this.etcDefault}/horizon && ` : '';
+        arg += (0, fs_1.existsSync)(`${this.homePath}/.hzn`) ? `rm -rf ${this.homePath}/.hzn -y && ` : '';
+        arg += ':';
         return this.shell(arg);
     }
     installCliOnly(anax) {
@@ -225,7 +230,7 @@ class Utils {
         }
         else {
             // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data
-            return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:'`);
+            return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -C`);
         }
     }
     installHznCli(anax, id, css = true, deviceToken = 'some-device-token') {
@@ -236,7 +241,7 @@ class Utils {
             if (anax.indexOf('latest') < 0) {
                 tag = anax.replace('download', 'tag');
             }
-            return this.shell(`sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`);
+            return this.shell(`sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} -k css: -c css:`);
         }
         else {
             // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data
@@ -261,7 +266,13 @@ class Utils {
                                 error: (err) => observer.complete() //ignore error when files do not exist    
                             });
                         },
-                        error: (err) => observer.error(err)
+                        error: (err) => {
+                            this.cleanUp()
+                                .subscribe({
+                                complete: () => observer.complete(),
+                                error: (err) => observer.complete() //ignore error when files do not exist    
+                            });
+                        }
                     });
                 }
                 else {
@@ -1056,24 +1067,32 @@ class Utils {
             resolve(res);
         });
     }
-    unregisterAgent() {
+    unregisterAgent(msg = 'Would you like to unregister this agent?') {
         return new rxjs_1.Observable((observer) => {
-            _1.utils.isNodeConfigured()
-                .subscribe({
-                next: (res) => {
-                    if (res) {
-                        let arg = `hzn unregister -frDv`;
-                        _1.utils.shell(arg, 'done unregistering agent', 'failed to unregister agent')
-                            .subscribe({
-                            next: (res) => observer.complete(),
-                            error: (e) => observer.error(e)
-                        });
-                    }
-                    else {
-                        console.log('no need to unregister...');
-                        observer.complete();
-                    }
-                }, error(e) {
+            console.log(`\n${msg}`);
+            prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                if (question.answer.toUpperCase() === 'Y') {
+                    _1.utils.isNodeConfigured()
+                        .subscribe({
+                        next: (res) => {
+                            if (res) {
+                                let arg = `hzn unregister -frDv`;
+                                _1.utils.shell(arg, 'done unregistering agent', 'failed to unregister agent', false)
+                                    .subscribe({
+                                    next: (res) => observer.complete(),
+                                    error: (e) => observer.error(e)
+                                });
+                            }
+                            else {
+                                console.log('no need to unregister...');
+                                observer.complete();
+                            }
+                        }, error(e) {
+                            observer.complete();
+                        }
+                    });
+                }
+                else {
                     observer.complete();
                 }
             });
@@ -1131,7 +1150,10 @@ class Utils {
                     let arg = param.name.length > 0 ? `hzn register --policy ${policy.nodePolicyJson} --name ${param.name}` : `hzn register --policy ${policy.nodePolicyJson}`;
                     _1.utils.shell(arg, 'done registering agent with policy', 'failed to register agent')
                         .subscribe({
-                        complete: () => observer.complete(),
+                        complete: () => {
+                            observer.next();
+                            observer.complete();
+                        },
                         error: (err) => observer.error(err)
                     });
                 }, error: (err) => {
@@ -1332,7 +1354,7 @@ class Utils {
     isNodeConfigured() {
         return new rxjs_1.Observable((observer) => {
             let arg = `hzn node list`;
-            this.shell(arg)
+            this.shell(arg, "Successfully list node", "Failed to list node")
                 .subscribe({
                 next: (res) => {
                     console.log(typeof res == 'string');
@@ -1354,6 +1376,7 @@ class Utils {
     shell(arg, success = 'command executed successfully', error = 'command failed', prnStdout = true, options = { maxBuffer: 1024 * 2000 }) {
         return new rxjs_1.Observable((observer) => {
             console.log(arg);
+            let output = '';
             let child = exec(arg, options, (err, stdout, stderr) => {
                 if (!err) {
                     // console.log(stdout);
@@ -1367,8 +1390,24 @@ class Utils {
                 }
             });
             child.stdout.pipe(process.stdout);
-            child.on('data', (data) => {
-                console.log(data);
+            // child.on('data', (data) => {
+            //   console.log('$$$$###@@@@', data)
+            //   if(data.indexOf('done registering agent with policy') >= 0 || data.indexOf('Horizon node is registered. Workload services should begin executing shortly.') >= 0) {
+            //     observer.next('');
+            //     observer.complete();
+            //   }
+            //   console.log('$$$$###@@@@')
+            // })
+            child.on('exit', (code) => {
+                console.log('child process exited with code ' + code.toString());
+                observer.next(prnStdout ? output : '');
+                observer.complete();
+            });
+            child.stdout.on('data', (data) => {
+                output += data;
+            });
+            child.stderr.on('data', (data) => {
+                console.log('stderr: ' + data.toString());
             });
         });
     }
