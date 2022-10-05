@@ -34,6 +34,7 @@ export declare class Utils {
     aptUpdate(): Observable<unknown>;
     installPrereq(): Observable<unknown>;
     cleanUp(): Observable<unknown>;
+    installCliOnly(anax: string): Observable<unknown>;
     installHznCli(anax: string, id: null, css?: boolean, deviceToken?: string): Observable<unknown>;
     uninstallHorizon(msg?: string): Observable<unknown>;
     setupManagementHub(): Observable<unknown>;
@@ -44,6 +45,7 @@ export declare class Utils {
     switchEnvironment(org: string, pEnv?: any): Observable<unknown>;
     updateAndSaveCredential(org: string, content: string): Observable<unknown>;
     shallowEqual(obj1: any, obj2: any): boolean;
+    promptCliOrAnax(msg?: string): any;
     installAnaxOrCli(container?: boolean): Observable<unknown>;
     updateOrgConfig(hznJson: any, org: string, newOrg?: boolean): Observable<unknown>;
     removeOrg(org: string): Observable<unknown>;

@@ -1,7 +1,7 @@
 import { Observable, of } from 'rxjs';
 import { Env } from './env';
 import { Utils, promptSync } from './utils';
-import { IHznParam, IPolicy, justRun, runDirectly, promptForUpdate } from './interface'
+import { IHznParam, IPolicy, justRun, runDirectly, promptForUpdate, installTar } from './interface'
 import { mkdirSync, existsSync, cpSync, copyFileSync } from 'fs';
 
 export const utils = new Utils();
@@ -81,18 +81,33 @@ export class Hzn {
         },
         error: (err) => {
           console.log(err.message);
+          this.envVar.setOrgId()
           if(err.message.indexOf('hzn:') >= 0) {
             console.log('need to install hzn');
-            this.preInstallHznCli()
-            .subscribe({
-              complete: () => {
-                console.log('done installing hzn cli.');
-                observer.complete();
-              },
-              error: (err) => {
-                observer.error(err);
-              }
-            })
+            const answer = utils.promptCliOrAnax();
+            if(answer == 'Y') {
+              utils.installCliOnly(this.envVar.getAnax())
+              .subscribe({
+                complete: () => {
+                  console.log('done installing hzn cli.');
+                  observer.complete();
+                },
+                error: (err) => {
+                  observer.error(err);
+                }
+              })  
+            } else {
+              this.preInstallHznCli()
+              .subscribe({
+                complete: () => {
+                  console.log('done installing hzn.');
+                  observer.complete();
+                },
+                error: (err) => {
+                  observer.error(err);
+                }
+              })  
+            }
           } else {
             observer.error(err);
           }
@@ -163,11 +178,11 @@ export class Hzn {
     })
   }
   publishService() {
-    // let arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceJson} --pull-image`;
-    // if(this.envVar.getDockerRegistry() && this.envVar.getDockerToken()) {
-    //   arg += ` -r "${this.envVar.getDockerRegistry()}:${this.envVar.getMyDockerHubId()}:${this.envVar.getDockerToken()}"`;
-    // }
-    const arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceJson} ${this.envVar.getServiceFlags()}`;
+    let arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceJson} --pull-image`;
+    if(this.envVar.getDockerRegistry() && this.envVar.getDockerToken()) {
+      arg += ` -r "${this.envVar.getDockerRegistry()}:${this.envVar.getMyDockerHubId()}:${this.envVar.getDockerToken()}"`;
+    }
+    // const arg = `hzn exchange service publish -O ${this.envVar.getServiceContainerCreds()} -f ${this.serviceJson} ${this.envVar.getServiceFlags()}`;
     return utils.shell(arg, 'done publishing service', 'failed to publish service');
   }
   publishPattern() {
@@ -175,11 +190,11 @@ export class Hzn {
     return utils.shell(arg, 'done publishing service pattern', 'failed to publish service pattern');
   }
   publishMMSService() {
-    // let arg = `hzn exchange service publish -O ${this.envVar.getMMSContainerCreds()} -f ${this.mmsServiceJson} --pull-image`;
-    // if(this.envVar.getDockerRegistry() && this.envVar.getDockerToken()) {
-    //   arg += ` -r "${this.envVar.getDockerRegistry()}:${this.envVar.getMyDockerHubId()}:${this.envVar.getDockerToken()}"`;
-    // }
-    const arg = `hzn exchange service publish -O ${this.envVar.getMMSContainerCreds()} -f ${this.mmsServiceJson} ${this.envVar.getServiceFlags()}`;
+    let arg = `hzn exchange service publish -O ${this.envVar.getMMSContainerCreds()} -f ${this.mmsServiceJson} --pull-image`;
+    if(this.envVar.getDockerRegistry() && this.envVar.getDockerToken()) {
+      arg += ` -r "${this.envVar.getDockerRegistry()}:${this.envVar.getMyDockerHubId()}:${this.envVar.getDockerToken()}"`;
+    }
+    // const arg = `hzn exchange service publish -O ${this.envVar.getMMSContainerCreds()} -f ${this.mmsServiceJson} ${this.envVar.getServiceFlags()}`;
     return utils.shell(arg, 'done publishing mms service', 'failed to publish mms service');
   }
   publishMMSPattern() {
