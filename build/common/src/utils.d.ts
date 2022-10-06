@@ -9,6 +9,8 @@ export declare class Utils {
     hznConfig: string;
     constructor();
     init(): void;
+    invalidTemplate(json: any): boolean;
+    autoSetup(param: IHznParam): Observable<unknown>;
     getEtcDefault(): string;
     getHznConfig(): string;
     listAgreement(param: IHznParam): Observable<unknown>;
@@ -17,6 +19,8 @@ export declare class Utils {
     listAllServices(param: IHznParam): Observable<unknown>;
     listPattern(name: string): Observable<unknown>;
     listNode(param: IHznParam): Observable<unknown>;
+    listNodes(param: IHznParam): Observable<unknown>;
+    listOrg(param: IHznParam): Observable<unknown>;
     listExchangeNode(param: IHznParam): Observable<unknown>;
     listPolicy(): Observable<unknown>;
     listExchangeNodePolicy(param: IHznParam): Observable<unknown>;
@@ -77,6 +81,7 @@ export declare class Utils {
     addDeploymentPolicy(policy: any): Observable<unknown>;
     addServicePolicy(policy: any): Observable<unknown>;
     addObjectPolicy(param: IHznParam): Observable<unknown>;
+    addObjectPattern(param: IHznParam): void;
     addNodePolicy(param: IHznParam, policy: any): Observable<unknown>;
     addRemoteNodePolicy(param: IHznParam, policy: any): Observable<unknown>;
     promptPolicySelection(msg?: string): any;

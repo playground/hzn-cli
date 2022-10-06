@@ -30,6 +30,7 @@ export declare class Hzn {
     constructor(param: IHznParam);
     init(): Observable<unknown>;
     test(): Observable<unknown>;
+    autoSetup(): Observable<unknown>;
     setup(): Observable<unknown>;
     appendSupport(): Observable<unknown>;
     installAnaxInContainer(): Observable<unknown>;
@@ -73,6 +74,8 @@ export declare class Hzn {
     isConfigured(): Observable<unknown>;
     listPattern(): Observable<unknown>;
     listNode(): Observable<unknown>;
+    listNodes(): Observable<unknown>;
+    listOrg(): Observable<unknown>;
     listExchangeNode(): Observable<unknown>;
     removeNode(): Observable<unknown>;
     listObject(): Observable<unknown>;

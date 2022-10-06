@@ -14,7 +14,7 @@ import { utils } from '.';
 import { fork } from 'child_process';
 import { URL } from 'url';
 import { Env } from './env';
-import { IHznParam, installPrompt, installTar } from './interface';
+import { IHznParam, installPrompt, installTar, configTemplate, keyMap } from './interface';
 
 const env = process.env.npm_config_env || 'biz';
 const isBoolean = [
@@ -45,6 +45,7 @@ const mustHave = [
   "MMS_SERVICE_FALLBACK_VERSION",
   "UPDATE_FILE_NAME"
 ];
+// ToDo: use configTemplate instead
 const credentialVars = [
   "HZN_EXCHANGE_USER_AUTH",
   "HZN_EXCHANGE_URL",
@@ -60,6 +61,61 @@ export class Utils {
   constructor() {
   }
   init() {
+  }
+  invalidTemplate(json) {
+    let matched = true;
+    const envHzn = configTemplate.envHzn;
+    Object.keys(json).some((key) => {
+      Object.keys(envHzn[keyMap[key]]).some((skey) => {
+        matched = json[key][skey] != undefined ? true : false
+        if(mustHave[skey] && !matched) {
+          console.log(`Invalid:  Missing ${skey}`)
+        }
+        return !matched
+      })
+      return !matched;
+    });
+    return matched;
+  }
+  autoSetup(param: IHznParam) {
+    return new Observable((observer) => {
+      if(existsSync(param.configFile)) {
+        try {
+          const pEnv: any = process.env;
+          let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
+          const config = jsonfile.readFileSync(param.configFile);
+          if(this.invalidTemplate(config)) {
+            observer.next('')
+            observer.complete()
+          }
+          const orgId = config['org']['HZN_ORG_ID'];
+          const envHzn = configTemplate.envHzn;
+          
+          if(!hznJson[orgId]) {
+            hznJson[orgId] = {}
+          }
+          Object.keys(envHzn).forEach((key) => {
+            if(!hznJson[orgId][key]) {
+              hznJson[orgId][key] = {}
+            }
+            let obj = envHzn[key]
+            Object.keys(obj).forEach((objKey) => {
+              hznJson[orgId][key][objKey] = config[keyMap[key]][objKey] ? config[keyMap[key]][objKey] : obj[objKey]
+              pEnv[objKey] = hznJson[orgId][key][objKey]
+            })
+          })
+          console.log(hznJson)
+          observer.next('')
+          observer.complete()
+        } catch(e) {
+          observer.next(e)
+          observer.complete()
+        }
+      } else {
+        observer.next(`${param.configFile} not found.`)
+        observer.complete()
+      }
+    })  
   }
   getEtcDefault() {
     return this.etcDefault
@@ -113,6 +169,14 @@ export class Utils {
   }
   listNode(param: IHznParam) {
     const arg = 'hzn node list';
+    return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
+  }
+  listNodes(param: IHznParam) {
+    const arg = 'hzn exchange node list';
+    return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
+  }
+  listOrg(param: IHznParam) {
+    const arg = 'hzn exchange org list';
     return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
   }
   listExchangeNode(param: IHznParam) {
@@ -260,7 +324,7 @@ export class Utils {
     }    
   }
   installHznCli(anax: string, id: null, css = true, deviceToken = 'some-device-token') {
-    let nodeId = id ? `-a ${id}:${deviceToken}` : '';
+    let nodeId = id ? `-a ${id}:${deviceToken}` : `-a ${os.hostname}:${deviceToken}`;
     if(anax && anax.indexOf('open-horizon') > 0) {
       // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download
       let tag = css ? 'css:' : 'anax:'
@@ -1065,7 +1129,7 @@ export class Utils {
       resolve(res)   
     })
   }
-  unregisterAgent(msg = 'Would you like to unregister this agent?') {
+  unregisterAgent(msg = 'Would you like to unregister this agent?  Y/n ') {
     return new Observable((observer) => {
       console.log(`\n${msg}`)
       prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
@@ -1135,6 +1199,9 @@ export class Utils {
   addObjectPolicy(param: IHznParam) {
     let arg = `hzn mms object publish -m ${param.policy.objectPolicyJson} -f ${param.objectFile}`
     return utils.shell(arg, 'done publishing object', 'failed to publish object', false);
+  }
+  addObjectPattern(param: IHznParam) {
+    // Todo 
   }
   addNodePolicy(param: IHznParam, policy: any) {
     return new Observable((observer) => {

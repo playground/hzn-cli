@@ -123,6 +123,9 @@ export class Hzn {
       observer.complete();
     });  
   }
+  autoSetup() {
+    return this.param.configFile.length > 0 ? utils.autoSetup(this.param) : of('Please specify the config file name')
+  }
   setup() {
     return new Observable((observer) => {
       console.log(`it works..., your environment is ready to go!`)
@@ -227,8 +230,13 @@ export class Hzn {
     return utils.shell(arg, 'done publishing object', 'failed to publish object');
   }
   publishMMSObjectPattern() {
-    let arg = `hzn mms object publish -m ${this.objectPatternJson} -f ${this.objectFile}`
-    return utils.shell(arg, 'done publishing object', 'failed to publish object');
+    if(!this.mmsPattern || this.mmsPattern.length == 0) {
+      return of('Please specify --pattern name') 
+    } else {
+      process.env.HZN_PATTERN = this.mmsPattern;
+      let arg = `hzn mms object publish -m ${this.objectPatternJson} -f ${this.objectFile}`
+      return utils.shell(arg, 'done publishing object', 'failed to publish object');  
+    }
   }
   publishMMSObjectPolicy() {
     let arg = `hzn mms object publish -m ${this.objectPolicyJson} -f ${this.objectFile}`
@@ -411,6 +419,12 @@ export class Hzn {
   }
   listNode() {
     return utils.listNode(this.param);
+  }
+  listNodes() {
+    return utils.listNodes(this.param);
+  }
+  listOrg() {
+    return utils.listOrg(this.param);
   }
   listExchangeNode() {
     return utils.listExchangeNode(this.param);

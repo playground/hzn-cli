@@ -44,6 +44,7 @@ const mustHave = [
     "MMS_SERVICE_FALLBACK_VERSION",
     "UPDATE_FILE_NAME"
 ];
+// ToDo: use configTemplate instead
 const credentialVars = [
     "HZN_EXCHANGE_USER_AUTH",
     "HZN_EXCHANGE_URL",
@@ -58,6 +59,62 @@ class Utils {
         this.hznConfig = `${this.homePath}/hzn-config`;
     }
     init() {
+    }
+    invalidTemplate(json) {
+        let matched = true;
+        const envHzn = interface_1.configTemplate.envHzn;
+        Object.keys(json).some((key) => {
+            Object.keys(envHzn[interface_1.keyMap[key]]).some((skey) => {
+                matched = json[key][skey] != undefined ? true : false;
+                if (mustHave[skey] && !matched) {
+                    console.log(`Invalid:  Missing ${skey}`);
+                }
+                return !matched;
+            });
+            return !matched;
+        });
+        return matched;
+    }
+    autoSetup(param) {
+        return new rxjs_1.Observable((observer) => {
+            if ((0, fs_1.existsSync)(param.configFile)) {
+                try {
+                    const pEnv = process.env;
+                    let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
+                    const config = jsonfile_1.default.readFileSync(param.configFile);
+                    if (this.invalidTemplate(config)) {
+                        observer.next('');
+                        observer.complete();
+                    }
+                    const orgId = config['org']['HZN_ORG_ID'];
+                    const envHzn = interface_1.configTemplate.envHzn;
+                    if (!hznJson[orgId]) {
+                        hznJson[orgId] = {};
+                    }
+                    Object.keys(envHzn).forEach((key) => {
+                        if (!hznJson[orgId][key]) {
+                            hznJson[orgId][key] = {};
+                        }
+                        let obj = envHzn[key];
+                        Object.keys(obj).forEach((objKey) => {
+                            hznJson[orgId][key][objKey] = config[interface_1.keyMap[key]][objKey] ? config[interface_1.keyMap[key]][objKey] : obj[objKey];
+                            pEnv[objKey] = hznJson[orgId][key][objKey];
+                        });
+                    });
+                    console.log(hznJson);
+                    observer.next('');
+                    observer.complete();
+                }
+                catch (e) {
+                    observer.next(e);
+                    observer.complete();
+                }
+            }
+            else {
+                observer.next(`${param.configFile} not found.`);
+                observer.complete();
+            }
+        });
     }
     getEtcDefault() {
         return this.etcDefault;
@@ -111,6 +168,14 @@ class Utils {
     }
     listNode(param) {
         const arg = 'hzn node list';
+        return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
+    }
+    listNodes(param) {
+        const arg = 'hzn exchange node list';
+        return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
+    }
+    listOrg(param) {
+        const arg = 'hzn exchange org list';
         return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
     }
     listExchangeNode(param) {
@@ -261,7 +326,7 @@ class Utils {
         }
     }
     installHznCli(anax, id, css = true, deviceToken = 'some-device-token') {
-        let nodeId = id ? `-a ${id}:${deviceToken}` : '';
+        let nodeId = id ? `-a ${id}:${deviceToken}` : `-a ${os_1.default.hostname}:${deviceToken}`;
         if (anax && anax.indexOf('open-horizon') > 0) {
             // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download
             let tag = css ? 'css:' : 'anax:';
@@ -1094,7 +1159,7 @@ class Utils {
             resolve(res);
         });
     }
-    unregisterAgent(msg = 'Would you like to unregister this agent?') {
+    unregisterAgent(msg = 'Would you like to unregister this agent?  Y/n ') {
         return new rxjs_1.Observable((observer) => {
             console.log(`\n${msg}`);
             prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
@@ -1169,6 +1234,9 @@ class Utils {
     addObjectPolicy(param) {
         let arg = `hzn mms object publish -m ${param.policy.objectPolicyJson} -f ${param.objectFile}`;
         return _1.utils.shell(arg, 'done publishing object', 'failed to publish object', false);
+    }
+    addObjectPattern(param) {
+        // Todo 
     }
     addNodePolicy(param, policy) {
         return new rxjs_1.Observable((observer) => {

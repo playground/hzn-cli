@@ -1,5 +1,6 @@
 export declare const justRun: string[];
 export declare const promptForUpdate: string[];
+export declare const customRun: any[];
 export declare const runDirectly: string[];
 export declare const loop: string[];
 export declare const installTar: {
@@ -19,6 +20,68 @@ export declare const supportPlatform: {
     amd64: string;
     arm: string;
 };
+export declare const keyMap: {
+    org: string;
+    service: string;
+    metaVars: string;
+    credential: string;
+    envVars: string;
+};
+export declare const configTemplate: {
+    envHzn: {
+        envVars: {
+            SERVICE_NAME: string;
+            SERVICE_CONTAINER_NAME: string;
+            SERVICE_VERSION: string;
+            SERVICE_VERSION_RANGE_UPPER: string;
+            SERVICE_VERSION_RANGE_LOWER: string;
+            SERVICE_CONTAINER_CREDS: string;
+            MMS_SERVICE_NAME: string;
+            MMS_CONTAINER_NAME: string;
+            MMS_SERVICE_VERSION: string;
+            MMS_SERVICE_FALLBACK_VERSION: string;
+            MMS_CONTAINER_CREDS: string;
+            VOLUME_MOUNT: string;
+            MMS_SHARED_VOLUME: string;
+            MMS_OBJECT_TYPE: string;
+            MMS_OBJECT_ID: string;
+            MMS_OBJECT_FILE: string;
+            UPDATE_FILE_NAME: string;
+            EDGE_OWNER: string;
+            EDGE_DEPLOY: string;
+        };
+        credential: {
+            HZN_ORG_ID: string;
+            HZN_EXCHANGE_USER_AUTH: string;
+            HZN_EXCHANGE_URL: string;
+            HZN_FSS_CSSURL: string;
+            ANAX: string;
+        };
+        metaVars: {};
+    };
+    envLocal: {
+        YOUR_DOCKERHUB_ID: string;
+        DOCKER_REGISTRY: string;
+        DOCKER_TOKEN: string;
+        HZN_EXCHANGE_USER_AUTH: string;
+        HZN_EXCHANGE_URL: string;
+        HZN_FSS_CSSURL: string;
+        HZN_CUSTOM_NODE_ID: string;
+        DEFAULT_ORG: string;
+        ANAX: string;
+        ANAX_IN_CONTAINER: string;
+    };
+    envSupport: {
+        SUPPORTED_OS_APPEND: string;
+        SUPPORTED_LINUX_DISTRO_APPEND: string;
+        SUPPORTED_DEBIAN_VARIANTS_APPEND: string;
+        SUPPORTED_DEBIAN_VERSION_APPEND: string;
+        SUPPORTED_DEBIAN_ARCH_APPEND: string;
+        SUPPORTED_REDHAT_VARIANTS_APPEND: string;
+        SUPPORTED_REDHAT_VERSION_APPEND: string;
+        SUPPORTED_REDHAT_ARCH_APPEND: string;
+    };
+};
 export interface IHznParam {
     org: string;
     configPath: string;
@@ -31,6 +94,7 @@ export interface IHznParam {
     watch?: string;
     filter?: string;
     policy: IPolicy;
+    configFile: string;
 }
 export interface IPolicy {
     envVar: string;
