@@ -1,5 +1,5 @@
 export const justRun = [
-  'addRemoteNodePolicy', 'autoSetup',
+  'addRemoteNodePolicy',
   'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'installAnaxInContainer', 'listAgreement', 
   'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodes', 'listOrg', 'listNodePattern', 'listObject', 'listPattern', 
   'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'publishMMSObject', 'publishMMSObjectPattern', 'publishMMSObjectPolicy', 
@@ -13,6 +13,7 @@ export const promptForUpdate = [
   'publishMMSPattern', 'pushMMSImage', 'pushServiceImage', 'registerAgent'
 ];
 export const customRun = [
+  'autoSetup', 'cleanUp'
 ];
 export const runDirectly = [
   'appendSupport', 'deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent'

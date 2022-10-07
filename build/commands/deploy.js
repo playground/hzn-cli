@@ -112,8 +112,8 @@ const handler = (argv) => {
         }
     };
     if (action && skipInitialize.concat(interface_1.runDirectly).concat(interface_1.justRun).concat(interface_1.promptForUpdate).concat(interface_1.customRun).includes(action)) {
-        console.log(action, env);
         if (interface_1.runDirectly.indexOf(action) >= 0) {
+            console.log(action, env);
             hzn_1.utils[action]()
                 .subscribe({
                 complete: () => process.exit(0),
@@ -124,9 +124,19 @@ const handler = (argv) => {
             });
         }
         else if (interface_1.customRun.indexOf(action) >= 0) {
-            // ToDo
+            console.log(action);
+            hzn_1.utils[action](config_file)
+                .subscribe({
+                next: (msg) => console.log(msg),
+                complete: () => process.exit(0),
+                error: (err) => {
+                    console.log(err);
+                    process.exit(0);
+                }
+            });
         }
         else {
+            console.log(action, env);
             hzn_1.utils.checkDefaultConfig()
                 .subscribe({
                 complete: () => {

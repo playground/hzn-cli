@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Service = exports.Deployment = exports.Container = exports.RequiredService = exports.configTemplate = exports.keyMap = exports.supportPlatform = exports.installPrompt = exports.installTar = exports.loop = exports.runDirectly = exports.customRun = exports.promptForUpdate = exports.justRun = void 0;
 exports.justRun = [
-    'addRemoteNodePolicy', 'autoSetup',
+    'addRemoteNodePolicy',
     'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'installAnaxInContainer', 'listAgreement',
     'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodes', 'listOrg', 'listNodePattern', 'listObject', 'listPattern',
     'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'publishMMSObject', 'publishMMSObjectPattern', 'publishMMSObjectPolicy',
@@ -15,7 +15,9 @@ exports.promptForUpdate = [
     'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService',
     'publishMMSPattern', 'pushMMSImage', 'pushServiceImage', 'registerAgent'
 ];
-exports.customRun = [];
+exports.customRun = [
+    'autoSetup', 'cleanUp'
+];
 exports.runDirectly = [
     'appendSupport', 'deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent'
 ];

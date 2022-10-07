@@ -10,7 +10,9 @@ export declare class Utils {
     constructor();
     init(): void;
     invalidTemplate(json: any): boolean;
-    autoSetup(param: IHznParam): Observable<unknown>;
+    randomString(): string;
+    preInstallHznCli(orgId: string, anax: string, nodeId: string, css: boolean, token: string): Observable<unknown>;
+    autoSetup(configFile: string): Observable<unknown>;
     getEtcDefault(): string;
     getHznConfig(): string;
     listAgreement(param: IHznParam): Observable<unknown>;
@@ -41,7 +43,7 @@ export declare class Utils {
     installPrereq(): Observable<unknown>;
     cleanUp(): Observable<unknown>;
     installCliOnly(anax: string): Observable<unknown>;
-    installHznCli(anax: string, id: null, css?: boolean, deviceToken?: string): Observable<unknown>;
+    installHznCli(anax: string, id: string, css?: boolean, deviceToken?: string): Observable<unknown>;
     uninstallHorizon(msg?: string): Observable<unknown>;
     setupManagementHub(): Observable<unknown>;
     copyFile(arg: string): Promise<unknown>;
@@ -98,6 +100,9 @@ export declare class Utils {
     editTypePolicy(filename: string): Observable<unknown>;
     isNodeConfigured(): Observable<unknown>;
     shell(arg: string, success?: string, error?: string, prnStdout?: boolean, options?: {
+        maxBuffer: number;
+    }): Observable<unknown>;
+    shell2(arg: string, success?: string, error?: string, prnStdout?: boolean, options?: {
         maxBuffer: number;
     }): Observable<unknown>;
 }

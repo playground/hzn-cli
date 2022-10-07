@@ -103,9 +103,6 @@ class Hzn {
             observer.complete();
         });
     }
-    autoSetup() {
-        return this.param.configFile.length > 0 ? exports.utils.autoSetup(this.param) : (0, rxjs_1.of)('Please specify the config file name');
-    }
     setup() {
         return new rxjs_1.Observable((observer) => {
             console.log(`it works..., your environment is ready to go!`);

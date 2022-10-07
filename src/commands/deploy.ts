@@ -128,8 +128,8 @@ export const handler = (argv: Arguments<Options>): void => {
   }
 
   if(action && skipInitialize.concat(runDirectly).concat(justRun).concat(promptForUpdate).concat(customRun).includes(action)) {
-    console.log(action, env);
     if(runDirectly.indexOf(action) >= 0) {
+      console.log(action, env);
       utils[action]()
       .subscribe({
         complete: () => process.exit(0),
@@ -139,8 +139,18 @@ export const handler = (argv: Arguments<Options>): void => {
         }
       })
     } else if(customRun.indexOf(action) >= 0) {
-      // ToDo
+      console.log(action);
+      utils[action](config_file)
+      .subscribe({
+        next: (msg) => console.log(msg),
+        complete: () => process.exit(0),
+        error: (err) => {
+          console.log(err);      
+          process.exit(0);  
+        }
+      })
     } else {
+      console.log(action, env);
       utils.checkDefaultConfig()
       .subscribe({
         complete: () => {
