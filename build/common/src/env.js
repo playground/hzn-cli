@@ -189,7 +189,7 @@ class Env {
         return pEnv.HZN_CUSTOM_NODE_ID || null;
     }
     getHznCSS() {
-        return pEnv.HZN_CSS || false;
+        return pEnv.HZN_CSS;
     }
     getServiceFlags() {
         return pEnv.SERVICE_FLAGS || '--pull-image';

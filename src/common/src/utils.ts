@@ -80,12 +80,12 @@ export class Utils {
   randomString() {
     return Math.random().toString(36).slice(2)
   }
-  preInstallHznCli(orgId: string, anax: string, nodeId: string, css: boolean, token: string) {
+  preInstallHznCli(orgId: string, anax: string, nodeId: string, css: string, token: string) {
     return new Observable((observer) => {
       this.installPrereq()
       .subscribe({
         complete: () => {
-          console.log('am i here', anax, nodeId, css, token)
+          console.log('am i here', anax, nodeId, css, typeof css, token)
           this.installHznCli(anax, nodeId, css, token)
           .subscribe({
             complete: () => {
@@ -111,12 +111,115 @@ export class Utils {
       })
     });  
   }
-  autoSetup(configFile: string) {
-    if(!configFile || configFile.length == 0) {
-      return of('Please provide --config_file name');
-    }
+  updateConfig(configFile: string) {
     return new Observable((observer) => {
-      if(existsSync(configFile)) {
+      try {
+        const pEnv: any = process.env;
+        let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
+        const config = jsonfile.readFileSync(configFile);
+        if(this.invalidTemplate(config)) {
+          observer.next('')
+          observer.complete()
+        }
+        const orgId = config['org']['HZN_ORG_ID'];
+        const envHzn = configTemplate.envHzn;
+        
+        if(!hznJson[orgId]) {
+          hznJson[orgId] = {}
+        }
+        Object.keys(envHzn).forEach((key) => {
+          if(!hznJson[orgId][key]) {
+            hznJson[orgId][key] = {}
+          }
+          let obj = envHzn[key]
+          if(config[keyMap[key]]) {
+            Object.keys(config[keyMap[key]]).forEach((configKey) => {
+              if(obj[configKey]) {
+                hznJson[orgId][key][configKey] = config[keyMap[key]][configKey] ? config[keyMap[key]][configKey] : obj[configKey]
+              }
+              pEnv[configKey] = config[keyMap[key]][configKey]
+            })  
+          } 
+          Object.keys(obj).forEach(objKey => {
+            if(!hznJson[orgId][key][objKey]) {
+            hznJson[orgId][key][objKey] = config[keyMap[key]][objKey] ? config[keyMap[key]][objKey] : obj[objKey]
+            }
+          });
+          // Object.keys(obj).forEach((objKey) => {
+          //   hznJson[orgId][key][objKey] = config[keyMap[key]][objKey] ? config[keyMap[key]][objKey] : obj[objKey]
+          //   pEnv[objKey] = hznJson[orgId][key][objKey]
+          // })
+        })
+        // console.log(hznJson)
+        jsonfile.writeFileSync('.env-hzn.json', hznJson, {spaces: 2});
+        this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json && sudo chmod 766 ${this.hznConfig}/.env-hzn.json`).then(() => {
+          console.log(`config files updated for ${orgId}`)
+          observer.next()
+          observer.complete()
+        })
+      } catch(e) {
+        observer.next(e)
+        observer.complete()
+      }
+    })
+  }
+  autoRun(configFile: string, cliOnly = false) {
+    return new Observable((observer) => {
+      if(!configFile || configFile.length == 0) {
+        observer.next('Please provide --config_file name')
+        observer.complete()
+      } else {
+        this.updateConfig(configFile)
+        .subscribe({
+          complete: () => {
+            const pEnv: any = process.env;
+            const arg = 'hzn version'
+            this.shell(arg)
+            .subscribe({
+              next: (msg: string) => {
+                console.log('hzn is already installed, if you like to reinstall, please uninstallHorizon first.')
+                observer.next('')
+                observer.complete();      
+              },
+              error: (err) => {
+                // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
+                let action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
+                if(cliOnly) {
+                  action = this.installCliOnly(pEnv.ANAX)
+                } 
+                action
+                .subscribe({
+                  next: (msg) => console.log('next here'),
+                  complete: () => {
+                    console.log('done installing hzn cli.');
+                    observer.complete();
+                  },
+                  error: (err) => {
+                    console.log('err here')
+                    observer.error(err);
+                  }
+                })
+              }
+            })      
+          },
+          error: (err) => observer.error(err)
+        })
+      }
+    })
+  }
+  autoSetup(configFile: string) {
+    return this.autoRun(configFile, false)
+  }
+  autoSetupCliOnly(configFile: string) {
+    return this.autoRun(configFile, true)    
+  }  
+  autoSetup2(configFile: string) {
+    return new Observable((observer) => {
+      if(!configFile || configFile.length == 0) {
+        observer.next('Please provide --config_file name')
+        observer.complete()
+      }
+      else if(existsSync(configFile)) {
         try {
           const pEnv: any = process.env;
           let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
@@ -136,10 +239,23 @@ export class Utils {
               hznJson[orgId][key] = {}
             }
             let obj = envHzn[key]
-            Object.keys(obj).forEach((objKey) => {
+            if(config[keyMap[key]]) {
+              Object.keys(config[keyMap[key]]).forEach((configKey) => {
+                if(obj[configKey]) {
+                  hznJson[orgId][key][configKey] = config[keyMap[key]][configKey] ? config[keyMap[key]][configKey] : obj[configKey]
+                }
+                pEnv[configKey] = config[keyMap[key]][configKey]
+              })  
+            } 
+            Object.keys(obj).forEach(objKey => {
+              if(!hznJson[orgId][key][objKey]) {
               hznJson[orgId][key][objKey] = config[keyMap[key]][objKey] ? config[keyMap[key]][objKey] : obj[objKey]
-              pEnv[objKey] = hznJson[orgId][key][objKey]
-            })
+              }
+            });
+            // Object.keys(obj).forEach((objKey) => {
+            //   hznJson[orgId][key][objKey] = config[keyMap[key]][objKey] ? config[keyMap[key]][objKey] : obj[objKey]
+            //   pEnv[objKey] = hznJson[orgId][key][objKey]
+            // })
           })
           // console.log(hznJson)
           jsonfile.writeFileSync('.env-hzn.json', hznJson, {spaces: 2});
@@ -156,20 +272,25 @@ export class Utils {
               },
               error: (err) => {
                 if(err.toString().indexOf('command not found') > 0) {
-                  const answer = utils.promptCliOrAnax();
+                  const answer = this.promptCliOrAnax();
+                  // console.log(pEnv)
                   if(answer == 'Y') {
-                    utils.installCliOnly(pEnv.ANAX)
+                    console.log('yes here')
+                    this.installCliOnly(pEnv.ANAX)
                     .subscribe({
+                      next: (msg) => console.log('next here'),
                       complete: () => {
                         console.log('done installing hzn cli.');
                         observer.complete();
                       },
                       error: (err) => {
+                        console.log('err here')
                         observer.error(err);
                       }
                     })  
                   } else {
-                    this.preInstallHznCli(pEnv.HZN_NODE_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
+                    console.log(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
+                    this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
                     .subscribe({
                       complete: () => {
                         console.log('done installing hzn.');
@@ -391,10 +512,10 @@ export class Utils {
   }
   cleanUp() {
     console.log('cleaning up', existsSync(`${this.etcDefault}/horizon`), existsSync(this.etcHorizon), this.etcHorizon)
-    let arg = existsSync(`${process.cwd()}/agent-install.cfg`) ? `rm ${process.cwd()}/agent-install.* -y && ` : ''
-    arg += existsSync(this.etcHorizon) ? `sudo rm -rf ${this.etcHorizon} -y && ` : ''
-    arg += existsSync(`${this.etcDefault}/horizon`) ? `sudo rm ${this.etcDefault}/horizon && `: ''
-    arg += existsSync(`${this.homePath}/.hzn`) ? `rm -rf ${this.homePath}/.hzn -y && ` : ''
+    let arg = existsSync(`${process.cwd()}/agent-install.cfg`) ? `sudo rm ${process.cwd()}/agent-install.* -f -y || true && ` : ''
+    arg += existsSync(this.etcHorizon) ? `sudo rm -rf ${this.etcHorizon} -y || true && ` : ''
+    arg += existsSync(`${this.etcDefault}/horizon`) ? `sudo rm ${this.etcDefault}/horizon || true && `: ''
+    arg += existsSync(`${this.homePath}/.hzn`) ? `sudo rm -rf ${this.homePath}/.hzn -y || true && ` : ''
     arg += ':'
     return this.shell(arg)
   }
@@ -403,6 +524,7 @@ export class Utils {
     console.log(tarFile, process.cwd())
     process.env['INPUT_FILE_PATH'] = process.cwd()
     if(anax && anax.indexOf('open-horizon') > 0) {
+      anax = anax.replace('/agent-install.sh', '')
       const arg = `curl -sSL https://github.com/open-horizon/anax/releases/latest/download/${tarFile} -o ${tarFile} && tar -zxvf ${tarFile}`
       return this.shell(`${arg} && sudo curl -sSL ${anax}/agent-install.sh -o agent-install.sh && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -C`)
     } else {
@@ -410,15 +532,17 @@ export class Utils {
       return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' -C`)
     }    
   }
-  installHznCli(anax: string, id: string, css = true, deviceToken = '') {
+  installHznCli(anax: string, id: string, css = 'true', deviceToken = '') {
     const token = deviceToken.length > 0 ? deviceToken : 'some-device-token'
+    console.log(css, typeof css)
     let nodeId = id && id.length > 0 ? `-a ${id}:${token}` : `-a ${os.hostname}:${token}`;
     if(anax && anax.indexOf('open-horizon') > 0) {
       // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download
-      let tag = css ? 'css:' : 'anax:'
+      let tag = css === 'true' ? 'css:' : 'anax:'
       if(anax.indexOf('latest') < 0) {
         tag = anax.replace('download', 'tag')
       }
+      anax = anax.replace('/agent-install.sh', '')
       return this.shell(`sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} -k css: -c css:`)
     } else {
       // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data

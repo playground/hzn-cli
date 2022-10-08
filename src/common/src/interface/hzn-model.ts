@@ -13,7 +13,7 @@ export const promptForUpdate = [
   'publishMMSPattern', 'pushMMSImage', 'pushServiceImage', 'registerAgent'
 ];
 export const customRun = [
-  'autoSetup', 'cleanUp'
+  'autoSetup', 'autoSetupCliOnly', 'cleanUp'
 ];
 export const runDirectly = [
   'appendSupport', 'deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent'

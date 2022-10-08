@@ -83,7 +83,7 @@ class Utils {
             this.installPrereq()
                 .subscribe({
                 complete: () => {
-                    console.log('am i here');
+                    console.log('am i here', anax, nodeId, css, typeof css, token);
                     this.installHznCli(anax, nodeId, css, token)
                         .subscribe({
                         complete: () => {
@@ -109,12 +109,116 @@ class Utils {
             });
         });
     }
-    autoSetup(configFile) {
-        if (!configFile || configFile.length == 0) {
-            return (0, rxjs_1.of)('Please provide --config_file name');
-        }
+    updateConfig(configFile) {
         return new rxjs_1.Observable((observer) => {
-            if ((0, fs_1.existsSync)(configFile)) {
+            try {
+                const pEnv = process.env;
+                let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
+                const config = jsonfile_1.default.readFileSync(configFile);
+                if (this.invalidTemplate(config)) {
+                    observer.next('');
+                    observer.complete();
+                }
+                const orgId = config['org']['HZN_ORG_ID'];
+                const envHzn = interface_1.configTemplate.envHzn;
+                if (!hznJson[orgId]) {
+                    hznJson[orgId] = {};
+                }
+                Object.keys(envHzn).forEach((key) => {
+                    if (!hznJson[orgId][key]) {
+                        hznJson[orgId][key] = {};
+                    }
+                    let obj = envHzn[key];
+                    if (config[interface_1.keyMap[key]]) {
+                        Object.keys(config[interface_1.keyMap[key]]).forEach((configKey) => {
+                            if (obj[configKey]) {
+                                hznJson[orgId][key][configKey] = config[interface_1.keyMap[key]][configKey] ? config[interface_1.keyMap[key]][configKey] : obj[configKey];
+                            }
+                            pEnv[configKey] = config[interface_1.keyMap[key]][configKey];
+                        });
+                    }
+                    Object.keys(obj).forEach(objKey => {
+                        if (!hznJson[orgId][key][objKey]) {
+                            hznJson[orgId][key][objKey] = config[interface_1.keyMap[key]][objKey] ? config[interface_1.keyMap[key]][objKey] : obj[objKey];
+                        }
+                    });
+                    // Object.keys(obj).forEach((objKey) => {
+                    //   hznJson[orgId][key][objKey] = config[keyMap[key]][objKey] ? config[keyMap[key]][objKey] : obj[objKey]
+                    //   pEnv[objKey] = hznJson[orgId][key][objKey]
+                    // })
+                });
+                // console.log(hznJson)
+                jsonfile_1.default.writeFileSync('.env-hzn.json', hznJson, { spaces: 2 });
+                this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json && sudo chmod 766 ${this.hznConfig}/.env-hzn.json`).then(() => {
+                    console.log(`config files updated for ${orgId}`);
+                    observer.next();
+                    observer.complete();
+                });
+            }
+            catch (e) {
+                observer.next(e);
+                observer.complete();
+            }
+        });
+    }
+    autoRun(configFile, cliOnly = false) {
+        return new rxjs_1.Observable((observer) => {
+            if (!configFile || configFile.length == 0) {
+                observer.next('Please provide --config_file name');
+                observer.complete();
+            }
+            else {
+                this.updateConfig(configFile)
+                    .subscribe({
+                    complete: () => {
+                        const pEnv = process.env;
+                        const arg = 'hzn version';
+                        this.shell(arg)
+                            .subscribe({
+                            next: (msg) => {
+                                console.log('hzn is already installed, if you like to reinstall, please uninstallHorizon first.');
+                                observer.next('');
+                                observer.complete();
+                            },
+                            error: (err) => {
+                                // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
+                                let action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN);
+                                if (cliOnly) {
+                                    action = this.installCliOnly(pEnv.ANAX);
+                                }
+                                action
+                                    .subscribe({
+                                    next: (msg) => console.log('next here'),
+                                    complete: () => {
+                                        console.log('done installing hzn cli.');
+                                        observer.complete();
+                                    },
+                                    error: (err) => {
+                                        console.log('err here');
+                                        observer.error(err);
+                                    }
+                                });
+                            }
+                        });
+                    },
+                    error: (err) => observer.error(err)
+                });
+            }
+        });
+    }
+    autoSetup(configFile) {
+        return this.autoRun(configFile, false);
+    }
+    autoSetupCliOnly(configFile) {
+        return this.autoRun(configFile, true);
+    }
+    autoSetup2(configFile) {
+        return new rxjs_1.Observable((observer) => {
+            if (!configFile || configFile.length == 0) {
+                observer.next('Please provide --config_file name');
+                observer.complete();
+            }
+            else if ((0, fs_1.existsSync)(configFile)) {
                 try {
                     const pEnv = process.env;
                     let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
@@ -133,10 +237,23 @@ class Utils {
                             hznJson[orgId][key] = {};
                         }
                         let obj = envHzn[key];
-                        Object.keys(obj).forEach((objKey) => {
-                            hznJson[orgId][key][objKey] = config[interface_1.keyMap[key]][objKey] ? config[interface_1.keyMap[key]][objKey] : obj[objKey];
-                            pEnv[objKey] = hznJson[orgId][key][objKey];
+                        if (config[interface_1.keyMap[key]]) {
+                            Object.keys(config[interface_1.keyMap[key]]).forEach((configKey) => {
+                                if (obj[configKey]) {
+                                    hznJson[orgId][key][configKey] = config[interface_1.keyMap[key]][configKey] ? config[interface_1.keyMap[key]][configKey] : obj[configKey];
+                                }
+                                pEnv[configKey] = config[interface_1.keyMap[key]][configKey];
+                            });
+                        }
+                        Object.keys(obj).forEach(objKey => {
+                            if (!hznJson[orgId][key][objKey]) {
+                                hznJson[orgId][key][objKey] = config[interface_1.keyMap[key]][objKey] ? config[interface_1.keyMap[key]][objKey] : obj[objKey];
+                            }
                         });
+                        // Object.keys(obj).forEach((objKey) => {
+                        //   hznJson[orgId][key][objKey] = config[keyMap[key]][objKey] ? config[keyMap[key]][objKey] : obj[objKey]
+                        //   pEnv[objKey] = hznJson[orgId][key][objKey]
+                        // })
                     });
                     // console.log(hznJson)
                     jsonfile_1.default.writeFileSync('.env-hzn.json', hznJson, { spaces: 2 });
@@ -152,21 +269,26 @@ class Utils {
                             },
                             error: (err) => {
                                 if (err.toString().indexOf('command not found') > 0) {
-                                    const answer = _1.utils.promptCliOrAnax();
+                                    const answer = this.promptCliOrAnax();
+                                    // console.log(pEnv)
                                     if (answer == 'Y') {
-                                        _1.utils.installCliOnly(pEnv.ANAX)
+                                        console.log('yes here');
+                                        this.installCliOnly(pEnv.ANAX)
                                             .subscribe({
+                                            next: (msg) => console.log('next here'),
                                             complete: () => {
                                                 console.log('done installing hzn cli.');
                                                 observer.complete();
                                             },
                                             error: (err) => {
+                                                console.log('err here');
                                                 observer.error(err);
                                             }
                                         });
                                     }
                                     else {
-                                        this.preInstallHznCli(pEnv.HZN_NODE_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
+                                        console.log(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN);
+                                        this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
                                             .subscribe({
                                             complete: () => {
                                                 console.log('done installing hzn.');
@@ -393,10 +515,10 @@ class Utils {
     }
     cleanUp() {
         console.log('cleaning up', (0, fs_1.existsSync)(`${this.etcDefault}/horizon`), (0, fs_1.existsSync)(this.etcHorizon), this.etcHorizon);
-        let arg = (0, fs_1.existsSync)(`${process.cwd()}/agent-install.cfg`) ? `rm ${process.cwd()}/agent-install.* -y && ` : '';
-        arg += (0, fs_1.existsSync)(this.etcHorizon) ? `sudo rm -rf ${this.etcHorizon} -y && ` : '';
-        arg += (0, fs_1.existsSync)(`${this.etcDefault}/horizon`) ? `sudo rm ${this.etcDefault}/horizon && ` : '';
-        arg += (0, fs_1.existsSync)(`${this.homePath}/.hzn`) ? `rm -rf ${this.homePath}/.hzn -y && ` : '';
+        let arg = (0, fs_1.existsSync)(`${process.cwd()}/agent-install.cfg`) ? `sudo rm ${process.cwd()}/agent-install.* -f -y || true && ` : '';
+        arg += (0, fs_1.existsSync)(this.etcHorizon) ? `sudo rm -rf ${this.etcHorizon} -y || true && ` : '';
+        arg += (0, fs_1.existsSync)(`${this.etcDefault}/horizon`) ? `sudo rm ${this.etcDefault}/horizon || true && ` : '';
+        arg += (0, fs_1.existsSync)(`${this.homePath}/.hzn`) ? `sudo rm -rf ${this.homePath}/.hzn -y || true && ` : '';
         arg += ':';
         return this.shell(arg);
     }
@@ -405,6 +527,7 @@ class Utils {
         console.log(tarFile, process.cwd());
         process.env['INPUT_FILE_PATH'] = process.cwd();
         if (anax && anax.indexOf('open-horizon') > 0) {
+            anax = anax.replace('/agent-install.sh', '');
             const arg = `curl -sSL https://github.com/open-horizon/anax/releases/latest/download/${tarFile} -o ${tarFile} && tar -zxvf ${tarFile}`;
             return this.shell(`${arg} && sudo curl -sSL ${anax}/agent-install.sh -o agent-install.sh && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -C`);
         }
@@ -413,15 +536,17 @@ class Utils {
             return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' -C`);
         }
     }
-    installHznCli(anax, id, css = true, deviceToken = '') {
+    installHznCli(anax, id, css = 'true', deviceToken = '') {
         const token = deviceToken.length > 0 ? deviceToken : 'some-device-token';
+        console.log(css, typeof css);
         let nodeId = id && id.length > 0 ? `-a ${id}:${token}` : `-a ${os_1.default.hostname}:${token}`;
         if (anax && anax.indexOf('open-horizon') > 0) {
             // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download
-            let tag = css ? 'css:' : 'anax:';
+            let tag = css === 'true' ? 'css:' : 'anax:';
             if (anax.indexOf('latest') < 0) {
                 tag = anax.replace('download', 'tag');
             }
+            anax = anax.replace('/agent-install.sh', '');
             return this.shell(`sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} -k css: -c css:`);
         }
         else {
