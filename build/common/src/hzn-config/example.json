@@ -1,0 +1,34 @@
+{
+  "org": {
+    "HZN_ORG_ID": "examples",
+    "HZN_DEVICE_TOKEN": "",
+    "HZN_DEVICE_ID": "device-name",
+    "HZN_EXCHANGE_USER_AUTH": "************",
+    "HZN_EXCHANGE_URL": "http://xxx.xxx.xxx.xxx:3090/v1",
+    "HZN_FSS_CSSURL": "http://xxx.xxx.xxx.xxx:9443/",
+    "HZN_AGBOT_URL": "http://xxx.xxx.xxx.xxx:3111",
+    "HZN_SDO_SVC_URL": "http://xxx.xxx.xxx.xxx:9008/api",
+    "HZN_AGENT_PORT": "8510",
+    "HZN_CSS": false,
+    "ANAX": "https://github.com/open-horizon/anax/releases/latest/download/agent-install.sh"  
+  },
+  "service": {
+    "SERVICE_NAME": "chunk-saved-model-service",
+    "SERVICE_CONTAINER_NAME": "chunk-saved-model-service",
+    "SERVICE_VERSION": "1.0.0",
+    "SERVICE_VERSION_RANGE_UPPER": "1.0.0",
+    "SERVICE_VERSION_RANGE_LOWER": "1.0.0",
+    "SERVICE_CONTAINER_CREDS": "",
+    "VOLUME_MOUNT": "/mms-shared",
+    "MMS_SHARED_VOLUME": "mms_shared_volume",
+    "MMS_OBJECT_TYPE": "chunk_object_detection",
+    "MMS_OBJECT_ID": "chunk_config.json",
+    "MMS_OBJECT_FILE": "config/config.json",
+    "MMS_CONTAINER_CREDS": "",
+    "MMS_CONTAINER_NAME": "chunk-mms-service",
+    "MMS_SERVICE_NAME": "chunk-mms-service",
+    "MMS_SERVICE_VERSION": "1.0.1",
+    "MMS_SERVICE_FALLBACK_VERSION": "1.0.0",
+    "UPDATE_FILE_NAME": "model.zip"
+  }
+}
