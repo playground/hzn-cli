@@ -13,6 +13,7 @@ class Hzn {
         this.deploymentPolicyJson = '';
         this.servicePolicyJson = '';
         this.objectPolicyJson = '';
+        this.objectPatternJson = '';
         this.serviceDefinitionJson = '';
         this.servicePatternJson = '';
         this.utils = exports.utils;
@@ -45,6 +46,7 @@ class Hzn {
                     this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
                     this.servicePolicyJson = `${this.configPath}/service.policy.json`;
                     this.objectPolicyJson = `${this.configPath}/object.policy.json`;
+                    this.objectPatternJson = `${this.configPath}/object.pattern.json`;
                     this.param.policy = this.getPolicyInfo();
                     this.envVar.updateContainerAndServiceNames();
                     if (interface_1.promptForUpdate.indexOf(this.param.action) >= 0) {
@@ -203,6 +205,16 @@ class Hzn {
     publishMMSObject() {
         let arg = `hzn mms object publish --type=${this.objectType} --id=${this.objectId} --object=${this.objectFile} --pattern=${this.mmsPattern}`;
         return exports.utils.shell(arg, 'done publishing object', 'failed to publish object');
+    }
+    publishMMSObjectPattern() {
+        if (!this.mmsPattern || this.mmsPattern.length == 0) {
+            return (0, rxjs_1.of)('Please specify --pattern name');
+        }
+        else {
+            process.env.HZN_PATTERN = this.mmsPattern;
+            let arg = `hzn mms object publish -m ${this.objectPatternJson} -f ${this.objectFile}`;
+            return exports.utils.shell(arg, 'done publishing object', 'failed to publish object');
+        }
     }
     publishMMSObjectPolicy() {
         let arg = `hzn mms object publish -m ${this.objectPolicyJson} -f ${this.objectFile}`;
@@ -373,6 +385,9 @@ class Hzn {
     listAllServices() {
         return exports.utils.listAllServices(this.param);
     }
+    removeService() {
+        return this.param.name.length > 0 ? exports.utils.removeService(`${this.param.org}/${this.param.name}`) : (0, rxjs_1.of)('Please specify service name');
+    }
     isConfigured() {
         return exports.utils.isNodeConfigured();
     }
@@ -382,6 +397,12 @@ class Hzn {
     listNode() {
         return exports.utils.listNode(this.param);
     }
+    listNodes() {
+        return exports.utils.listNodes(this.param);
+    }
+    listOrg() {
+        return exports.utils.listOrg(this.param);
+    }
     listExchangeNode() {
         return exports.utils.listExchangeNode(this.param);
     }
@@ -390,6 +411,9 @@ class Hzn {
     }
     listObject() {
         return exports.utils.listObject(this.param);
+    }
+    removeObject() {
+        return exports.utils.removeObject(this.param);
     }
     listPolicy() {
         return exports.utils.listPolicy();

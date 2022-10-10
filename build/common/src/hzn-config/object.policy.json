@@ -1,27 +1,26 @@
 {
-  "objectID": "$MMS_OBJECT_ID",
-  "objectType": "$MMS_OBJECT_TYPE",
-  "destinationOrgID": "$HZN_ORG_ID",
-  "destinationPolicy": {
-      "properties": [
-          {
-              "type": "deployment",
-              "name": "homehub",
-              "value": "Home Automation"
-          }
-      ],
-      "constraints": [],
-      "services": [
-          {
-              "orgID": "$HZN_ORG_ID",
-              "arch": "$ARCH",
-              "serviceName": "$MMS_SERVICE_NAME",
-              "version": "$MMS_SERVICE_VERSION"
-          }
-      ]
-  },
-  "expiration": "",
-  "version": "1.0.0",
-  "description": "image demo with tensorflow models",
-  "activationTime": ""
-}
+    "objectID": "$MMS_OBJECT_ID",
+    "objectType": "$MMS_OBJECT_TYPE",
+    "destinationOrgID": "$HZN_ORG_ID",
+    "destinationPolicy": {
+        "properties": [
+            {
+                "type": "deployment",
+                "name": "workersafety",
+                "value": "Worker Safety"
+            }
+        ],
+        "services": [
+            {
+                "orgID": "$HZN_ORG_ID",
+                "arch": "*",
+                "serviceName": "$MMS_SERVICE_NAME",
+                "version": "1.0.0"
+            }
+        ]
+    },
+    "expiration": "",
+    "version": "1.0.0",
+    "description": "image demo with tensorflow models",
+    "activationTime": ""
+  }

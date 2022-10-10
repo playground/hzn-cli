@@ -9,62 +9,9 @@ const homePath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HO
 const hznConfig = `${homePath}/hzn-config`;
 const defaultConfig = __dirname;
 const constants = fs.constants;
+import { configTemplate } from "../src/common/src/interface";
 
-const template = {
-  envHzn:   {
-    "envVars": {
-      "SERVICE_NAME": "saved-model-service",
-      "SERVICE_CONTAINER_NAME": "saved-model-service",
-      "SERVICE_VERSION": "1.0.0",
-      "SERVICE_VERSION_RANGE_UPPER": "1.0.0",
-      "SERVICE_VERSION_RANGE_LOWER": "1.0.0",
-      "SERVICE_CONTAINER_CREDS": "",
-      "MMS_SERVICE_NAME": "mms-service",
-      "MMS_CONTAINER_NAME": "mms-service",
-      "MMS_SERVICE_VERSION": "1.0.0",
-      "MMS_SERVICE_FALLBACK_VERSION": "1.0.0",
-      "MMS_CONTAINER_CREDS": "",
-      "VOLUME_MOUNT": "/mms-shared",
-      "MMS_SHARED_VOLUME": "mms_shared_volume",
-      "MMS_OBJECT_TYPE": "object_detection",
-      "MMS_OBJECT_ID": "config.json",
-      "MMS_OBJECT_FILE": "config/config.json",
-      "UPDATE_FILE_NAME": "model.zip",
-      "EDGE_OWNER": "",
-      "EDGE_DEPLOY": ""
-    },
-    "credential": {
-      "HZN_EXCHANGE_USER_AUTH": "",
-      "HZN_EXCHANGE_URL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-exchange/v1",
-      "HZN_FSS_CSSURL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-css",
-      "ANAX": "api/v1/objects/IBM/agent_files/agent-install.sh/data"
-    },
-    "metaVars": {
-    }
-  },
-  envLocal: {
-    "YOUR_DOCKERHUB_ID": "",
-    "DOCKER_REGISTRY": "",
-    "DOCKER_TOKEN": "",
-    "HZN_EXCHANGE_USER_AUTH": "",
-    "HZN_EXCHANGE_URL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-exchange/v1",
-    "HZN_FSS_CSSURL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-css",
-    "HZN_CUSTOM_NODE_ID": "",
-    "DEFAULT_ORG": "biz",
-    "ANAX": "api/v1/objects/IBM/agent_files/agent-install.sh/data",
-    "ANAX_IN_CONTAINER": "true"
-  },
-  envSupport: {
-    "SUPPORTED_OS_APPEND": "",
-    "SUPPORTED_LINUX_DISTRO_APPEND": "",
-    "SUPPORTED_DEBIAN_VARIANTS_APPEND": "",
-    "SUPPORTED_DEBIAN_VERSION_APPEND": "",
-    "SUPPORTED_DEBIAN_ARCH_APPEND": "",
-    "SUPPORTED_REDHAT_VARIANTS_APPEND": "",
-    "SUPPORTED_REDHAT_VERSION_APPEND": "",
-    "SUPPORTED_REDHAT_ARCH_APPEND": ""
-  }
-}
+const template = configTemplate;
 
 const getPropsFromFile = (file) => {
   let props = {};

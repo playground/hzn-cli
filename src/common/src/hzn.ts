@@ -23,6 +23,7 @@ export class Hzn {
   deploymentPolicyJson: string = '';
   servicePolicyJson: string = '';
   objectPolicyJson: string = '';
+  objectPatternJson: string = '';
   serviceDefinitionJson: string = '';
   servicePatternJson: string = '';
   envVar: any;
@@ -66,6 +67,7 @@ export class Hzn {
           this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
           this.servicePolicyJson = `${this.configPath}/service.policy.json`;
           this.objectPolicyJson = `${this.configPath}/object.policy.json`;
+          this.objectPatternJson = `${this.configPath}/object.pattern.json`;
 
           this.param.policy = this.getPolicyInfo()
           this.envVar.updateContainerAndServiceNames()
@@ -223,6 +225,15 @@ export class Hzn {
   publishMMSObject() {
     let arg = `hzn mms object publish --type=${this.objectType} --id=${this.objectId} --object=${this.objectFile} --pattern=${this.mmsPattern}`
     return utils.shell(arg, 'done publishing object', 'failed to publish object');
+  }
+  publishMMSObjectPattern() {
+    if(!this.mmsPattern || this.mmsPattern.length == 0) {
+      return of('Please specify --pattern name') 
+    } else {
+      process.env.HZN_PATTERN = this.mmsPattern;
+      let arg = `hzn mms object publish -m ${this.objectPatternJson} -f ${this.objectFile}`
+      return utils.shell(arg, 'done publishing object', 'failed to publish object');  
+    }
   }
   publishMMSObjectPolicy() {
     let arg = `hzn mms object publish -m ${this.objectPolicyJson} -f ${this.objectFile}`
@@ -394,6 +405,9 @@ export class Hzn {
   listAllServices() {
     return utils.listAllServices(this.param);
   }
+  removeService() {
+    return this.param.name.length > 0 ? utils.removeService(`${this.param.org}/${this.param.name}`) : of('Please specify service name')
+  }
   isConfigured() {
     return utils.isNodeConfigured()
   }
@@ -403,6 +417,12 @@ export class Hzn {
   listNode() {
     return utils.listNode(this.param);
   }
+  listNodes() {
+    return utils.listNodes(this.param);
+  }
+  listOrg() {
+    return utils.listOrg(this.param);
+  }
   listExchangeNode() {
     return utils.listExchangeNode(this.param);
   }
@@ -411,6 +431,9 @@ export class Hzn {
   }
   listObject() {
     return utils.listObject(this.param);
+  }
+  removeObject() {
+    return utils.removeObject(this.param)
   }
   listPolicy() {
     return utils.listPolicy()

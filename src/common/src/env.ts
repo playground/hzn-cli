@@ -79,7 +79,7 @@ export class Env {
     pEnv.SERVICE_CONTAINER = `${pEnv.YOUR_DOCKERHUB_ID}/${container}_${pEnv.ARCH}:${pEnv.SERVICE_VERSION}`.replace(/\r?\n|\r/g, '')
   }
   updateContainerAndServiceNames() {
-    console.log('update', this.getEdgeDeploy(), this.getEdgeOwner())
+    console.log('update', this.getEdgeDeploy(), this.getEdgeOwner(), this.getServiceContainerName(), this.getServiceContainerName())
     if(this.getServiceContainerName() != this.getServiceName()) {
       this.setServiceContainer(`${this.getServiceContainerName()}:${this.getServiceVersion()}`)
     }
@@ -194,7 +194,7 @@ export class Env {
     return pEnv.HZN_CUSTOM_NODE_ID || null;
   }
   getHznCSS() {
-    return pEnv.HZN_CSS || false;
+    return pEnv.HZN_CSS;
   }
   getServiceFlags() {
     return pEnv.SERVICE_FLAGS || '--pull-image'

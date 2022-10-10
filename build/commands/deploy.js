@@ -13,7 +13,7 @@ const fs_1 = require("fs");
 exports.command = 'deploy <action>';
 exports.desc = 'Deploy <action> to Org <org>';
 let availableActions = 'Available actions:';
-interface_1.runDirectly.concat(interface_1.justRun).concat(interface_1.promptForUpdate).sort().forEach((action) => {
+interface_1.runDirectly.concat(interface_1.justRun).concat(interface_1.promptForUpdate).concat(interface_1.customRun).sort().forEach((action) => {
     availableActions += ` ${action}`;
 });
 const builder = (yargs) => yargs
@@ -27,7 +27,8 @@ const builder = (yargs) => yargs
     pattern: { type: 'string', desc: 'Pattern name' },
     watch: { type: 'string', desc: 'watch = true/false' },
     filter: { type: 'string', desc: 'filter search result = arm, amd64, arm64 & etc' },
-    skip_config_update: { type: 'string', desc: 'Do not prompt for config updates = true/false' }
+    skip_config_update: { type: 'string', desc: 'Do not prompt for config updates = true/false' },
+    config_file: { type: 'string', desc: 'Provide config json file for auto setup' }
 })
     .positional('action', {
     type: 'string',
@@ -38,7 +39,7 @@ exports.builder = builder;
 const handler = (argv) => {
     (0, clear_1.default)();
     console.log(chalk_1.default.greenBright(figlet_1.default.textSync('hzn-cli', { horizontalLayout: 'full' })));
-    const { action, org, config_path, name, object_type, object_id, object, pattern, watch, filter, skip_config_update } = argv;
+    const { action, org, config_path, name, object_type, object_id, object, pattern, watch, filter, skip_config_update, config_file } = argv;
     let env = org || '';
     const n = name || '';
     const objType = object_type || '';
@@ -62,7 +63,8 @@ const handler = (argv) => {
                 objectFile: object || '',
                 action: action,
                 watch: watch && watch === 'true' ? 'watch ' : '',
-                filter: filter
+                filter: filter,
+                configFile: config_file || ''
             };
             const hzn = new hzn_1.Hzn(hznModel);
             hzn.init()
@@ -109,9 +111,9 @@ const handler = (argv) => {
             console.log(`${configPath}/.env-hzn.json file not fouund.`);
         }
     };
-    if (action && skipInitialize.concat(interface_1.runDirectly).concat(interface_1.justRun).concat(interface_1.promptForUpdate).includes(action)) {
-        console.log(action, env);
+    if (action && skipInitialize.concat(interface_1.runDirectly).concat(interface_1.justRun).concat(interface_1.promptForUpdate).concat(interface_1.customRun).includes(action)) {
         if (interface_1.runDirectly.indexOf(action) >= 0) {
+            console.log(action, env);
             hzn_1.utils[action]()
                 .subscribe({
                 complete: () => process.exit(0),
@@ -121,7 +123,20 @@ const handler = (argv) => {
                 }
             });
         }
+        else if (interface_1.customRun.indexOf(action) >= 0) {
+            console.log(action);
+            hzn_1.utils[action](config_file)
+                .subscribe({
+                next: (msg) => console.log(msg),
+                complete: () => process.exit(0),
+                error: (err) => {
+                    console.log(err);
+                    process.exit(0);
+                }
+            });
+        }
         else {
+            console.log(action, env);
             hzn_1.utils.checkDefaultConfig()
                 .subscribe({
                 complete: () => {
