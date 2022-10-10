@@ -176,7 +176,7 @@ echo "==> Setting up hzn environment..."
 if [ "${ENV_SETUP}" = "All-In-One" ]
 then
 	echo "$ENV_SETUP, here we go."
-	oh deploy autoSetupCliOnly --config_file ${CONFIG_FILE}
+	oh deploy autoSetup --config_file ${CONFIG_FILE}
 elif [ "${ENV_SETUP}" = "CLI-Only" ]
 then
 	echo "$ENV_SETUP, here we go."
