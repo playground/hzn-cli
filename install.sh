@@ -111,47 +111,7 @@ select fav in "${configfile[@]}"; do
 done
 
 if [ -d "${HOME}/.nvm/.git" ]
-then echo "nvm installed"
-	#echo -e "==> Update npm to latest version, if this stuck then terminate (CTRL+C) the execution"
-	npm install -g npm
-
-	echo "==> Checking for versions"
-	nvm --version
-	node --version
-	npm --version
-
-	echo "==> Print binary paths"
-	which npm
-	which node
-
-	echo "==> List installed node versions"
-	nvm ls
-
-	nvm cache clear
-	echo "==> Now you're all setup and ready for development. If changes are yet to take effect in the current shell, try source ~/.bashrc or open a new shell"
-
-	echo "==> Installing oh cli"
-	npm i -g hzn-cli
-
-	echo "==> Checking oh version"
-	oh --version
-
-	echo "==> Setting up hzn environment..."
-	if [ "${ENV_SETUP}" = "All-In-One" ]
-	then
-		echo "$ENV_SETUP, here we go."
-		oh deploy autoSetupCliOnly --config_file ${CONFIG_FILE}
-	elif [ "${ENV_SETUP}" = "CLI-Only" ]
-	then
-		echo "$ENV_SETUP, here we go."
-		oh deploy autoSetupCliOnly --config_file ${CONFIG_FILE}
-	elif [ "${ENV_SETUP}" = "Anax-In-Container" ]
-	then
-		echo "$ENV_SETUP, here we go."
-	else
-		echo "Something went wrong...$ENV_SETUP"
-		break
-	fi
+then echo "nvm installed";
 else echo "nvm not installed"
 	# Define versions
 	INSTALL_NODE_VER=16
@@ -184,4 +144,47 @@ else echo "nvm not installed"
 	nvm alias default $INSTALL_NODE_VER
 	nvm use default
 
+	echo "==> Checking for versions"
+	nvm --version
+
+	echo "==> List installed node versions"
+	nvm ls
+
+	nvm cache clear
+	echo "==> Now you're all setup and ready for development. If changes are yet to take effect in the current shell, try source ~/.bashrc or open a new shell"
+
+fi
+
+echo "==> Print binary paths"
+which npm
+which node
+
+echo "==> Checking for versions"
+node --version
+npm --version
+
+echo -e "==> Update npm to latest version, if this stuck then terminate (CTRL+C) the execution"
+npm install -g npm
+
+echo "==> Installing oh cli"
+npm i -g hzn-cli
+
+echo "==> Checking oh version"
+oh --version
+
+echo "==> Setting up hzn environment..."
+if [ "${ENV_SETUP}" = "All-In-One" ]
+then
+	echo "$ENV_SETUP, here we go."
+	oh deploy autoSetupCliOnly --config_file ${CONFIG_FILE}
+elif [ "${ENV_SETUP}" = "CLI-Only" ]
+then
+	echo "$ENV_SETUP, here we go."
+	oh deploy autoSetupCliOnly --config_file ${CONFIG_FILE}
+elif [ "${ENV_SETUP}" = "Anax-In-Container" ]
+then
+	echo "$ENV_SETUP, here we go."
+else
+	echo "Something went wrong...$ENV_SETUP"
+	break
 fi
