@@ -14,7 +14,7 @@ import { utils } from '.';
 import { fork } from 'child_process';
 import { URL } from 'url';
 import { Env } from './env';
-import { IHznParam, installPrompt, installTar, configTemplate, keyMap } from './interface';
+import { IHznParam, installPrompt, installTar, configTemplate, keyMap, SetupEnvironment, HorizonTemplate, HorizonKeyMap } from './interface';
 
 const env = process.env.npm_config_env || 'biz';
 const isBoolean = [
@@ -58,6 +58,7 @@ export class Utils {
   etcHorizon = '/etc/horizon';
   homePath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
   hznConfig = `${this.homePath}/hzn-config`;
+  configJson = {};
   constructor() {
   }
   init() {
@@ -111,6 +112,114 @@ export class Utils {
       })
     });  
   }
+  installCliInContainer(configJson: any) {
+    return new Observable((observer) => {
+      if(configJson.cliInContainer) {
+        this.shell(configJson.cliInContainer)
+        .subscribe({
+          complete: () => {
+            observer.next()
+            observer.complete();
+          },
+          error: (err) => {
+            observer.error(err);
+          }
+        })
+      } else {
+        console.log('Missing cliInContainer property in configuration file')
+        observer.error();
+      }
+    })
+  }
+  createHorizonSystemFiles(configJson: any) {
+    return new Observable((observer) => {
+      let content = ''
+      const pEnv = process.env
+      Object.keys(HorizonTemplate).forEach((key) => {
+        console.log(key)
+        if(content.length > 0) content += '\n'
+        if(pEnv[key]) {
+          content += `${key}=${pEnv[key]}`          
+        } else {
+          if(HorizonKeyMap[key]) {
+            pEnv[key] = HorizonTemplate[key]
+            content += `${key}=${pEnv[key]}`          
+          }
+          if(key == 'HZN_NODE_ID') {
+            content += `${key}=${pEnv.HZN_DEVICE_ID}` 
+          }
+        }    
+      })
+      console.log(content)
+      if(content.length > 0) {
+        writeFileSync(`${process.cwd()}/horizon`, content);
+        this.copyFile(`sudo mv ${process.cwd()}/horizon /var/horizon`).then(() => {
+          const folders = configJson.folders;
+          if(existsSync(pEnv.CONFIG_CERT_PATH) && folders) {
+            this.copyFile(`sudo cp ${pEnv.CONFIG_CERT_PATH} ${pEnv.HZN_MGMT_HUB_CERT_PATH}`).then(() => {
+              let arg = ''
+              folders.forEach((folder) => {
+                if(arg.length > 0) {
+                  arg += ' && '
+                }
+                arg += `sudo mkdir -p ${folder}`
+              })
+              this.shell(arg)
+              .subscribe({
+                complete: () => {
+                  observer.next()
+                  observer.complete()    
+                },
+                error: (err) => observer.error(err)
+              }) 
+            })
+          } else {
+            console.log(folders ? `CONFIG_CERT_PATH env var not found.` : `Missing folders property in config.`)
+            observer.error('')
+          }    
+        })
+      } else {
+        console.log(`Something went wrong, unable to create /var/horizon file`)
+        observer.error('')
+      }
+    })  
+  }
+  installAnaxInContainer(configJson: any) {
+    return new Observable((observer) => {
+      this.installPrereq()
+      .subscribe({
+        complete: () => {
+          this.createHorizonSystemFiles(configJson)
+          .subscribe({
+            complete: () => {
+              if(configJson.anaxInContainer) {
+                let containerStr = this.replaceEnvTokens(configJson.anaxInContainer, configJson.org)
+                this.shell(containerStr)
+                .subscribe({
+                  complete: () => {
+                    observer.complete();
+                  },
+                  error: (err) => {
+                    observer.error(err);
+                  }
+                })  
+              } else {
+                console.log('Missing anaxInContainer property in configuration file')
+                observer.error();
+              }
+            },
+            error: (err) => {
+              observer.error(err);
+            }
+          })        
+        },
+        error: (err) => {
+          console.log('am i here')
+          observer.error(err);
+        }
+      })
+    })
+  }
   updateConfig(configFile: string) {
     return new Observable((observer) => {
       try {
@@ -154,16 +263,17 @@ export class Utils {
         jsonfile.writeFileSync('.env-hzn.json', hznJson, {spaces: 2});
         this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json && sudo chmod 766 ${this.hznConfig}/.env-hzn.json`).then(() => {
           console.log(`config files updated for ${orgId}`)
-          observer.next()
+          this.configJson = config;
+          observer.next(config)
           observer.complete()
         })
       } catch(e) {
-        observer.next(e)
-        observer.complete()
+        console.log(e)
+        observer.error(e)
       }
     })
   }
-  autoRun(configFile: string, cliOnly = false) {
+  autoRun(configFile: string, setup: SetupEnvironment) {
     return new Observable((observer) => {
       if(!configFile || configFile.length == 0) {
         observer.next('Please provide --config_file name')
@@ -171,6 +281,7 @@ export class Utils {
       } else {
         this.updateConfig(configFile)
         .subscribe({
+          next: (json) => this.configJson = json,
           complete: () => {
             const pEnv: any = process.env;
             const arg = 'hzn version'
@@ -184,9 +295,23 @@ export class Utils {
               error: (err) => {
                 // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
                 let action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
-                if(cliOnly) {
-                  action = this.installCliOnly(pEnv.ANAX)
-                } 
+                switch(setup) {
+                  case SetupEnvironment.autoSetup:
+                    action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
+                    break;
+                  case SetupEnvironment.autoSetupCliOnly:
+                    action = this.installCliOnly(pEnv.ANAX)
+                    break;
+                  case SetupEnvironment.autoSetupAnaxInContainer:
+                    action = this.installAnaxInContainer(this.configJson)
+                    break;
+                  case SetupEnvironment.autoSetupCliInContainer:
+                    action = this.installCliInContainer(this.configJson)
+                    break;
+                    case SetupEnvironment.autoSetupContainer:
+                    action = this.installAnaxInContainer(this.configJson)
+                    break;
+                }
                 action
                 .subscribe({
                   next: (msg) => console.log('next here'),
@@ -207,118 +332,29 @@ export class Utils {
       }
     })
   }
+  replaceEnvTokens(input: string, tokens: any) {
+    let envTokens = {}
+    Object.keys(tokens).forEach((key) => {
+      envTokens[key] = process.env[key]
+    })
+    this.tokenReplace(input, envTokens)
+    return input;
+  }
   autoSetup(configFile: string) {
-    return this.autoRun(configFile, false)
+    return this.autoRun(configFile, SetupEnvironment.autoSetup)
   }
   autoSetupCliOnly(configFile: string) {
-    return this.autoRun(configFile, true)    
-  }  
-  autoSetup2(configFile: string) {
-    return new Observable((observer) => {
-      if(!configFile || configFile.length == 0) {
-        observer.next('Please provide --config_file name')
-        observer.complete()
-      }
-      else if(existsSync(configFile)) {
-        try {
-          const pEnv: any = process.env;
-          let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
-          const config = jsonfile.readFileSync(configFile);
-          if(this.invalidTemplate(config)) {
-            observer.next('')
-            observer.complete()
-          }
-          const orgId = config['org']['HZN_ORG_ID'];
-          const envHzn = configTemplate.envHzn;
-          
-          if(!hznJson[orgId]) {
-            hznJson[orgId] = {}
-          }
-          Object.keys(envHzn).forEach((key) => {
-            if(!hznJson[orgId][key]) {
-              hznJson[orgId][key] = {}
-            }
-            let obj = envHzn[key]
-            if(config[keyMap[key]]) {
-              Object.keys(config[keyMap[key]]).forEach((configKey) => {
-                if(obj[configKey]) {
-                  hznJson[orgId][key][configKey] = config[keyMap[key]][configKey] ? config[keyMap[key]][configKey] : obj[configKey]
-                }
-                pEnv[configKey] = config[keyMap[key]][configKey]
-              })  
-            } 
-            Object.keys(obj).forEach(objKey => {
-              if(!hznJson[orgId][key][objKey]) {
-              hznJson[orgId][key][objKey] = config[keyMap[key]][objKey] ? config[keyMap[key]][objKey] : obj[objKey]
-              }
-            });
-            // Object.keys(obj).forEach((objKey) => {
-            //   hznJson[orgId][key][objKey] = config[keyMap[key]][objKey] ? config[keyMap[key]][objKey] : obj[objKey]
-            //   pEnv[objKey] = hznJson[orgId][key][objKey]
-            // })
-          })
-          // console.log(hznJson)
-          jsonfile.writeFileSync('.env-hzn.json', hznJson, {spaces: 2});
-          this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json && sudo chmod 766 ${this.hznConfig}/.env-hzn.json`).then(() => {
-            console.log(`config files updated for ${orgId}`)
-
-            const arg = 'hzn version'
-            this.shell(arg)
-            .subscribe({
-              next: (msg: string) => {
-                console.log('hzn is already installed, if you like to reinstall, please uninstallHorizon first.')
-                observer.next('')
-                observer.complete();      
-              },
-              error: (err) => {
-                if(err.toString().indexOf('command not found') > 0) {
-                  const answer = this.promptCliOrAnax();
-                  // console.log(pEnv)
-                  if(answer == 'Y') {
-                    console.log('yes here')
-                    this.installCliOnly(pEnv.ANAX)
-                    .subscribe({
-                      next: (msg) => console.log('next here'),
-                      complete: () => {
-                        console.log('done installing hzn cli.');
-                        observer.complete();
-                      },
-                      error: (err) => {
-                        console.log('err here')
-                        observer.error(err);
-                      }
-                    })  
-                  } else {
-                    console.log(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
-                    this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
-                    .subscribe({
-                      complete: () => {
-                        console.log('done installing hzn.');
-                        observer.complete();
-                      },
-                      error: (err) => {
-                        observer.error(err);
-                      }
-                    })  
-                  }
-                  observer.next('')
-                  observer.complete();      
-                } else {
-                  observer.error(err);
-                }
-              }
-            })
-          })
-        } catch(e) {
-          observer.next(e)
-          observer.complete()
-        }
-      } else {
-        observer.next(`${configFile} not found.`)
-        observer.complete()
-      }
-    })  
+    return this.autoRun(configFile, SetupEnvironment.autoSetupCliOnly)    
   }
+  autoSetupAnaxInContainer(configFile: string) {
+    return this.autoRun(configFile, SetupEnvironment.autoSetupAnaxInContainer)    
+  }
+  autoSetupCliInContainer(configFile: string) {
+    return this.autoRun(configFile, SetupEnvironment.autoSetupCliInContainer)    
+  }
+  autoSetupContainer(configFile: string) {
+    return this.autoRun(configFile, SetupEnvironment.autoSetupContainer)    
+  }  
   getEtcDefault() {
     return this.etcDefault
   }
