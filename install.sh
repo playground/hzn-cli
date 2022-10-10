@@ -167,7 +167,7 @@ echo -e "==> Update npm to latest version, if this stuck then terminate (CTRL+C)
 npm install -g npm
 
 echo "==> Installing oh cli"
-npm i -g hzn-cli
+npm i -g ts-node hzn-cli
 
 echo "==> Checking oh version"
 oh --version
