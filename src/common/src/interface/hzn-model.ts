@@ -1,18 +1,22 @@
 export const justRun = [
   'addRemoteNodePolicy',
   'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'installAnaxInContainer', 'listAgreement', 
-  'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodePattern', 'listObject', 'listPattern', 
-  'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'removeDeploymentPolicy', 'removeOrg', 
-  'removeNode', 'reviewPolicy', 'reviewServiceDefinition'
+  'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodes', 'listOrg', 'listNodePattern', 'listObject', 'listPattern', 
+  'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'publishMMSObject', 'publishMMSObjectPattern', 'publishMMSObjectPolicy', 
+  'removeDeploymentPolicy', 'removeObject', 'removeOrg', 
+  'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition'
 ];
 export const promptForUpdate = [
   'addPolicy', 'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister', 
   'buildMMSImage', 'buildServiceImage', 'editDeploymentPoicy', 'editNodePolicy', 'editServicePolicy', 'publishAndRegister', 
   'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService', 
-  'publishMMSPattern', 'publishMMSObject', 'publishMMSObjectPolicy', 'pushMMSImage', 'pushServiceImage', 'registerAgent', 'unregisterAgent'
+  'publishMMSPattern', 'pushMMSImage', 'pushServiceImage', 'registerAgent'
+];
+export const customRun = [
+  'autoSetup', 'autoSetupCliOnly', 'cleanUp'
 ];
 export const runDirectly = [
-  'appendSupport', 'deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon'
+  'appendSupport', 'deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent'
 ];
 export const loop = [
   'addPolicy', 'editPolicy', 'reviewPolicy', 'reviewServiceDefinition'
@@ -34,6 +38,72 @@ export const supportPlatform = {
   "amd64": "linux/amd64",
   "arm": "linux/arm/v7"
 }
+
+export const keyMap = {
+  org: 'credential',
+  service: 'envVars',
+  metaVars: 'metaVars',
+  credential: 'org',
+  envVars: 'service'
+}
+
+export const configTemplate = {
+  envHzn:   {
+    "envVars": {
+      "SERVICE_NAME": "saved-model-service",
+      "SERVICE_CONTAINER_NAME": "saved-model-service",
+      "SERVICE_VERSION": "1.0.0",
+      "SERVICE_VERSION_RANGE_UPPER": "1.0.0",
+      "SERVICE_VERSION_RANGE_LOWER": "1.0.0",
+      "SERVICE_CONTAINER_CREDS": "",
+      "MMS_SERVICE_NAME": "mms-service",
+      "MMS_CONTAINER_NAME": "mms-service",
+      "MMS_SERVICE_VERSION": "1.0.0",
+      "MMS_SERVICE_FALLBACK_VERSION": "1.0.0",
+      "MMS_CONTAINER_CREDS": "",
+      "VOLUME_MOUNT": "/mms-shared",
+      "MMS_SHARED_VOLUME": "mms_shared_volume",
+      "MMS_OBJECT_TYPE": "object_detection",
+      "MMS_OBJECT_ID": "config.json",
+      "MMS_OBJECT_FILE": "config/config.json",
+      "UPDATE_FILE_NAME": "model.zip",
+      "EDGE_OWNER": "",
+      "EDGE_DEPLOY": ""
+    },
+    "credential": {
+      "HZN_ORG_ID": "",
+      "HZN_EXCHANGE_USER_AUTH": "",
+      "HZN_EXCHANGE_URL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-exchange/v1",
+      "HZN_FSS_CSSURL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-css",
+      "ANAX": "api/v1/objects/IBM/agent_files/agent-install.sh/data"
+    },
+    "metaVars": {
+    }
+  },
+  envLocal: {
+    "YOUR_DOCKERHUB_ID": "",
+    "DOCKER_REGISTRY": "",
+    "DOCKER_TOKEN": "",
+    "HZN_EXCHANGE_USER_AUTH": "",
+    "HZN_EXCHANGE_URL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-exchange/v1",
+    "HZN_FSS_CSSURL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-css",
+    "HZN_CUSTOM_NODE_ID": "",
+    "DEFAULT_ORG": "biz",
+    "ANAX": "api/v1/objects/IBM/agent_files/agent-install.sh/data",
+    "ANAX_IN_CONTAINER": "true"
+  },
+  envSupport: {
+    "SUPPORTED_OS_APPEND": "",
+    "SUPPORTED_LINUX_DISTRO_APPEND": "",
+    "SUPPORTED_DEBIAN_VARIANTS_APPEND": "",
+    "SUPPORTED_DEBIAN_VERSION_APPEND": "",
+    "SUPPORTED_DEBIAN_ARCH_APPEND": "",
+    "SUPPORTED_REDHAT_VARIANTS_APPEND": "",
+    "SUPPORTED_REDHAT_VERSION_APPEND": "",
+    "SUPPORTED_REDHAT_ARCH_APPEND": ""
+  }
+}
+
 export interface IHznParam {
   org: string;
   configPath: string;
@@ -46,6 +116,7 @@ export interface IHznParam {
   watch?: string;
   filter?: string;
   policy: IPolicy;
+  configFile: string;
 }
 export interface IPolicy {
   envVar: string;

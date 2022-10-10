@@ -1,6 +1,6 @@
 {
   "name": "hzn-cli",
-  "version": "0.3.6",
+  "version": "0.3.11",
   "description": "Open Horizon CLI toolkit helps streamline the process of preparing node agents and perform tasks between orgs environments",
   "main": "./build/index.js",
   "bin": {
@@ -13,9 +13,11 @@
     "local": "npm run build && npm i -g && oh && npm run postinstall",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install",
     "publishObjectPolicy": "oh deploy publishMMSObjectPolicy --object=/Users/jeff/Downloads/demo-model/demo/version1/model.zip",
+    "listObject": "hzn mms object list -t sweetest1.fyre.ibm.com.chunk_object_detection -i chunk_config.json",
     "install:anax-hzn-cli": "bin/hzn-install.sh",
     "install:anax-in-container": "container=true bin/hzn-install.sh",
-    "postinstall": "bin/install.js",
+    "postinstall": "ts-node bin/install.ts",
+    "ts-node": "ts-node bin/install.ts",
     "precommit": "npm run build",
     "test": "jest --coverage",
     "test:watch": "jest --watch && npm run build:watch",
@@ -46,9 +48,7 @@
     "onchange": "^7.1.0",
     "serve": "^13.0.2",
     "source-map-support": "^0.5.21",
-    "ts-jest": "^27.1.4",
-    "ts-node": "^10.5.0",
-    "typescript": "^4.5.5"
+    "ts-jest": "^27.1.4"
   },
   "dependencies": {
     "chalk": "^4.1.2",
@@ -60,6 +60,8 @@
     "prompt": "^1.3.0",
     "prompt-sync": "^4.2.0",
     "rxjs": "^7.3.0",
+    "ts-node": "^10.5.0",
+    "typescript": "^4.5.5",
     "yargs": "^17.1.1"
   }
 }

@@ -1,6 +1,6 @@
 import type { Arguments, CommandBuilder } from 'yargs';
 import { Hzn, utils } from '../common/src/hzn';
-import { IHznParam, justRun, runDirectly, promptForUpdate, loop } from '../common/src/interface';
+import { IHznParam, justRun, runDirectly, promptForUpdate, customRun, loop } from '../common/src/interface';
 import chalk from 'chalk';
 import clear from 'clear';
 import figlet from 'figlet';
@@ -18,12 +18,13 @@ type Options = {
   watch: string | undefined;
   filter: string | undefined;
   skip_config_update: string | undefined;
+  config_file: string | undefined;
 };
 export const command: string = 'deploy <action>';
 export const desc: string = 'Deploy <action> to Org <org>';
 
 let availableActions = 'Available actions:'
-runDirectly.concat(justRun).concat(promptForUpdate).sort().forEach((action) => {
+runDirectly.concat(justRun).concat(promptForUpdate).concat(customRun).sort().forEach((action) => {
   availableActions += ` ${action}`
 }) 
 export const builder: CommandBuilder<Options, Options> = (yargs) =>
@@ -38,7 +39,8 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
       pattern: {type: 'string', desc: 'Pattern name'},
       watch: {type: 'string', desc: 'watch = true/false'},
       filter: {type: 'string', desc: 'filter search result = arm, amd64, arm64 & etc'},
-      skip_config_update: {type: 'string', desc: 'Do not prompt for config updates = true/false'}
+      skip_config_update: {type: 'string', desc: 'Do not prompt for config updates = true/false'},
+      config_file: {type: 'string', desc: 'Provide config json file for auto setup'}
     })
     .positional('action', {
       type: 'string', 
@@ -53,7 +55,7 @@ export const handler = (argv: Arguments<Options>): void => {
       figlet.textSync('hzn-cli', { horizontalLayout: 'full' })
     )
   );
-  const { action, org, config_path, name, object_type, object_id, object, pattern, watch, filter, skip_config_update } = argv;
+  const { action, org, config_path, name, object_type, object_id, object, pattern, watch, filter, skip_config_update, config_file } = argv;
   let env = org || '';
   const n = name || '';
   const objType = object_type || '';
@@ -78,7 +80,8 @@ export const handler = (argv: Arguments<Options>): void => {
         objectFile: object || '',
         action: action,
         watch: watch && watch === 'true' ? 'watch ' : '',
-        filter: filter
+        filter: filter,
+        configFile: config_file || ''
       } as IHznParam;
       const hzn = new Hzn(hznModel);
   
@@ -124,9 +127,9 @@ export const handler = (argv: Arguments<Options>): void => {
     }  
   }
 
-  if(action && skipInitialize.concat(runDirectly).concat(justRun).concat(promptForUpdate).includes(action)) {
-    console.log(action, env);
+  if(action && skipInitialize.concat(runDirectly).concat(justRun).concat(promptForUpdate).concat(customRun).includes(action)) {
     if(runDirectly.indexOf(action) >= 0) {
+      console.log(action, env);
       utils[action]()
       .subscribe({
         complete: () => process.exit(0),
@@ -135,7 +138,19 @@ export const handler = (argv: Arguments<Options>): void => {
           process.exit(0);  
         }
       })
+    } else if(customRun.indexOf(action) >= 0) {
+      console.log(action);
+      utils[action](config_file)
+      .subscribe({
+        next: (msg) => console.log(msg),
+        complete: () => process.exit(0),
+        error: (err) => {
+          console.log(err);      
+          process.exit(0);  
+        }
+      })
     } else {
+      console.log(action, env);
       utils.checkDefaultConfig()
       .subscribe({
         complete: () => {

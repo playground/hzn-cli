@@ -11,6 +11,7 @@ declare type Options = {
     watch: string | undefined;
     filter: string | undefined;
     skip_config_update: string | undefined;
+    config_file: string | undefined;
 };
 export declare const command: string;
 export declare const desc: string;

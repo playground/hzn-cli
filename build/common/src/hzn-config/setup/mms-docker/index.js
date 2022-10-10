@@ -48,7 +48,7 @@ class Mms {
     this.auth = `${this.user}:${this.password}`;
     // this.tempFile = `.${this.objectId}`; 
 
-    this.essObjectList = `curl -sSL -u ${this.auth} ${this.cert} ${this.socket} ${this.baseUrl}/${this.objectType}`;
+    this.essObjectList = `curl -sSL -w "%{http_code}" -u ${this.auth} ${this.cert} ${this.socket} ${this.baseUrl}/${this.objectType}`;
     // this.essObjectGet = `curl -sSL -u ${this.auth} ${this.cert} ${this.socket} ${this.baseUrl}/${this.objectType}/${this.objectType}/data -o ${this.sharedVolume}/${this.tempFile}`;
     // this.essObjectReceived = `curl -sSL -X PUT -u ${this.auth} ${this.cert} ${this.socket} ${this.baseUrl}/${this.objectType}/${this.objectId}/received`;
     this.monitor(this.timeout);
@@ -76,38 +76,44 @@ class Mms {
           console.log(stdout)
           console.log(`done curling`);
           if(stdout && stdout.length > 0) {
-            let config = JSON.parse(stdout);
-            // console.log(config[this.objectType]);
-            if(config.length > 0 && !config[0].deleted) {
-              this.objectId = config[0].objectID;
-              this.tempFile = `.${this.objectId}`; 
-              this.essObjectGet = `curl -sSL -u ${this.auth} ${this.cert} ${this.socket} ${this.baseUrl}/${this.objectType}/${this.objectId}/data -o ${this.sharedVolume}/${this.tempFile}`;
-              this.essObjectReceived = `curl -sSL -X PUT -u ${this.auth} ${this.cert} ${this.socket} ${this.baseUrl}/${this.objectType}/${this.objectId}/received`;                
-              exec(this.essObjectGet, {maxBuffer: 1024 * 2000}, (err, stdout, stderr) => {
-                if(!err) {
-                  console.log('ESS object file copy was successful.');
-                  exec(this.essObjectReceived, {maxBuffer: 1024 * 2000}, async (err, stdout, stderr) => {
-                    if(!err) {
-                      console.log('ESS object received command was successful.');
-                      if(zipFile.isZipSync(`${this.sharedVolume}/${this.tempFile}`)) {                    
-                        console.log('zipped file has arrived...')
-                        await this.moveFileToShare(`${this.sharedVolume}/${this.tempFile}`, `${this.sharedVolume}/${this.updateFilename}`);
-                      } else {                                                                            
-                        console.log('json')
-                        let json = JSON.parse(readFileSync(`${this.sharedVolume}/${this.tempFile}`));                                                               
-                        console.log(json.hello)
-                        if(json.url) {
-                          await this.writeFileToShare(json.url, `${this.sharedVolume}/${this.tempFile}`, `${this.sharedVolume}/${this.updateFilename}`);
-                        }
-                      }   
-                    } else {
-                      console.log("ERROR ", err);
-                    }
-                  });      
-                } else {
-                  console.log("ERROR ", err);
-                }
-              });
+            try {
+              const config = JSON.parse(stdout);
+              // console.log(config[this.objectType]);
+              if(config.length > 0 && !config[0].deleted) {
+                this.objectId = config[0].objectID;
+                this.tempFile = `.${this.objectId}`; 
+                this.essObjectGet = `curl -sSL -u ${this.auth} ${this.cert} ${this.socket} ${this.baseUrl}/${this.objectType}/${this.objectId}/data -o ${this.sharedVolume}/${this.tempFile}`;
+                this.essObjectReceived = `curl -sSL -X PUT -u ${this.auth} ${this.cert} ${this.socket} ${this.baseUrl}/${this.objectType}/${this.objectId}/received`;                
+                exec(this.essObjectGet, {maxBuffer: 1024 * 2000}, (err, stdout, stderr) => {
+                  if(!err) {
+                    console.log('ESS object file copy was successful.');
+                    exec(this.essObjectReceived, {maxBuffer: 1024 * 2000}, async (err, stdout, stderr) => {
+                      if(!err) {
+                        console.log('ESS object received command was successful.');
+                        if(zipFile.isZipSync(`${this.sharedVolume}/${this.tempFile}`)) {                    
+                          console.log('zipped file has arrived...')
+                          await this.moveFileToShare(`${this.sharedVolume}/${this.tempFile}`, `${this.sharedVolume}/${this.updateFilename}`);
+                        } else {                                                                            
+                          console.log('json')
+                          let json = JSON.parse(readFileSync(`${this.sharedVolume}/${this.tempFile}`));                                                               
+                          console.log(json.hello)
+                          if(json.url) {
+                            await this.writeFileToShare(json.url, `${this.sharedVolume}/${this.tempFile}`, `${this.sharedVolume}/${this.updateFilename}`);
+                          }
+                        }   
+                      } else {
+                        console.log("ERROR ", err);
+                      }
+                    });      
+                  } else {
+                    console.log("ERROR ", err);
+                  }
+                });
+              } else {
+                console.log('something went wrong...')
+              }                
+            } catch (error) {
+              console.log(error)
             }
           }
         } else {

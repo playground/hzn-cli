@@ -14,7 +14,7 @@ import { utils } from '.';
 import { fork } from 'child_process';
 import { URL } from 'url';
 import { Env } from './env';
-import { IHznParam, installPrompt, installTar } from './interface';
+import { IHznParam, installPrompt, installTar, configTemplate, keyMap } from './interface';
 
 const env = process.env.npm_config_env || 'biz';
 const isBoolean = [
@@ -45,6 +45,7 @@ const mustHave = [
   "MMS_SERVICE_FALLBACK_VERSION",
   "UPDATE_FILE_NAME"
 ];
+// ToDo: use configTemplate instead
 const credentialVars = [
   "HZN_EXCHANGE_USER_AUTH",
   "HZN_EXCHANGE_URL",
@@ -60,6 +61,263 @@ export class Utils {
   constructor() {
   }
   init() {
+  }
+  invalidTemplate(json) {
+    let matched = true;
+    const envHzn = configTemplate.envHzn;
+    Object.keys(json).some((key) => {
+      Object.keys(envHzn[keyMap[key]]).some((skey) => {
+        matched = json[key][skey] != undefined ? true : false
+        if(mustHave[skey] && !matched) {
+          console.log(`Invalid:  Missing ${skey}`)
+        }
+        return !matched
+      })
+      return !matched;
+    });
+    return matched;
+  }
+  randomString() {
+    return Math.random().toString(36).slice(2)
+  }
+  preInstallHznCli(orgId: string, anax: string, nodeId: string, css: string, token: string) {
+    return new Observable((observer) => {
+      this.installPrereq()
+      .subscribe({
+        complete: () => {
+          console.log('am i here', anax, nodeId, css, typeof css, token)
+          this.installHznCli(anax, nodeId, css, token)
+          .subscribe({
+            complete: () => {
+              this.createHznKey(orgId, this.randomString())
+              .subscribe({
+                complete: () => {
+                  observer.complete();
+                },
+                error: (err) => {
+                  observer.error(err);
+                }
+              })
+            },
+            error: (err) => {
+              observer.error(err);
+            }
+          })        
+        },
+        error: (err) => {
+          console.log('am i here')
+          observer.error(err);
+        }
+      })
+    });  
+  }
+  updateConfig(configFile: string) {
+    return new Observable((observer) => {
+      try {
+        const pEnv: any = process.env;
+        let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
+        const config = jsonfile.readFileSync(configFile);
+        if(this.invalidTemplate(config)) {
+          observer.next('')
+          observer.complete()
+        }
+        const orgId = config['org']['HZN_ORG_ID'];
+        const envHzn = configTemplate.envHzn;
+        
+        if(!hznJson[orgId]) {
+          hznJson[orgId] = {}
+        }
+        Object.keys(envHzn).forEach((key) => {
+          if(!hznJson[orgId][key]) {
+            hznJson[orgId][key] = {}
+          }
+          let obj = envHzn[key]
+          if(config[keyMap[key]]) {
+            Object.keys(config[keyMap[key]]).forEach((configKey) => {
+              if(obj[configKey]) {
+                hznJson[orgId][key][configKey] = config[keyMap[key]][configKey] ? config[keyMap[key]][configKey] : obj[configKey]
+              }
+              pEnv[configKey] = config[keyMap[key]][configKey]
+            })  
+          } 
+          Object.keys(obj).forEach(objKey => {
+            if(!hznJson[orgId][key][objKey]) {
+            hznJson[orgId][key][objKey] = config[keyMap[key]][objKey] ? config[keyMap[key]][objKey] : obj[objKey]
+            }
+          });
+          // Object.keys(obj).forEach((objKey) => {
+          //   hznJson[orgId][key][objKey] = config[keyMap[key]][objKey] ? config[keyMap[key]][objKey] : obj[objKey]
+          //   pEnv[objKey] = hznJson[orgId][key][objKey]
+          // })
+        })
+        // console.log(hznJson)
+        jsonfile.writeFileSync('.env-hzn.json', hznJson, {spaces: 2});
+        this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json && sudo chmod 766 ${this.hznConfig}/.env-hzn.json`).then(() => {
+          console.log(`config files updated for ${orgId}`)
+          observer.next()
+          observer.complete()
+        })
+      } catch(e) {
+        observer.next(e)
+        observer.complete()
+      }
+    })
+  }
+  autoRun(configFile: string, cliOnly = false) {
+    return new Observable((observer) => {
+      if(!configFile || configFile.length == 0) {
+        observer.next('Please provide --config_file name')
+        observer.complete()
+      } else {
+        this.updateConfig(configFile)
+        .subscribe({
+          complete: () => {
+            const pEnv: any = process.env;
+            const arg = 'hzn version'
+            this.shell(arg)
+            .subscribe({
+              next: (msg: string) => {
+                console.log('hzn is already installed, if you like to reinstall, please uninstallHorizon first.')
+                observer.next('')
+                observer.complete();      
+              },
+              error: (err) => {
+                // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
+                let action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
+                if(cliOnly) {
+                  action = this.installCliOnly(pEnv.ANAX)
+                } 
+                action
+                .subscribe({
+                  next: (msg) => console.log('next here'),
+                  complete: () => {
+                    console.log('done installing hzn cli.');
+                    observer.complete();
+                  },
+                  error: (err) => {
+                    console.log('err here')
+                    observer.error(err);
+                  }
+                })
+              }
+            })      
+          },
+          error: (err) => observer.error(err)
+        })
+      }
+    })
+  }
+  autoSetup(configFile: string) {
+    return this.autoRun(configFile, false)
+  }
+  autoSetupCliOnly(configFile: string) {
+    return this.autoRun(configFile, true)    
+  }  
+  autoSetup2(configFile: string) {
+    return new Observable((observer) => {
+      if(!configFile || configFile.length == 0) {
+        observer.next('Please provide --config_file name')
+        observer.complete()
+      }
+      else if(existsSync(configFile)) {
+        try {
+          const pEnv: any = process.env;
+          let hznJson = JSON.parse(readFileSync(`${this.hznConfig}/.env-hzn.json`).toString());
+          const config = jsonfile.readFileSync(configFile);
+          if(this.invalidTemplate(config)) {
+            observer.next('')
+            observer.complete()
+          }
+          const orgId = config['org']['HZN_ORG_ID'];
+          const envHzn = configTemplate.envHzn;
+          
+          if(!hznJson[orgId]) {
+            hznJson[orgId] = {}
+          }
+          Object.keys(envHzn).forEach((key) => {
+            if(!hznJson[orgId][key]) {
+              hznJson[orgId][key] = {}
+            }
+            let obj = envHzn[key]
+            if(config[keyMap[key]]) {
+              Object.keys(config[keyMap[key]]).forEach((configKey) => {
+                if(obj[configKey]) {
+                  hznJson[orgId][key][configKey] = config[keyMap[key]][configKey] ? config[keyMap[key]][configKey] : obj[configKey]
+                }
+                pEnv[configKey] = config[keyMap[key]][configKey]
+              })  
+            } 
+            Object.keys(obj).forEach(objKey => {
+              if(!hznJson[orgId][key][objKey]) {
+              hznJson[orgId][key][objKey] = config[keyMap[key]][objKey] ? config[keyMap[key]][objKey] : obj[objKey]
+              }
+            });
+            // Object.keys(obj).forEach((objKey) => {
+            //   hznJson[orgId][key][objKey] = config[keyMap[key]][objKey] ? config[keyMap[key]][objKey] : obj[objKey]
+            //   pEnv[objKey] = hznJson[orgId][key][objKey]
+            // })
+          })
+          // console.log(hznJson)
+          jsonfile.writeFileSync('.env-hzn.json', hznJson, {spaces: 2});
+          this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json && sudo chmod 766 ${this.hznConfig}/.env-hzn.json`).then(() => {
+            console.log(`config files updated for ${orgId}`)
+
+            const arg = 'hzn version'
+            this.shell(arg)
+            .subscribe({
+              next: (msg: string) => {
+                console.log('hzn is already installed, if you like to reinstall, please uninstallHorizon first.')
+                observer.next('')
+                observer.complete();      
+              },
+              error: (err) => {
+                if(err.toString().indexOf('command not found') > 0) {
+                  const answer = this.promptCliOrAnax();
+                  // console.log(pEnv)
+                  if(answer == 'Y') {
+                    console.log('yes here')
+                    this.installCliOnly(pEnv.ANAX)
+                    .subscribe({
+                      next: (msg) => console.log('next here'),
+                      complete: () => {
+                        console.log('done installing hzn cli.');
+                        observer.complete();
+                      },
+                      error: (err) => {
+                        console.log('err here')
+                        observer.error(err);
+                      }
+                    })  
+                  } else {
+                    console.log(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
+                    this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
+                    .subscribe({
+                      complete: () => {
+                        console.log('done installing hzn.');
+                        observer.complete();
+                      },
+                      error: (err) => {
+                        observer.error(err);
+                      }
+                    })  
+                  }
+                  observer.next('')
+                  observer.complete();      
+                } else {
+                  observer.error(err);
+                }
+              }
+            })
+          })
+        } catch(e) {
+          observer.next(e)
+          observer.complete()
+        }
+      } else {
+        observer.next(`${configFile} not found.`)
+        observer.complete()
+      }
+    })  
   }
   getEtcDefault() {
     return this.etcDefault
@@ -90,6 +348,19 @@ export class Utils {
       })
     })  
   }
+  removeService(name: string) {
+    return new Observable((observer) => {
+      const arg = `yes | hzn exchange service remove ${name}`
+      const msg = `\nAre you sure you want to remove ${name} service from the Horizon Exchange? [y/N]:`
+      this.areYouSure(arg, msg)
+      .subscribe({
+        complete: () => {
+          observer.complete()
+        },
+        error: (err) => observer.error(err)
+      })
+    })  
+  }
   listAllServices(param: IHznParam) {
     const arg = param.name.length > 0 ? `hzn exchange service list ${param.name} --org ${param.org}` : `hzn exchange service list --org ${param.org}`;
     return param.name.length > 0 ? this.shell(arg, 'commande executed successfully', 'failed to execute command', false) : this.shell(arg)
@@ -100,6 +371,14 @@ export class Utils {
   }
   listNode(param: IHznParam) {
     const arg = 'hzn node list';
+    return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
+  }
+  listNodes(param: IHznParam) {
+    const arg = 'hzn exchange node list';
+    return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
+  }
+  listOrg(param: IHznParam) {
+    const arg = 'hzn exchange org list';
     return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
   }
   listExchangeNode(param: IHznParam) {
@@ -170,9 +449,23 @@ export class Utils {
     const arg = param.name.length > 0 ? `${param.watch}hzn mms object list ${param.name}` : `${param.watch}hzn mms object list -t ${param.objectType} -i ${param.objectId} -d`;
     return utils.shell(arg, 'done listing object', 'failed to list object', false);
   }
+  removeObject(param: IHznParam) {
+    return new Observable((observer) => {
+      const object = `--type=${param.objectType} --id=${param.objectId}`
+      const arg = `yes | hzn mms object delete ${object}`
+      const msg = `\nAre you sure you want to remove object with ${object} from MMS? [y/N]:`
+      this.areYouSure(arg, msg)
+      .subscribe({
+        complete: () => {
+          observer.complete()
+        },
+        error: (err) => observer.error(err)
+      })
+    })  
+  }
   createHznKey(org: string, id: string) {
     if(org && id) {
-      return this.shell(`hzn key create ${org} ${id}`);  
+      return this.shell(`hzn key create ${org} ${id} -f`);  
     } else {
       console.log('please provide both <YOUR_DOCKERHUB_ID> and <HZN_ORG_ID> in .env-hzn.json')
       return of();
@@ -203,16 +496,27 @@ export class Utils {
     return this.shell(`sudo apt-get -y update && sudo apt-get -yq install jq curl git`);
   }
   installPrereq() {
+    if(process.platform == 'darwin') {
+      return of('MacOS...')
+    }
     return new Observable((observer) => {
       this.aptUpdate()
       .subscribe({
-        complete: () => observer.complete(),
+        complete: () => {
+          console.log('am i here')
+          observer.complete()
+        },
         error: () => observer.complete() // Ignore errors
       })
     });
   }
   cleanUp() {
-    const arg = `rm -rf ${this.homePath}/.hzn && sudo rm ${process.cwd()}/agent-install* && sudo rm ${this.etcDefault}/horizon && sudo rm -rf ${this.etcHorizon}`
+    console.log('cleaning up', existsSync(`${this.etcDefault}/horizon`), existsSync(this.etcHorizon), this.etcHorizon)
+    let arg = existsSync(`${process.cwd()}/agent-install.cfg`) ? `sudo rm ${process.cwd()}/agent-install.* -f -y || true && ` : ''
+    arg += existsSync(this.etcHorizon) ? `sudo rm -rf ${this.etcHorizon} -y || true && ` : ''
+    arg += existsSync(`${this.etcDefault}/horizon`) ? `sudo rm ${this.etcDefault}/horizon || true && `: ''
+    arg += existsSync(`${this.homePath}/.hzn`) ? `sudo rm -rf ${this.homePath}/.hzn -y || true && ` : ''
+    arg += ':'
     return this.shell(arg)
   }
   installCliOnly(anax: string) {
@@ -220,22 +524,26 @@ export class Utils {
     console.log(tarFile, process.cwd())
     process.env['INPUT_FILE_PATH'] = process.cwd()
     if(anax && anax.indexOf('open-horizon') > 0) {
+      anax = anax.replace('/agent-install.sh', '')
       const arg = `curl -sSL https://github.com/open-horizon/anax/releases/latest/download/${tarFile} -o ${tarFile} && tar -zxvf ${tarFile}`
       return this.shell(`${arg} && sudo curl -sSL ${anax}/agent-install.sh -o agent-install.sh && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -C`)
     } else {
       // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data
-      return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:'`)
+      return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' -C`)
     }    
   }
-  installHznCli(anax: string, id: null, css = true, deviceToken = 'some-device-token') {
-    let nodeId = id ? `-a ${id}:${deviceToken}` : '';
+  installHznCli(anax: string, id: string, css = 'true', deviceToken = '') {
+    const token = deviceToken.length > 0 ? deviceToken : 'some-device-token'
+    console.log(css, typeof css)
+    let nodeId = id && id.length > 0 ? `-a ${id}:${token}` : `-a ${os.hostname}:${token}`;
     if(anax && anax.indexOf('open-horizon') > 0) {
       // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download
-      let tag = css ? 'css:' : 'anax:'
+      let tag = css === 'true' ? 'css:' : 'anax:'
       if(anax.indexOf('latest') < 0) {
         tag = anax.replace('download', 'tag')
       }
-      return this.shell(`sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} -k css: -c css: -p IBM/pattern-ibm.helloworld -w '*' -T 120`)
+      anax = anax.replace('/agent-install.sh', '')
+      return this.shell(`sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} -k css: -c css:`)
     } else {
       // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data
       return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`)
@@ -259,7 +567,13 @@ export class Utils {
                 error: (err) => observer.complete() //ignore error when files do not exist    
               })
             },
-            error: (err) => observer.error(err)
+            error: (err) => {
+              this.cleanUp()
+              .subscribe({
+                complete: () => observer.complete(),
+                error: (err) => observer.complete() //ignore error when files do not exist    
+              })
+            }
           })
         } else {
           observer.complete()
@@ -1027,26 +1341,33 @@ export class Utils {
       resolve(res)   
     })
   }
-  unregisterAgent() {
+  unregisterAgent(msg = 'Would you like to unregister this agent?  Y/n ') {
     return new Observable((observer) => {
-      utils.isNodeConfigured()
-      .subscribe({
-        next: (res) => {
-          if(res) {
-            let arg = `hzn unregister -frDv`;
-            utils.shell(arg, 'done unregistering agent', 'failed to unregister agent')
-            .subscribe({
-              next: (res) => observer.complete(),
-              error: (e) => observer.error(e)
-            })      
-          } else {
-            console.log('no need to unregister...')
-            observer.complete()
-          }
-        }, error(e) {
+      console.log(`\n${msg}`)
+      prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
+        if(question.answer.toUpperCase() === 'Y') {
+          utils.isNodeConfigured()
+          .subscribe({
+            next: (res) => {
+              if(res) {
+                let arg = `hzn unregister -frDv`;
+                utils.shell(arg, 'done unregistering agent', 'failed to unregister agent', false)
+                .subscribe({
+                  next: (res) => observer.complete(),
+                  error: (e) => observer.error(e)
+                })      
+              } else {
+                console.log('no need to unregister...')
+                observer.complete()
+              }
+            }, error(e) {
+              observer.complete()
+            }
+          })
+        } else {
           observer.complete()
         }
-      })
+      })  
     })  
   }
   promptEditPolicy() {
@@ -1091,6 +1412,9 @@ export class Utils {
     let arg = `hzn mms object publish -m ${param.policy.objectPolicyJson} -f ${param.objectFile}`
     return utils.shell(arg, 'done publishing object', 'failed to publish object', false);
   }
+  addObjectPattern(param: IHznParam) {
+    // Todo 
+  }
   addNodePolicy(param: IHznParam, policy: any) {
     return new Observable((observer) => {
       this.unregisterAgent().subscribe({
@@ -1098,7 +1422,10 @@ export class Utils {
           let arg = param.name.length > 0 ? `hzn register --policy ${policy.nodePolicyJson} --name ${param.name}` : `hzn register --policy ${policy.nodePolicyJson}`
           utils.shell(arg, 'done registering agent with policy', 'failed to register agent')
           .subscribe({
-            complete: () => observer.complete(),
+            complete: () => {
+              observer.next()
+              observer.complete()
+            },  
             error: (err) => observer.error(err)
           })
         }, error: (err) => {
@@ -1290,7 +1617,7 @@ export class Utils {
   isNodeConfigured() {
     return new Observable((observer) => {
       let arg = `hzn node list`
-      this.shell(arg)
+      this.shell(arg, "Successfully list node", "Failed to list node")
       .subscribe({
         next: (res: any) => {
           console.log(typeof res == 'string')
@@ -1323,9 +1650,53 @@ export class Utils {
         }
       });
       child.stdout.pipe(process.stdout);
+      child.stdout.on('data', (data) => {
+        if(data.indexOf(`Run 'hzn agreement list' to view`) > 0) {
+          console.log(success);
+          observer.next(prnStdout ? data : '');
+          observer.complete();
+        }
+      })
       child.on('data', (data) => {
         console.log(data)
       })  
+    });
+  }
+  shell2(arg: string, success='command executed successfully', error='command failed', prnStdout=true, options={maxBuffer: 1024 * 2000}) {
+    return new Observable((observer) => {
+      console.log(arg);
+      let output = ''
+      let child = exec(arg, options, (err: any, stdout: any, stderr: any) => {
+        if(!err) {
+          // console.log(stdout);
+          console.log(success);
+          observer.next(prnStdout ? stdout : '');
+          observer.complete();
+        } else {
+          console.log(`${error}: ${err}`);
+          observer.error(err);
+        }
+      });
+      child.stdout.pipe(process.stdout);
+      // child.on('data', (data) => {
+      //   console.log('$$$$###@@@@', data)
+      //   if(data.indexOf('done registering agent with policy') >= 0 || data.indexOf('Horizon node is registered. Workload services should begin executing shortly.') >= 0) {
+      //     observer.next('');
+      //     observer.complete();
+      //   }
+      //   console.log('$$$$###@@@@')
+      // })
+      child.on('exit', (code) => {
+        console.log('child process exited with code ' + code.toString());
+        observer.next(prnStdout ? output : '');
+        observer.complete();
+      })  
+      child.stdout.on('data', (data) => {
+        output += data
+      })
+      child.stderr.on('data', (data) => {
+        console.log('stderr: ' + data.toString());
+      })
     });
   }
 }

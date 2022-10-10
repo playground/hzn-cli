@@ -1,0 +1,10 @@
+{
+  "objectID": "$MMS_OBJECT_ID",
+  "objectType": "$MMS_OBJECT_TYPE",
+  "destinationOrgID": "$HZN_ORG_ID",
+  "destinationType": "$HZN_PATTERN",
+  "expiration": "",
+  "version": "1.0.0",
+  "description": "image demo with tensorflow models",
+  "activationTime": ""
+}

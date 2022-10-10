@@ -9,13 +9,24 @@ export declare class Utils {
     hznConfig: string;
     constructor();
     init(): void;
+    invalidTemplate(json: any): boolean;
+    randomString(): string;
+    preInstallHznCli(orgId: string, anax: string, nodeId: string, css: string, token: string): Observable<unknown>;
+    updateConfig(configFile: string): Observable<unknown>;
+    autoRun(configFile: string, cliOnly?: boolean): Observable<unknown>;
+    autoSetup(configFile: string): Observable<unknown>;
+    autoSetupCliOnly(configFile: string): Observable<unknown>;
+    autoSetup2(configFile: string): Observable<unknown>;
     getEtcDefault(): string;
     getHznConfig(): string;
     listAgreement(param: IHznParam): Observable<unknown>;
     listService(param: IHznParam): Observable<unknown>;
+    removeService(name: string): Observable<unknown>;
     listAllServices(param: IHznParam): Observable<unknown>;
     listPattern(name: string): Observable<unknown>;
     listNode(param: IHznParam): Observable<unknown>;
+    listNodes(param: IHznParam): Observable<unknown>;
+    listOrg(param: IHznParam): Observable<unknown>;
     listExchangeNode(param: IHznParam): Observable<unknown>;
     listPolicy(): Observable<unknown>;
     listExchangeNodePolicy(param: IHznParam): Observable<unknown>;
@@ -25,6 +36,7 @@ export declare class Utils {
     areYouSure(arg: string, msg: string): Observable<unknown>;
     removeNode(name: string): Observable<unknown>;
     listObject(param: IHznParam): Observable<unknown>;
+    removeObject(param: IHznParam): Observable<unknown>;
     createHznKey(org: string, id: string): Observable<unknown>;
     checkConfigState(): Observable<unknown>;
     listNodePattern(): Observable<unknown>;
@@ -35,7 +47,7 @@ export declare class Utils {
     installPrereq(): Observable<unknown>;
     cleanUp(): Observable<unknown>;
     installCliOnly(anax: string): Observable<unknown>;
-    installHznCli(anax: string, id: null, css?: boolean, deviceToken?: string): Observable<unknown>;
+    installHznCli(anax: string, id: string, css?: string, deviceToken?: string): Observable<unknown>;
     uninstallHorizon(msg?: string): Observable<unknown>;
     setupManagementHub(): Observable<unknown>;
     copyFile(arg: string): Promise<unknown>;
@@ -69,12 +81,13 @@ export declare class Utils {
     policyToProps(policy: string): any;
     promptType(propName: string, res: any, el: any): void;
     goPrompt(props: any, propName: string): Promise<unknown>;
-    unregisterAgent(): Observable<unknown>;
+    unregisterAgent(msg?: string): Observable<unknown>;
     promptEditPolicy(): void;
     addPolicy(param: IHznParam, policy: any): Observable<unknown>;
     addDeploymentPolicy(policy: any): Observable<unknown>;
     addServicePolicy(policy: any): Observable<unknown>;
     addObjectPolicy(param: IHznParam): Observable<unknown>;
+    addObjectPattern(param: IHznParam): void;
     addNodePolicy(param: IHznParam, policy: any): Observable<unknown>;
     addRemoteNodePolicy(param: IHznParam, policy: any): Observable<unknown>;
     promptPolicySelection(msg?: string): any;
@@ -91,6 +104,9 @@ export declare class Utils {
     editTypePolicy(filename: string): Observable<unknown>;
     isNodeConfigured(): Observable<unknown>;
     shell(arg: string, success?: string, error?: string, prnStdout?: boolean, options?: {
+        maxBuffer: number;
+    }): Observable<unknown>;
+    shell2(arg: string, success?: string, error?: string, prnStdout?: boolean, options?: {
         maxBuffer: number;
     }): Observable<unknown>;
 }
