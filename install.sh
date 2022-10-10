@@ -6,6 +6,111 @@ set -e
 
 # Tested on Ubuntu, MacOS
 # @playground
+ENV_SETUP=""
+CONFIG_FILE=""
+PS3='Choose your environment setup: '
+envsetup=("All-In-One" "CLI-Only" "Run-In-Container" "Confirm" "Quit")
+select fav in "${envsetup[@]}"; do
+	case $fav in
+		"All-In-One")
+			echo "$fav runs both CLI & Agent on host machine, choose <Confirm> to continue setup."
+			ENV_SETUP=$fav
+			# optionally call a function or run some code here
+			;;
+		"CLI-Only")
+			echo "$fav runs CLI on host and Agent in container, choose <Confirm> to continue setup."
+			ENV_SETUP=$fav
+			# optionally call a function or run some code here
+			;;
+		"Run-In-Container")
+			echo "$fav, CLI and Agent both runs in its own container, choose <Confirm> to continue setup."
+			ENV_SETUP=$fav
+			# optionally call a function or run some code here
+			;;
+		"Confirm")
+			if [ "${ENV_SETUP}" = "" ]
+			then
+				echo "You have not chosen an env setup yet."
+			else
+				echo "You have chosen $ENV_SETUP"
+				break
+			fi
+			# optionally call a function or run some code here
+			;;
+		"Quit")
+	    echo "User requested exit"
+	    exit
+	    ;;
+    *) echo "invalid option $REPLY";;
+  esac
+done
+
+PS3='Continue with setup: '
+configfile=("Config-File" "Confirm" "Help" "Quit")
+select fav in "${configfile[@]}"; do
+	case $fav in
+		"Config-File")
+			echo "Please provide absolute path to configuration file, then choose <Confirm> to continue setup."
+			read CONFIG_FILE
+			# optionally call a function or run some code here
+			;;
+		"Help")
+			echo "You would need to provide your configuration json file with the following info."
+			echo '\033[1;33m'
+			echo '  {'
+			echo '    "org": {'
+    	echo '    "HZN_ORG_ID": "examples",'
+			echo '    "HZN_DEVICE_TOKEN": "",'
+			echo '    "HZN_DEVICE_ID": "device-name",'
+			echo '    "HZN_EXCHANGE_USER_AUTH": "************",'
+			echo '    "HZN_EXCHANGE_URL": "http://xxx.xxx.xxx.xxx:3090/v1",'
+			echo '    "HZN_FSS_CSSURL": "http://xxx.xxx.xxx.xxx:9443/",'
+			echo '    "HZN_AGBOT_URL": "http://xxx.xxx.xxx.xxx:3111",'
+			echo '    "HZN_SDO_SVC_URL": "http://xxx.xxx.xxx.xxx:9008/api",'
+			echo '    "HZN_AGENT_PORT": "8510",'
+			echo '    "HZN_CSS": false,'
+			echo '    "ANAX": "https://github.com/open-horizon/anax/releases/latest/download/agent-install.sh"'  
+			echo '  },'
+			echo '  "service": {'
+			echo '    "SERVICE_NAME": "chunk-saved-model-service",'
+			echo '    "SERVICE_CONTAINER_NAME": "chunk-saved-model-service",'
+			echo '    "SERVICE_VERSION": "1.0.0",'
+			echo '    "SERVICE_VERSION_RANGE_UPPER": "1.0.0",'
+			echo '    "SERVICE_VERSION_RANGE_LOWER": "1.0.0",'
+			echo '    "SERVICE_CONTAINER_CREDS": "",'
+			echo '    "VOLUME_MOUNT": "/mms-shared",'
+			echo '    "MMS_SHARED_VOLUME": "mms_shared_volume",'
+			echo '    "MMS_OBJECT_TYPE": "chunk_object_detection",'
+			echo '    "MMS_OBJECT_ID": "chunk_config.json",'
+			echo '    "MMS_OBJECT_FILE": "config/config.json",'
+			echo '    "MMS_CONTAINER_CREDS": "",'
+			echo '    "MMS_CONTAINER_NAME": "chunk-mms-service",'
+			echo '    "MMS_SERVICE_NAME": "chunk-mms-service",'
+			echo '    "MMS_SERVICE_VERSION": "1.0.1",'
+			echo '    "MMS_SERVICE_FALLBACK_VERSION": "1.0.0",'
+			echo '    "UPDATE_FILE_NAME": "model.zip"'
+			echo '  }'
+			echo '\033[0m'
+			;;
+		"Confirm")
+			if [ "${CONFIG_FILE}" = "" ]
+			then
+				echo "You have not provided your configuration file."
+			else
+				echo "You have provided $CONFIG_FILE for this setup"
+				break
+			fi
+			# optionally call a function or run some code here
+			;;
+		"Quit")
+	    echo "User requested exit"
+	    exit
+	    ;;
+    *) echo "invalid option $REPLY";;
+  esac
+done
+
+exit
 
 # Define versions
 INSTALL_NODE_VER=16
@@ -63,7 +168,18 @@ echo "==> Checking oh version"
 oh --version
 
 echo "==> Setting up hzn environment..."
-echo "Input HZN_ORG_ID"
-org_id="myorg"
-read org_id
-oh deploy setup --org ${org_id}
+if [ "${ENV_SETUP}" = "All-In-One" ]
+then
+	echo "$ENV_SETUP, here we go."
+	oh deploy autoSetupCliOnly --config_file ${CONFIG_FILE}
+elif [ "${ENV_SETUP}" = "CLI-Only" ]
+then
+	echo "$ENV_SETUP, here we go."
+	oh deploy autoSetupCliOnly --config_file ${CONFIG_FILE}
+elif [ "${ENV_SETUP}" = "Anax-In-Container" ]
+then
+	echo "$ENV_SETUP, here we go."
+else
+	echo "Something went wrong...$ENV_SETUP"
+	break
+fi
