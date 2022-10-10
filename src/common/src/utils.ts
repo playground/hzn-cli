@@ -522,7 +522,6 @@ export class Utils {
   installCliOnly(anax: string) {
     const tarFile = process.platform == 'darwin' ? installTar['darwin'] : installTar[os.arch()];
     console.log(tarFile, process.cwd())
-    process.env['INPUT_FILE_PATH'] = process.cwd()
     if(anax && anax.indexOf('open-horizon') > 0) {
       anax = anax.replace('/agent-install.sh', '')
       const arg = `curl -sSL https://github.com/open-horizon/anax/releases/latest/download/${tarFile} -o ${tarFile} && tar -zxvf ${tarFile}`
