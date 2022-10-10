@@ -110,8 +110,6 @@ select fav in "${configfile[@]}"; do
   esac
 done
 
-exit
-
 # Define versions
 INSTALL_NODE_VER=16
 INSTALL_NVM_VER=0.39.1
