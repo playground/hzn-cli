@@ -110,74 +110,78 @@ select fav in "${configfile[@]}"; do
   esac
 done
 
-# Define versions
-INSTALL_NODE_VER=16
-INSTALL_NVM_VER=0.39.1
+if [ -d "${HOME}/.nvm/.git" ]
+then echo "nvm installed"
+	#echo -e "==> Update npm to latest version, if this stuck then terminate (CTRL+C) the execution"
+	npm install -g npm
 
-# You can pass argument to this script --version 8
-if [ "$1" = '--version' ]; then
-	echo "==> Using specified node version - $2"
-	INSTALL_NODE_VER=$2
-fi
+	echo "==> Checking for versions"
+	nvm --version
+	node --version
+	npm --version
 
-echo "==> Ensuring .bashrc exists and is writable"
-touch ~/.bashrc
+	echo "==> Print binary paths"
+	which npm
+	which node
 
-echo "==> Installing node version manager (NVM). Version $INSTALL_NVM_VER"
-# Removed if already installed
-rm -rf ~/.nvm
-# Unset exported variable
-export NVM_DIR=
+	echo "==> List installed node versions"
+	nvm ls
 
-# Install nvm 
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v$INSTALL_NVM_VER/install.sh | bash
-# Make nvm command available to terminal
-source ~/.nvm/nvm.sh
+	nvm cache clear
+	echo "==> Now you're all setup and ready for development. If changes are yet to take effect in the current shell, try source ~/.bashrc or open a new shell"
 
-echo "==> Installing node js version $INSTALL_NODE_VER"
-nvm install $INSTALL_NODE_VER
+	echo "==> Installing oh cli"
+	npm i -g hzn-cli
 
-echo "==> Make this version system default"
-nvm alias default $INSTALL_NODE_VER
-nvm use default
+	echo "==> Checking oh version"
+	oh --version
 
-#echo -e "==> Update npm to latest version, if this stuck then terminate (CTRL+C) the execution"
-npm install -g npm
+	echo "==> Setting up hzn environment..."
+	if [ "${ENV_SETUP}" = "All-In-One" ]
+	then
+		echo "$ENV_SETUP, here we go."
+		oh deploy autoSetupCliOnly --config_file ${CONFIG_FILE}
+	elif [ "${ENV_SETUP}" = "CLI-Only" ]
+	then
+		echo "$ENV_SETUP, here we go."
+		oh deploy autoSetupCliOnly --config_file ${CONFIG_FILE}
+	elif [ "${ENV_SETUP}" = "Anax-In-Container" ]
+	then
+		echo "$ENV_SETUP, here we go."
+	else
+		echo "Something went wrong...$ENV_SETUP"
+		break
+	fi
+else echo "nvm not installed"
+	# Define versions
+	INSTALL_NODE_VER=16
+	INSTALL_NVM_VER=0.39.1
 
-echo "==> Checking for versions"
-nvm --version
-node --version
-npm --version
+	# You can pass argument to this script --version 8
+	if [ "$1" = '--version' ]; then
+		echo "==> Using specified node version - $2"
+		INSTALL_NODE_VER=$2
+	fi
 
-echo "==> Print binary paths"
-which npm
-which node
+	echo "==> Ensuring .bashrc exists and is writable"
+	touch ~/.bashrc
 
-echo "==> List installed node versions"
-nvm ls
+	echo "==> Installing node version manager (NVM). Version $INSTALL_NVM_VER"
+	# Removed if already installed
+	rm -rf ~/.nvm
+	# Unset exported variable
+	export NVM_DIR=
 
-nvm cache clear
-echo "==> Now you're all setup and ready for development. If changes are yet to take effect in the current shell, try source ~/.bashrc or open a new shell"
+	# Install nvm 
+	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v$INSTALL_NVM_VER/install.sh | bash
+	# Make nvm command available to terminal
+	source ~/.nvm/nvm.sh
 
-echo "==> Installing oh cli"
-npm i -g hzn-cli
+	echo "==> Installing node js version $INSTALL_NODE_VER"
+	nvm install $INSTALL_NODE_VER
 
-echo "==> Checking oh version"
-oh --version
+	echo "==> Make this version system default"
+	nvm alias default $INSTALL_NODE_VER
+	nvm use default
 
-echo "==> Setting up hzn environment..."
-if [ "${ENV_SETUP}" = "All-In-One" ]
-then
-	echo "$ENV_SETUP, here we go."
-	oh deploy autoSetupCliOnly --config_file ${CONFIG_FILE}
-elif [ "${ENV_SETUP}" = "CLI-Only" ]
-then
-	echo "$ENV_SETUP, here we go."
-	oh deploy autoSetupCliOnly --config_file ${CONFIG_FILE}
-elif [ "${ENV_SETUP}" = "Anax-In-Container" ]
-then
-	echo "$ENV_SETUP, here we go."
-else
-	echo "Something went wrong...$ENV_SETUP"
-	break
 fi
