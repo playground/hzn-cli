@@ -16,11 +16,7 @@ then
 		# Install Homebrew
 		ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 	fi
-	which -s jq
-	if [[ $? != 0 ]]
-	then
-		brew install jq
-	fi	
+	brew install jq
 fi
 
 ENV_SETUP=""
