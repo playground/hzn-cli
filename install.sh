@@ -16,7 +16,7 @@ then
 		# Install Homebrew
 		ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 	fi
-	brew install jq socat
+	brew install socat jq
 fi
 
 ENV_SETUP=""
