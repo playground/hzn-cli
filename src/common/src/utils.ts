@@ -290,8 +290,18 @@ export class Utils {
         this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json && sudo chmod 644 ${this.hznConfig}/.env-hzn.json`).then(() => {
           console.log(`config files updated for ${orgId}`)
           this.configJson = config;
-          observer.next(config)
-          observer.complete()
+          let content = ''
+          Object.keys(envLocal).forEach((key) => {
+            if(content.length > 0) {
+              content += '\n'
+            }
+            content += HorizonKeyMap[key] ? `${key}=${pEnv[HorizonKeyMap[key]]}` : pEnv[key] ? `${key}=${pEnv[key]}` : configLocal && configLocal[key] ? `${key}=${configLocal[key]}` : `${key}=${envLocal[key]}`
+          })
+          writeFileSync('.env-local', content);
+          this.copyFile(`sudo mv .env-local ${this.hznConfig}/.env-local && sudo chmod 644 ${this.hznConfig}/.env-local`).then(() => {
+            observer.next(config)
+            observer.complete()
+          })  
         })
       } catch(e) {
         console.log(e)

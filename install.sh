@@ -67,8 +67,8 @@ select fav in "${configfile[@]}"; do
 		"Help")
 			echo "You would need to provide your configuration json file with the following info."
 			echo '\033[1;33m'
-			echo '  {'
-			echo '    "org": {'
+			echo '{'
+			echo '  "org": {'
     	echo '    "HZN_ORG_ID": "examples",'
 			echo '    "HZN_DEVICE_TOKEN": "",'
 			echo '    "HZN_DEVICE_ID": "device-name",'
@@ -100,6 +100,20 @@ select fav in "${configfile[@]}"; do
 			echo '    "MMS_SERVICE_FALLBACK_VERSION": "1.0.0",'
 			echo '    "UPDATE_FILE_NAME": "model.zip"'
 			echo '  }'
+			echo '  "folders": ['
+			echo '    "/var/tmp/horizon/horizon1/fss-domain-socket",'
+			echo '    "/var/tmp/horizon/horizon1/ess-auth",'
+			echo '    "/var/tmp/horizon/horizon1/secrets",'
+			echo '    "/var/tmp/horizon/horizon1/nmp"'
+			echo '  ],'
+			echo '  "local": {'
+			echo '    "YOUR_DOCKERHUB_ID": "dockerid",'
+			echo '    "DOCKER_REGISTRY": "hub.docker.com",'
+			echo '    "DOCKER_TOKEN": "dckr_pat_w......"'
+			echo '  },'
+			echo '  "anaxInContainer": "docker run -d -t --restart always --name horizon1 --privileged -p 127.0.0.1:8081:8510 -e DOCKER_NAME=horizon1 -e HZN_VAR_RUN_BASE=/var/tmp/horizon/horizon1 -v /var/run/docker.sock:/var/run/docker.sock -v /var/horizon:/etc/default/horizon:ro -v /var/agent-install.crt:/var/agent-install.crt -v horizon1_var:/var/horizon/ -v horizon1_etc:/etc/horizon/ -v /var/tmp/horizon/horizon1:/var/tmp/horizon/horizon1 openhorizon/amd64_anax:2.30.0-952",'
+			echo '  "cliInContainer": "docker run -d -it --restart always --name hzn-cli --privileged --network=\"host\" -v /var/run/docker.sock:/var/run/docker.sock -v /var/agent-install.crt:/var/agent-install.crt -e HORIZON_URL=http://localhost:8081 -e HZN_ORG_ID=${HZN_ORG_ID} -e HZN_EXCHANGE_USER_AUTH=${HZN_EXCHANGE_USER_AUTH} -e HZN_FSS_CSSURL=${HZN_FSS_CSSURL} -e HZN_EXCHANGE_URL=${HZN_EXCHANGE_URL} -e version=v2.30.0-952 playbox21/hzn-cli_amd64"'
+			echo '}'
 			echo '\033[0m'
 			;;
 		"Confirm")
