@@ -19,7 +19,8 @@ exports.customRun = [
     'autoSetup', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer', 'cleanUp'
 ];
 exports.runDirectly = [
-    'appendSupport', 'deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent'
+    'appendSupport', 'deleteObject', 'removeCliContainer', 'removeAnaxContainer', 'stopRemoveContainer',
+    'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent'
 ];
 exports.loop = [
     'addPolicy', 'editPolicy', 'reviewPolicy', 'reviewServiceDefinition'
@@ -67,7 +68,9 @@ exports.HorizonTemplate = {
     "HZN_AGENT_PORT": ""
 };
 exports.HorizonKeyMap = {
-    "HZN_MGMT_HUB_CERT_PATH": "CONFIG_CERT_PATH"
+    "HZN_MGMT_HUB_CERT_PATH": "CONFIG_CERT_PATH",
+    "HZN_CUSTOM_NODE_ID": 'HZN_DEVICE_ID',
+    "DEFAULT_ORG": "HZN_ORG_ID"
 };
 exports.configTemplate = {
     envHzn: {
@@ -89,6 +92,7 @@ exports.configTemplate = {
             "MMS_OBJECT_ID": "config.json",
             "MMS_OBJECT_FILE": "config/config.json",
             "UPDATE_FILE_NAME": "model.zip",
+            "HZN_CSS": "false",
             "EDGE_OWNER": "",
             "EDGE_DEPLOY": ""
         },

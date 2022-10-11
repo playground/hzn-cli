@@ -9,7 +9,7 @@ set -e
 ENV_SETUP=""
 CONFIG_FILE=""
 PS3='Choose your environment setup: '
-envsetup=("All-In-One" "CLI-Only" "Run-In-Container" "Confirm" "Quit")
+envsetup=("All-In-One" "CLI-Only" "CLI-In-Container" "Anax-In-Container" "Run-In-Containers" "Confirm" "Quit")
 select fav in "${envsetup[@]}"; do
 	case $fav in
 		"All-In-One")
@@ -18,12 +18,22 @@ select fav in "${envsetup[@]}"; do
 			# optionally call a function or run some code here
 			;;
 		"CLI-Only")
-			echo "$fav runs CLI on host and Agent in container, choose <Confirm> to continue setup."
+			echo "$fav runs CLI on host with Agent running in container, choose <Confirm> to continue setup."
 			ENV_SETUP=$fav
 			# optionally call a function or run some code here
 			;;
-		"Run-In-Container")
-			echo "$fav, CLI and Agent both runs in its own container, choose <Confirm> to continue setup."
+		"CLI-In-Container")
+			echo "$fav runs CLI on host with Agent running in container, choose <Confirm> to continue setup."
+			ENV_SETUP=$fav
+			# optionally call a function or run some code here
+			;;
+		"Anax-In-Container")
+			echo "$fav, Run Agent in container, choose <Confirm> to continue setup."
+			ENV_SETUP=$fav
+			# optionally call a function or run some code here
+			;;
+		"Run-In-Containers")
+			echo "$fav, Run both CLI and Agent in its own container, choose <Confirm> to continue setup."
 			ENV_SETUP=$fav
 			# optionally call a function or run some code here
 			;;
@@ -181,9 +191,18 @@ elif [ "${ENV_SETUP}" = "CLI-Only" ]
 then
 	echo "$ENV_SETUP, here we go."
 	oh deploy autoSetupCliOnly --config_file ${CONFIG_FILE}
+elif [ "${ENV_SETUP}" = "CLI-In-Container" ]
+then
+	echo "$ENV_SETUP, here we go."
+	oh deploy autoSetupCliInContainer --config_file ${CONFIG_FILE}
 elif [ "${ENV_SETUP}" = "Anax-In-Container" ]
 then
 	echo "$ENV_SETUP, here we go."
+	oh deploy autoSetupAnaxInContainer --config_file ${CONFIG_FILE}
+elif [ "${ENV_SETUP}" = "Run-In-Containers" ]
+then
+	echo "$ENV_SETUP, here we go."
+	oh deploy autoSetupContainer --config_file ${CONFIG_FILE}
 else
 	echo "Something went wrong...$ENV_SETUP"
 	break

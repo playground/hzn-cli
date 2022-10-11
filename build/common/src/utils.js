@@ -187,6 +187,30 @@ class Utils {
             }
         });
     }
+    removeCliContainer(name = 'hzn-cli') {
+        return this.stopRemoveContainer(name);
+    }
+    removeAnaxContainer(name = 'horizon1') {
+        return this.stopRemoveContainer(name);
+    }
+    stopRemoveContainer(name) {
+        return this.shell(`docker container stop ${name} && docker container rm ${name}`);
+    }
+    installCliAndAnaxInContainers(configJson) {
+        return new rxjs_1.Observable((observer) => {
+            this.installCliInContainer(configJson)
+                .subscribe({
+                complete: () => {
+                    this.installAnaxInContainer(configJson)
+                        .subscribe({
+                        complete: () => observer.complete(),
+                        error: (err) => observer.error(err)
+                    });
+                },
+                error: (err) => observer.error(err)
+            });
+        });
+    }
     installAnaxInContainer(configJson) {
         return new rxjs_1.Observable((observer) => {
             this.installPrereq()
@@ -236,6 +260,8 @@ class Utils {
                 }
                 const orgId = config['org']['HZN_ORG_ID'];
                 const envHzn = interface_1.configTemplate.envHzn;
+                const configLocal = config['local'];
+                const envLocal = interface_1.configTemplate.envLocal;
                 if (!hznJson[orgId]) {
                     hznJson[orgId] = {};
                 }
@@ -264,7 +290,7 @@ class Utils {
                 });
                 // console.log(hznJson)
                 jsonfile_1.default.writeFileSync('.env-hzn.json', hznJson, { spaces: 2 });
-                this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json && sudo chmod 766 ${this.hznConfig}/.env-hzn.json`).then(() => {
+                this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json && sudo chmod 644 ${this.hznConfig}/.env-hzn.json`).then(() => {
                     console.log(`config files updated for ${orgId}`);
                     this.configJson = config;
                     observer.next(config);
@@ -314,7 +340,7 @@ class Utils {
                                         action = this.installCliInContainer(this.configJson);
                                         break;
                                     case interface_1.SetupEnvironment.autoSetupContainer:
-                                        action = this.installAnaxInContainer(this.configJson);
+                                        action = this.installCliAndAnaxInContainers(this.configJson);
                                         break;
                                 }
                                 action
@@ -576,7 +602,7 @@ class Utils {
             return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' -C`);
         }
     }
-    installHznCli(anax, id, css = 'true', deviceToken = '') {
+    installHznCli(anax, id, css, deviceToken = '') {
         const token = deviceToken.length > 0 ? deviceToken : 'some-device-token';
         console.log(css, typeof css);
         let nodeId = id && id.length > 0 ? `-a ${id}:${token}` : `-a ${os_1.default.hostname}:${token}`;
@@ -804,7 +830,7 @@ class Utils {
                                         }
                                         let nodeId = pEnv.HZN_CUSTOM_NODE_ID ? pEnv.HZN_CUSTOM_NODE_ID : '';
                                         pEnv.NODE_ID = nodeId;
-                                        this.installHznCli(pEnv.ANAX, nodeId)
+                                        this.installHznCli(pEnv.ANAX, nodeId, pEnv.HZN_CSS)
                                             .subscribe({
                                             complete: () => observer.complete(),
                                             error: (err) => observer.error(err)
