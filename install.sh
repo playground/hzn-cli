@@ -6,6 +6,21 @@ set -e
 
 # Tested on Ubuntu, MacOS
 # @playground
+
+if [[ $OSTYPE == 'darwin'* ]]
+then
+	echo 'MacOS'
+	which -s brew
+	if [[ $? != 0 ]] ; then
+		# Install Homebrew
+		ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+	fi
+	which -s jq
+	if [[ $? != 0 ]] ; then
+		brew install jq
+	fi	
+fi
+
 ENV_SETUP=""
 CONFIG_FILE=""
 PS3='Choose your environment setup: '
