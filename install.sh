@@ -147,7 +147,7 @@ select fav in "${configfile[@]}"; do
   esac
 done
 
-if [ -d "${HOME}/.nvm/.git" ]
+if ! command -v nvm &> /dev/null
 then echo "nvm installed";
 else echo "nvm not installed"
 	# Define versions
