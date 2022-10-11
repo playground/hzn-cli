@@ -1,6 +1,6 @@
 export const justRun = [
   'addRemoteNodePolicy',
-  'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'installAnaxInContainer', 'listAgreement', 
+  'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement', 
   'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodes', 'listOrg', 'listNodePattern', 'listObject', 'listPattern', 
   'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'publishMMSObject', 'publishMMSObjectPattern', 'publishMMSObjectPolicy', 
   'removeDeploymentPolicy', 'removeObject', 'removeOrg', 
@@ -13,7 +13,7 @@ export const promptForUpdate = [
   'publishMMSPattern', 'pushMMSImage', 'pushServiceImage', 'registerAgent'
 ];
 export const customRun = [
-  'autoSetup', 'autoSetupCliOnly', 'cleanUp'
+  'autoSetup', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer', 'cleanUp'
 ];
 export const runDirectly = [
   'appendSupport', 'deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent'
@@ -38,7 +38,13 @@ export const supportPlatform = {
   "amd64": "linux/amd64",
   "arm": "linux/arm/v7"
 }
-
+export enum SetupEnvironment {
+  autoSetup = 0,
+  autoSetupCliOnly = 1,
+  autoSetupAnaxInContainer = 2,
+  autoSetupCliInContainer = 3,
+  autoSetupContainer = 4
+}
 export const keyMap = {
   org: 'credential',
   service: 'envVars',
@@ -46,7 +52,19 @@ export const keyMap = {
   credential: 'org',
   envVars: 'service'
 }
-
+export const HorizonTemplate = {
+  "HZN_EXCHANGE_URL": "",
+  "HZN_FSS_CSSURL": "",
+  "HZN_DEVICE_ID": "",
+  "HZN_NODE_ID": "",
+  "HZN_AGBOT_URL": "",
+  "HZN_SDO_SVC_URL": "",
+  "HZN_MGMT_HUB_CERT_PATH": "/var/agent-install.crt",
+  "HZN_AGENT_PORT": ""
+}
+export const HorizonKeyMap = {
+  "HZN_MGMT_HUB_CERT_PATH": "CONFIG_CERT_PATH"
+}
 export const configTemplate = {
   envHzn:   {
     "envVars": {
