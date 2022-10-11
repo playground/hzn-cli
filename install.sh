@@ -147,8 +147,10 @@ select fav in "${configfile[@]}"; do
   esac
 done
 
-if ! command -v nvm &> /dev/null
-then echo "nvm installed";
+if [[ -f "${HOME}/.nvm/nvm.sh" ]]; then
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 else echo "nvm not installed"
 	# Define versions
 	INSTALL_NODE_VER=16
