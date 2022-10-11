@@ -11,12 +11,14 @@ if [[ $OSTYPE == 'darwin'* ]]
 then
 	echo 'MacOS'
 	which -s brew
-	if [[ $? != 0 ]] ; then
+	if [[ $? != 0 ]]
+	then
 		# Install Homebrew
 		ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 	fi
 	which -s jq
-	if [[ $? != 0 ]] ; then
+	if [[ $? != 0 ]]
+	then
 		brew install jq
 	fi	
 fi
