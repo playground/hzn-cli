@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Service = exports.Deployment = exports.Container = exports.RequiredService = exports.configTemplate = exports.keyMap = exports.supportPlatform = exports.installPrompt = exports.installTar = exports.loop = exports.runDirectly = exports.customRun = exports.promptForUpdate = exports.justRun = void 0;
+exports.Service = exports.Deployment = exports.Container = exports.RequiredService = exports.configTemplate = exports.HorizonKeyMap = exports.HorizonTemplate = exports.keyMap = exports.SetupEnvironment = exports.supportPlatform = exports.installPrompt = exports.installTar = exports.loop = exports.runDirectly = exports.customRun = exports.promptForUpdate = exports.justRun = void 0;
 exports.justRun = [
     'addRemoteNodePolicy',
-    'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'installAnaxInContainer', 'listAgreement',
+    'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement',
     'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodes', 'listOrg', 'listNodePattern', 'listObject', 'listPattern',
     'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'publishMMSObject', 'publishMMSObjectPattern', 'publishMMSObjectPolicy',
     'removeDeploymentPolicy', 'removeObject', 'removeOrg',
@@ -16,7 +16,7 @@ exports.promptForUpdate = [
     'publishMMSPattern', 'pushMMSImage', 'pushServiceImage', 'registerAgent'
 ];
 exports.customRun = [
-    'autoSetup', 'autoSetupCliOnly', 'cleanUp'
+    'autoSetup', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer', 'cleanUp'
 ];
 exports.runDirectly = [
     'appendSupport', 'deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent'
@@ -41,12 +41,33 @@ exports.supportPlatform = {
     "amd64": "linux/amd64",
     "arm": "linux/arm/v7"
 };
+var SetupEnvironment;
+(function (SetupEnvironment) {
+    SetupEnvironment[SetupEnvironment["autoSetup"] = 0] = "autoSetup";
+    SetupEnvironment[SetupEnvironment["autoSetupCliOnly"] = 1] = "autoSetupCliOnly";
+    SetupEnvironment[SetupEnvironment["autoSetupAnaxInContainer"] = 2] = "autoSetupAnaxInContainer";
+    SetupEnvironment[SetupEnvironment["autoSetupCliInContainer"] = 3] = "autoSetupCliInContainer";
+    SetupEnvironment[SetupEnvironment["autoSetupContainer"] = 4] = "autoSetupContainer";
+})(SetupEnvironment = exports.SetupEnvironment || (exports.SetupEnvironment = {}));
 exports.keyMap = {
     org: 'credential',
     service: 'envVars',
     metaVars: 'metaVars',
     credential: 'org',
     envVars: 'service'
+};
+exports.HorizonTemplate = {
+    "HZN_EXCHANGE_URL": "",
+    "HZN_FSS_CSSURL": "",
+    "HZN_DEVICE_ID": "",
+    "HZN_NODE_ID": "",
+    "HZN_AGBOT_URL": "",
+    "HZN_SDO_SVC_URL": "",
+    "HZN_MGMT_HUB_CERT_PATH": "/var/agent-install.crt",
+    "HZN_AGENT_PORT": ""
+};
+exports.HorizonKeyMap = {
+    "HZN_MGMT_HUB_CERT_PATH": "CONFIG_CERT_PATH"
 };
 exports.configTemplate = {
     envHzn: {

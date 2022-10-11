@@ -20,12 +20,32 @@ export declare const supportPlatform: {
     amd64: string;
     arm: string;
 };
+export declare enum SetupEnvironment {
+    autoSetup = 0,
+    autoSetupCliOnly = 1,
+    autoSetupAnaxInContainer = 2,
+    autoSetupCliInContainer = 3,
+    autoSetupContainer = 4
+}
 export declare const keyMap: {
     org: string;
     service: string;
     metaVars: string;
     credential: string;
     envVars: string;
+};
+export declare const HorizonTemplate: {
+    HZN_EXCHANGE_URL: string;
+    HZN_FSS_CSSURL: string;
+    HZN_DEVICE_ID: string;
+    HZN_NODE_ID: string;
+    HZN_AGBOT_URL: string;
+    HZN_SDO_SVC_URL: string;
+    HZN_MGMT_HUB_CERT_PATH: string;
+    HZN_AGENT_PORT: string;
+};
+export declare const HorizonKeyMap: {
+    HZN_MGMT_HUB_CERT_PATH: string;
 };
 export declare const configTemplate: {
     envHzn: {
