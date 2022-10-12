@@ -212,6 +212,8 @@ echo "==> Checking oh version"
 oh --version
 
 echo "==> Setting up hzn environment..."
+sudo touch /etc/default/horizon
+
 if [ "${ENV_SETUP}" = "All-In-One" ]
 then
 	echo "$ENV_SETUP, here we go."
