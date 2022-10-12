@@ -21,6 +21,7 @@ export declare class Utils {
     installCliAndAnaxInContainers(configJson: any): Observable<unknown>;
     installAnaxInContainer(configJson: any): Observable<unknown>;
     updateConfig(configFile: string): Observable<unknown>;
+    proceedWithAutoInstall(setup: SetupEnvironment): Observable<unknown>;
     autoRun(configFile: string, setup: SetupEnvironment): Observable<unknown>;
     replaceEnvTokens(input: string, tokens: any): string;
     autoSetup(configFile: string): Observable<unknown>;
@@ -59,7 +60,7 @@ export declare class Utils {
     cleanUp(): Observable<unknown>;
     installCliOnly(anax: string): Observable<unknown>;
     installHznCli(anax: string, id: string, css: any, deviceToken?: string): Observable<unknown>;
-    uninstallHorizon(msg?: string): Observable<unknown>;
+    uninstallHorizon(msg?: string, yes?: string): Observable<unknown>;
     setupManagementHub(): Observable<unknown>;
     copyFile(arg: string): Promise<unknown>;
     appendSupport(): Observable<unknown>;

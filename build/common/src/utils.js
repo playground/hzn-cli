@@ -313,6 +313,42 @@ class Utils {
             }
         });
     }
+    proceedWithAutoInstall(setup) {
+        return new rxjs_1.Observable((observer) => {
+            // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
+            const pEnv = process.env;
+            let action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN);
+            switch (setup) {
+                case interface_1.SetupEnvironment.autoSetup:
+                    action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN);
+                    break;
+                case interface_1.SetupEnvironment.autoSetupCliOnly:
+                    action = this.installCliOnly(pEnv.ANAX);
+                    break;
+                case interface_1.SetupEnvironment.autoSetupAnaxInContainer:
+                    action = this.installAnaxInContainer(this.configJson);
+                    break;
+                case interface_1.SetupEnvironment.autoSetupCliInContainer:
+                    action = this.installCliInContainer(this.configJson);
+                    break;
+                case interface_1.SetupEnvironment.autoSetupContainer:
+                    action = this.installCliAndAnaxInContainers(this.configJson);
+                    break;
+            }
+            action
+                .subscribe({
+                next: (msg) => console.log('next here'),
+                complete: () => {
+                    console.log('done installing hzn cli.');
+                    observer.complete();
+                },
+                error: (err) => {
+                    console.log('err here');
+                    observer.error(err);
+                }
+            });
+        });
+    }
     autoRun(configFile, setup) {
         return new rxjs_1.Observable((observer) => {
             if (!configFile || configFile.length == 0) {
@@ -329,9 +365,31 @@ class Utils {
                         this.shell(arg)
                             .subscribe({
                             next: (msg) => {
-                                console.log('hzn is already installed, if you like to reinstall, please uninstallHorizon first.');
-                                observer.next('');
-                                observer.complete();
+                                let answer = '';
+                                console.log('hzn is already installed, please uninstallHorizon first.');
+                                this.uninstallHorizon('Would you like to proceed to reinstall Horzion: Y/n?')
+                                    .subscribe({
+                                    next: (resp) => answer = resp,
+                                    complete: () => {
+                                        if (answer === 'Y') {
+                                            this.proceedWithAutoInstall(setup)
+                                                .subscribe({
+                                                complete: () => {
+                                                    observer.next('');
+                                                    observer.complete();
+                                                },
+                                                error: (err) => observer.error(err)
+                                            });
+                                        }
+                                        else {
+                                            observer.next('');
+                                            observer.complete();
+                                        }
+                                    }, error: (err) => {
+                                        observer.next('');
+                                        observer.complete();
+                                    }
+                                });
                             },
                             error: (err) => {
                                 // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
@@ -623,41 +681,56 @@ class Utils {
                 tag = anax.replace('download', 'tag');
             }
             anax = anax.replace('/agent-install.sh', '');
-            return this.shell(`sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} -k css: -c css:`);
+            return this.shell(`sudo touch /etc/default/horizon && sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} -k css: -c css:`);
         }
         else {
             // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data
             return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`);
         }
     }
-    uninstallHorizon(msg = 'Would you like to proceed to uninstall Horzion: Y/n?') {
+    uninstallHorizon(msg = 'Would you like to proceed to uninstall Horzion: Y/n?', yes = 'yes |') {
+        // TODO:  Weird, have to force yes otherwise the script will hang
         return new rxjs_1.Observable((observer) => {
             console.log(`\n${msg}`);
             prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
-                if (question.answer.toUpperCase() === 'Y') {
+                const resp = question.answer.toUpperCase();
+                if (resp === 'Y') {
                     let arg = `sudo apt-get purge -y bluehorizon horizon horizon-cli && sudo rm agent-install.* -y`;
                     if (process.platform == 'darwin') {
-                        arg = `yes | sudo /Users/Shared/horizon-cli/bin/horizon-cli-uninstall.sh && sudo pkgutil --forget com.github.open-horizon.pkg.horizon-cli`;
+                        arg = `${yes} sudo /Users/Shared/horizon-cli/bin/horizon-cli-uninstall.sh && sudo pkgutil --forget com.github.open-horizon.pkg.horizon-cli`;
                     }
                     this.shell(arg)
                         .subscribe({
                         complete: () => {
                             this.cleanUp()
                                 .subscribe({
-                                complete: () => observer.complete(),
-                                error: (err) => observer.complete() //ignore error when files do not exist    
+                                complete: () => {
+                                    observer.next(resp);
+                                    observer.complete();
+                                },
+                                error: (err) => {
+                                    observer.next(resp);
+                                    observer.complete();
+                                }
                             });
                         },
                         error: (err) => {
                             this.cleanUp()
                                 .subscribe({
-                                complete: () => observer.complete(),
-                                error: (err) => observer.complete() //ignore error when files do not exist    
+                                complete: () => {
+                                    observer.next(resp);
+                                    observer.complete();
+                                },
+                                error: (err) => {
+                                    observer.next(resp);
+                                    observer.complete();
+                                }
                             });
                         }
                     });
                 }
                 else {
+                    observer.next(resp);
                     observer.complete();
                 }
             });
