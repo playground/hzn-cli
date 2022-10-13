@@ -25,7 +25,8 @@ export declare enum SetupEnvironment {
     autoSetupCliOnly = 1,
     autoSetupAnaxInContainer = 2,
     autoSetupCliInContainer = 3,
-    autoSetupContainer = 4
+    autoSetupContainer = 4,
+    autoSetupAllInOne = 5
 }
 export declare const keyMap: {
     org: string;

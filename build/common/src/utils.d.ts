@@ -29,6 +29,7 @@ export declare class Utils {
     autoSetupAnaxInContainer(configFile: string): Observable<unknown>;
     autoSetupCliInContainer(configFile: string): Observable<unknown>;
     autoSetupContainer(configFile: string): Observable<unknown>;
+    autoSetupAllInOne(configFile: string): Observable<unknown>;
     getEtcDefault(): string;
     getHznConfig(): string;
     listAgreement(param: IHznParam): Observable<unknown>;

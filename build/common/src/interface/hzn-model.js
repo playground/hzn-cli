@@ -16,7 +16,7 @@ exports.promptForUpdate = [
     'publishMMSPattern', 'pushMMSImage', 'pushServiceImage', 'registerAgent'
 ];
 exports.customRun = [
-    'autoSetup', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer', 'cleanUp'
+    'autoSetup', 'autoSetupAllInOne', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer', 'cleanUp'
 ];
 exports.runDirectly = [
     'appendSupport', 'deleteObject', 'removeCliContainer', 'removeAnaxContainer', 'stopRemoveContainer',
@@ -49,6 +49,7 @@ var SetupEnvironment;
     SetupEnvironment[SetupEnvironment["autoSetupAnaxInContainer"] = 2] = "autoSetupAnaxInContainer";
     SetupEnvironment[SetupEnvironment["autoSetupCliInContainer"] = 3] = "autoSetupCliInContainer";
     SetupEnvironment[SetupEnvironment["autoSetupContainer"] = 4] = "autoSetupContainer";
+    SetupEnvironment[SetupEnvironment["autoSetupAllInOne"] = 5] = "autoSetupAllInOne";
 })(SetupEnvironment = exports.SetupEnvironment || (exports.SetupEnvironment = {}));
 exports.keyMap = {
     org: 'credential',

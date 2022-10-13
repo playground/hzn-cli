@@ -13,7 +13,7 @@ export const promptForUpdate = [
   'publishMMSPattern', 'pushMMSImage', 'pushServiceImage', 'registerAgent'
 ];
 export const customRun = [
-  'autoSetup', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer', 'cleanUp'
+  'autoSetup', 'autoSetupAllInOne', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer', 'cleanUp'
 ];
 export const runDirectly = [
   'appendSupport', 'deleteObject', 'removeCliContainer', 'removeAnaxContainer', 'stopRemoveContainer', 
@@ -44,7 +44,8 @@ export enum SetupEnvironment {
   autoSetupCliOnly = 1,
   autoSetupAnaxInContainer = 2,
   autoSetupCliInContainer = 3,
-  autoSetupContainer = 4
+  autoSetupContainer = 4,
+  autoSetupAllInOne = 5
 }
 export const keyMap = {
   org: 'credential',

@@ -334,6 +334,9 @@ class Utils {
                 case interface_1.SetupEnvironment.autoSetupContainer:
                     action = this.installCliAndAnaxInContainers(this.configJson);
                     break;
+                case interface_1.SetupEnvironment.autoSetupAllInOne:
+                    action = this.setupManagementHub();
+                    break;
             }
             action
                 .subscribe({
@@ -392,36 +395,13 @@ class Utils {
                                 });
                             },
                             error: (err) => {
-                                // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
-                                let action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN);
-                                switch (setup) {
-                                    case interface_1.SetupEnvironment.autoSetup:
-                                        action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN);
-                                        break;
-                                    case interface_1.SetupEnvironment.autoSetupCliOnly:
-                                        action = this.installCliOnly(pEnv.ANAX);
-                                        break;
-                                    case interface_1.SetupEnvironment.autoSetupAnaxInContainer:
-                                        action = this.installAnaxInContainer(this.configJson);
-                                        break;
-                                    case interface_1.SetupEnvironment.autoSetupCliInContainer:
-                                        action = this.installCliInContainer(this.configJson);
-                                        break;
-                                    case interface_1.SetupEnvironment.autoSetupContainer:
-                                        action = this.installCliAndAnaxInContainers(this.configJson);
-                                        break;
-                                }
-                                action
+                                this.proceedWithAutoInstall(setup)
                                     .subscribe({
-                                    next: (msg) => console.log('next here'),
                                     complete: () => {
-                                        console.log('done installing hzn cli.');
+                                        observer.next('');
                                         observer.complete();
                                     },
-                                    error: (err) => {
-                                        console.log('err here');
-                                        observer.error(err);
-                                    }
+                                    error: (err) => observer.error(err)
                                 });
                             }
                         });
@@ -453,6 +433,9 @@ class Utils {
     }
     autoSetupContainer(configFile) {
         return this.autoRun(configFile, interface_1.SetupEnvironment.autoSetupContainer);
+    }
+    autoSetupAllInOne(configFile) {
+        return this.autoRun(configFile, interface_1.SetupEnvironment.autoSetupAllInOne);
     }
     getEtcDefault() {
         return this.etcDefault;

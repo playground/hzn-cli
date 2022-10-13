@@ -22,10 +22,10 @@ fi
 ENV_SETUP=""
 CONFIG_FILE=""
 PS3='Choose your environment setup: '
-envsetup=("All-In-One" "CLI-Only" "CLI-In-Container" "Anax-In-Container" "Run-In-Containers" "Confirm" "Quit")
+envsetup=("Cli-And-Anax" "CLI-Only" "CLI-In-Container" "Anax-In-Container" "Run-In-Containers" "All-In-One" "Confirm" "Quit")
 select fav in "${envsetup[@]}"; do
 	case $fav in
-		"All-In-One")
+		"Cli-And-Anax")
 			echo "$fav runs both CLI & Agent on host machine, choose <Confirm> to continue setup."
 			ENV_SETUP=$fav
 			# optionally call a function or run some code here
@@ -41,12 +41,17 @@ select fav in "${envsetup[@]}"; do
 			# optionally call a function or run some code here
 			;;
 		"Anax-In-Container")
-			echo "$fav, Run Agent in container, choose <Confirm> to continue setup."
+			echo "$fav, Runs Agent in container, choose <Confirm> to continue setup."
 			ENV_SETUP=$fav
 			# optionally call a function or run some code here
 			;;
 		"Run-In-Containers")
-			echo "$fav, Run both CLI and Agent in its own container, choose <Confirm> to continue setup."
+			echo "$fav, Runs both CLI and Agent in its own container, choose <Confirm> to continue setup."
+			ENV_SETUP=$fav
+			# optionally call a function or run some code here
+			;;
+		"All-In-One")
+			echo "$fav, Runs CLI, Agent & Management Hub on the same machine, choose <Confirm> to continue setup."
 			ENV_SETUP=$fav
 			# optionally call a function or run some code here
 			;;
@@ -214,7 +219,7 @@ oh --version
 echo "==> Setting up hzn environment..."
 sudo touch /etc/default/horizon
 
-if [ "${ENV_SETUP}" = "All-In-One" ]
+if [ "${ENV_SETUP}" = "Cli-And-Anax" ]
 then
 	echo "$ENV_SETUP, here we go."
 	oh deploy autoSetup --config_file ${CONFIG_FILE}
@@ -234,6 +239,10 @@ elif [ "${ENV_SETUP}" = "Run-In-Containers" ]
 then
 	echo "$ENV_SETUP, here we go."
 	oh deploy autoSetupContainer --config_file ${CONFIG_FILE}
+elif [ "${ENV_SETUP}" = "All-In-One" ]
+then
+	echo "$ENV_SETUP, here we go."
+	oh deploy autoSetupAllInOne --config_file ${CONFIG_FILE}
 else
 	echo "Something went wrong...$ENV_SETUP"
 	break
