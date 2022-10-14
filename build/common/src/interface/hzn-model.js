@@ -16,10 +16,11 @@ exports.promptForUpdate = [
     'publishMMSPattern', 'pushMMSImage', 'pushServiceImage', 'registerAgent'
 ];
 exports.customRun = [
-    'autoSetup', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer', 'cleanUp'
+    'autoSetup', 'autoSetupAllInOne', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer', 'cleanUp'
 ];
 exports.runDirectly = [
-    'appendSupport', 'deleteObject', 'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent'
+    'appendSupport', 'deleteObject', 'removeCliContainer', 'removeAnaxContainer', 'stopRemoveContainer',
+    'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent'
 ];
 exports.loop = [
     'addPolicy', 'editPolicy', 'reviewPolicy', 'reviewServiceDefinition'
@@ -48,6 +49,7 @@ var SetupEnvironment;
     SetupEnvironment[SetupEnvironment["autoSetupAnaxInContainer"] = 2] = "autoSetupAnaxInContainer";
     SetupEnvironment[SetupEnvironment["autoSetupCliInContainer"] = 3] = "autoSetupCliInContainer";
     SetupEnvironment[SetupEnvironment["autoSetupContainer"] = 4] = "autoSetupContainer";
+    SetupEnvironment[SetupEnvironment["autoSetupAllInOne"] = 5] = "autoSetupAllInOne";
 })(SetupEnvironment = exports.SetupEnvironment || (exports.SetupEnvironment = {}));
 exports.keyMap = {
     org: 'credential',
@@ -67,7 +69,9 @@ exports.HorizonTemplate = {
     "HZN_AGENT_PORT": ""
 };
 exports.HorizonKeyMap = {
-    "HZN_MGMT_HUB_CERT_PATH": "CONFIG_CERT_PATH"
+    "HZN_MGMT_HUB_CERT_PATH": "CONFIG_CERT_PATH",
+    "HZN_CUSTOM_NODE_ID": 'HZN_DEVICE_ID',
+    "DEFAULT_ORG": "HZN_ORG_ID"
 };
 exports.configTemplate = {
     envHzn: {
@@ -89,6 +93,7 @@ exports.configTemplate = {
             "MMS_OBJECT_ID": "config.json",
             "MMS_OBJECT_FILE": "config/config.json",
             "UPDATE_FILE_NAME": "model.zip",
+            "HZN_CSS": "false",
             "EDGE_OWNER": "",
             "EDGE_DEPLOY": ""
         },
