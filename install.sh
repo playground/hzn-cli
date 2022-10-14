@@ -6,24 +6,52 @@ set -e
 
 # Tested on Ubuntu, MacOS
 # @playground
+
+if [[ $OSTYPE == 'darwin'* ]]
+then
+	echo 'MacOS'
+	which -s brew
+	if [[ $? != 0 ]]
+	then
+		# Install Homebrew
+		ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+	fi
+	brew install socat jq
+fi
+
 ENV_SETUP=""
 CONFIG_FILE=""
 PS3='Choose your environment setup: '
-envsetup=("All-In-One" "CLI-Only" "Run-In-Container" "Confirm" "Quit")
+envsetup=("Cli-And-Anax" "CLI-Only" "CLI-In-Container" "Anax-In-Container" "Run-In-Containers" "All-In-One" "Confirm" "Quit")
 select fav in "${envsetup[@]}"; do
 	case $fav in
-		"All-In-One")
+		"Cli-And-Anax")
 			echo "$fav runs both CLI & Agent on host machine, choose <Confirm> to continue setup."
 			ENV_SETUP=$fav
 			# optionally call a function or run some code here
 			;;
 		"CLI-Only")
-			echo "$fav runs CLI on host and Agent in container, choose <Confirm> to continue setup."
+			echo "$fav runs CLI on host with Agent running in container, choose <Confirm> to continue setup."
 			ENV_SETUP=$fav
 			# optionally call a function or run some code here
 			;;
-		"Run-In-Container")
-			echo "$fav, CLI and Agent both runs in its own container, choose <Confirm> to continue setup."
+		"CLI-In-Container")
+			echo "$fav runs CLI on host with Agent running in container, choose <Confirm> to continue setup."
+			ENV_SETUP=$fav
+			# optionally call a function or run some code here
+			;;
+		"Anax-In-Container")
+			echo "$fav, Runs Agent in container, choose <Confirm> to continue setup."
+			ENV_SETUP=$fav
+			# optionally call a function or run some code here
+			;;
+		"Run-In-Containers")
+			echo "$fav, Runs both CLI and Agent in its own container, choose <Confirm> to continue setup."
+			ENV_SETUP=$fav
+			# optionally call a function or run some code here
+			;;
+		"All-In-One")
+			echo "$fav, Runs CLI, Agent & Management Hub on the same machine, choose <Confirm> to continue setup."
 			ENV_SETUP=$fav
 			# optionally call a function or run some code here
 			;;
@@ -57,8 +85,8 @@ select fav in "${configfile[@]}"; do
 		"Help")
 			echo "You would need to provide your configuration json file with the following info."
 			echo '\033[1;33m'
-			echo '  {'
-			echo '    "org": {'
+			echo '{'
+			echo '  "org": {'
     	echo '    "HZN_ORG_ID": "examples",'
 			echo '    "HZN_DEVICE_TOKEN": "",'
 			echo '    "HZN_DEVICE_ID": "device-name",'
@@ -90,6 +118,20 @@ select fav in "${configfile[@]}"; do
 			echo '    "MMS_SERVICE_FALLBACK_VERSION": "1.0.0",'
 			echo '    "UPDATE_FILE_NAME": "model.zip"'
 			echo '  }'
+			echo '  "folders": ['
+			echo '    "/var/tmp/horizon/horizon1/fss-domain-socket",'
+			echo '    "/var/tmp/horizon/horizon1/ess-auth",'
+			echo '    "/var/tmp/horizon/horizon1/secrets",'
+			echo '    "/var/tmp/horizon/horizon1/nmp"'
+			echo '  ],'
+			echo '  "local": {'
+			echo '    "YOUR_DOCKERHUB_ID": "dockerid",'
+			echo '    "DOCKER_REGISTRY": "hub.docker.com",'
+			echo '    "DOCKER_TOKEN": "dckr_pat_w......"'
+			echo '  },'
+			echo '  "anaxInContainer": "docker run -d -t --restart always --name horizon1 --privileged -p 127.0.0.1:8081:8510 -e DOCKER_NAME=horizon1 -e HZN_VAR_RUN_BASE=/var/tmp/horizon/horizon1 -v /var/run/docker.sock:/var/run/docker.sock -v /var/horizon:/etc/default/horizon:ro -v /var/agent-install.crt:/var/agent-install.crt -v horizon1_var:/var/horizon/ -v horizon1_etc:/etc/horizon/ -v /var/tmp/horizon/horizon1:/var/tmp/horizon/horizon1 openhorizon/amd64_anax:2.30.0-952",'
+			echo '  "cliInContainer": "docker run -d -it --restart always --name hzn-cli --privileged --network=\"host\" -v /var/run/docker.sock:/var/run/docker.sock -v /var/agent-install.crt:/var/agent-install.crt -e HORIZON_URL=http://localhost:8081 -e HZN_ORG_ID=${HZN_ORG_ID} -e HZN_EXCHANGE_USER_AUTH=${HZN_EXCHANGE_USER_AUTH} -e HZN_FSS_CSSURL=${HZN_FSS_CSSURL} -e HZN_EXCHANGE_URL=${HZN_EXCHANGE_URL} -e version=v2.30.0-952 playbox21/hzn-cli_amd64"'
+			echo '}'
 			echo '\033[0m'
 			;;
 		"Confirm")
@@ -110,8 +152,10 @@ select fav in "${configfile[@]}"; do
   esac
 done
 
-if [ -d "${HOME}/.nvm/.git" ]
-then echo "nvm installed";
+if [[ -f "${HOME}/.nvm/nvm.sh" ]]; then
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 else echo "nvm not installed"
 	# Define versions
 	INSTALL_NODE_VER=16
@@ -173,7 +217,9 @@ echo "==> Checking oh version"
 oh --version
 
 echo "==> Setting up hzn environment..."
-if [ "${ENV_SETUP}" = "All-In-One" ]
+sudo touch /etc/default/horizon
+
+if [ "${ENV_SETUP}" = "Cli-And-Anax" ]
 then
 	echo "$ENV_SETUP, here we go."
 	oh deploy autoSetup --config_file ${CONFIG_FILE}
@@ -181,9 +227,22 @@ elif [ "${ENV_SETUP}" = "CLI-Only" ]
 then
 	echo "$ENV_SETUP, here we go."
 	oh deploy autoSetupCliOnly --config_file ${CONFIG_FILE}
+elif [ "${ENV_SETUP}" = "CLI-In-Container" ]
+then
+	echo "$ENV_SETUP, here we go."
+	oh deploy autoSetupCliInContainer --config_file ${CONFIG_FILE}
 elif [ "${ENV_SETUP}" = "Anax-In-Container" ]
 then
 	echo "$ENV_SETUP, here we go."
+	oh deploy autoSetupAnaxInContainer --config_file ${CONFIG_FILE}
+elif [ "${ENV_SETUP}" = "Run-In-Containers" ]
+then
+	echo "$ENV_SETUP, here we go."
+	oh deploy autoSetupContainer --config_file ${CONFIG_FILE}
+elif [ "${ENV_SETUP}" = "All-In-One" ]
+then
+	echo "$ENV_SETUP, here we go."
+	oh deploy autoSetupAllInOne --config_file ${CONFIG_FILE}
 else
 	echo "Something went wrong...$ENV_SETUP"
 	break

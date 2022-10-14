@@ -15,8 +15,13 @@ export declare class Utils {
     preInstallHznCli(orgId: string, anax: string, nodeId: string, css: string, token: string): Observable<unknown>;
     installCliInContainer(configJson: any): Observable<unknown>;
     createHorizonSystemFiles(configJson: any): Observable<unknown>;
+    removeCliContainer(name?: string): Observable<unknown>;
+    removeAnaxContainer(name?: string): Observable<unknown>;
+    stopRemoveContainer(name: string): Observable<unknown>;
+    installCliAndAnaxInContainers(configJson: any): Observable<unknown>;
     installAnaxInContainer(configJson: any): Observable<unknown>;
     updateConfig(configFile: string): Observable<unknown>;
+    proceedWithAutoInstall(setup: SetupEnvironment): Observable<unknown>;
     autoRun(configFile: string, setup: SetupEnvironment): Observable<unknown>;
     replaceEnvTokens(input: string, tokens: any): string;
     autoSetup(configFile: string): Observable<unknown>;
@@ -24,6 +29,7 @@ export declare class Utils {
     autoSetupAnaxInContainer(configFile: string): Observable<unknown>;
     autoSetupCliInContainer(configFile: string): Observable<unknown>;
     autoSetupContainer(configFile: string): Observable<unknown>;
+    autoSetupAllInOne(configFile: string): Observable<unknown>;
     getEtcDefault(): string;
     getHznConfig(): string;
     listAgreement(param: IHznParam): Observable<unknown>;
@@ -54,8 +60,8 @@ export declare class Utils {
     installPrereq(): Observable<unknown>;
     cleanUp(): Observable<unknown>;
     installCliOnly(anax: string): Observable<unknown>;
-    installHznCli(anax: string, id: string, css?: string, deviceToken?: string): Observable<unknown>;
-    uninstallHorizon(msg?: string): Observable<unknown>;
+    installHznCli(anax: string, id: string, css: any, deviceToken?: string): Observable<unknown>;
+    uninstallHorizon(msg?: string, yes?: string): Observable<unknown>;
     setupManagementHub(): Observable<unknown>;
     copyFile(arg: string): Promise<unknown>;
     appendSupport(): Observable<unknown>;

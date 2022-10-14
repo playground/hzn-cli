@@ -25,7 +25,8 @@ export declare enum SetupEnvironment {
     autoSetupCliOnly = 1,
     autoSetupAnaxInContainer = 2,
     autoSetupCliInContainer = 3,
-    autoSetupContainer = 4
+    autoSetupContainer = 4,
+    autoSetupAllInOne = 5
 }
 export declare const keyMap: {
     org: string;
@@ -46,6 +47,8 @@ export declare const HorizonTemplate: {
 };
 export declare const HorizonKeyMap: {
     HZN_MGMT_HUB_CERT_PATH: string;
+    HZN_CUSTOM_NODE_ID: string;
+    DEFAULT_ORG: string;
 };
 export declare const configTemplate: {
     envHzn: {
@@ -67,6 +70,7 @@ export declare const configTemplate: {
             MMS_OBJECT_ID: string;
             MMS_OBJECT_FILE: string;
             UPDATE_FILE_NAME: string;
+            HZN_CSS: string;
             EDGE_OWNER: string;
             EDGE_DEPLOY: string;
         };

@@ -10,25 +10,7 @@ Open Horizon toolkit is a CLI built with Typescript for the NodeJS developers.  
 ## Pre-release version of hzn-cli, howto?
 
 ### Docker image
-Containerized version is available here ```docker pull playbox21/hzn-cli[amd64|arm]:0.2.31```
-
-```
-docker run -d -it --name hzn-cli --privileged --network="host" -v /var/run/docker.sock:/var/run/docker.sock \
--e HZN_ORG_ID=biz \
--e HZN_EXCHANGE_USER_AUTH= \
--e HZN_FSS_CSSURL= \
--e HZN_EXCHANGE_URL= \
--e HORIZON_URL=http://localhost:8081 \
-playbox21/hzn-cli_amd64:0.2.31
-```
-### To run Anax in container
-```
-export HZN_ORG_ID=biz \
-export HZN_EXCHANGE_USER_AUTH= \
-export HZN_FSS_CSSURL= \
-export HZN_EXCHANGE_URL= 
-```
-```curl -sSL https://raw.githubusercontent.com/open-horizon/anax/master/agent-install/agent-install.sh -o agent-install.sh && chmod +x agent-install.sh && sudo -s -E ./agent-install.sh -i 'css:' --container```
+Containerized version is available here ```docker pull playbox21/hzn-cli[amd64|arm]```
 
 ### To setup Management Hub
 ```curl -sSL https://raw.githubusercontent.com/playground/hzn-cli/main/install-mgmt-hub.sh  --output install-mgmt-hub.sh && bash ./install-mgmt-hub.sh```
@@ -47,19 +29,23 @@ After installlation run
 Deploy <action> to Org <org>
 
 Positionals:
-  action  Available actions: addDeploymentPolicy, addNodePolicy,
-          addServicePolicy, addPolicy, appendSupport, buildAndPublish,
-          buildMMSImage, buildPublishAndRegister, buildServiceImage,
-          checkConfigState, createHznKey, deleteObject, dockerImageExists,
-          editPolicy, editDeploymentPolicy, editNodePolicy, editServicePolicy,
-          getDeviceArch, getIpAddress, isConfigured, listDeploymentPolicy,
-          listNode, listNodePattern, listObject, listPattern, listService,
-          publishAndRegister, publishMMSObject, publishMMSObjectPolicy,
-          publishMMSPattern, publishMMSService, publishPatterrn, publishService,
-          publishServiceAndPattern, pullDockerImage, pushMMSImage,
-          pushServiceImage, registerAgent, removeOrg, setup, setupManagementHub,
-          showHznInfo, test, uninstallHorizon, unregisterAgent, updateHznInfo
-                                                             [string] [required]
+  action  Available actions: addPolicy addRemoteNodePolicy appendSupport
+          autoSetup autoSetupAnaxInContainer autoSetupCliInContainer
+          autoSetupCliOnly autoSetupContainer buildAndPublish buildMMSImage
+          buildPublishAndRegister buildServiceImage checkConfigState cleanUp
+          createHznKey deleteObject editDeploymentPoicy editNodePolicy
+          editPolicy editServicePolicy getDeviceArch isConfigured listAgreement
+          listAllServices listDeploymentPolicy listExchangeNode
+          listExchangeNodePolicy listNode listNodePattern listNodes listObject
+          listOrg listPattern listPolicy listService listServicePolicy
+          publishAndRegister publishMMSObject publishMMSObjectPattern
+          publishMMSObjectPolicy publishMMSPattern publishMMSService
+          publishPattern publishService publishServiceAndPattern pushMMSImage
+          pushServiceImage registerAgent removeAnaxContainer removeCliContainer
+          removeDeploymentPolicy removeNode removeObject removeOrg removeService
+          reviewPolicy reviewServiceDefinition setup setupManagementHub
+          showHznInfo stopRemoveContainer test uninstallHorizon unregisterAgent
+          updateHznInfo                                      [string] [required]
 
 Options:
       --version             Show version number                        [boolean]
@@ -70,8 +56,13 @@ Options:
       --object_type         Type of object                              [string]
       --object_id           Id of object to be published                [string]
       --object              Object file to be published                 [string]
-      --pattern             MMS pattern                                 [string]
-      --skip_config_update  Do not prompt for config updates            [string]
+      --pattern             Pattern name                                [string]
+      --watch               watch = true/false                          [string]
+      --filter              filter search result = arm, amd64, arm64 & etc
+                                                                        [string]
+      --skip_config_update  Do not prompt for config updates = true/false
+                                                                        [string]
+      --config_file         Provide config json file for auto setup     [string]
   -h, --help                Show help                                  [boolean]
 ```
 ## To setup your environment, you will need to run
