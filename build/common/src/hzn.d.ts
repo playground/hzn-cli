@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
-import { Utils } from './utils';
 import { IHznParam, IPolicy } from './interface';
+import { Utils } from './utils';
 export declare const utils: Utils;
 export declare class Hzn {
     objectType: any;
@@ -44,6 +44,7 @@ export declare class Hzn {
     publishMMSService(): Observable<unknown>;
     publishMMSPattern(): Observable<unknown>;
     unregisterAgent(): Observable<unknown>;
+    register(): Observable<unknown>;
     registerAgent(): Observable<unknown>;
     publishMMSObject(): Observable<unknown>;
     publishMMSObjectPattern(): Observable<unknown>;
@@ -60,6 +61,7 @@ export declare class Hzn {
     editNodePolicy(): Observable<unknown>;
     editServicePolicy(): Observable<unknown>;
     addPolicy(): Observable<unknown>;
+    updatePolicy(): Observable<unknown>;
     addDeploymentPolicy(): Observable<unknown>;
     addServicePolicy(): Observable<unknown>;
     addNodePolicy(): Observable<unknown>;

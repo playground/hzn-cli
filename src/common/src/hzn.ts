@@ -1,8 +1,9 @@
+import { existsSync } from 'fs';
 import { Observable, of } from 'rxjs';
+
 import { Env } from './env';
-import { Utils, promptSync } from './utils';
-import { IHznParam, IPolicy, justRun, runDirectly, promptForUpdate, installTar } from './interface'
-import { mkdirSync, existsSync, cpSync, copyFileSync } from 'fs';
+import { IHznParam, IPolicy, promptForUpdate } from './interface';
+import { Utils } from './utils';
 
 export const utils = new Utils();
 
@@ -206,6 +207,9 @@ export class Hzn {
   unregisterAgent() {
     return utils.unregisterAgent()
   }
+  register() {
+    return utils.register(this)
+  }
   registerAgent() {
     return new Observable((observer) => {
       this.unregisterAgent().subscribe({
@@ -377,6 +381,9 @@ export class Hzn {
   }
   addPolicy() {
     return utils.addPolicy(this.param, this.getPolicyInfo())
+  }
+  updatePolicy() {
+    return utils.updatePolicy(this.param, this.getPolicyInfo())
   }
   addDeploymentPolicy() {
     return utils.addDeploymentPolicy(this.getPolicyInfo())

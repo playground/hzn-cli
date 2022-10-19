@@ -1,21 +1,30 @@
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import jsonfile from 'jsonfile';
+import os from 'os';
+import prompt from 'prompt';
+import { firstValueFrom, Observable, of } from 'rxjs';
+import { URL } from 'url';
+
+import { Hzn, utils } from '.';
+import { Env } from './env';
+import {
+  configTemplate,
+  HorizonKeyMap,
+  HorizonTemplate,
+  IHznParam,
+  installPrompt,
+  installTar,
+  keyMap,
+  SetupEnvironment,
+} from './interface';
+
 declare var require: any
 declare var process: any
 
-import { Observable, of, firstValueFrom, Observer, forkJoin, from } from 'rxjs';
 const cp = require('child_process'),
 exec = cp.exec;
-import { readFileSync, writeFileSync, copyFileSync , existsSync, exists, mkdirSync } from 'fs';
-import os from 'os';
 const ifs: any = os.networkInterfaces();
-import prompt from 'prompt';
 export const promptSync = require('prompt-sync')();
-import jsonfile from 'jsonfile';
-import { utils } from '.';
-import { fork } from 'child_process';
-import { URL } from 'url';
-import { Env } from './env';
-import { IHznParam, installPrompt, installTar, configTemplate, keyMap, SetupEnvironment, HorizonTemplate, HorizonKeyMap } from './interface';
-
 const env = process.env.npm_config_env || 'biz';
 const isBoolean = [
   'TOP_LEVEL_SERVICE'
@@ -1497,12 +1506,65 @@ export class Utils {
       })  
     })  
   }
-  promptEditPolicy() {
-
-  }
-  addPolicy(param: IHznParam, policy: any) {
+  register(hzn: Hzn) {
     return new Observable((observer) => {
-      let answer = this.promptPolicySelection(`Please select the type of policy you would like to add: `);
+      let answer = this.promptRegisterSelection(`Please make a selection: `);
+      if(answer == 0) {
+        observer.next(0) 
+        observer.complete()
+      } else if(answer == 1) {
+        console.log('\x1b[32m', '\nRegister with a Policy') 
+        this.registerWithPolicy(hzn)
+        .subscribe(() => {observer.next(1); observer.complete()})
+      } else if(answer == 2) {
+        console.log('\x1b[32m', '\nRegister with a Pattern') 
+        this.registerWithPattern(hzn)
+        .subscribe(() => {observer.next(2); observer.complete()})
+      }
+    })     
+  }
+  registerWithPolicy(hzn: Hzn) {
+    return new Observable((observer) => {
+      this.unregisterAgent().subscribe({
+        complete: () => {
+          let arg = hzn.param.name.length > 0 ? `hzn register --policy ${hzn.getPolicyInfo()} --name ${hzn.param.name}` : `hzn register --policy ${hzn.getPolicyInfo()}`
+          utils.shell(arg, 'done registering agent with policy', 'failed to register agent')
+          .subscribe({
+            complete: () => {
+              observer.next()
+              observer.complete()
+            },  
+            error: (err) => observer.error(err)
+          })
+        }, error: (err) => {
+          observer.error(err);
+        }    
+      })  
+    })  
+  }
+  registerWithPattern(hzn: Hzn) {
+    return new Observable((observer) => {
+      this.unregisterAgent().subscribe({
+        complete: () => {
+          let arg = `hzn register --policy ${hzn.nodePolicyJson} --pattern "${hzn.mmsPattern}"`;
+          utils.shell(arg, 'done registering agent', 'failed to register agent')
+          .subscribe({
+            complete: () => observer.complete(),
+            error: (err) => observer.error(err)
+          })
+        }, error: (err) => {
+          observer.error(err);
+        }    
+      })  
+    })      
+  }
+  updatePolicy(param: IHznParam, policy: any) {
+    return this.addPolicy(param, policy, true)
+  }
+  addPolicy(param: IHznParam, policy: any, update = false) {
+    return new Observable((observer) => {
+      const addOrUpdate = update ? 'update' : 'add';
+      let answer = this.promptPolicySelection(`Please select the type of policy you would like to ${addOrUpdate}: `);
       if(answer == 0) {
         observer.next(0) 
         observer.complete()
@@ -1570,6 +1632,17 @@ export class Utils {
         error: (err) => observer.error(err)
       })
     })
+  }
+  promptRegisterSelection(msg: string = `Please make a selection: `) {
+    let answer;
+    console.log('\x1b[36m', `\nType of registrations:\n1) Register with a Policy\n2) Register with a pattern\n0) To exit`)
+    do {
+      answer = parseInt(promptSync(msg))
+      if(answer < 0 || answer > 2) {
+        console.log('\x1b[41m%s\x1b[0m', '\nInvalid, try again.')
+      } 
+    } while(answer < 0 || answer > 4)
+    return answer
   }
   promptPolicySelection(msg: string = `Please select the type of policy you would like to work with: `) {
     let answer;
