@@ -630,6 +630,10 @@ class Utils {
             });
         });
     }
+    purgeManagementHub() {
+        const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`;
+        return this.shell(arg);
+    }
     cleanUp() {
         console.log('cleaning up', (0, fs_1.existsSync)(`${this.etcDefault}/horizon`), (0, fs_1.existsSync)(this.etcHorizon), this.etcHorizon);
         let arg = (0, fs_1.existsSync)(`${process.cwd()}/agent-install.cfg`) ? `sudo rm ${process.cwd()}/agent-install.* -f -y || true && ` : '';
@@ -733,23 +737,37 @@ class Utils {
             console.log(props);
             console.log('\nKey in new value or (leave blank) press Enter to keep current value: ');
             prompt_1.default.get(props, (err, result) => {
-                console.log(result);
-                console.log(`\nWould you like to proceed to install Management Hub: Y/n?`);
-                prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
-                    if (question.answer.toUpperCase() === 'Y') {
-                        for (const [key, value] of Object.entries(result)) {
-                            pEnv[key] = value;
-                        }
-                        this.shell(`curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo -s -E -b ./deploy-mgmt-hub.sh`)
-                            .subscribe({
-                            next: (res) => {
-                                (0, fs_1.writeFileSync)(`${this.hznConfig}/.secret`, res);
-                            },
-                            complete: () => observer.complete(),
-                            error: (err) => observer.error(err)
-                        });
+                console.dir(result, { depth: null, color: true });
+                // TODO: refactor following into a reusable function
+                const template = { name: '', value: '' };
+                let propName = 'environment variable';
+                let answer;
+                do {
+                    answer = (0, exports.promptSync)(`Would you like to add additional ${propName}: Y/n? `);
+                    if (answer.toLowerCase() == 'y') {
+                        this.promptType(propName, result, template);
                     }
-                });
+                } while (answer.toLowerCase() == 'y');
+                console.dir(result, { depth: null, color: true });
+                answer = (0, exports.promptSync)(`\nWould you like to proceed to install Management Hub: Y/n?`);
+                if (answer.toLowerCase() == 'y') {
+                    for (const [key, value] of Object.entries(result)) {
+                        pEnv[key] = value;
+                    }
+                    this.shell(`curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo -s -E -b ./deploy-mgmt-hub.sh`)
+                        .subscribe({
+                        next: (res) => {
+                            (0, fs_1.writeFileSync)(`${this.hznConfig}/.secret`, res);
+                        },
+                        complete: () => observer.complete(),
+                        error: (err) => {
+                            if (err.indexOf('400 from: vaultUnseal') > 0) {
+                                console.log('You might want to purge existing instance by running "oh deploy purgeManagementHub.');
+                            }
+                            observer.error(err);
+                        }
+                    });
+                }
             });
         });
     }

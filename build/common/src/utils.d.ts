@@ -59,6 +59,7 @@ export declare class Utils {
     getIpAddress(): any[];
     aptUpdate(): Observable<unknown>;
     installPrereq(): Observable<unknown>;
+    purgeManagementHub(): Observable<unknown>;
     cleanUp(): Observable<unknown>;
     installCliOnly(anax: string): Observable<unknown>;
     installHznCli(anax: string, id: string, css: any, deviceToken?: string): Observable<unknown>;

@@ -16,7 +16,8 @@ exports.promptForUpdate = [
     'publishMMSPattern', 'pushMMSImage', 'pushServiceImage', 'registerAgent'
 ];
 exports.customRun = [
-    'autoSetup', 'autoSetupAllInOne', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer', 'cleanUp'
+    'autoSetup', 'autoSetupAllInOne', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer',
+    'cleanUp', 'purgeManagementHub'
 ];
 exports.runDirectly = [
     'appendSupport', 'deleteObject', 'removeCliContainer', 'removeAnaxContainer', 'stopRemoveContainer',
