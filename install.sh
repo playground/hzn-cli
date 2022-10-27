@@ -31,17 +31,17 @@ select fav in "${envsetup[@]}"; do
 			# optionally call a function or run some code here
 			;;
 		"CLI-Only")
-			echo "$fav runs CLI on host with Agent running in container, choose <Confirm> to continue setup."
+			echo "$fav install CLI only on host, this option implies agent is running in a container, choose <Confirm> to continue setup."
 			ENV_SETUP=$fav
 			# optionally call a function or run some code here
 			;;
 		"CLI-In-Container")
-			echo "$fav runs CLI on host with Agent running in container, choose <Confirm> to continue setup."
+			echo "$fav runs CLI in a container, this option implies agent is running in a container, choose <Confirm> to continue setup."
 			ENV_SETUP=$fav
 			# optionally call a function or run some code here
 			;;
 		"Anax-In-Container")
-			echo "$fav, Runs Agent in container, choose <Confirm> to continue setup."
+			echo "$fav, Runs Agent in container , choose <Confirm> to continue setup."
 			ENV_SETUP=$fav
 			# optionally call a function or run some code here
 			;;

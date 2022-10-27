@@ -1,7 +1,8 @@
 import { Observable } from 'rxjs';
-export declare const promptSync: any;
+import { Hzn } from '.';
 import { Env } from './env';
 import { IHznParam, SetupEnvironment } from './interface';
+export declare const promptSync: any;
 export declare class Utils {
     etcDefault: string;
     etcHorizon: string;
@@ -58,6 +59,7 @@ export declare class Utils {
     getIpAddress(): any[];
     aptUpdate(): Observable<unknown>;
     installPrereq(): Observable<unknown>;
+    purgeManagementHub(): Observable<unknown>;
     cleanUp(): Observable<unknown>;
     installCliOnly(anax: string): Observable<unknown>;
     installHznCli(anax: string, id: string, css: any, deviceToken?: string): Observable<unknown>;
@@ -95,14 +97,18 @@ export declare class Utils {
     promptType(propName: string, res: any, el: any): void;
     goPrompt(props: any, propName: string): Promise<unknown>;
     unregisterAgent(msg?: string): Observable<unknown>;
-    promptEditPolicy(): void;
-    addPolicy(param: IHznParam, policy: any): Observable<unknown>;
+    register(hzn: Hzn): Observable<unknown>;
+    registerWithPolicy(hzn: Hzn): Observable<unknown>;
+    registerWithPattern(hzn: Hzn): Observable<unknown>;
+    updatePolicy(param: IHznParam, policy: any): Observable<unknown>;
+    addPolicy(param: IHznParam, policy: any, update?: boolean): Observable<unknown>;
     addDeploymentPolicy(policy: any): Observable<unknown>;
     addServicePolicy(policy: any): Observable<unknown>;
     addObjectPolicy(param: IHznParam): Observable<unknown>;
     addObjectPattern(param: IHznParam): void;
     addNodePolicy(param: IHznParam, policy: any): Observable<unknown>;
     addRemoteNodePolicy(param: IHznParam, policy: any): Observable<unknown>;
+    promptRegisterSelection(msg?: string): any;
     promptPolicySelection(msg?: string): any;
     promptServiceSelection(): any;
     reviewServiceDefinition(): Observable<unknown>;
