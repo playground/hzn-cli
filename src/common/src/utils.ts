@@ -204,10 +204,10 @@ export class Utils {
   }
   installCliAndAnaxInContainers(configJson: any) {
     return new Observable((observer) => {
-      this.installCliInContainer(configJson)
+      this.installAnaxInContainer(configJson)
       .subscribe({
         complete: () => {
-          this.installAnaxInContainer(configJson)
+          this.installCliInContainer(configJson)
           .subscribe({
             complete: () => observer.complete(),
             error: (err) => observer.error(err)
