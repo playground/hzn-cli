@@ -153,33 +153,41 @@ class Utils {
             });
             console.log(content);
             if (content.length > 0) {
-                (0, fs_1.writeFileSync)(`${process.cwd()}/horizon`, content);
-                this.copyFile(`sudo mv ${process.cwd()}/horizon /var/horizon`).then(() => {
-                    const folders = configJson.folders;
-                    if ((0, fs_1.existsSync)(pEnv.CONFIG_CERT_PATH) && folders) {
-                        this.copyFile(`sudo cp ${pEnv.CONFIG_CERT_PATH} ${pEnv.HZN_MGMT_HUB_CERT_PATH}`).then(() => {
-                            let arg = '';
-                            folders.forEach((folder) => {
-                                if (arg.length > 0) {
-                                    arg += ' && ';
-                                }
-                                arg += `sudo mkdir -p ${folder}`;
-                            });
-                            this.shell(arg)
+                const folders = configJson.folders;
+                if ((0, fs_1.existsSync)(pEnv.CONFIG_CERT_PATH) && folders) {
+                    (0, fs_1.writeFileSync)(`${process.cwd()}/horizon`, content);
+                    this.shell(`sudo mv ${process.cwd()}/horizon /var/horizon`)
+                        .subscribe({
+                        complete: () => {
+                            this.shell(`sudo cp ${pEnv.CONFIG_CERT_PATH} ${pEnv.HZN_MGMT_HUB_CERT_PATH}`)
                                 .subscribe({
                                 complete: () => {
-                                    observer.next();
-                                    observer.complete();
+                                    let arg = '';
+                                    folders.forEach((folder) => {
+                                        if (arg.length > 0) {
+                                            arg += ' && ';
+                                        }
+                                        arg += `sudo mkdir -p ${folder}`;
+                                    });
+                                    this.shell(arg)
+                                        .subscribe({
+                                        complete: () => {
+                                            observer.next();
+                                            observer.complete();
+                                        },
+                                        error: (err) => observer.error(err)
+                                    });
                                 },
                                 error: (err) => observer.error(err)
                             });
-                        });
-                    }
-                    else {
-                        console.log(folders ? `CONFIG_CERT_PATH env var not found.` : `Missing folders property in config.`);
-                        observer.error('');
-                    }
-                });
+                        },
+                        error: (err) => observer.error(err)
+                    });
+                }
+                else {
+                    console.log(folders ? `CONFIG_CERT_PATH env var not found.` : `Missing folders property in config.`);
+                    observer.error('');
+                }
             }
             else {
                 console.log(`Something went wrong, unable to create /var/horizon file`);
