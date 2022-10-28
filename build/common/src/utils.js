@@ -316,39 +316,44 @@ class Utils {
     proceedWithAutoInstall(setup) {
         return new rxjs_1.Observable((observer) => {
             // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
-            const pEnv = process.env;
-            let action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN);
-            switch (setup) {
-                case interface_1.SetupEnvironment.autoSetup:
-                    action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN);
-                    break;
-                case interface_1.SetupEnvironment.autoSetupCliOnly:
-                    action = this.installCliOnly(pEnv.ANAX);
-                    break;
-                case interface_1.SetupEnvironment.autoSetupAnaxInContainer:
-                    action = this.installAnaxInContainer(this.configJson);
-                    break;
-                case interface_1.SetupEnvironment.autoSetupCliInContainer:
-                    action = this.installCliInContainer(this.configJson);
-                    break;
-                case interface_1.SetupEnvironment.autoSetupContainer:
-                    action = this.installCliAndAnaxInContainers(this.configJson);
-                    break;
-                case interface_1.SetupEnvironment.autoSetupAllInOne:
-                    action = this.setupManagementHub();
-                    break;
-            }
-            action
+            this.purgeManagementHub() // Leverage this functin to cleanup and install prerequisites, maynot need preInstallHznCli anymore
                 .subscribe({
-                next: (msg) => console.log('next here'),
                 complete: () => {
-                    console.log('done installing hzn cli.');
-                    observer.complete();
-                },
-                error: (err) => {
-                    console.log('err here');
-                    observer.error(err);
-                }
+                    const pEnv = process.env;
+                    let action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN);
+                    switch (setup) {
+                        case interface_1.SetupEnvironment.autoSetup:
+                            action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN);
+                            break;
+                        case interface_1.SetupEnvironment.autoSetupCliOnly:
+                            action = this.installCliOnly(pEnv.ANAX);
+                            break;
+                        case interface_1.SetupEnvironment.autoSetupAnaxInContainer:
+                            action = this.installAnaxInContainer(this.configJson);
+                            break;
+                        case interface_1.SetupEnvironment.autoSetupCliInContainer:
+                            action = this.installCliInContainer(this.configJson);
+                            break;
+                        case interface_1.SetupEnvironment.autoSetupContainer:
+                            action = this.installCliAndAnaxInContainers(this.configJson);
+                            break;
+                        case interface_1.SetupEnvironment.autoSetupAllInOne:
+                            action = this.setupManagementHub();
+                            break;
+                    }
+                    action
+                        .subscribe({
+                        next: (msg) => console.log('next here'),
+                        complete: () => {
+                            console.log('done installing hzn cli.');
+                            observer.complete();
+                        },
+                        error: (err) => {
+                            console.log('err here');
+                            observer.error(err);
+                        }
+                    });
+                }, error: (err) => observer.error(err)
             });
         });
     }
