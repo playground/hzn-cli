@@ -354,7 +354,7 @@ class Utils {
     }
     autoRun(configFile, setup) {
         return new rxjs_1.Observable((observer) => {
-            if (!configFile || configFile.length == 0) {
+            if (!configFile || configFile.length == 0 || !(0, fs_1.existsSync)(`${process.cwd()}/${configFile}`)) {
                 observer.next('Please provide --config_file name');
                 observer.complete();
             }
@@ -731,6 +731,7 @@ class Utils {
                 { name: 'HZN_LISTEN_IP', default: ips ? ips[0] : '', ipList: ips, required: true },
                 { name: 'HZN_TRANSPORT', default: 'https', required: true },
                 { name: 'EXCHANGE_IMAGE_NAME', default: '', required: false },
+                { name: 'MONGO_IMAGE_TAG', default: '', required: false },
                 { name: 'OH_ANAX_RELEASES', default: 'https://github.com/open-horizon/anax/releases/latest/download', required: true },
                 { name: 'EXCHANGE_USER_ORG', default: 'myorg', required: true }
             ];
@@ -1631,7 +1632,7 @@ class Utils {
             }
             else if (answer == 3) {
                 console.log('\x1b[32m', '\nAdding Node Policy');
-                this.addNodePolicy(param, policy)
+                this.updateNodePolicy(param, policy)
                     .subscribe(() => { observer.next(3); observer.complete(); });
             }
             else if (answer == 4) {
@@ -1657,6 +1658,10 @@ class Utils {
     }
     addObjectPattern(param) {
         // Todo 
+    }
+    updateNodePolicy(param, policy) {
+        const arg = `hzn exchange node addpolicy --json-file ${policy.nodePolicyJson} ${process.env.HZN_CUSTOM_NODE_ID}`;
+        return _1.utils.shell(arg, `done add/update for this agent`, `failed to add/update for this agent`);
     }
     addNodePolicy(param, policy) {
         return new rxjs_1.Observable((observer) => {

@@ -359,7 +359,7 @@ export class Utils {
   }
   autoRun(configFile: string, setup: SetupEnvironment) {
     return new Observable((observer) => {
-      if(!configFile || configFile.length == 0) {
+      if(!configFile || configFile.length == 0 || !existsSync(`${process.cwd()}/${configFile}`)) {
         observer.next('Please provide --config_file name')
         observer.complete()
       } else {
@@ -729,6 +729,7 @@ export class Utils {
         {name: 'HZN_LISTEN_IP', default: ips ? ips[0]: '', ipList: ips, required: true},
         {name: 'HZN_TRANSPORT', default: 'https', required: true},
         {name: 'EXCHANGE_IMAGE_NAME', default: '', required: false},
+        {name: 'MONGO_IMAGE_TAG', default: '', required: false},
         {name: 'OH_ANAX_RELEASES', default: 'https://github.com/open-horizon/anax/releases/latest/download', required: true},
         {name: 'EXCHANGE_USER_ORG', default: 'myorg', required: true}
       ]
@@ -1597,7 +1598,7 @@ export class Utils {
         .subscribe(() => {observer.next(2); observer.complete()})
       } else if(answer == 3) {
         console.log('\x1b[32m', '\nAdding Node Policy') 
-        this.addNodePolicy(param, policy)
+        this.updateNodePolicy(param, policy)
         .subscribe(() => {observer.next(3); observer.complete()})
       } else if(answer == 4) {
         console.log('\x1b[32m', '\nAdding Object Policy')
@@ -1622,6 +1623,10 @@ export class Utils {
   }
   addObjectPattern(param: IHznParam) {
     // Todo 
+  }
+  updateNodePolicy(param: IHznParam, policy: any) {
+    const arg = `hzn exchange node addpolicy --json-file ${policy.nodePolicyJson} ${process.env.HZN_CUSTOM_NODE_ID}`
+    return utils.shell(arg, `done add/update for this agent`, `failed to add/update for this agent`)
   }
   addNodePolicy(param: IHznParam, policy: any) {
     return new Observable((observer) => {

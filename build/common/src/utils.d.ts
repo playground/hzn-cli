@@ -106,6 +106,7 @@ export declare class Utils {
     addServicePolicy(policy: any): Observable<unknown>;
     addObjectPolicy(param: IHznParam): Observable<unknown>;
     addObjectPattern(param: IHznParam): void;
+    updateNodePolicy(param: IHznParam, policy: any): Observable<unknown>;
     addNodePolicy(param: IHznParam, policy: any): Observable<unknown>;
     addRemoteNodePolicy(param: IHznParam, policy: any): Observable<unknown>;
     promptRegisterSelection(msg?: string): any;

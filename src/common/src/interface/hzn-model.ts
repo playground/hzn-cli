@@ -1,13 +1,13 @@
 export const justRun = [
-  'addRemoteNodePolicy',
+  'addPolicy', 'addRemoteNodePolicy', 'updatePolicy',
   'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement', 
   'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodes', 'listOrg', 'listNodePattern', 'listObject', 'listPattern', 
   'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'publishMMSObject', 'publishMMSObjectPattern', 'publishMMSObjectPolicy', 
-  'removeDeploymentPolicy', 'removeObject', 'removeOrg', 
+  'register', 'removeDeploymentPolicy', 'removeObject', 'removeOrg', 
   'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition'
 ];
 export const promptForUpdate = [
-  'addPolicy', 'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister', 
+  'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister', 
   'buildMMSImage', 'buildServiceImage', 'editDeploymentPoicy', 'editNodePolicy', 'editServicePolicy', 'publishAndRegister', 
   'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService', 
   'publishMMSPattern', 'pushMMSImage', 'pushServiceImage', 'registerAgent'
