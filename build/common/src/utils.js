@@ -732,12 +732,13 @@ class Utils {
         return new rxjs_1.Observable((observer) => {
             let ips = this.getIpAddress();
             const pEnv = process.env;
+            const orgId = pEnv.HZN_ORG_ID ? pEnv.HZN_ORG_ID : 'myorg';
             const props = [
                 { name: 'HZN_LISTEN_IP', default: ips ? ips[0] : '', ipList: ips, required: true },
                 { name: 'HZN_TRANSPORT', default: 'https', required: true },
                 { name: 'EXCHANGE_IMAGE_NAME', default: '', required: false },
                 { name: 'OH_ANAX_RELEASES', default: 'https://github.com/open-horizon/anax/releases/latest/download', required: true },
-                { name: 'EXCHANGE_USER_ORG', default: 'myorg', required: true }
+                { name: 'EXCHANGE_USER_ORG', default: orgId, required: true }
             ];
             console.log(props);
             console.log('\nKey in new value or (leave blank) press Enter to keep current value: ');
