@@ -162,10 +162,10 @@ export class Utils {
       console.log(content)
       if(content.length > 0) {
         writeFileSync(`${process.cwd()}/horizon`, content);
-        this.copyFile(`sudo mv ${process.cwd()}/horizon /var/horizon`).then(() => {
+        this.copyFile(`sudo mv ${process.cwd()}/horizon /var`).then(() => {
           const folders = configJson.folders;
           if(existsSync(pEnv.CONFIG_CERT_PATH) && folders) {
-            this.copyFile(`sudo cp ${pEnv.CONFIG_CERT_PATH} ${pEnv.HZN_MGMT_HUB_CERT_PATH}`).then(() => {
+            this.copyFile(`sudo cp ${pEnv.CONFIG_CERT_PATH} /var`).then(() => {
               let arg = ''
               folders.forEach((folder) => {
                 if(arg.length > 0) {
@@ -204,10 +204,10 @@ export class Utils {
   }
   installCliAndAnaxInContainers(configJson: any) {
     return new Observable((observer) => {
-      this.installCliInContainer(configJson)
+      this.installAnaxInContainer(configJson)
       .subscribe({
         complete: () => {
-          this.installAnaxInContainer(configJson)
+          this.installCliInContainer(configJson)
           .subscribe({
             complete: () => observer.complete(),
             error: (err) => observer.error(err)
@@ -321,40 +321,45 @@ export class Utils {
   proceedWithAutoInstall(setup: SetupEnvironment) {
     return new Observable((observer) => {
       // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
-      const pEnv: any = process.env;
-      let action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
-      switch(setup) {
-        case SetupEnvironment.autoSetup:
-          action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
-          break;
-        case SetupEnvironment.autoSetupCliOnly:
-          action = this.installCliOnly(pEnv.ANAX)
-          break;
-        case SetupEnvironment.autoSetupAnaxInContainer:
-          action = this.installAnaxInContainer(this.configJson)
-          break;
-        case SetupEnvironment.autoSetupCliInContainer:
-          action = this.installCliInContainer(this.configJson)
-          break;
-        case SetupEnvironment.autoSetupContainer:
-          action = this.installCliAndAnaxInContainers(this.configJson)
-          break;
-        case SetupEnvironment.autoSetupAllInOne:
-          action = this.setupManagementHub()
-          break;
-        }
-      action
+      this.purgeManagementHub() // Leverage this functin to cleanup and install prerequisites, maynot need preInstallHznCli anymore
       .subscribe({
-        next: (msg) => console.log('next here'),
         complete: () => {
-          console.log('done installing hzn cli.');
-          observer.complete();
-        },
-        error: (err) => {
-          console.log('err here')
-          observer.error(err);
-        }
-      })      
+          const pEnv: any = process.env;
+          let action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
+          switch(setup) {
+            case SetupEnvironment.autoSetup:
+              action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
+              break;
+            case SetupEnvironment.autoSetupCliOnly:
+              action = this.installCliOnly(pEnv.ANAX)
+              break;
+            case SetupEnvironment.autoSetupAnaxInContainer:
+              action = this.installAnaxInContainer(this.configJson)
+              break;
+            case SetupEnvironment.autoSetupCliInContainer:
+              action = this.installCliInContainer(this.configJson)
+              break;
+            case SetupEnvironment.autoSetupContainer:
+              action = this.installCliAndAnaxInContainers(this.configJson)
+              break;
+            case SetupEnvironment.autoSetupAllInOne:
+              action = this.setupManagementHub()
+              break;
+            }
+          action
+          .subscribe({
+            next: (msg) => console.log('next here'),
+            complete: () => {
+              console.log('done installing hzn cli.');
+              observer.complete();
+            },
+            error: (err) => {
+              console.log('err here')
+              observer.error(err);
+            }
+          })          
+        }, error: (err) => observer.error(err)
+      }) 
     })
   }
   autoRun(configFile: string, setup: SetupEnvironment) {
