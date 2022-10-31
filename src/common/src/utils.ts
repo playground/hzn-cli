@@ -736,7 +736,8 @@ export class Utils {
         {name: 'HZN_TRANSPORT', default: 'https', required: true},
         {name: 'EXCHANGE_IMAGE_NAME', default: '', required: false},
         {name: 'OH_ANAX_RELEASES', default: 'https://github.com/open-horizon/anax/releases/latest/download', required: true},
-        {name: 'EXCHANGE_USER_ORG', default: orgId, required: true}
+        {name: 'EXCHANGE_USER_ORG', default: orgId, required: true},
+        {name: 'DEPLOY_MGMT_HUB_SCRIPT', default: 'https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh', required: true}
       ]
       console.log(props)
       console.log('\nKey in new value or (leave blank) press Enter to keep current value: ')
@@ -759,7 +760,13 @@ export class Utils {
           for(const [key, value] of Object.entries(result)) {
             pEnv[key] = value; 
           }
-          this.shell(`curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo -s -E -b ./deploy-mgmt-hub.sh`)
+          const mgmtHubScript = pEnv.DEPLOY_MGMT_HUB_SCRIPT;
+          if(mgmtHubScript.indexOf('://') < 0 && !existsSync(mgmtHubScript)) {
+            console.log(`${mgmtHubScript} not found.`)
+            observer.error('exiting...')
+          }
+          const arg = mgmtHubScript.indexOf('://') > 0 ? `curl -sSL ${mgmtHubScript} --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo -s -E -b ./deploy-mgmt-hub.sh` : `sudo -s -E -b ${mgmtHubScript}`
+          this.shell(arg)
           .subscribe({
             next: (res: any) => {
               writeFileSync(`${this.hznConfig}/.secret`, res)
