@@ -367,6 +367,21 @@ export class Utils {
       if(!configFile || configFile.length == 0) {
         observer.next('Please provide --config_file name')
         observer.complete()
+      } else if(setup == SetupEnvironment.autoSetupAllInOne) {
+        const config = jsonfile.readFileSync(configFile);
+        const pEnv: any = process.env;
+        const org = config.org
+        Object.keys(org).forEach((key) => {
+          pEnv[key] = org[key]
+        })
+        this.proceedWithAutoInstall(setup)
+        .subscribe({
+          complete: () => {
+            observer.next('')
+            observer.complete();              
+          },
+          error: (err) => observer.error(err)
+        })  
       } else {
         this.updateConfig(configFile)
         .subscribe({
@@ -730,14 +745,16 @@ export class Utils {
     return new Observable((observer) => {
       let ips = this.getIpAddress()
       const pEnv: any = process.env;
-      const orgId = pEnv.HZN_ORG_ID ? pEnv.HZN_ORG_ID : 'myorg' 
+      const orgId = pEnv.HZN_ORG_ID ? pEnv.HZN_ORG_ID : 'myorg'
+      let https = pEnv.HZN_TRANSPORT ? pEnv.HZN_TRANSPORT : 'https'
+      let mgmtHubScript = pEnv.DEPLOY_MGMT_HUB_SCRIPT ? pEnv.DEPLOY_MGMT_HUB_SCRIPT : 'https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh';
       const props = [
         {name: 'HZN_LISTEN_IP', default: ips ? ips[0]: '', ipList: ips, required: true},
-        {name: 'HZN_TRANSPORT', default: 'https', required: true},
+        {name: 'HZN_TRANSPORT', default: https, required: true},
         {name: 'EXCHANGE_IMAGE_NAME', default: '', required: false},
         {name: 'OH_ANAX_RELEASES', default: 'https://github.com/open-horizon/anax/releases/latest/download', required: true},
         {name: 'EXCHANGE_USER_ORG', default: orgId, required: true},
-        {name: 'DEPLOY_MGMT_HUB_SCRIPT', default: 'https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh', required: true}
+        {name: 'DEPLOY_MGMT_HUB_SCRIPT', default: mgmtHubScript, required: true}
       ]
       console.log(props)
       console.log('\nKey in new value or (leave blank) press Enter to keep current value: ')
@@ -760,7 +777,7 @@ export class Utils {
           for(const [key, value] of Object.entries(result)) {
             pEnv[key] = value; 
           }
-          const mgmtHubScript = pEnv.DEPLOY_MGMT_HUB_SCRIPT;
+          mgmtHubScript = pEnv.DEPLOY_MGMT_HUB_SCRIPT;
           if(mgmtHubScript.indexOf('://') < 0 && !existsSync(mgmtHubScript)) {
             console.log(`${mgmtHubScript} not found.`)
             observer.error('exiting...')
