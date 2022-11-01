@@ -129,64 +129,73 @@ Register agent with Policy
 ## Complete guide to set up an agent on a brand new device running on Ubuntu 20.04
 
 ```
-  - sudo apt-get update && sudo apt-get upgrade
-  - sudo apt install npm -y"
-  - sudo npm install -g n && sudo n stable
-  - open a new shell or run PATH="$PATH"
-  - node -v should return the latest stable version, currently at v16.13.1
-  - sudo npm i -g hzn-cli
-  - oh --version should return v0.1.8
-  - run "oh deploy setup"
-    - No config files. Initialising...
+  - Run curl -sSL https://raw.githubusercontent.com/playground/hzn-cli/main/install.sh --output install.sh && bash ./install.sh
+  - 1) Cli-And-Anax	      3) CLI-In-Container   5) Run-In-Containers  7) Confirm
+    2) CLI-Only	      4) Anax-In-Container  6) All-In-One	  8) Quit
+    Choose your environment setup: 1
+  - Cli-And-Anax runs both CLI & Agent on host machine, choose <Confirm> to continue setup.
+    Choose your environment setup: 7
+  - You have chosen Cli-And-Anax
+    1) Config-File
+    2) Confirm
+    3) Help
+    4) Quit
+    Continue with setup: 1
+  - Please provide absolute path to configuration file, then choose <Confirm> to continue setup.
+    example.json
+    Continue with setup: 2
 
-    - Key in new value or press Enter to keep current value:
-    - prompt: YOUR_DOCKERHUB_ID:  playbox21
-    - prompt: HZN_EXCHANGE_USER_AUTH:  iamapikey:**************************
-    - prompt: HZN_EXCHANGE_URL:  (https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-exchange/v1)
-    - prompt: HZN_FSS_CSSURL:  (https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-css)
-    - prompt: HZN_CUSTOM_NODE_ID:  (knap1.fyre.ibm.com)
+    The above selections will automate the setup process to install the agent and cli for you.
 
-    - Would you like to change any of the above properties for biz: Y/n?
-    - prompt: answer:  Y
-
-    - Key in new value or press Enter to keep current value:
-    - prompt: SERVICE_NAME:  (saved-model-service) saved-model-service-aws
-    - prompt: SERVICE_CONTAINER_NAME:  (saved-model-service) saved-model-service-aws
-    - prompt: SERVICE_VERSION:  (1.0.0) 1.0.9
-    - prompt: SERVICE_CONTAINER_CREDS:
-    - prompt: VOLUME_MOUNT:  (/mms-shared)
-    - prompt: MMS_SHARED_VOLUME:  (demo_model_mms_helper_shared_volume)
-    - prompt: MMS_CONTAINER_CREDS:
-    - prompt: MMS_CONTAINER_NAME:  (mms-service) mms-service-aws
-    - prompt: MMS_SERVICE_NAME:  (mms-service) mms-service-aws
-    - prompt: MMS_SERVICE_VERSION:  (1.0.0) 1.0.9
-    - prompt: MMS_OBJECT_TYPE:  (object_detection)
-    - prompt: MMS_OBJECT_ID:  (config.json)
-    - prompt: MMS_OBJECT_FILE:  (config/config.json)
-    - prompt: UPDATE_FILE_NAME:  (model.zip)
-
-    - Would you like to save these changes: Y/n?
-    - prompt: answer:  Y
-    - sudo mv .env-hzn.json /etc/default/config/.env-hzn.json
-    - command executed successfully
-    - config files updated for biz
-    - failed to identify arch
-    - Command failed: hzn architecture
-    - /bin/sh: 1: hzn: not found
-
-    - need to install hzn, this will install and setup hzn environment if it doesn't exist
-  should see this message when it's done
-  command executed successfully
-  done installing hzn cli.
-
-  it works...undefined, your environment is ready to go!
-  process completed.
-
-  - run "oh deploy registerAgent" or "oh deploy registerAgent --skip_config_update"
-  will prompt to make changes to configuration as needed or answer n to proceed
-  will attempt to unregister then register agent with the provided configurations
-  if all goes well, agent should start up shortly
-  http://<ip-to-device>:3000/ is now up and running
+  - example.json template
+    {
+      "org": {
+        "HZN_ORG_ID": "org-name",
+        "HZN_DEVICE_TOKEN": "",
+        "HZN_DEVICE_ID": "device-name",
+        "HZN_EXCHANGE_USER_AUTH": "************",
+        "HZN_EXCHANGE_URL": "http://xxx.xxx.xxx.xxx:3090/v1",
+        "HZN_FSS_CSSURL": "http://xxx.xxx.xxx.xxx:9443/",
+        "HZN_AGBOT_URL": "http://xxx.xxx.xxx.xxx:3111",
+        "HZN_SDO_SVC_URL": "http://xxx.xxx.xxx.xxx:9008/api",
+        "HZN_AGENT_PORT": "8510",
+        "HZN_CSS": true,
+        "CONFIG_CERT_PATH": "cert-file-with-absolute-path",
+        "ANAX": "https://github.com/open-horizon/anax/releases/latest/download/agent-install.sh"
+      },
+      "service": {
+        "SERVICE_NAME": "chunk-saved-model-service",
+        "SERVICE_CONTAINER_NAME": "chunk-saved-model-service",
+        "SERVICE_VERSION": "1.0.0",
+        "SERVICE_VERSION_RANGE_UPPER": "1.0.0",
+        "SERVICE_VERSION_RANGE_LOWER": "1.0.0",
+        "SERVICE_CONTAINER_CREDS": "",
+        "VOLUME_MOUNT": "/mms-shared",
+        "MMS_SHARED_VOLUME": "mms_shared_volume",
+        "MMS_OBJECT_TYPE": "chunk_object_detection",
+        "MMS_OBJECT_ID": "chunk_config.json",
+        "MMS_OBJECT_FILE": "config/config.json",
+        "MMS_CONTAINER_CREDS": "",
+        "MMS_CONTAINER_NAME": "chunk-mms-service",
+        "MMS_SERVICE_NAME": "chunk-mms-service",
+        "MMS_SERVICE_VERSION": "1.0.1",
+        "MMS_SERVICE_FALLBACK_VERSION": "1.0.0",
+        "UPDATE_FILE_NAME": "model.zip"
+      },
+      "folders": [
+        "/var/tmp/horizon/horizon1/fss-domain-socket",
+        "/var/tmp/horizon/horizon1/ess-auth",
+        "/var/tmp/horizon/horizon1/secrets",
+        "/var/tmp/horizon/horizon1/nmp"
+      ],
+      "local": {
+        "YOUR_DOCKERHUB_ID": "playbox21",
+        "DOCKER_REGISTRY": "hub.docker.com",
+        "DOCKER_TOKEN": "dckr_pat_wQJZTXR2WfGLohIHnqQylRMRIpk"
+      },
+      "anaxInContainer": "docker run -d -t --restart always --name horizon1 --privileged -p 127.0.0.1:8081:8510 -e DOCKER_NAME=horizon1 -e HZN_VAR_RUN_BASE=/var/tmp/horizon/horizon1 -v /var/run/docker.sock:/var/run/docker.sock -v /var/horizon:/etc/default/horizon:ro -v /var/agent-install.crt:/var/agent-install.crt -v horizon1_var:/var/horizon/ -v horizon1_etc:/etc/horizon/ -v /var/tmp/horizon/horizon1:/var/tmp/horizon/horizon1 openhorizon/amd64_anax:2.30.0-952",
+      "cliInContainer": "docker run -d -it --restart always --name hzn-cli --privileged --network=\"host\" -v /var/run/docker.sock:/var/run/docker.sock -v /var/agent-install.crt:/var/agent-install.crt -e HORIZON_URL=http://localhost:8081 -e HZN_ORG_ID=${HZN_ORG_ID} -e HZN_EXCHANGE_USER_AUTH=${HZN_EXCHANGE_USER_AUTH} -e HZN_FSS_CSSURL=${HZN_FSS_CSSURL} -e HZN_EXCHANGE_URL=${HZN_EXCHANGE_URL} -e version=v2.30.0-952 playbox21/hzn-cli_amd64"
+    }
 ```
 
 ## Complete guide to set up an Open Horizon Management Hub
@@ -214,7 +223,7 @@ Register agent with Policy
 
   Key in new value or (leave blank) press Enter to keep current value:
   prompt: HZN_LISTEN_IP:  (127.0.0.1) xxx.xxx.xxx.xxx  // external ip
-  prompt: HZN_TRANSPORT:  (https)
+  prompt: HZN_TRANSPORT:  (https) http
   prompt: EXCHANGE_USER_ORG:  (myorg) myhub
   {
     HZN_LISTEN_IP: 'xxx.xxx.xxx.xxx',
