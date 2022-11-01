@@ -162,10 +162,10 @@ export class Utils {
       console.log(content)
       if(content.length > 0) {
         writeFileSync(`${process.cwd()}/horizon`, content);
-        this.copyFile(`sudo mv ${process.cwd()}/horizon /var/horizon`).then(() => {
+        this.copyFile(`sudo mv ${process.cwd()}/horizon /var`).then(() => {
           const folders = configJson.folders;
           if(existsSync(pEnv.CONFIG_CERT_PATH) && folders) {
-            this.copyFile(`sudo cp ${pEnv.CONFIG_CERT_PATH} ${pEnv.HZN_MGMT_HUB_CERT_PATH}`).then(() => {
+            this.copyFile(`sudo cp ${pEnv.CONFIG_CERT_PATH} /var`).then(() => {
               let arg = ''
               folders.forEach((folder) => {
                 if(arg.length > 0) {
@@ -204,10 +204,10 @@ export class Utils {
   }
   installCliAndAnaxInContainers(configJson: any) {
     return new Observable((observer) => {
-      this.installCliInContainer(configJson)
+      this.installAnaxInContainer(configJson)
       .subscribe({
         complete: () => {
-          this.installAnaxInContainer(configJson)
+          this.installCliInContainer(configJson)
           .subscribe({
             complete: () => observer.complete(),
             error: (err) => observer.error(err)
@@ -321,40 +321,45 @@ export class Utils {
   proceedWithAutoInstall(setup: SetupEnvironment) {
     return new Observable((observer) => {
       // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
-      const pEnv: any = process.env;
-      let action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
-      switch(setup) {
-        case SetupEnvironment.autoSetup:
-          action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
-          break;
-        case SetupEnvironment.autoSetupCliOnly:
-          action = this.installCliOnly(pEnv.ANAX)
-          break;
-        case SetupEnvironment.autoSetupAnaxInContainer:
-          action = this.installAnaxInContainer(this.configJson)
-          break;
-        case SetupEnvironment.autoSetupCliInContainer:
-          action = this.installCliInContainer(this.configJson)
-          break;
-        case SetupEnvironment.autoSetupContainer:
-          action = this.installCliAndAnaxInContainers(this.configJson)
-          break;
-        case SetupEnvironment.autoSetupAllInOne:
-          action = this.setupManagementHub()
-          break;
-        }
-      action
+      this.purgeManagementHub() // Leverage this functin to cleanup and install prerequisites, maynot need preInstallHznCli anymore
       .subscribe({
-        next: (msg) => console.log('next here'),
         complete: () => {
-          console.log('done installing hzn cli.');
-          observer.complete();
-        },
-        error: (err) => {
-          console.log('err here')
-          observer.error(err);
-        }
-      })      
+          const pEnv: any = process.env;
+          let action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
+          switch(setup) {
+            case SetupEnvironment.autoSetup:
+              action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
+              break;
+            case SetupEnvironment.autoSetupCliOnly:
+              action = this.installCliOnly(pEnv.ANAX)
+              break;
+            case SetupEnvironment.autoSetupAnaxInContainer:
+              action = this.installAnaxInContainer(this.configJson)
+              break;
+            case SetupEnvironment.autoSetupCliInContainer:
+              action = this.installCliInContainer(this.configJson)
+              break;
+            case SetupEnvironment.autoSetupContainer:
+              action = this.installCliAndAnaxInContainers(this.configJson)
+              break;
+            case SetupEnvironment.autoSetupAllInOne:
+              action = this.setupManagementHub()
+              break;
+            }
+          action
+          .subscribe({
+            next: (msg) => console.log('next here'),
+            complete: () => {
+              console.log('done installing hzn cli.');
+              observer.complete();
+            },
+            error: (err) => {
+              console.log('err here')
+              observer.error(err);
+            }
+          })          
+        }, error: (err) => observer.error(err)
+      }) 
     })
   }
   autoRun(configFile: string, setup: SetupEnvironment) {
@@ -362,6 +367,21 @@ export class Utils {
       if(!configFile || configFile.length == 0) {
         observer.next('Please provide --config_file name')
         observer.complete()
+      } else if(setup == SetupEnvironment.autoSetupAllInOne) {
+        const config = jsonfile.readFileSync(configFile);
+        const pEnv: any = process.env;
+        const org = config.org
+        Object.keys(org).forEach((key) => {
+          pEnv[key] = org[key]
+        })
+        this.proceedWithAutoInstall(setup)
+        .subscribe({
+          complete: () => {
+            observer.next('')
+            observer.complete();              
+          },
+          error: (err) => observer.error(err)
+        })  
       } else {
         this.updateConfig(configFile)
         .subscribe({
@@ -722,15 +742,20 @@ export class Utils {
     })  
   }
   setupManagementHub() {
-    return new Observable((observer) => { 
+    return new Observable((observer) => {
       let ips = this.getIpAddress()
       const pEnv: any = process.env;
+      const orgId = pEnv.HZN_ORG_ID ? pEnv.HZN_ORG_ID : 'myorg'
+      let https = pEnv.HZN_TRANSPORT ? pEnv.HZN_TRANSPORT : 'https'
+      let anaxRelease = pEnv.OH_ANAX_RELEASES ? pEnv.OH_ANAX_RELEASES : 'https://github.com/open-horizon/anax/releases/latest/download'
+      let mgmtHubScript = pEnv.DEPLOY_MGMT_HUB_SCRIPT ? pEnv.DEPLOY_MGMT_HUB_SCRIPT : 'https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh';
       const props = [
         {name: 'HZN_LISTEN_IP', default: ips ? ips[0]: '', ipList: ips, required: true},
-        {name: 'HZN_TRANSPORT', default: 'https', required: true},
+        {name: 'HZN_TRANSPORT', default: https, required: true},
         {name: 'EXCHANGE_IMAGE_NAME', default: '', required: false},
-        {name: 'OH_ANAX_RELEASES', default: 'https://github.com/open-horizon/anax/releases/latest/download', required: true},
-        {name: 'EXCHANGE_USER_ORG', default: 'myorg', required: true}
+        {name: 'OH_ANAX_RELEASES', default: anaxRelease, required: true},
+        {name: 'EXCHANGE_USER_ORG', default: orgId, required: true},
+        {name: 'DEPLOY_MGMT_HUB_SCRIPT', default: mgmtHubScript, required: true}
       ]
       console.log(props)
       console.log('\nKey in new value or (leave blank) press Enter to keep current value: ')
@@ -753,7 +778,13 @@ export class Utils {
           for(const [key, value] of Object.entries(result)) {
             pEnv[key] = value; 
           }
-          this.shell(`curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo -s -E -b ./deploy-mgmt-hub.sh`)
+          mgmtHubScript = pEnv.DEPLOY_MGMT_HUB_SCRIPT;
+          if(mgmtHubScript.indexOf('://') < 0 && !existsSync(mgmtHubScript)) {
+            console.log(`${mgmtHubScript} not found.`)
+            observer.error('exiting...')
+          }
+          const arg = mgmtHubScript.indexOf('://') > 0 ? `curl -sSL ${mgmtHubScript} --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo -s -E -b ./deploy-mgmt-hub.sh` : `sudo -s -E -b ${mgmtHubScript}`
+          this.shell(arg)
           .subscribe({
             next: (res: any) => {
               writeFileSync(`${this.hznConfig}/.secret`, res)
