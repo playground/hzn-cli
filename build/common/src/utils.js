@@ -756,15 +756,9 @@ class Utils {
                 { name: 'HZN_LISTEN_IP', default: ips ? ips[0] : '', ipList: ips, required: true },
                 { name: 'HZN_TRANSPORT', default: https, required: true },
                 { name: 'EXCHANGE_IMAGE_NAME', default: '', required: false },
-<<<<<<< HEAD
-                { name: 'MONGO_IMAGE_TAG', default: '', required: false },
-                { name: 'OH_ANAX_RELEASES', default: 'https://github.com/open-horizon/anax/releases/latest/download', required: true },
-                { name: 'EXCHANGE_USER_ORG', default: 'myorg', required: true }
-=======
                 { name: 'OH_ANAX_RELEASES', default: anaxRelease, required: true },
                 { name: 'EXCHANGE_USER_ORG', default: orgId, required: true },
                 { name: 'DEPLOY_MGMT_HUB_SCRIPT', default: mgmtHubScript, required: true }
->>>>>>> auto-setup-2
             ];
             console.log(props);
             console.log('\nKey in new value or (leave blank) press Enter to keep current value: ');
