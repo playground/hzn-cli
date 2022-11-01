@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Hzn = exports.utils = void 0;
+const fs_1 = require("fs");
 const rxjs_1 = require("rxjs");
 const env_1 = require("./env");
-const utils_1 = require("./utils");
 const interface_1 = require("./interface");
-const fs_1 = require("fs");
+const utils_1 = require("./utils");
 exports.utils = new utils_1.Utils();
 class Hzn {
     constructor(param) {
@@ -186,6 +186,9 @@ class Hzn {
     unregisterAgent() {
         return exports.utils.unregisterAgent();
     }
+    register() {
+        return exports.utils.register(this);
+    }
     registerAgent() {
         return new rxjs_1.Observable((observer) => {
             this.unregisterAgent().subscribe({
@@ -357,6 +360,9 @@ class Hzn {
     }
     addPolicy() {
         return exports.utils.addPolicy(this.param, this.getPolicyInfo());
+    }
+    updatePolicy() {
+        return exports.utils.updatePolicy(this.param, this.getPolicyInfo());
     }
     addDeploymentPolicy() {
         return exports.utils.addDeploymentPolicy(this.getPolicyInfo());

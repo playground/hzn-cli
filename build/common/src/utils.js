@@ -4,17 +4,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Utils = exports.promptSync = void 0;
-const rxjs_1 = require("rxjs");
-const cp = require('child_process'), exec = cp.exec;
 const fs_1 = require("fs");
-const os_1 = __importDefault(require("os"));
-const ifs = os_1.default.networkInterfaces();
-const prompt_1 = __importDefault(require("prompt"));
-exports.promptSync = require('prompt-sync')();
 const jsonfile_1 = __importDefault(require("jsonfile"));
-const _1 = require(".");
+const os_1 = __importDefault(require("os"));
+const prompt_1 = __importDefault(require("prompt"));
+const rxjs_1 = require("rxjs");
 const url_1 = require("url");
+const _1 = require(".");
 const interface_1 = require("./interface");
+const cp = require('child_process'), exec = cp.exec;
+const ifs = os_1.default.networkInterfaces();
+exports.promptSync = require('prompt-sync')();
 const env = process.env.npm_config_env || 'biz';
 const isBoolean = [
     'TOP_LEVEL_SERVICE'
@@ -154,10 +154,10 @@ class Utils {
             console.log(content);
             if (content.length > 0) {
                 (0, fs_1.writeFileSync)(`${process.cwd()}/horizon`, content);
-                this.copyFile(`sudo mv ${process.cwd()}/horizon /var/horizon`).then(() => {
+                this.copyFile(`sudo mv ${process.cwd()}/horizon /var`).then(() => {
                     const folders = configJson.folders;
                     if ((0, fs_1.existsSync)(pEnv.CONFIG_CERT_PATH) && folders) {
-                        this.copyFile(`sudo cp ${pEnv.CONFIG_CERT_PATH} ${pEnv.HZN_MGMT_HUB_CERT_PATH}`).then(() => {
+                        this.copyFile(`sudo cp ${pEnv.CONFIG_CERT_PATH} /var`).then(() => {
                             let arg = '';
                             folders.forEach((folder) => {
                                 if (arg.length > 0) {
@@ -198,10 +198,10 @@ class Utils {
     }
     installCliAndAnaxInContainers(configJson) {
         return new rxjs_1.Observable((observer) => {
-            this.installCliInContainer(configJson)
+            this.installAnaxInContainer(configJson)
                 .subscribe({
                 complete: () => {
-                    this.installAnaxInContainer(configJson)
+                    this.installCliInContainer(configJson)
                         .subscribe({
                         complete: () => observer.complete(),
                         error: (err) => observer.error(err)
@@ -316,39 +316,44 @@ class Utils {
     proceedWithAutoInstall(setup) {
         return new rxjs_1.Observable((observer) => {
             // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
-            const pEnv = process.env;
-            let action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN);
-            switch (setup) {
-                case interface_1.SetupEnvironment.autoSetup:
-                    action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN);
-                    break;
-                case interface_1.SetupEnvironment.autoSetupCliOnly:
-                    action = this.installCliOnly(pEnv.ANAX);
-                    break;
-                case interface_1.SetupEnvironment.autoSetupAnaxInContainer:
-                    action = this.installAnaxInContainer(this.configJson);
-                    break;
-                case interface_1.SetupEnvironment.autoSetupCliInContainer:
-                    action = this.installCliInContainer(this.configJson);
-                    break;
-                case interface_1.SetupEnvironment.autoSetupContainer:
-                    action = this.installCliAndAnaxInContainers(this.configJson);
-                    break;
-                case interface_1.SetupEnvironment.autoSetupAllInOne:
-                    action = this.setupManagementHub();
-                    break;
-            }
-            action
+            this.purgeManagementHub() // Leverage this functin to cleanup and install prerequisites, maynot need preInstallHznCli anymore
                 .subscribe({
-                next: (msg) => console.log('next here'),
                 complete: () => {
-                    console.log('done installing hzn cli.');
-                    observer.complete();
-                },
-                error: (err) => {
-                    console.log('err here');
-                    observer.error(err);
-                }
+                    const pEnv = process.env;
+                    let action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN);
+                    switch (setup) {
+                        case interface_1.SetupEnvironment.autoSetup:
+                            action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN);
+                            break;
+                        case interface_1.SetupEnvironment.autoSetupCliOnly:
+                            action = this.installCliOnly(pEnv.ANAX);
+                            break;
+                        case interface_1.SetupEnvironment.autoSetupAnaxInContainer:
+                            action = this.installAnaxInContainer(this.configJson);
+                            break;
+                        case interface_1.SetupEnvironment.autoSetupCliInContainer:
+                            action = this.installCliInContainer(this.configJson);
+                            break;
+                        case interface_1.SetupEnvironment.autoSetupContainer:
+                            action = this.installCliAndAnaxInContainers(this.configJson);
+                            break;
+                        case interface_1.SetupEnvironment.autoSetupAllInOne:
+                            action = this.setupManagementHub();
+                            break;
+                    }
+                    action
+                        .subscribe({
+                        next: (msg) => console.log('next here'),
+                        complete: () => {
+                            console.log('done installing hzn cli.');
+                            observer.complete();
+                        },
+                        error: (err) => {
+                            console.log('err here');
+                            observer.error(err);
+                        }
+                    });
+                }, error: (err) => observer.error(err)
             });
         });
     }
@@ -357,6 +362,22 @@ class Utils {
             if (!configFile || configFile.length == 0) {
                 observer.next('Please provide --config_file name');
                 observer.complete();
+            }
+            else if (setup == interface_1.SetupEnvironment.autoSetupAllInOne) {
+                const config = jsonfile_1.default.readFileSync(configFile);
+                const pEnv = process.env;
+                const org = config.org;
+                Object.keys(org).forEach((key) => {
+                    pEnv[key] = org[key];
+                });
+                this.proceedWithAutoInstall(setup)
+                    .subscribe({
+                    complete: () => {
+                        observer.next('');
+                        observer.complete();
+                    },
+                    error: (err) => observer.error(err)
+                });
             }
             else {
                 this.updateConfig(configFile)
@@ -630,6 +651,10 @@ class Utils {
             });
         });
     }
+    purgeManagementHub() {
+        const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`;
+        return this.shell(arg);
+    }
     cleanUp() {
         console.log('cleaning up', (0, fs_1.existsSync)(`${this.etcDefault}/horizon`), (0, fs_1.existsSync)(this.etcHorizon), this.etcHorizon);
         let arg = (0, fs_1.existsSync)(`${process.cwd()}/agent-install.cfg`) ? `sudo rm ${process.cwd()}/agent-install.* -f -y || true && ` : '';
@@ -723,33 +748,58 @@ class Utils {
         return new rxjs_1.Observable((observer) => {
             let ips = this.getIpAddress();
             const pEnv = process.env;
+            const orgId = pEnv.HZN_ORG_ID ? pEnv.HZN_ORG_ID : 'myorg';
+            let https = pEnv.HZN_TRANSPORT ? pEnv.HZN_TRANSPORT : 'https';
+            let anaxRelease = pEnv.OH_ANAX_RELEASES ? pEnv.OH_ANAX_RELEASES : 'https://github.com/open-horizon/anax/releases/latest/download';
+            let mgmtHubScript = pEnv.DEPLOY_MGMT_HUB_SCRIPT ? pEnv.DEPLOY_MGMT_HUB_SCRIPT : 'https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh';
             const props = [
                 { name: 'HZN_LISTEN_IP', default: ips ? ips[0] : '', ipList: ips, required: true },
-                { name: 'HZN_TRANSPORT', default: 'https', required: true },
+                { name: 'HZN_TRANSPORT', default: https, required: true },
                 { name: 'EXCHANGE_IMAGE_NAME', default: '', required: false },
-                { name: 'OH_ANAX_RELEASES', default: 'https://github.com/open-horizon/anax/releases/latest/download', required: true },
-                { name: 'EXCHANGE_USER_ORG', default: 'myorg', required: true }
+                { name: 'OH_ANAX_RELEASES', default: anaxRelease, required: true },
+                { name: 'EXCHANGE_USER_ORG', default: orgId, required: true },
+                { name: 'DEPLOY_MGMT_HUB_SCRIPT', default: mgmtHubScript, required: true }
             ];
             console.log(props);
             console.log('\nKey in new value or (leave blank) press Enter to keep current value: ');
             prompt_1.default.get(props, (err, result) => {
-                console.log(result);
-                console.log(`\nWould you like to proceed to install Management Hub: Y/n?`);
-                prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
-                    if (question.answer.toUpperCase() === 'Y') {
-                        for (const [key, value] of Object.entries(result)) {
-                            pEnv[key] = value;
-                        }
-                        this.shell(`curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo -s -E -b ./deploy-mgmt-hub.sh`)
-                            .subscribe({
-                            next: (res) => {
-                                (0, fs_1.writeFileSync)(`${this.hznConfig}/.secret`, res);
-                            },
-                            complete: () => observer.complete(),
-                            error: (err) => observer.error(err)
-                        });
+                console.dir(result, { depth: null, color: true });
+                // TODO: refactor following into a reusable function
+                const template = { name: '', value: '' };
+                let propName = 'environment variable';
+                let answer;
+                do {
+                    answer = (0, exports.promptSync)(`Would you like to add additional ${propName}: Y/n? `);
+                    if (answer.toLowerCase() == 'y') {
+                        this.promptType(propName, result, template);
                     }
-                });
+                } while (answer.toLowerCase() == 'y');
+                console.dir(result, { depth: null, color: true });
+                answer = (0, exports.promptSync)(`\nWould you like to proceed to install Management Hub: Y/n?`);
+                if (answer.toLowerCase() == 'y') {
+                    for (const [key, value] of Object.entries(result)) {
+                        pEnv[key] = value;
+                    }
+                    mgmtHubScript = pEnv.DEPLOY_MGMT_HUB_SCRIPT;
+                    if (mgmtHubScript.indexOf('://') < 0 && !(0, fs_1.existsSync)(mgmtHubScript)) {
+                        console.log(`${mgmtHubScript} not found.`);
+                        observer.error('exiting...');
+                    }
+                    const arg = mgmtHubScript.indexOf('://') > 0 ? `curl -sSL ${mgmtHubScript} --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo -s -E -b ./deploy-mgmt-hub.sh` : `sudo -s -E -b ${mgmtHubScript}`;
+                    this.shell(arg)
+                        .subscribe({
+                        next: (res) => {
+                            (0, fs_1.writeFileSync)(`${this.hznConfig}/.secret`, res);
+                        },
+                        complete: () => observer.complete(),
+                        error: (err) => {
+                            if (err.indexOf('400 from: vaultUnseal') > 0) {
+                                console.log('You might want to purge existing instance by running "oh deploy purgeManagementHub.');
+                            }
+                            observer.error(err);
+                        }
+                    });
+                }
             });
         });
     }
@@ -1536,11 +1586,67 @@ class Utils {
             });
         });
     }
-    promptEditPolicy() {
-    }
-    addPolicy(param, policy) {
+    register(hzn) {
         return new rxjs_1.Observable((observer) => {
-            let answer = this.promptPolicySelection(`Please select the type of policy you would like to add: `);
+            let answer = this.promptRegisterSelection(`Please make a selection: `);
+            if (answer == 0) {
+                observer.next(0);
+                observer.complete();
+            }
+            else if (answer == 1) {
+                console.log('\x1b[32m', '\nRegister with a Policy');
+                this.registerWithPolicy(hzn)
+                    .subscribe(() => { observer.next(1); observer.complete(); });
+            }
+            else if (answer == 2) {
+                console.log('\x1b[32m', '\nRegister with a Pattern');
+                this.registerWithPattern(hzn)
+                    .subscribe(() => { observer.next(2); observer.complete(); });
+            }
+        });
+    }
+    registerWithPolicy(hzn) {
+        return new rxjs_1.Observable((observer) => {
+            this.unregisterAgent().subscribe({
+                complete: () => {
+                    let arg = hzn.param.name.length > 0 ? `hzn register --policy ${hzn.getPolicyInfo()} --name ${hzn.param.name}` : `hzn register --policy ${hzn.getPolicyInfo()}`;
+                    _1.utils.shell(arg, 'done registering agent with policy', 'failed to register agent')
+                        .subscribe({
+                        complete: () => {
+                            observer.next();
+                            observer.complete();
+                        },
+                        error: (err) => observer.error(err)
+                    });
+                }, error: (err) => {
+                    observer.error(err);
+                }
+            });
+        });
+    }
+    registerWithPattern(hzn) {
+        return new rxjs_1.Observable((observer) => {
+            this.unregisterAgent().subscribe({
+                complete: () => {
+                    let arg = `hzn register --policy ${hzn.nodePolicyJson} --pattern "${hzn.mmsPattern}"`;
+                    _1.utils.shell(arg, 'done registering agent', 'failed to register agent')
+                        .subscribe({
+                        complete: () => observer.complete(),
+                        error: (err) => observer.error(err)
+                    });
+                }, error: (err) => {
+                    observer.error(err);
+                }
+            });
+        });
+    }
+    updatePolicy(param, policy) {
+        return this.addPolicy(param, policy, true);
+    }
+    addPolicy(param, policy, update = false) {
+        return new rxjs_1.Observable((observer) => {
+            const addOrUpdate = update ? 'update' : 'add';
+            let answer = this.promptPolicySelection(`Please select the type of policy you would like to ${addOrUpdate}: `);
             if (answer == 0) {
                 observer.next(0);
                 observer.complete();
@@ -1612,6 +1718,17 @@ class Utils {
                 error: (err) => observer.error(err)
             });
         });
+    }
+    promptRegisterSelection(msg = `Please make a selection: `) {
+        let answer;
+        console.log('\x1b[36m', `\nType of registrations:\n1) Register with a Policy\n2) Register with a pattern\n0) To exit`);
+        do {
+            answer = parseInt((0, exports.promptSync)(msg));
+            if (answer < 0 || answer > 2) {
+                console.log('\x1b[41m%s\x1b[0m', '\nInvalid, try again.');
+            }
+        } while (answer < 0 || answer > 4);
+        return answer;
     }
     promptPolicySelection(msg = `Please select the type of policy you would like to work with: `) {
         let answer;
