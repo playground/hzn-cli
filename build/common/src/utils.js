@@ -470,7 +470,7 @@ class Utils {
     autoCommand(configFile, command) {
         return new rxjs_1.Observable((observer) => {
             let config = `${this.hznConfig}/.env-hzn.json`;
-            if (configFile.length > 0 && !(0, fs_1.existsSync)(`${process.cwd()}/${configFile}`)) {
+            if (configFile && configFile.length > 0 && !(0, fs_1.existsSync)(`${process.cwd()}/${configFile}`)) {
                 observer.next('Please provide --config_file name or leave out --config_file to use the default configuration.');
                 observer.complete();
             }

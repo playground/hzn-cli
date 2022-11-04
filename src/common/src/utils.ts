@@ -471,7 +471,7 @@ export class Utils {
   autoCommand(configFile: string, command: AutoCommand) {
     return new Observable((observer) => {
       let config = `${this.hznConfig}/.env-hzn.json`
-      if(configFile.length > 0 && !existsSync(`${process.cwd()}/${configFile}`)) {
+      if(configFile && configFile.length > 0 && !existsSync(`${process.cwd()}/${configFile}`)) {
         observer.next('Please provide --config_file name or leave out --config_file to use the default configuration.')
         observer.complete()
       } else if(!configFile || configFile.length == 0) {
