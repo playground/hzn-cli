@@ -8,6 +8,7 @@ import { URL } from 'url';
 import { Hzn, utils } from '.';
 import { Env } from './env';
 import {
+  AutoCommand,
   configTemplate,
   HorizonKeyMap,
   HorizonTemplate,
@@ -15,6 +16,7 @@ import {
   installPrompt,
   installTar,
   keyMap,
+  policyType,
   SetupEnvironment,
 } from './interface';
 
@@ -433,6 +435,92 @@ export class Utils {
         })
       }
     })
+  }
+  setEnvFromConfig(configFile: string) {
+    return new Observable((observer) => {
+      let config = `${this.hznConfig}/.env-hzn.json`
+      if(configFile.length > 0 && !existsSync(`${process.cwd()}/${configFile}`)) {
+        observer.error('Please provide --config_file name or leave out --config_file to use the default configuration.')
+      } else if(!configFile || configFile.length == 0) {
+        console.log('using default config file')
+      } else {
+        config = configFile;
+      }
+      let hznJson = JSON.parse(readFileSync(config).toString());
+      const org = utils.getPropValueFromFile(`${utils.getHznConfig()}/.env-local`, 'DEFAULT_ORG')
+      if(org) {
+        const pEnv: any = process.env;
+        const envVars = hznJson[org]['envVars'];
+        for(const [key, value] of Object.entries(envVars)) {
+          if(!pEnv[key]) {
+            // @ts-ignore
+            pEnv[key] = value.replace(/\r?\n|\r/g, '');
+          } 
+          // console.log(`${key}: ${pEnv[key]}`);
+        }
+        Object.keys(org).forEach((key) => {
+          pEnv[key] = org[key]
+        })
+        observer.next('Env vars all set.')
+        observer.complete()  
+      } else {
+        observer.error('Default org not set.')
+      }
+    })
+  }
+  autoCommand(configFile: string, command: AutoCommand) {
+    return new Observable((observer) => {
+      let config = `${this.hznConfig}/.env-hzn.json`
+      if(configFile.length > 0 && !existsSync(`${process.cwd()}/${configFile}`)) {
+        observer.next('Please provide --config_file name or leave out --config_file to use the default configuration.')
+        observer.complete()
+      } else if(!configFile || configFile.length == 0) {
+        console.log('using default config file')
+      } else {
+        config = configFile;
+      }
+      this.setEnvFromConfig(config)
+      .subscribe({
+        next: (data) => console.log(data),
+        complete: () => {
+          let action: any;
+          switch(command) {
+            case AutoCommand.autoRegisterWithPolicy:
+              action = utils.registerWithPolicy('', this.getPolicyJson(policyType.nodePolicy))
+              break;
+            case AutoCommand.autoRegisterWithPattern:
+              action = utils.registerWithPolicy('', this.getPolicyJson(policyType.nodePolicy))
+              break;
+          }
+          if(action) {
+            action
+            .subscribe({
+              next: (msg) => console.log('msg'),
+              complete: () => {
+                console.log('Autocommand completed');
+                observer.complete();
+              },
+              error: (err) => {
+                console.log('err here')
+                observer.error(err);
+              }
+            })    
+          } else {
+            observer.error('AutoCommand not found')
+          } 
+        },
+        error: (err) => observer.error(err)
+      })
+    })      
+  }
+  autoRegisterWithPolicy(configFile: string) {
+    return this.autoCommand(configFile, AutoCommand.autoRegisterWithPolicy)
+  }
+  autoRegisterWithPattern(configFile: string) {
+    return this.autoCommand(configFile, AutoCommand.autoRegisterWithPattern)
+  }
+  autoUnregister(configFile: string) {
+    return this.autoCommand(configFile, AutoCommand.autoUnregister)
   }
   replaceEnvTokens(input: string, tokens: any) {
     let envTokens = {}
@@ -1564,20 +1652,20 @@ export class Utils {
         observer.complete()
       } else if(answer == 1) {
         console.log('\x1b[32m', '\nRegister with a Policy') 
-        this.registerWithPolicy(hzn)
+        this.registerWithPolicy(hzn.param.name, this.getPolicyJson(policyType.nodePolicy))
         .subscribe(() => {observer.next(1); observer.complete()})
       } else if(answer == 2) {
         console.log('\x1b[32m', '\nRegister with a Pattern') 
-        this.registerWithPattern(hzn)
+        this.registerWithPattern(hzn.mmsPattern, this.getPolicyJson(policyType.nodePolicy))
         .subscribe(() => {observer.next(2); observer.complete()})
       }
     })     
   }
-  registerWithPolicy(hzn: Hzn) {
+  registerWithPolicy(name: string, policy: string) {
     return new Observable((observer) => {
       this.unregisterAgent().subscribe({
         complete: () => {
-          let arg = hzn.param.name.length > 0 ? `hzn register --policy ${hzn.getPolicyInfo()} --name ${hzn.param.name}` : `hzn register --policy ${hzn.getPolicyInfo()}`
+          let arg = name.length > 0 ? `hzn register --policy ${policy} --name ${name}` : `hzn register --policy ${policy}`
           utils.shell(arg, 'done registering agent with policy', 'failed to register agent')
           .subscribe({
             complete: () => {
@@ -1592,11 +1680,11 @@ export class Utils {
       })  
     })  
   }
-  registerWithPattern(hzn: Hzn) {
+  registerWithPattern(pattern: string, policy: string) {
     return new Observable((observer) => {
       this.unregisterAgent().subscribe({
         complete: () => {
-          let arg = `hzn register --policy ${hzn.nodePolicyJson} --pattern "${hzn.mmsPattern}"`;
+          let arg = `hzn register --policy ${policy} --pattern "${pattern}"`;
           utils.shell(arg, 'done registering agent', 'failed to register agent')
           .subscribe({
             complete: () => observer.complete(),
@@ -1607,6 +1695,17 @@ export class Utils {
         }    
       })  
     })      
+  }
+  getPolicyJson(type: string) {
+    // TODO: refactor and move logic from hzn.ts
+    const policy = {
+      nodePolicyJson: `${this.hznConfig}/node.policy.json`,
+      deploymentPolicyJson: `${this.hznConfig}/deployment.policy.json`,
+      servicePolicyJson: `${this.hznConfig}/service.policy.json`,
+      objectPolicyJson: `${this.hznConfig}/object.policy.json`,
+      objectPatternJson: `${this.hznConfig}/object.pattern.json`
+    }
+    return policy[type]  
   }
   updatePolicy(param: IHznParam, policy: any) {
     return this.addPolicy(param, policy, true)

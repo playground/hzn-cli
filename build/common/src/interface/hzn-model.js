@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Service = exports.Deployment = exports.Container = exports.RequiredService = exports.configTemplate = exports.HorizonKeyMap = exports.HorizonTemplate = exports.keyMap = exports.SetupEnvironment = exports.supportPlatform = exports.installPrompt = exports.installTar = exports.loop = exports.runDirectly = exports.customRun = exports.promptForUpdate = exports.justRun = void 0;
+exports.Service = exports.Deployment = exports.Container = exports.RequiredService = exports.configTemplate = exports.HorizonKeyMap = exports.HorizonTemplate = exports.keyMap = exports.AutoCommand = exports.SetupEnvironment = exports.policyType = exports.supportPlatform = exports.installPrompt = exports.installTar = exports.loop = exports.runDirectly = exports.customRun = exports.promptForUpdate = exports.justRun = void 0;
 exports.justRun = [
     'addPolicy', 'addRemoteNodePolicy', 'updatePolicy',
     'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement',
@@ -43,6 +43,13 @@ exports.supportPlatform = {
     "amd64": "linux/amd64",
     "arm": "linux/arm/v7"
 };
+exports.policyType = {
+    "nodePolicy": "nodePolicyJson",
+    "deploymentPolicy": "deploymentPolicyJson",
+    "servicePolicy": "servicePolicyJson",
+    "objectPolicy": "objectPolicyJson",
+    "objectPattern": "objectPatternJson"
+};
 var SetupEnvironment;
 (function (SetupEnvironment) {
     SetupEnvironment[SetupEnvironment["autoSetup"] = 0] = "autoSetup";
@@ -52,6 +59,16 @@ var SetupEnvironment;
     SetupEnvironment[SetupEnvironment["autoSetupContainer"] = 4] = "autoSetupContainer";
     SetupEnvironment[SetupEnvironment["autoSetupAllInOne"] = 5] = "autoSetupAllInOne";
 })(SetupEnvironment = exports.SetupEnvironment || (exports.SetupEnvironment = {}));
+var AutoCommand;
+(function (AutoCommand) {
+    AutoCommand[AutoCommand["autoPublishService"] = 0] = "autoPublishService";
+    AutoCommand[AutoCommand["autoPublishMMSService"] = 1] = "autoPublishMMSService";
+    AutoCommand[AutoCommand["autoAddDeploymentPolicy"] = 2] = "autoAddDeploymentPolicy";
+    AutoCommand[AutoCommand["autoAddNodePolicy"] = 3] = "autoAddNodePolicy";
+    AutoCommand[AutoCommand["autoRegisterWithPolicy"] = 4] = "autoRegisterWithPolicy";
+    AutoCommand[AutoCommand["autoRegisterWithPattern"] = 5] = "autoRegisterWithPattern";
+    AutoCommand[AutoCommand["autoUnregister"] = 6] = "autoUnregister";
+})(AutoCommand = exports.AutoCommand || (exports.AutoCommand = {}));
 exports.keyMap = {
     org: 'credential',
     service: 'envVars',

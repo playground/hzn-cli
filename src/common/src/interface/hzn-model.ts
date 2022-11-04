@@ -40,6 +40,13 @@ export const supportPlatform = {
   "amd64": "linux/amd64",
   "arm": "linux/arm/v7"
 }
+export const policyType = {
+  "nodePolicy": "nodePolicyJson",
+  "deploymentPolicy": "deploymentPolicyJson",
+  "servicePolicy": "servicePolicyJson",
+  "objectPolicy": "objectPolicyJson",
+  "objectPattern": "objectPatternJson"
+}
 export enum SetupEnvironment {
   autoSetup = 0,
   autoSetupCliOnly = 1,
@@ -47,6 +54,15 @@ export enum SetupEnvironment {
   autoSetupCliInContainer = 3,
   autoSetupContainer = 4,
   autoSetupAllInOne = 5
+}
+export enum AutoCommand {
+  autoPublishService = 0,
+  autoPublishMMSService = 1,
+  autoAddDeploymentPolicy = 2,
+  autoAddNodePolicy = 3,
+  autoRegisterWithPolicy = 4,
+  autoRegisterWithPattern = 5,
+  autoUnregister = 6
 }
 export const keyMap = {
   org: 'credential',

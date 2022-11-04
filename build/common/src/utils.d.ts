@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { Hzn } from '.';
 import { Env } from './env';
-import { IHznParam, SetupEnvironment } from './interface';
+import { AutoCommand, IHznParam, SetupEnvironment } from './interface';
 export declare const promptSync: any;
 export declare class Utils {
     etcDefault: string;
@@ -24,6 +24,11 @@ export declare class Utils {
     updateConfig(configFile: string): Observable<unknown>;
     proceedWithAutoInstall(setup: SetupEnvironment): Observable<unknown>;
     autoRun(configFile: string, setup: SetupEnvironment): Observable<unknown>;
+    setEnvFromConfig(configFile: string): Observable<unknown>;
+    autoCommand(configFile: string, command: AutoCommand): Observable<unknown>;
+    autoRegisterWithPolicy(configFile: string): Observable<unknown>;
+    autoRegisterWithPattern(configFile: string): Observable<unknown>;
+    autoUnregister(configFile: string): Observable<unknown>;
     replaceEnvTokens(input: string, tokens: any): string;
     autoSetup(configFile: string): Observable<unknown>;
     autoSetupCliOnly(configFile: string): Observable<unknown>;
@@ -98,8 +103,9 @@ export declare class Utils {
     goPrompt(props: any, propName: string): Promise<unknown>;
     unregisterAgent(msg?: string): Observable<unknown>;
     register(hzn: Hzn): Observable<unknown>;
-    registerWithPolicy(hzn: Hzn): Observable<unknown>;
-    registerWithPattern(hzn: Hzn): Observable<unknown>;
+    registerWithPolicy(name: string, policy: string): Observable<unknown>;
+    registerWithPattern(pattern: string, policy: string): Observable<unknown>;
+    getPolicyJson(type: string): any;
     updatePolicy(param: IHznParam, policy: any): Observable<unknown>;
     addPolicy(param: IHznParam, policy: any, update?: boolean): Observable<unknown>;
     addDeploymentPolicy(policy: any): Observable<unknown>;
