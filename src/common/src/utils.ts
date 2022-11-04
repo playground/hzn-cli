@@ -439,7 +439,7 @@ export class Utils {
   setEnvFromConfig(configFile: string) {
     return new Observable((observer) => {
       let config = `${this.hznConfig}/.env-hzn.json`
-      if(configFile.length > 0 && !existsSync(`${process.cwd()}/${configFile}`)) {
+      if(configFile && configFile.length > 0 && !existsSync(`${process.cwd()}/${configFile}`)) {
         observer.error('Please provide --config_file name or leave out --config_file to use the default configuration.')
       } else if(!configFile || configFile.length == 0) {
         console.log('using default config file')
@@ -470,16 +470,7 @@ export class Utils {
   }
   autoCommand(configFile: string, command: AutoCommand) {
     return new Observable((observer) => {
-      let config = `${this.hznConfig}/.env-hzn.json`
-      if(configFile && configFile.length > 0 && !existsSync(`${process.cwd()}/${configFile}`)) {
-        observer.next('Please provide --config_file name or leave out --config_file to use the default configuration.')
-        observer.complete()
-      } else if(!configFile || configFile.length == 0) {
-        console.log('using default config file')
-      } else {
-        config = configFile;
-      }
-      this.setEnvFromConfig(config)
+      this.setEnvFromConfig(configFile)
       .subscribe({
         next: (data) => console.log(data),
         complete: () => {

@@ -435,7 +435,7 @@ class Utils {
     setEnvFromConfig(configFile) {
         return new rxjs_1.Observable((observer) => {
             let config = `${this.hznConfig}/.env-hzn.json`;
-            if (configFile.length > 0 && !(0, fs_1.existsSync)(`${process.cwd()}/${configFile}`)) {
+            if (configFile && configFile.length > 0 && !(0, fs_1.existsSync)(`${process.cwd()}/${configFile}`)) {
                 observer.error('Please provide --config_file name or leave out --config_file to use the default configuration.');
             }
             else if (!configFile || configFile.length == 0) {
@@ -469,18 +469,7 @@ class Utils {
     }
     autoCommand(configFile, command) {
         return new rxjs_1.Observable((observer) => {
-            let config = `${this.hznConfig}/.env-hzn.json`;
-            if (configFile && configFile.length > 0 && !(0, fs_1.existsSync)(`${process.cwd()}/${configFile}`)) {
-                observer.next('Please provide --config_file name or leave out --config_file to use the default configuration.');
-                observer.complete();
-            }
-            else if (!configFile || configFile.length == 0) {
-                console.log('using default config file');
-            }
-            else {
-                config = configFile;
-            }
-            this.setEnvFromConfig(config)
+            this.setEnvFromConfig(configFile)
                 .subscribe({
                 next: (data) => console.log(data),
                 complete: () => {
