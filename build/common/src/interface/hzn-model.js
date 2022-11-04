@@ -17,6 +17,7 @@ exports.promptForUpdate = [
 ];
 exports.customRun = [
     'autoSetup', 'autoSetupAllInOne', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer',
+    'autoRegisterWithPolicy', 'autoRegisterWithPattern', 'autoUnregister',
     'cleanUp', 'purgeManagementHub'
 ];
 exports.runDirectly = [
