@@ -480,44 +480,95 @@ class Utils {
             }
         });
     }
+    getTopLevelPatternName() {
+        const pEnv = process.env;
+        return `pattern-${pEnv.MMS_SERVICE_NAME}-${pEnv.ARCH}`;
+        let name = this.getByKey(`${_1.utils.getHznConfig()}/services/top-level-service/service.pattern.json`, 'name');
+    }
+    getArch() {
+        return new rxjs_1.Observable((observer) => {
+            const pEnv = process.env;
+            if (!pEnv.ARCH) {
+                let arg = `hzn architecture`;
+                exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
+                    if (!err) {
+                        pEnv.ARCH = stdout.replace(/\r?\n|\r/g, '');
+                        observer.next(pEnv.ARCH);
+                        observer.complete();
+                    }
+                    else {
+                        console.log('failed to identify arch');
+                        observer.error(err);
+                    }
+                });
+            }
+            else {
+                observer.next(pEnv.ARCH);
+                observer.complete();
+            }
+        });
+    }
+    getByKey(file, key) {
+        let value = undefined;
+        try {
+            if ((0, fs_1.existsSync)(file)) {
+                let json = JSON.parse((0, fs_1.readFileSync)(file).toString());
+                Object.keys(json).some((k) => {
+                    if (k === key) {
+                        value = json[k];
+                    }
+                    return k === key;
+                });
+            }
+        }
+        catch (e) {
+            console.log(e);
+        }
+        return value;
+    }
     autoCommand(configFile, command) {
         return new rxjs_1.Observable((observer) => {
             this.setEnvFromEnvLocal();
-            this.setEnvFromConfig(configFile)
+            this.getArch()
                 .subscribe({
-                next: (data) => console.log(data),
                 complete: () => {
-                    let action;
-                    switch (command) {
-                        case interface_1.AutoCommand.autoRegisterWithPolicy:
-                            action = _1.utils.registerWithPolicy('', this.getPolicyJson(interface_1.policyType.nodePolicy));
-                            break;
-                        case interface_1.AutoCommand.autoRegisterWithPattern:
-                            action = _1.utils.registerWithPolicy('', this.getPolicyJson(interface_1.policyType.nodePolicy));
-                            break;
-                        case interface_1.AutoCommand.autoUnregister:
-                            action = _1.utils.unregisterAgent(true);
-                            break;
-                    }
-                    if (action) {
-                        action
-                            .subscribe({
-                            next: (msg) => console.log('msg'),
-                            complete: () => {
-                                console.log('Autocommand completed');
-                                observer.complete();
-                            },
-                            error: (err) => {
-                                console.log('err here');
-                                observer.error(err);
+                    this.setEnvFromConfig(configFile)
+                        .subscribe({
+                        next: (data) => console.log(data),
+                        complete: () => {
+                            let action;
+                            switch (command) {
+                                case interface_1.AutoCommand.autoRegisterWithPolicy:
+                                    action = _1.utils.registerWithPolicy('', this.getPolicyJson(interface_1.policyType.nodePolicy));
+                                    break;
+                                case interface_1.AutoCommand.autoRegisterWithPattern:
+                                    action = _1.utils.registerWithPattern(this.getTopLevelPatternName(), this.getPolicyJson(interface_1.policyType.nodePolicy));
+                                    break;
+                                case interface_1.AutoCommand.autoUnregister:
+                                    action = _1.utils.unregisterAgent(true);
+                                    break;
                             }
-                        });
-                    }
-                    else {
-                        observer.error('AutoCommand not found');
-                    }
-                },
-                error: (err) => observer.error(err)
+                            if (action) {
+                                action
+                                    .subscribe({
+                                    next: (msg) => console.log('msg'),
+                                    complete: () => {
+                                        console.log('Autocommand completed');
+                                        observer.complete();
+                                    },
+                                    error: (err) => {
+                                        console.log('err here');
+                                        observer.error(err);
+                                    }
+                                });
+                            }
+                            else {
+                                observer.error('AutoCommand not found');
+                            }
+                        },
+                        error: (err) => observer.error(err)
+                    });
+                }, error: (err) => observer.error(err)
             });
         });
     }

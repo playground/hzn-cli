@@ -26,6 +26,9 @@ export declare class Utils {
     autoRun(configFile: string, setup: SetupEnvironment): Observable<unknown>;
     setEnvFromEnvLocal(): void;
     setEnvFromConfig(configFile: string): Observable<unknown>;
+    getTopLevelPatternName(): string;
+    getArch(): Observable<unknown>;
+    getByKey(file: string, key: string): any;
     autoCommand(configFile: string, command: AutoCommand): Observable<unknown>;
     autoRegisterWithPolicy(configFile: string): Observable<unknown>;
     autoRegisterWithPattern(configFile: string): Observable<unknown>;

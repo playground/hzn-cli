@@ -481,43 +481,91 @@ export class Utils {
       }
     })
   }
+  getTopLevelPatternName() {
+    const pEnv = process.env
+    return `pattern-${pEnv.MMS_SERVICE_NAME}-${pEnv.ARCH}`
+    let name = this.getByKey(`${utils.getHznConfig()}/services/top-level-service/service.pattern.json`, 'name')
+  }
+  getArch() {
+    return new Observable((observer) => {
+      const pEnv = process.env;
+      if(!pEnv.ARCH) {
+        let arg = `hzn architecture`
+        exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
+          if(!err) {
+            pEnv.ARCH = stdout.replace(/\r?\n|\r/g, '');
+            observer.next(pEnv.ARCH);
+            observer.complete();
+          } else {
+            console.log('failed to identify arch');
+            observer.error(err);
+          }
+        });  
+      } else {
+        observer.next(pEnv.ARCH);
+        observer.complete();
+      }
+    })
+  }
+  getByKey(file: string, key: string) {
+    let value = undefined;
+    try {
+      if(existsSync(file)) {
+        let json = JSON.parse(readFileSync(file).toString());
+        Object.keys(json).some((k: any) => {
+          if(k === key) {
+            value = json[k]
+          }
+          return k === key;
+        }) 
+      }
+    } catch(e) {
+      console.log(e)
+    }
+    return value;
+  }
   autoCommand(configFile: string, command: AutoCommand) {
     return new Observable((observer) => {
       this.setEnvFromEnvLocal()
-      this.setEnvFromConfig(configFile)
+      this.getArch()
       .subscribe({
-        next: (data) => console.log(data),
         complete: () => {
-          let action: any;
-          switch(command) {
-            case AutoCommand.autoRegisterWithPolicy:
-              action = utils.registerWithPolicy('', this.getPolicyJson(policyType.nodePolicy))
-              break;
-            case AutoCommand.autoRegisterWithPattern:
-              action = utils.registerWithPolicy('', this.getPolicyJson(policyType.nodePolicy))
-              break;
-            case AutoCommand.autoUnregister:
-              action = utils.unregisterAgent(true)
-              break;    
-          }
-          if(action) {
-            action
-            .subscribe({
-              next: (msg) => console.log('msg'),
-              complete: () => {
-                console.log('Autocommand completed');
-                observer.complete();
-              },
-              error: (err) => {
-                console.log('err here')
-                observer.error(err);
+          this.setEnvFromConfig(configFile)
+          .subscribe({
+            next: (data) => console.log(data),
+            complete: () => {
+              let action: any;
+              switch(command) {
+                case AutoCommand.autoRegisterWithPolicy:
+                  action = utils.registerWithPolicy('', this.getPolicyJson(policyType.nodePolicy))
+                  break;
+                case AutoCommand.autoRegisterWithPattern:
+                  action = utils.registerWithPattern(this.getTopLevelPatternName(), this.getPolicyJson(policyType.nodePolicy))
+                  break;
+                case AutoCommand.autoUnregister:
+                  action = utils.unregisterAgent(true)
+                  break;    
               }
-            })    
-          } else {
-            observer.error('AutoCommand not found')
-          } 
-        },
-        error: (err) => observer.error(err)
+              if(action) {
+                action
+                .subscribe({
+                  next: (msg) => console.log('msg'),
+                  complete: () => {
+                    console.log('Autocommand completed');
+                    observer.complete();
+                  },
+                  error: (err) => {
+                    console.log('err here')
+                    observer.error(err);
+                  }
+                })    
+              } else {
+                observer.error('AutoCommand not found')
+              } 
+            },
+            error: (err) => observer.error(err)
+          })    
+        }, error: (err) => observer.error(err)
       })
     })      
   }
