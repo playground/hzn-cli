@@ -386,6 +386,15 @@ export class Utils {
           },
           error: (err) => observer.error(err)
         })  
+      } else if(setup == SetupEnvironment.autoUpdateConfigFiles) {
+        this.updateConfig(configFile)
+        .subscribe({
+          complete: () => {
+            observer.next('')
+            observer.complete();              
+          },
+          error: (err) => observer.error(err)
+        })
       } else {
         this.updateConfig(configFile)
         .subscribe({
@@ -545,9 +554,6 @@ export class Utils {
                 case AutoCommand.autoUnregister:
                   action = utils.unregisterAgent(true)
                   break;    
-                case AutoCommand.autoUpdateConfigFiles:
-                  action = utils.updateConfig(configFile)
-                  break;    
               }
               if(action) {
                 action
@@ -581,9 +587,6 @@ export class Utils {
   autoUnregister(configFile: string) {
     return this.autoCommand(configFile, AutoCommand.autoUnregister)
   }
-  autoUpdateConfigFiles(configFile: string) {
-    return this.autoCommand(configFile, AutoCommand.autoUpdateConfigFiles)    
-  }  
   replaceEnvTokens(input: string, tokens: any) {
     let envTokens = {}
     Object.keys(tokens).forEach((key) => {
@@ -609,6 +612,9 @@ export class Utils {
   }  
   autoSetupAllInOne(configFile: string) {
     return this.autoRun(configFile, SetupEnvironment.autoSetupAllInOne)    
+  }  
+  autoUpdateConfigFiles(configFile: string) {
+    return this.autoRun(configFile, SetupEnvironment.autoUpdateConfigFiles)    
   }  
   getEtcDefault() {
     return this.etcDefault

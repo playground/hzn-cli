@@ -54,7 +54,8 @@ export enum SetupEnvironment {
   autoSetupAnaxInContainer = 2,
   autoSetupCliInContainer = 3,
   autoSetupContainer = 4,
-  autoSetupAllInOne = 5
+  autoSetupAllInOne = 5,
+  autoUpdateConfigFiles = 6
 }
 export enum AutoCommand {
   autoPublishService = 0,
@@ -63,8 +64,7 @@ export enum AutoCommand {
   autoAddNodePolicy = 3,
   autoRegisterWithPolicy = 4,
   autoRegisterWithPattern = 5,
-  autoUnregister = 6,
-  autoUpdateConfigFiles = 7
+  autoUnregister = 6
 }
 export const keyMap = {
   org: 'credential',

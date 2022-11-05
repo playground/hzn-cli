@@ -59,6 +59,7 @@ var SetupEnvironment;
     SetupEnvironment[SetupEnvironment["autoSetupCliInContainer"] = 3] = "autoSetupCliInContainer";
     SetupEnvironment[SetupEnvironment["autoSetupContainer"] = 4] = "autoSetupContainer";
     SetupEnvironment[SetupEnvironment["autoSetupAllInOne"] = 5] = "autoSetupAllInOne";
+    SetupEnvironment[SetupEnvironment["autoUpdateConfigFiles"] = 6] = "autoUpdateConfigFiles";
 })(SetupEnvironment = exports.SetupEnvironment || (exports.SetupEnvironment = {}));
 var AutoCommand;
 (function (AutoCommand) {
@@ -69,7 +70,6 @@ var AutoCommand;
     AutoCommand[AutoCommand["autoRegisterWithPolicy"] = 4] = "autoRegisterWithPolicy";
     AutoCommand[AutoCommand["autoRegisterWithPattern"] = 5] = "autoRegisterWithPattern";
     AutoCommand[AutoCommand["autoUnregister"] = 6] = "autoUnregister";
-    AutoCommand[AutoCommand["autoUpdateConfigFiles"] = 7] = "autoUpdateConfigFiles";
 })(AutoCommand = exports.AutoCommand || (exports.AutoCommand = {}));
 exports.keyMap = {
     org: 'credential',

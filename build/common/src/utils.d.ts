@@ -33,7 +33,6 @@ export declare class Utils {
     autoRegisterWithPolicy(configFile: string): Observable<unknown>;
     autoRegisterWithPattern(configFile: string): Observable<unknown>;
     autoUnregister(configFile: string): Observable<unknown>;
-    autoUpdateConfigFiles(configFile: string): Observable<unknown>;
     replaceEnvTokens(input: string, tokens: any): string;
     autoSetup(configFile: string): Observable<unknown>;
     autoSetupCliOnly(configFile: string): Observable<unknown>;
@@ -41,6 +40,7 @@ export declare class Utils {
     autoSetupCliInContainer(configFile: string): Observable<unknown>;
     autoSetupContainer(configFile: string): Observable<unknown>;
     autoSetupAllInOne(configFile: string): Observable<unknown>;
+    autoUpdateConfigFiles(configFile: string): Observable<unknown>;
     getEtcDefault(): string;
     getHznConfig(): string;
     listAgreement(param: IHznParam): Observable<unknown>;
