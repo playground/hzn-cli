@@ -581,6 +581,9 @@ export class Utils {
   autoUnregister(configFile: string) {
     return this.autoCommand(configFile, AutoCommand.autoUnregister)
   }
+  autoUpdateConfigFiles(configFile: string) {
+    return this.autoCommand(configFile, AutoCommand.autoUpdateConfigFiles)    
+  }  
   replaceEnvTokens(input: string, tokens: any) {
     let envTokens = {}
     Object.keys(tokens).forEach((key) => {
