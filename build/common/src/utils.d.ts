@@ -24,6 +24,7 @@ export declare class Utils {
     updateConfig(configFile: string): Observable<unknown>;
     proceedWithAutoInstall(setup: SetupEnvironment): Observable<unknown>;
     autoRun(configFile: string, setup: SetupEnvironment): Observable<unknown>;
+    setEnvFromEnvLocal(): void;
     setEnvFromConfig(configFile: string): Observable<unknown>;
     autoCommand(configFile: string, command: AutoCommand): Observable<unknown>;
     autoRegisterWithPolicy(configFile: string): Observable<unknown>;

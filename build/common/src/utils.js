@@ -12,6 +12,7 @@ const rxjs_1 = require("rxjs");
 const url_1 = require("url");
 const _1 = require(".");
 const interface_1 = require("./interface");
+const dotenv = require('dotenv');
 const cp = require('child_process'), exec = cp.exec;
 const ifs = os_1.default.networkInterfaces();
 exports.promptSync = require('prompt-sync')();
@@ -432,6 +433,18 @@ class Utils {
             }
         });
     }
+    setEnvFromEnvLocal() {
+        const localEnv = dotenv.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-local`));
+        const pEnv = process.env;
+        for (let i in localEnv) {
+            if (i == 'DEFAULT_ORG') {
+                pEnv['HZN_ORG_ID'] = localEnv[i];
+            }
+            else {
+                pEnv[i] = localEnv[i];
+            }
+        }
+    }
     setEnvFromConfig(configFile) {
         return new rxjs_1.Observable((observer) => {
             let config = `${this.hznConfig}/.env-hzn.json`;
@@ -445,10 +458,9 @@ class Utils {
                 config = configFile;
             }
             let hznJson = JSON.parse((0, fs_1.readFileSync)(config).toString());
-            const org = _1.utils.getPropValueFromFile(`${_1.utils.getHznConfig()}/.env-local`, 'DEFAULT_ORG');
+            const pEnv = process.env;
+            const org = pEnv['HZN_ORG_ID'];
             if (org) {
-                const pEnv = process.env;
-                pEnv['HZN_ORG_ID'] = org;
                 const envVars = hznJson[org]['envVars'];
                 for (const [key, value] of Object.entries(envVars)) {
                     if (!pEnv[key]) {

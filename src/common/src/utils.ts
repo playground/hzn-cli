@@ -20,6 +20,8 @@ import {
   SetupEnvironment,
 } from './interface';
 
+const dotenv = require('dotenv');
+
 declare var require: any
 declare var process: any
 
@@ -436,6 +438,17 @@ export class Utils {
       }
     })
   }
+  setEnvFromEnvLocal() {
+    const localEnv = dotenv.parse(readFileSync(`${this.hznConfig}/.env-local`));
+    const pEnv: any = process.env;
+    for(let i in localEnv) {
+      if(i == 'DEFAULT_ORG') {
+        pEnv['HZN_ORG_ID'] = localEnv[i]
+      } else {
+        pEnv[i] = localEnv[i];
+      }
+    }
+  }
   setEnvFromConfig(configFile: string) {
     return new Observable((observer) => {
       let config = `${this.hznConfig}/.env-hzn.json`
@@ -447,10 +460,9 @@ export class Utils {
         config = configFile;
       }
       let hznJson = JSON.parse(readFileSync(config).toString());
-      const org = utils.getPropValueFromFile(`${utils.getHznConfig()}/.env-local`, 'DEFAULT_ORG')
+      const pEnv: any = process.env;
+      const org = pEnv['HZN_ORG_ID']
       if(org) {
-        const pEnv: any = process.env;
-        pEnv['HZN_ORG_ID'] = org;
         const envVars = hznJson[org]['envVars'];
         for(const [key, value] of Object.entries(envVars)) {
           if(!pEnv[key]) {
