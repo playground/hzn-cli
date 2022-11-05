@@ -450,6 +450,7 @@ export class Utils {
       const org = utils.getPropValueFromFile(`${utils.getHznConfig()}/.env-local`, 'DEFAULT_ORG')
       if(org) {
         const pEnv: any = process.env;
+        pEnv['HZN_ORG_ID'] = org;
         const envVars = hznJson[org]['envVars'];
         for(const [key, value] of Object.entries(envVars)) {
           if(!pEnv[key]) {
@@ -1656,6 +1657,7 @@ export class Utils {
     return new Observable((observer) => {
       this.unregisterAgent().subscribe({
         complete: () => {
+          console.log(process.env.HZN_ORG_ID)
           let arg = name.length > 0 ? `hzn register --policy ${policy} --name ${name}` : `hzn register --policy ${policy}`
           utils.shell(arg, 'done registering agent with policy', 'failed to register agent')
           .subscribe({
