@@ -496,6 +496,9 @@ export class Utils {
             case AutoCommand.autoRegisterWithPattern:
               action = utils.registerWithPolicy('', this.getPolicyJson(policyType.nodePolicy))
               break;
+            case AutoCommand.autoUnregister:
+              action = utils.unregisterAgent(true)
+              break;    
           }
           if(action) {
             action
@@ -1620,33 +1623,42 @@ export class Utils {
       resolve(res)   
     })
   }
-  unregisterAgent(msg = 'Would you like to unregister this agent?  Y/n ') {
+  unregisterAgent(auto = false, msg = 'Would you like to unregister this agent?  Y/n ') {
     return new Observable((observer) => {
-      console.log(`\n${msg}`)
-      prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
-        if(question.answer.toUpperCase() === 'Y') {
-          utils.isNodeConfigured()
-          .subscribe({
-            next: (res) => {
-              if(res) {
-                let arg = `hzn unregister -frDv`;
-                utils.shell(arg, 'done unregistering agent', 'failed to unregister agent', false)
-                .subscribe({
-                  next: (res) => observer.complete(),
-                  error: (e) => observer.error(e)
-                })      
-              } else {
-                console.log('no need to unregister...')
+      if(auto) {
+        const arg = `hzn unregister -frDv`;
+        utils.shell(arg, 'done unregistering agent', 'failed to unregister agent', false)
+        .subscribe({
+          next: (res) => observer.complete(),
+          error: (e) => observer.error(e)
+        })      
+      } else {
+        console.log(`\n${msg}`)
+        prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
+          if(question.answer.toUpperCase() === 'Y') {
+            utils.isNodeConfigured()
+            .subscribe({
+              next: (res) => {
+                if(res) {
+                  const arg = `hzn unregister -frDv`;
+                  utils.shell(arg, 'done unregistering agent', 'failed to unregister agent', false)
+                  .subscribe({
+                    next: (res) => observer.complete(),
+                    error: (e) => observer.error(e)
+                  })      
+                } else {
+                  console.log('no need to unregister...')
+                  observer.complete()
+                }
+              }, error(e) {
                 observer.complete()
               }
-            }, error(e) {
-              observer.complete()
-            }
-          })
-        } else {
-          observer.complete()
-        }
-      })  
+            })
+          } else {
+            observer.complete()
+          }
+        })            
+      }
     })  
   }
   register(hzn: Hzn) {

@@ -495,6 +495,9 @@ class Utils {
                         case interface_1.AutoCommand.autoRegisterWithPattern:
                             action = _1.utils.registerWithPolicy('', this.getPolicyJson(interface_1.policyType.nodePolicy));
                             break;
+                        case interface_1.AutoCommand.autoUnregister:
+                            action = _1.utils.unregisterAgent(true);
+                            break;
                     }
                     if (action) {
                         action
@@ -1650,35 +1653,45 @@ class Utils {
             resolve(res);
         });
     }
-    unregisterAgent(msg = 'Would you like to unregister this agent?  Y/n ') {
+    unregisterAgent(auto = false, msg = 'Would you like to unregister this agent?  Y/n ') {
         return new rxjs_1.Observable((observer) => {
-            console.log(`\n${msg}`);
-            prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
-                if (question.answer.toUpperCase() === 'Y') {
-                    _1.utils.isNodeConfigured()
-                        .subscribe({
-                        next: (res) => {
-                            if (res) {
-                                let arg = `hzn unregister -frDv`;
-                                _1.utils.shell(arg, 'done unregistering agent', 'failed to unregister agent', false)
-                                    .subscribe({
-                                    next: (res) => observer.complete(),
-                                    error: (e) => observer.error(e)
-                                });
-                            }
-                            else {
-                                console.log('no need to unregister...');
+            if (auto) {
+                const arg = `hzn unregister -frDv`;
+                _1.utils.shell(arg, 'done unregistering agent', 'failed to unregister agent', false)
+                    .subscribe({
+                    next: (res) => observer.complete(),
+                    error: (e) => observer.error(e)
+                });
+            }
+            else {
+                console.log(`\n${msg}`);
+                prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                    if (question.answer.toUpperCase() === 'Y') {
+                        _1.utils.isNodeConfigured()
+                            .subscribe({
+                            next: (res) => {
+                                if (res) {
+                                    const arg = `hzn unregister -frDv`;
+                                    _1.utils.shell(arg, 'done unregistering agent', 'failed to unregister agent', false)
+                                        .subscribe({
+                                        next: (res) => observer.complete(),
+                                        error: (e) => observer.error(e)
+                                    });
+                                }
+                                else {
+                                    console.log('no need to unregister...');
+                                    observer.complete();
+                                }
+                            }, error(e) {
                                 observer.complete();
                             }
-                        }, error(e) {
-                            observer.complete();
-                        }
-                    });
-                }
-                else {
-                    observer.complete();
-                }
-            });
+                        });
+                    }
+                    else {
+                        observer.complete();
+                    }
+                });
+            }
         });
     }
     register(hzn) {
