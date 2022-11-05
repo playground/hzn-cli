@@ -483,6 +483,7 @@ export class Utils {
   }
   autoCommand(configFile: string, command: AutoCommand) {
     return new Observable((observer) => {
+      this.setEnvFromEnvLocal()
       this.setEnvFromConfig(configFile)
       .subscribe({
         next: (data) => console.log(data),

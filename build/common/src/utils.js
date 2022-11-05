@@ -482,6 +482,7 @@ class Utils {
     }
     autoCommand(configFile, command) {
         return new rxjs_1.Observable((observer) => {
+            this.setEnvFromEnvLocal();
             this.setEnvFromConfig(configFile)
                 .subscribe({
                 next: (data) => console.log(data),
