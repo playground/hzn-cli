@@ -545,6 +545,9 @@ export class Utils {
                 case AutoCommand.autoUnregister:
                   action = utils.unregisterAgent(true)
                   break;    
+                case AutoCommand.autoUpdateConfigFiles:
+                  action = utils.updateConfig(configFile)
+                  break;    
               }
               if(action) {
                 action
@@ -1671,19 +1674,41 @@ export class Utils {
       resolve(res)   
     })
   }
+  unregisterAsNeeded() {
+    return new Observable((observer) => {
+      utils.isNodeConfigured()
+      .subscribe({
+        next: (res) => {
+          if(res) {
+            const arg = `hzn unregister -frDv`;
+            utils.shell(arg, 'done unregistering agent', 'failed to unregister agent', false)
+            .subscribe({
+              next: (res) => observer.complete(),
+              error: (e) => observer.error(e)
+            })      
+          } else {
+            console.log('no need to unregister...')
+            observer.complete()
+          }
+        }, error(e) {
+          observer.complete()
+        }
+      })
+    })
+  }
   unregisterAgent(auto = false, msg = 'Would you like to unregister this agent?  Y/n ') {
     return new Observable((observer) => {
       if(auto) {
-        const arg = `hzn unregister -frDv`;
-        utils.shell(arg, 'done unregistering agent', 'failed to unregister agent', false)
+        utils.unregisterAsNeeded()
         .subscribe({
-          next: (res) => observer.complete(),
+          complete: () => observer.complete(),
           error: (e) => observer.error(e)
-        })      
+        })
       } else {
         console.log(`\n${msg}`)
         prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
           if(question.answer.toUpperCase() === 'Y') {
+            // TODO: should call utils.unregisterAsNeeded()
             utils.isNodeConfigured()
             .subscribe({
               next: (res) => {

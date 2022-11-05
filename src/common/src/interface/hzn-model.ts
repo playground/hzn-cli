@@ -14,7 +14,7 @@ export const promptForUpdate = [
 ];
 export const customRun = [
   'autoSetup', 'autoSetupAllInOne', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer',
-  'autoRegisterWithPolicy', 'autoRegisterWithPattern', 'autoUnregister', 
+  'autoRegisterWithPolicy', 'autoRegisterWithPattern', 'autoUnregister', 'autoUpdateConfigFiles',
   'cleanUp', 'purgeManagementHub'
 ];
 export const runDirectly = [
@@ -63,7 +63,8 @@ export enum AutoCommand {
   autoAddNodePolicy = 3,
   autoRegisterWithPolicy = 4,
   autoRegisterWithPattern = 5,
-  autoUnregister = 6
+  autoUnregister = 6,
+  autoUpdateConfigFiles = 7
 }
 export const keyMap = {
   org: 'credential',

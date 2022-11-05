@@ -17,7 +17,7 @@ exports.promptForUpdate = [
 ];
 exports.customRun = [
     'autoSetup', 'autoSetupAllInOne', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer',
-    'autoRegisterWithPolicy', 'autoRegisterWithPattern', 'autoUnregister',
+    'autoRegisterWithPolicy', 'autoRegisterWithPattern', 'autoUnregister', 'autoUpdateConfigFiles',
     'cleanUp', 'purgeManagementHub'
 ];
 exports.runDirectly = [
@@ -69,6 +69,7 @@ var AutoCommand;
     AutoCommand[AutoCommand["autoRegisterWithPolicy"] = 4] = "autoRegisterWithPolicy";
     AutoCommand[AutoCommand["autoRegisterWithPattern"] = 5] = "autoRegisterWithPattern";
     AutoCommand[AutoCommand["autoUnregister"] = 6] = "autoUnregister";
+    AutoCommand[AutoCommand["autoUpdateConfigFiles"] = 7] = "autoUpdateConfigFiles";
 })(AutoCommand = exports.AutoCommand || (exports.AutoCommand = {}));
 exports.keyMap = {
     org: 'credential',

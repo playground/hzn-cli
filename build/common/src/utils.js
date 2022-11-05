@@ -547,6 +547,9 @@ class Utils {
                                 case interface_1.AutoCommand.autoUnregister:
                                     action = _1.utils.unregisterAgent(true);
                                     break;
+                                case interface_1.AutoCommand.autoUpdateConfigFiles:
+                                    action = _1.utils.updateConfig(configFile);
+                                    break;
                             }
                             if (action) {
                                 action
@@ -1704,13 +1707,35 @@ class Utils {
             resolve(res);
         });
     }
+    unregisterAsNeeded() {
+        return new rxjs_1.Observable((observer) => {
+            _1.utils.isNodeConfigured()
+                .subscribe({
+                next: (res) => {
+                    if (res) {
+                        const arg = `hzn unregister -frDv`;
+                        _1.utils.shell(arg, 'done unregistering agent', 'failed to unregister agent', false)
+                            .subscribe({
+                            next: (res) => observer.complete(),
+                            error: (e) => observer.error(e)
+                        });
+                    }
+                    else {
+                        console.log('no need to unregister...');
+                        observer.complete();
+                    }
+                }, error(e) {
+                    observer.complete();
+                }
+            });
+        });
+    }
     unregisterAgent(auto = false, msg = 'Would you like to unregister this agent?  Y/n ') {
         return new rxjs_1.Observable((observer) => {
             if (auto) {
-                const arg = `hzn unregister -frDv`;
-                _1.utils.shell(arg, 'done unregistering agent', 'failed to unregister agent', false)
+                _1.utils.unregisterAsNeeded()
                     .subscribe({
-                    next: (res) => observer.complete(),
+                    complete: () => observer.complete(),
                     error: (e) => observer.error(e)
                 });
             }
@@ -1718,6 +1743,7 @@ class Utils {
                 console.log(`\n${msg}`);
                 prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                     if (question.answer.toUpperCase() === 'Y') {
+                        // TODO: should call utils.unregisterAsNeeded()
                         _1.utils.isNodeConfigured()
                             .subscribe({
                             next: (res) => {
