@@ -368,7 +368,7 @@ export class Utils {
   }
   autoRun(configFile: string, setup: SetupEnvironment) {
     return new Observable((observer) => {
-      if(!configFile || configFile.length == 0 || !existsSync(`${process.cwd()}/${configFile}`)) {
+      if(!configFile || configFile.length == 0 || !existsSync(configFile)) {
         observer.next('Please provide --config_file name')
         observer.complete()
       } else if(setup == SetupEnvironment.autoSetupAllInOne) {
@@ -452,7 +452,7 @@ export class Utils {
   setEnvFromConfig(configFile: string) {
     return new Observable((observer) => {
       let config = `${this.hznConfig}/.env-hzn.json`
-      if(configFile && configFile.length > 0 && !existsSync(`${process.cwd()}/${configFile}`)) {
+      if(configFile && configFile.length > 0 && !existsSync(configFile)) {
         observer.error('Please provide --config_file name or leave out --config_file to use the default configuration.')
       } else if(!configFile || configFile.length == 0) {
         console.log('using default config file')

@@ -360,7 +360,7 @@ class Utils {
     }
     autoRun(configFile, setup) {
         return new rxjs_1.Observable((observer) => {
-            if (!configFile || configFile.length == 0 || !(0, fs_1.existsSync)(`${process.cwd()}/${configFile}`)) {
+            if (!configFile || configFile.length == 0 || !(0, fs_1.existsSync)(configFile)) {
                 observer.next('Please provide --config_file name');
                 observer.complete();
             }
@@ -448,7 +448,7 @@ class Utils {
     setEnvFromConfig(configFile) {
         return new rxjs_1.Observable((observer) => {
             let config = `${this.hznConfig}/.env-hzn.json`;
-            if (configFile && configFile.length > 0 && !(0, fs_1.existsSync)(`${process.cwd()}/${configFile}`)) {
+            if (configFile && configFile.length > 0 && !(0, fs_1.existsSync)(configFile)) {
                 observer.error('Please provide --config_file name or leave out --config_file to use the default configuration.');
             }
             else if (!configFile || configFile.length == 0) {
