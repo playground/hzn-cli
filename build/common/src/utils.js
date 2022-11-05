@@ -539,10 +539,10 @@ class Utils {
                             let action;
                             switch (command) {
                                 case interface_1.AutoCommand.autoRegisterWithPolicy:
-                                    action = _1.utils.registerWithPolicy('', this.getPolicyJson(interface_1.policyType.nodePolicy));
+                                    action = _1.utils.registerWithPolicy('', this.getPolicyJson(interface_1.policyType.nodePolicy), true);
                                     break;
                                 case interface_1.AutoCommand.autoRegisterWithPattern:
-                                    action = _1.utils.registerWithPattern(this.getTopLevelPatternName(), this.getPolicyJson(interface_1.policyType.nodePolicy));
+                                    action = _1.utils.registerWithPattern(this.getTopLevelPatternName(), this.getPolicyJson(interface_1.policyType.nodePolicy), true);
                                     break;
                                 case interface_1.AutoCommand.autoUnregister:
                                     action = _1.utils.unregisterAgent(true);
@@ -1764,9 +1764,9 @@ class Utils {
             }
         });
     }
-    registerWithPolicy(name, policy) {
+    registerWithPolicy(name, policy, auto = false) {
         return new rxjs_1.Observable((observer) => {
-            this.unregisterAgent().subscribe({
+            this.unregisterAgent(auto).subscribe({
                 complete: () => {
                     console.log(process.env.HZN_ORG_ID);
                     let arg = name.length > 0 ? `hzn register --policy ${policy} --name ${name}` : `hzn register --policy ${policy}`;
@@ -1784,9 +1784,9 @@ class Utils {
             });
         });
     }
-    registerWithPattern(pattern, policy) {
+    registerWithPattern(pattern, policy, auto = false) {
         return new rxjs_1.Observable((observer) => {
-            this.unregisterAgent().subscribe({
+            this.unregisterAgent(auto).subscribe({
                 complete: () => {
                     let arg = `hzn register --policy ${policy} --pattern "${pattern}"`;
                     _1.utils.shell(arg, 'done registering agent', 'failed to register agent')

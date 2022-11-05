@@ -537,10 +537,10 @@ export class Utils {
               let action: any;
               switch(command) {
                 case AutoCommand.autoRegisterWithPolicy:
-                  action = utils.registerWithPolicy('', this.getPolicyJson(policyType.nodePolicy))
+                  action = utils.registerWithPolicy('', this.getPolicyJson(policyType.nodePolicy), true)
                   break;
                 case AutoCommand.autoRegisterWithPattern:
-                  action = utils.registerWithPattern(this.getTopLevelPatternName(), this.getPolicyJson(policyType.nodePolicy))
+                  action = utils.registerWithPattern(this.getTopLevelPatternName(), this.getPolicyJson(policyType.nodePolicy), true)
                   break;
                 case AutoCommand.autoUnregister:
                   action = utils.unregisterAgent(true)
@@ -1726,9 +1726,9 @@ export class Utils {
       }
     })     
   }
-  registerWithPolicy(name: string, policy: string) {
+  registerWithPolicy(name: string, policy: string, auto = false) {
     return new Observable((observer) => {
-      this.unregisterAgent().subscribe({
+      this.unregisterAgent(auto).subscribe({
         complete: () => {
           console.log(process.env.HZN_ORG_ID)
           let arg = name.length > 0 ? `hzn register --policy ${policy} --name ${name}` : `hzn register --policy ${policy}`
@@ -1746,9 +1746,9 @@ export class Utils {
       })  
     })  
   }
-  registerWithPattern(pattern: string, policy: string) {
+  registerWithPattern(pattern: string, policy: string, auto = false) {
     return new Observable((observer) => {
-      this.unregisterAgent().subscribe({
+      this.unregisterAgent(auto).subscribe({
         complete: () => {
           let arg = `hzn register --policy ${policy} --pattern "${pattern}"`;
           utils.shell(arg, 'done registering agent', 'failed to register agent')

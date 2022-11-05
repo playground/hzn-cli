@@ -107,8 +107,8 @@ export declare class Utils {
     goPrompt(props: any, propName: string): Promise<unknown>;
     unregisterAgent(auto?: boolean, msg?: string): Observable<unknown>;
     register(hzn: Hzn): Observable<unknown>;
-    registerWithPolicy(name: string, policy: string): Observable<unknown>;
-    registerWithPattern(pattern: string, policy: string): Observable<unknown>;
+    registerWithPolicy(name: string, policy: string, auto?: boolean): Observable<unknown>;
+    registerWithPattern(pattern: string, policy: string, auto?: boolean): Observable<unknown>;
     getPolicyJson(type: string): any;
     updatePolicy(param: IHznParam, policy: any): Observable<unknown>;
     addPolicy(param: IHznParam, policy: any, update?: boolean): Observable<unknown>;
