@@ -255,6 +255,10 @@ class Utils {
                 const envHzn = interface_1.configTemplate.envHzn;
                 const configLocal = config['local'];
                 const envLocal = interface_1.configTemplate.envLocal;
+                const metaVars = config['metaVars'] || {};
+                Object.keys(metaVars).forEach((key) => {
+                    pEnv[key] = metaVars[key];
+                });
                 if (!hznJson[orgId]) {
                     hznJson[orgId] = {};
                 }

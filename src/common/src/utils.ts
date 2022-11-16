@@ -263,6 +263,11 @@ export class Utils {
         const envHzn = configTemplate.envHzn;
         const configLocal = config['local'];
         const envLocal = configTemplate.envLocal;
+        const metaVars = config['metaVars'] || {};
+
+        Object.keys(metaVars).forEach((key) => {
+          pEnv[key] = metaVars[key];
+        })
         
         if(!hznJson[orgId]) {
           hznJson[orgId] = {}
