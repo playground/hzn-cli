@@ -146,6 +146,10 @@ export class Utils {
   }
   createHorizonSystemFiles(configJson: any) {
     return new Observable((observer) => {
+      if(configJson.test === 'undefined' || !configJson.test) {
+        observer.next('')
+        observer.complete()
+      }
       let content = ''
       const pEnv = process.env
       Object.keys(HorizonTemplate).forEach((key) => {
@@ -226,21 +230,29 @@ export class Utils {
       this.installPrereq()
       .subscribe({
         complete: () => {
-          if(configJson.anaxInContainer) {
-            let containerStr = this.replaceEnvTokens(configJson.anaxInContainer, configJson.org)
-            this.shell(containerStr)
-            .subscribe({
-              complete: () => {
-                observer.complete();
-              },
-              error: (err) => {
-                observer.error(err);
+          this.createHorizonSystemFiles(configJson)
+          .subscribe({
+            complete: () => {
+              if(configJson.anaxInContainer) {
+                let containerStr = this.replaceEnvTokens(configJson.anaxInContainer, configJson.org)
+                this.shell(containerStr)
+                .subscribe({
+                  complete: () => {
+                    observer.complete();
+                  },
+                  error: (err) => {
+                    observer.error(err);
+                  }
+                })  
+              } else {
+                console.log('Missing anaxInContainer property in configuration file')
+                observer.error();
               }
-            })  
-          } else {
-            console.log('Missing anaxInContainer property in configuration file')
-            observer.error();
-          }
+            },
+            error: (err) => {
+              observer.error(err);
+            }
+          })        
         },
         error: (err) => {
           console.log('am i here')
