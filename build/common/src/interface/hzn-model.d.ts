@@ -123,6 +123,10 @@ export declare const configTemplate: {
         SUPPORTED_REDHAT_ARCH_APPEND: string;
     };
 };
+export interface IAutoParam {
+    configFile: string;
+    object: Object;
+}
 export interface IHznParam {
     org: string;
     configPath: string;

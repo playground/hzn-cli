@@ -14,7 +14,7 @@ export const promptForUpdate = [
 ];
 export const customRun = [
   'autoSetup', 'autoSetupAllInOne', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer',
-  'autoRegisterWithPolicy', 'autoRegisterWithPattern', 'autoUnregister', 'autoUpdateConfigFiles',
+  'autoRegisterWithPolicy', 'autoRegisterWithPattern', 'autoUnregister', 'autoUpdateConfigFiles', 'autoUpdateNodePolicy',
   'cleanUp', 'purgeManagementHub'
 ];
 export const runDirectly = [
@@ -146,6 +146,10 @@ export const configTemplate = {
   }
 }
 
+export interface IAutoParam {
+  configFile: string;
+  object: Object;
+}
 export interface IHznParam {
   org: string;
   configPath: string;

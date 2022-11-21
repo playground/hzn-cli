@@ -19,6 +19,7 @@ import {
   policyType,
   SetupEnvironment,
 } from './interface';
+import { IAutoParam } from './interface/hzn-model';
 
 const dotenv = require('dotenv');
 
@@ -169,6 +170,7 @@ export class Utils {
       })
       console.log(content)
       if(content.length > 0) {
+        const dest = pEnv['VAR_DIRECTORIES_FILES'] || '/var'; 
         writeFileSync(`${process.cwd()}/horizon`, content);
         this.copyFile(`sudo mv ${process.cwd()}/horizon /var`).then(() => {
           const folders = configJson.folders;
@@ -542,13 +544,13 @@ export class Utils {
     }
     return value;
   }
-  autoCommand(configFile: string, command: AutoCommand) {
+  autoCommand(params: IAutoParam, command: AutoCommand) {
     return new Observable((observer) => {
       this.setEnvFromEnvLocal()
       this.getArch()
       .subscribe({
         complete: () => {
-          this.setEnvFromConfig(configFile)
+          this.setEnvFromConfig(params.configFile)
           .subscribe({
             next: (data) => console.log(data),
             complete: () => {
@@ -562,7 +564,10 @@ export class Utils {
                   break;
                 case AutoCommand.autoUnregister:
                   action = utils.unregisterAgent(true)
-                  break;    
+                  break;
+                case AutoCommand.autoAddNodePolicy:
+                  action = utils.updateNodePolicy(`-f- ${params.object}`)
+                  break    
               }
               if(action) {
                 action
@@ -587,14 +592,17 @@ export class Utils {
       })
     })      
   }
-  autoRegisterWithPolicy(configFile: string) {
-    return this.autoCommand(configFile, AutoCommand.autoRegisterWithPolicy)
+  autoUpdateNodePolicy(params: IAutoParam) {
+    return this.autoCommand(params, AutoCommand.autoAddNodePolicy)
   }
-  autoRegisterWithPattern(configFile: string) {
-    return this.autoCommand(configFile, AutoCommand.autoRegisterWithPattern)
+  autoRegisterWithPolicy(params: IAutoParam) {
+    return this.autoCommand(params, AutoCommand.autoRegisterWithPolicy)
   }
-  autoUnregister(configFile: string) {
-    return this.autoCommand(configFile, AutoCommand.autoUnregister)
+  autoRegisterWithPattern(params: IAutoParam) {
+    return this.autoCommand(params, AutoCommand.autoRegisterWithPattern)
+  }
+  autoUnregister(params: IAutoParam) {
+    return this.autoCommand(params, AutoCommand.autoUnregister)
   }
   replaceEnvTokens(input: string, tokens: any) {
     let envTokens = {}
@@ -604,26 +612,26 @@ export class Utils {
     this.tokenReplace(input, envTokens)
     return input;
   }
-  autoSetup(configFile: string) {
-    return this.autoRun(configFile, SetupEnvironment.autoSetup)
+  autoSetup(params: IAutoParam) {
+    return this.autoRun(params.configFile, SetupEnvironment.autoSetup)
   }
-  autoSetupCliOnly(configFile: string) {
-    return this.autoRun(configFile, SetupEnvironment.autoSetupCliOnly)    
+  autoSetupCliOnly(params: IAutoParam) {
+    return this.autoRun(params.configFile, SetupEnvironment.autoSetupCliOnly)    
   }
-  autoSetupAnaxInContainer(configFile: string) {
-    return this.autoRun(configFile, SetupEnvironment.autoSetupAnaxInContainer)    
+  autoSetupAnaxInContainer(params: IAutoParam) {
+    return this.autoRun(params.configFile, SetupEnvironment.autoSetupAnaxInContainer)    
   }
-  autoSetupCliInContainer(configFile: string) {
-    return this.autoRun(configFile, SetupEnvironment.autoSetupCliInContainer)    
+  autoSetupCliInContainer(params: IAutoParam) {
+    return this.autoRun(params.configFile, SetupEnvironment.autoSetupCliInContainer)    
   }
-  autoSetupContainer(configFile: string) {
-    return this.autoRun(configFile, SetupEnvironment.autoSetupContainer)    
+  autoSetupContainer(params: IAutoParam) {
+    return this.autoRun(params.configFile, SetupEnvironment.autoSetupContainer)    
   }  
-  autoSetupAllInOne(configFile: string) {
-    return this.autoRun(configFile, SetupEnvironment.autoSetupAllInOne)    
+  autoSetupAllInOne(params: IAutoParam) {
+    return this.autoRun(params.configFile, SetupEnvironment.autoSetupAllInOne)    
   }  
-  autoUpdateConfigFiles(configFile: string) {
-    return this.autoRun(configFile, SetupEnvironment.autoUpdateConfigFiles)    
+  autoUpdateConfigFiles(params: IAutoParam) {
+    return this.autoRun(params.configFile, SetupEnvironment.autoUpdateConfigFiles)    
   }  
   getEtcDefault() {
     return this.etcDefault
@@ -826,6 +834,7 @@ export class Utils {
     arg += existsSync(this.etcHorizon) ? `sudo rm -rf ${this.etcHorizon} -y || true && ` : ''
     arg += existsSync(`${this.etcDefault}/horizon`) ? `sudo rm ${this.etcDefault}/horizon || true && `: ''
     arg += existsSync(`${this.homePath}/.hzn`) ? `sudo rm -rf ${this.homePath}/.hzn -y || true && ` : ''
+    arg += existsSync(`/var/tmp/horizon`) ? `sudo rm -rf /var/tmp/horizon -y || true && ` : ''
     arg += ':'
     return this.shell(arg)
   }
@@ -1836,7 +1845,7 @@ export class Utils {
         .subscribe(() => {observer.next(2); observer.complete()})
       } else if(answer == 3) {
         console.log('\x1b[32m', '\nAdding Node Policy') 
-        this.updateNodePolicy(param, policy)
+        this.updateNodePolicy(`--json-file ${policy.nodePolicyJson}`)
         .subscribe(() => {observer.next(3); observer.complete()})
       } else if(answer == 4) {
         console.log('\x1b[32m', '\nAdding Object Policy')
@@ -1862,8 +1871,9 @@ export class Utils {
   addObjectPattern(param: IHznParam) {
     // Todo 
   }
-  updateNodePolicy(param: IHznParam, policy: any) {
-    const arg = `hzn exchange node addpolicy --json-file ${policy.nodePolicyJson} ${process.env.HZN_CUSTOM_NODE_ID}`
+  updateNodePolicy(param: string) {
+    //const arg = `hzn exchange node addpolicy --json-file ${policy.nodePolicyJson} ${process.env.HZN_CUSTOM_NODE_ID}`
+    const arg = `hzn exchange node addpolicy ${param} ${process.env.HZN_CUSTOM_NODE_ID}`
     return utils.shell(arg, `done add/update for this agent`, `failed to add/update for this agent`)
   }
   addNodePolicy(param: IHznParam, policy: any) {

@@ -126,7 +126,8 @@ const handler = (argv) => {
         }
         else if (interface_1.customRun.indexOf(action) >= 0) {
             console.log(action);
-            hzn_1.utils[action](config_file)
+            const params = { configFile: config_file, object: obj };
+            hzn_1.utils[action](params)
                 .subscribe({
                 next: (msg) => console.log(msg),
                 complete: () => process.exit(0),

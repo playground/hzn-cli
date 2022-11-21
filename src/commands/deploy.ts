@@ -5,6 +5,7 @@ import { existsSync } from 'fs';
 
 import { Hzn, utils } from '../common/src/hzn';
 import { customRun, IHznParam, justRun, loop, promptForUpdate, runDirectly } from '../common/src/interface';
+import { IAutoParam } from '../common/src/interface/hzn-model';
 
 import type { Arguments, CommandBuilder } from 'yargs';
 type Options = {
@@ -142,7 +143,8 @@ export const handler = (argv: Arguments<Options>): void => {
       })
     } else if(customRun.indexOf(action) >= 0) {
       console.log(action);
-      utils[action](config_file)
+      const params: IAutoParam = {configFile: config_file, object: obj}
+      utils[action](params)
       .subscribe({
         next: (msg) => console.log(msg),
         complete: () => process.exit(0),
