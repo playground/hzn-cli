@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { Hzn } from '.';
 import { Env } from './env';
-import { IHznParam, SetupEnvironment } from './interface';
+import { AutoCommand, IHznParam, SetupEnvironment } from './interface';
 export declare const promptSync: any;
 export declare class Utils {
     etcDefault: string;
@@ -24,6 +24,15 @@ export declare class Utils {
     updateConfig(configFile: string): Observable<unknown>;
     proceedWithAutoInstall(setup: SetupEnvironment): Observable<unknown>;
     autoRun(configFile: string, setup: SetupEnvironment): Observable<unknown>;
+    setEnvFromEnvLocal(): void;
+    setEnvFromConfig(configFile: string): Observable<unknown>;
+    getTopLevelPatternName(): string;
+    getArch(): Observable<unknown>;
+    getByKey(file: string, key: string): any;
+    autoCommand(configFile: string, command: AutoCommand): Observable<unknown>;
+    autoRegisterWithPolicy(configFile: string): Observable<unknown>;
+    autoRegisterWithPattern(configFile: string): Observable<unknown>;
+    autoUnregister(configFile: string): Observable<unknown>;
     replaceEnvTokens(input: string, tokens: any): string;
     autoSetup(configFile: string): Observable<unknown>;
     autoSetupCliOnly(configFile: string): Observable<unknown>;
@@ -31,6 +40,7 @@ export declare class Utils {
     autoSetupCliInContainer(configFile: string): Observable<unknown>;
     autoSetupContainer(configFile: string): Observable<unknown>;
     autoSetupAllInOne(configFile: string): Observable<unknown>;
+    autoUpdateConfigFiles(configFile: string): Observable<unknown>;
     getEtcDefault(): string;
     getHznConfig(): string;
     listAgreement(param: IHznParam): Observable<unknown>;
@@ -96,16 +106,19 @@ export declare class Utils {
     policyToProps(policy: string): any;
     promptType(propName: string, res: any, el: any): void;
     goPrompt(props: any, propName: string): Promise<unknown>;
-    unregisterAgent(msg?: string): Observable<unknown>;
+    unregisterAsNeeded(): Observable<unknown>;
+    unregisterAgent(auto?: boolean, msg?: string): Observable<unknown>;
     register(hzn: Hzn): Observable<unknown>;
-    registerWithPolicy(hzn: Hzn): Observable<unknown>;
-    registerWithPattern(hzn: Hzn): Observable<unknown>;
+    registerWithPolicy(name: string, policy: string, auto?: boolean): Observable<unknown>;
+    registerWithPattern(pattern: string, policy: string, auto?: boolean): Observable<unknown>;
+    getPolicyJson(type: string): any;
     updatePolicy(param: IHznParam, policy: any): Observable<unknown>;
     addPolicy(param: IHznParam, policy: any, update?: boolean): Observable<unknown>;
     addDeploymentPolicy(policy: any): Observable<unknown>;
     addServicePolicy(policy: any): Observable<unknown>;
     addObjectPolicy(param: IHznParam): Observable<unknown>;
     addObjectPattern(param: IHznParam): void;
+    updateNodePolicy(param: IHznParam, policy: any): Observable<unknown>;
     addNodePolicy(param: IHznParam, policy: any): Observable<unknown>;
     addRemoteNodePolicy(param: IHznParam, policy: any): Observable<unknown>;
     promptRegisterSelection(msg?: string): any;

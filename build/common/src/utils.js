@@ -12,6 +12,7 @@ const rxjs_1 = require("rxjs");
 const url_1 = require("url");
 const _1 = require(".");
 const interface_1 = require("./interface");
+const dotenv = require('dotenv');
 const cp = require('child_process'), exec = cp.exec;
 const ifs = os_1.default.networkInterfaces();
 exports.promptSync = require('prompt-sync')();
@@ -132,6 +133,10 @@ class Utils {
     }
     createHorizonSystemFiles(configJson) {
         return new rxjs_1.Observable((observer) => {
+            if (configJson.test === 'undefined' || !configJson.test) {
+                observer.next('');
+                observer.complete();
+            }
             let content = '';
             const pEnv = process.env;
             Object.keys(interface_1.HorizonTemplate).forEach((key) => {
@@ -262,6 +267,10 @@ class Utils {
                 const envHzn = interface_1.configTemplate.envHzn;
                 const configLocal = config['local'];
                 const envLocal = interface_1.configTemplate.envLocal;
+                const metaVars = config['metaVars'] || {};
+                Object.keys(metaVars).forEach((key) => {
+                    pEnv[key] = metaVars[key];
+                });
                 if (!hznJson[orgId]) {
                     hznJson[orgId] = {};
                 }
@@ -359,7 +368,7 @@ class Utils {
     }
     autoRun(configFile, setup) {
         return new rxjs_1.Observable((observer) => {
-            if (!configFile || configFile.length == 0) {
+            if (!configFile || configFile.length == 0 || !(0, fs_1.existsSync)(configFile)) {
                 observer.next('Please provide --config_file name');
                 observer.complete();
             }
@@ -371,6 +380,16 @@ class Utils {
                     pEnv[key] = org[key];
                 });
                 this.proceedWithAutoInstall(setup)
+                    .subscribe({
+                    complete: () => {
+                        observer.next('');
+                        observer.complete();
+                    },
+                    error: (err) => observer.error(err)
+                });
+            }
+            else if (setup == interface_1.SetupEnvironment.autoUpdateConfigFiles) {
+                this.updateConfig(configFile)
                     .subscribe({
                     complete: () => {
                         observer.next('');
@@ -432,6 +451,154 @@ class Utils {
             }
         });
     }
+    setEnvFromEnvLocal() {
+        const localEnv = dotenv.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-local`));
+        const pEnv = process.env;
+        for (let i in localEnv) {
+            if (i == 'DEFAULT_ORG') {
+                pEnv['HZN_ORG_ID'] = localEnv[i];
+            }
+            else {
+                pEnv[i] = localEnv[i];
+            }
+        }
+    }
+    setEnvFromConfig(configFile) {
+        return new rxjs_1.Observable((observer) => {
+            let config = `${this.hznConfig}/.env-hzn.json`;
+            if (configFile && configFile.length > 0 && !(0, fs_1.existsSync)(configFile)) {
+                observer.error('Please provide --config_file name or leave out --config_file to use the default configuration.');
+            }
+            else if (!configFile || configFile.length == 0) {
+                console.log('using default config file');
+            }
+            else {
+                config = configFile;
+            }
+            let hznJson = JSON.parse((0, fs_1.readFileSync)(config).toString());
+            const pEnv = process.env;
+            const org = pEnv['HZN_ORG_ID'];
+            if (org) {
+                const envVars = hznJson[org]['envVars'];
+                for (const [key, value] of Object.entries(envVars)) {
+                    if (!pEnv[key]) {
+                        // @ts-ignore
+                        pEnv[key] = value.replace(/\r?\n|\r/g, '');
+                    }
+                    // console.log(`${key}: ${pEnv[key]}`);
+                }
+                Object.keys(org).forEach((key) => {
+                    pEnv[key] = org[key];
+                });
+                observer.next('Env vars all set.');
+                observer.complete();
+            }
+            else {
+                observer.error('Default org not set.');
+            }
+        });
+    }
+    getTopLevelPatternName() {
+        const pEnv = process.env;
+        return `pattern-${pEnv.MMS_SERVICE_NAME}-${pEnv.ARCH}`;
+        let name = this.getByKey(`${_1.utils.getHznConfig()}/services/top-level-service/service.pattern.json`, 'name');
+    }
+    getArch() {
+        return new rxjs_1.Observable((observer) => {
+            const pEnv = process.env;
+            if (!pEnv.ARCH) {
+                let arg = `hzn architecture`;
+                exec(arg, { maxBuffer: 1024 * 2000 }, (err, stdout, stderr) => {
+                    if (!err) {
+                        pEnv.ARCH = stdout.replace(/\r?\n|\r/g, '');
+                        observer.next(pEnv.ARCH);
+                        observer.complete();
+                    }
+                    else {
+                        console.log('failed to identify arch');
+                        observer.error(err);
+                    }
+                });
+            }
+            else {
+                observer.next(pEnv.ARCH);
+                observer.complete();
+            }
+        });
+    }
+    getByKey(file, key) {
+        let value = undefined;
+        try {
+            if ((0, fs_1.existsSync)(file)) {
+                let json = JSON.parse((0, fs_1.readFileSync)(file).toString());
+                Object.keys(json).some((k) => {
+                    if (k === key) {
+                        value = json[k];
+                    }
+                    return k === key;
+                });
+            }
+        }
+        catch (e) {
+            console.log(e);
+        }
+        return value;
+    }
+    autoCommand(configFile, command) {
+        return new rxjs_1.Observable((observer) => {
+            this.setEnvFromEnvLocal();
+            this.getArch()
+                .subscribe({
+                complete: () => {
+                    this.setEnvFromConfig(configFile)
+                        .subscribe({
+                        next: (data) => console.log(data),
+                        complete: () => {
+                            let action;
+                            switch (command) {
+                                case interface_1.AutoCommand.autoRegisterWithPolicy:
+                                    action = _1.utils.registerWithPolicy('', this.getPolicyJson(interface_1.policyType.nodePolicy), true);
+                                    break;
+                                case interface_1.AutoCommand.autoRegisterWithPattern:
+                                    action = _1.utils.registerWithPattern(this.getTopLevelPatternName(), this.getPolicyJson(interface_1.policyType.nodePolicy), true);
+                                    break;
+                                case interface_1.AutoCommand.autoUnregister:
+                                    action = _1.utils.unregisterAgent(true);
+                                    break;
+                            }
+                            if (action) {
+                                action
+                                    .subscribe({
+                                    next: (msg) => console.log('msg'),
+                                    complete: () => {
+                                        console.log('Autocommand completed');
+                                        observer.complete();
+                                    },
+                                    error: (err) => {
+                                        console.log('err here');
+                                        observer.error(err);
+                                    }
+                                });
+                            }
+                            else {
+                                observer.error('AutoCommand not found');
+                            }
+                        },
+                        error: (err) => observer.error(err)
+                    });
+                }, error: (err) => observer.error(err)
+            });
+        });
+    }
+    autoRegisterWithPolicy(configFile) {
+        return this.autoCommand(configFile, interface_1.AutoCommand.autoRegisterWithPolicy);
+    }
+    autoRegisterWithPattern(configFile) {
+        return this.autoCommand(configFile, interface_1.AutoCommand.autoRegisterWithPattern);
+    }
+    autoUnregister(configFile) {
+        return this.autoCommand(configFile, interface_1.AutoCommand.autoUnregister);
+    }
     replaceEnvTokens(input, tokens) {
         let envTokens = {};
         Object.keys(tokens).forEach((key) => {
@@ -457,6 +624,9 @@ class Utils {
     }
     autoSetupAllInOne(configFile) {
         return this.autoRun(configFile, interface_1.SetupEnvironment.autoSetupAllInOne);
+    }
+    autoUpdateConfigFiles(configFile) {
+        return this.autoRun(configFile, interface_1.SetupEnvironment.autoUpdateConfigFiles);
     }
     getEtcDefault() {
         return this.etcDefault;
@@ -1555,35 +1725,68 @@ class Utils {
             resolve(res);
         });
     }
-    unregisterAgent(msg = 'Would you like to unregister this agent?  Y/n ') {
+    unregisterAsNeeded() {
         return new rxjs_1.Observable((observer) => {
-            console.log(`\n${msg}`);
-            prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
-                if (question.answer.toUpperCase() === 'Y') {
-                    _1.utils.isNodeConfigured()
-                        .subscribe({
-                        next: (res) => {
-                            if (res) {
-                                let arg = `hzn unregister -frDv`;
-                                _1.utils.shell(arg, 'done unregistering agent', 'failed to unregister agent', false)
-                                    .subscribe({
-                                    next: (res) => observer.complete(),
-                                    error: (e) => observer.error(e)
-                                });
-                            }
-                            else {
-                                console.log('no need to unregister...');
-                                observer.complete();
-                            }
-                        }, error(e) {
-                            observer.complete();
-                        }
-                    });
-                }
-                else {
+            _1.utils.isNodeConfigured()
+                .subscribe({
+                next: (res) => {
+                    if (res) {
+                        const arg = `hzn unregister -frDv`;
+                        _1.utils.shell(arg, 'done unregistering agent', 'failed to unregister agent', false)
+                            .subscribe({
+                            next: (res) => observer.complete(),
+                            error: (e) => observer.error(e)
+                        });
+                    }
+                    else {
+                        console.log('no need to unregister...');
+                        observer.complete();
+                    }
+                }, error(e) {
                     observer.complete();
                 }
             });
+        });
+    }
+    unregisterAgent(auto = false, msg = 'Would you like to unregister this agent?  Y/n ') {
+        return new rxjs_1.Observable((observer) => {
+            if (auto) {
+                _1.utils.unregisterAsNeeded()
+                    .subscribe({
+                    complete: () => observer.complete(),
+                    error: (e) => observer.error(e)
+                });
+            }
+            else {
+                console.log(`\n${msg}`);
+                prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                    if (question.answer.toUpperCase() === 'Y') {
+                        // TODO: should call utils.unregisterAsNeeded()
+                        _1.utils.isNodeConfigured()
+                            .subscribe({
+                            next: (res) => {
+                                if (res) {
+                                    const arg = `hzn unregister -frDv`;
+                                    _1.utils.shell(arg, 'done unregistering agent', 'failed to unregister agent', false)
+                                        .subscribe({
+                                        next: (res) => observer.complete(),
+                                        error: (e) => observer.error(e)
+                                    });
+                                }
+                                else {
+                                    console.log('no need to unregister...');
+                                    observer.complete();
+                                }
+                            }, error(e) {
+                                observer.complete();
+                            }
+                        });
+                    }
+                    else {
+                        observer.complete();
+                    }
+                });
+            }
         });
     }
     register(hzn) {
@@ -1595,21 +1798,22 @@ class Utils {
             }
             else if (answer == 1) {
                 console.log('\x1b[32m', '\nRegister with a Policy');
-                this.registerWithPolicy(hzn)
+                this.registerWithPolicy(hzn.param.name, this.getPolicyJson(interface_1.policyType.nodePolicy))
                     .subscribe(() => { observer.next(1); observer.complete(); });
             }
             else if (answer == 2) {
                 console.log('\x1b[32m', '\nRegister with a Pattern');
-                this.registerWithPattern(hzn)
+                this.registerWithPattern(hzn.mmsPattern, this.getPolicyJson(interface_1.policyType.nodePolicy))
                     .subscribe(() => { observer.next(2); observer.complete(); });
             }
         });
     }
-    registerWithPolicy(hzn) {
+    registerWithPolicy(name, policy, auto = false) {
         return new rxjs_1.Observable((observer) => {
-            this.unregisterAgent().subscribe({
+            this.unregisterAgent(auto).subscribe({
                 complete: () => {
-                    let arg = hzn.param.name.length > 0 ? `hzn register --policy ${hzn.getPolicyInfo()} --name ${hzn.param.name}` : `hzn register --policy ${hzn.getPolicyInfo()}`;
+                    console.log(process.env.HZN_ORG_ID);
+                    let arg = name.length > 0 ? `hzn register --policy ${policy} --name ${name}` : `hzn register --policy ${policy}`;
                     _1.utils.shell(arg, 'done registering agent with policy', 'failed to register agent')
                         .subscribe({
                         complete: () => {
@@ -1624,11 +1828,11 @@ class Utils {
             });
         });
     }
-    registerWithPattern(hzn) {
+    registerWithPattern(pattern, policy, auto = false) {
         return new rxjs_1.Observable((observer) => {
-            this.unregisterAgent().subscribe({
+            this.unregisterAgent(auto).subscribe({
                 complete: () => {
-                    let arg = `hzn register --policy ${hzn.nodePolicyJson} --pattern "${hzn.mmsPattern}"`;
+                    let arg = `hzn register --policy ${policy} --pattern "${pattern}"`;
                     _1.utils.shell(arg, 'done registering agent', 'failed to register agent')
                         .subscribe({
                         complete: () => observer.complete(),
@@ -1639,6 +1843,17 @@ class Utils {
                 }
             });
         });
+    }
+    getPolicyJson(type) {
+        // TODO: refactor and move logic from hzn.ts
+        const policy = {
+            nodePolicyJson: `${this.hznConfig}/node.policy.json`,
+            deploymentPolicyJson: `${this.hznConfig}/deployment.policy.json`,
+            servicePolicyJson: `${this.hznConfig}/service.policy.json`,
+            objectPolicyJson: `${this.hznConfig}/object.policy.json`,
+            objectPatternJson: `${this.hznConfig}/object.pattern.json`
+        };
+        return policy[type];
     }
     updatePolicy(param, policy) {
         return this.addPolicy(param, policy, true);
@@ -1663,7 +1878,7 @@ class Utils {
             }
             else if (answer == 3) {
                 console.log('\x1b[32m', '\nAdding Node Policy');
-                this.addNodePolicy(param, policy)
+                this.updateNodePolicy(param, policy)
                     .subscribe(() => { observer.next(3); observer.complete(); });
             }
             else if (answer == 4) {
@@ -1689,6 +1904,10 @@ class Utils {
     }
     addObjectPattern(param) {
         // Todo 
+    }
+    updateNodePolicy(param, policy) {
+        const arg = `hzn exchange node addpolicy --json-file ${policy.nodePolicyJson} ${process.env.HZN_CUSTOM_NODE_ID}`;
+        return _1.utils.shell(arg, `done add/update for this agent`, `failed to add/update for this agent`);
     }
     addNodePolicy(param, policy) {
         return new rxjs_1.Observable((observer) => {
