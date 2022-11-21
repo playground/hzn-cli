@@ -20,13 +20,30 @@ export declare const supportPlatform: {
     amd64: string;
     arm: string;
 };
+export declare const policyType: {
+    nodePolicy: string;
+    deploymentPolicy: string;
+    servicePolicy: string;
+    objectPolicy: string;
+    objectPattern: string;
+};
 export declare enum SetupEnvironment {
     autoSetup = 0,
     autoSetupCliOnly = 1,
     autoSetupAnaxInContainer = 2,
     autoSetupCliInContainer = 3,
     autoSetupContainer = 4,
-    autoSetupAllInOne = 5
+    autoSetupAllInOne = 5,
+    autoUpdateConfigFiles = 6
+}
+export declare enum AutoCommand {
+    autoPublishService = 0,
+    autoPublishMMSService = 1,
+    autoAddDeploymentPolicy = 2,
+    autoAddNodePolicy = 3,
+    autoRegisterWithPolicy = 4,
+    autoRegisterWithPattern = 5,
+    autoUnregister = 6
 }
 export declare const keyMap: {
     org: string;

@@ -1,19 +1,20 @@
 export const justRun = [
-  'addRemoteNodePolicy',
+  'addPolicy', 'addRemoteNodePolicy', 'updatePolicy',
   'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement', 
   'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodes', 'listOrg', 'listNodePattern', 'listObject', 'listPattern', 
   'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'publishMMSObject', 'publishMMSObjectPattern', 'publishMMSObjectPolicy', 
-  'removeDeploymentPolicy', 'removeObject', 'removeOrg', 
+  'register', 'removeDeploymentPolicy', 'removeObject', 'removeOrg', 
   'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition'
 ];
 export const promptForUpdate = [
-  'addPolicy', 'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister', 
+  'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister', 
   'buildMMSImage', 'buildServiceImage', 'editDeploymentPoicy', 'editNodePolicy', 'editServicePolicy', 'publishAndRegister', 
   'publishService', 'publishServiceAndPattern', 'publishPattern', 'publishMMSService', 
   'publishMMSPattern', 'pushMMSImage', 'pushServiceImage', 'registerAgent'
 ];
 export const customRun = [
-  'autoSetup', 'autoSetupAllInOne', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer', 
+  'autoSetup', 'autoSetupAllInOne', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer',
+  'autoRegisterWithPolicy', 'autoRegisterWithPattern', 'autoUnregister', 'autoUpdateConfigFiles',
   'cleanUp', 'purgeManagementHub'
 ];
 export const runDirectly = [
@@ -40,13 +41,30 @@ export const supportPlatform = {
   "amd64": "linux/amd64",
   "arm": "linux/arm/v7"
 }
+export const policyType = {
+  "nodePolicy": "nodePolicyJson",
+  "deploymentPolicy": "deploymentPolicyJson",
+  "servicePolicy": "servicePolicyJson",
+  "objectPolicy": "objectPolicyJson",
+  "objectPattern": "objectPatternJson"
+}
 export enum SetupEnvironment {
   autoSetup = 0,
   autoSetupCliOnly = 1,
   autoSetupAnaxInContainer = 2,
   autoSetupCliInContainer = 3,
   autoSetupContainer = 4,
-  autoSetupAllInOne = 5
+  autoSetupAllInOne = 5,
+  autoUpdateConfigFiles = 6
+}
+export enum AutoCommand {
+  autoPublishService = 0,
+  autoPublishMMSService = 1,
+  autoAddDeploymentPolicy = 2,
+  autoAddNodePolicy = 3,
+  autoRegisterWithPolicy = 4,
+  autoRegisterWithPattern = 5,
+  autoUnregister = 6
 }
 export const keyMap = {
   org: 'credential',

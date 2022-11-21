@@ -8,6 +8,7 @@ import { URL } from 'url';
 import { Hzn, utils } from '.';
 import { Env } from './env';
 import {
+  AutoCommand,
   configTemplate,
   HorizonKeyMap,
   HorizonTemplate,
@@ -15,8 +16,11 @@ import {
   installPrompt,
   installTar,
   keyMap,
+  policyType,
   SetupEnvironment,
 } from './interface';
+
+const dotenv = require('dotenv');
 
 declare var require: any
 declare var process: any
@@ -142,6 +146,10 @@ export class Utils {
   }
   createHorizonSystemFiles(configJson: any) {
     return new Observable((observer) => {
+      if(configJson.test === 'undefined' || !configJson.test) {
+        observer.next('')
+        observer.complete()
+      }
       let content = ''
       const pEnv = process.env
       Object.keys(HorizonTemplate).forEach((key) => {
@@ -267,6 +275,11 @@ export class Utils {
         const envHzn = configTemplate.envHzn;
         const configLocal = config['local'];
         const envLocal = configTemplate.envLocal;
+        const metaVars = config['metaVars'] || {};
+
+        Object.keys(metaVars).forEach((key) => {
+          pEnv[key] = metaVars[key];
+        })
         
         if(!hznJson[orgId]) {
           hznJson[orgId] = {}
@@ -364,7 +377,7 @@ export class Utils {
   }
   autoRun(configFile: string, setup: SetupEnvironment) {
     return new Observable((observer) => {
-      if(!configFile || configFile.length == 0) {
+      if(!configFile || configFile.length == 0 || !existsSync(configFile)) {
         observer.next('Please provide --config_file name')
         observer.complete()
       } else if(setup == SetupEnvironment.autoSetupAllInOne) {
@@ -382,6 +395,15 @@ export class Utils {
           },
           error: (err) => observer.error(err)
         })  
+      } else if(setup == SetupEnvironment.autoUpdateConfigFiles) {
+        this.updateConfig(configFile)
+        .subscribe({
+          complete: () => {
+            observer.next('')
+            observer.complete();              
+          },
+          error: (err) => observer.error(err)
+        })
       } else {
         this.updateConfig(configFile)
         .subscribe({
@@ -434,6 +456,146 @@ export class Utils {
       }
     })
   }
+  setEnvFromEnvLocal() {
+    const localEnv = dotenv.parse(readFileSync(`${this.hznConfig}/.env-local`));
+    const pEnv: any = process.env;
+    for(let i in localEnv) {
+      if(i == 'DEFAULT_ORG') {
+        pEnv['HZN_ORG_ID'] = localEnv[i]
+      } else {
+        pEnv[i] = localEnv[i];
+      }
+    }
+  }
+  setEnvFromConfig(configFile: string) {
+    return new Observable((observer) => {
+      let config = `${this.hznConfig}/.env-hzn.json`
+      if(configFile && configFile.length > 0 && !existsSync(configFile)) {
+        observer.error('Please provide --config_file name or leave out --config_file to use the default configuration.')
+      } else if(!configFile || configFile.length == 0) {
+        console.log('using default config file')
+      } else {
+        config = configFile;
+      }
+      let hznJson = JSON.parse(readFileSync(config).toString());
+      const pEnv: any = process.env;
+      const org = pEnv['HZN_ORG_ID']
+      if(org) {
+        const envVars = hznJson[org]['envVars'];
+        for(const [key, value] of Object.entries(envVars)) {
+          if(!pEnv[key]) {
+            // @ts-ignore
+            pEnv[key] = value.replace(/\r?\n|\r/g, '');
+          } 
+          // console.log(`${key}: ${pEnv[key]}`);
+        }
+        Object.keys(org).forEach((key) => {
+          pEnv[key] = org[key]
+        })
+        observer.next('Env vars all set.')
+        observer.complete()  
+      } else {
+        observer.error('Default org not set.')
+      }
+    })
+  }
+  getTopLevelPatternName() {
+    const pEnv = process.env
+    return `pattern-${pEnv.MMS_SERVICE_NAME}-${pEnv.ARCH}`
+    let name = this.getByKey(`${utils.getHznConfig()}/services/top-level-service/service.pattern.json`, 'name')
+  }
+  getArch() {
+    return new Observable((observer) => {
+      const pEnv = process.env;
+      if(!pEnv.ARCH) {
+        let arg = `hzn architecture`
+        exec(arg, {maxBuffer: 1024 * 2000}, (err: any, stdout: any, stderr: any) => {
+          if(!err) {
+            pEnv.ARCH = stdout.replace(/\r?\n|\r/g, '');
+            observer.next(pEnv.ARCH);
+            observer.complete();
+          } else {
+            console.log('failed to identify arch');
+            observer.error(err);
+          }
+        });  
+      } else {
+        observer.next(pEnv.ARCH);
+        observer.complete();
+      }
+    })
+  }
+  getByKey(file: string, key: string) {
+    let value = undefined;
+    try {
+      if(existsSync(file)) {
+        let json = JSON.parse(readFileSync(file).toString());
+        Object.keys(json).some((k: any) => {
+          if(k === key) {
+            value = json[k]
+          }
+          return k === key;
+        }) 
+      }
+    } catch(e) {
+      console.log(e)
+    }
+    return value;
+  }
+  autoCommand(configFile: string, command: AutoCommand) {
+    return new Observable((observer) => {
+      this.setEnvFromEnvLocal()
+      this.getArch()
+      .subscribe({
+        complete: () => {
+          this.setEnvFromConfig(configFile)
+          .subscribe({
+            next: (data) => console.log(data),
+            complete: () => {
+              let action: any;
+              switch(command) {
+                case AutoCommand.autoRegisterWithPolicy:
+                  action = utils.registerWithPolicy('', this.getPolicyJson(policyType.nodePolicy), true)
+                  break;
+                case AutoCommand.autoRegisterWithPattern:
+                  action = utils.registerWithPattern(this.getTopLevelPatternName(), this.getPolicyJson(policyType.nodePolicy), true)
+                  break;
+                case AutoCommand.autoUnregister:
+                  action = utils.unregisterAgent(true)
+                  break;    
+              }
+              if(action) {
+                action
+                .subscribe({
+                  next: (msg) => console.log('msg'),
+                  complete: () => {
+                    console.log('Autocommand completed');
+                    observer.complete();
+                  },
+                  error: (err) => {
+                    console.log('err here')
+                    observer.error(err);
+                  }
+                })    
+              } else {
+                observer.error('AutoCommand not found')
+              } 
+            },
+            error: (err) => observer.error(err)
+          })    
+        }, error: (err) => observer.error(err)
+      })
+    })      
+  }
+  autoRegisterWithPolicy(configFile: string) {
+    return this.autoCommand(configFile, AutoCommand.autoRegisterWithPolicy)
+  }
+  autoRegisterWithPattern(configFile: string) {
+    return this.autoCommand(configFile, AutoCommand.autoRegisterWithPattern)
+  }
+  autoUnregister(configFile: string) {
+    return this.autoCommand(configFile, AutoCommand.autoUnregister)
+  }
   replaceEnvTokens(input: string, tokens: any) {
     let envTokens = {}
     Object.keys(tokens).forEach((key) => {
@@ -459,6 +621,9 @@ export class Utils {
   }  
   autoSetupAllInOne(configFile: string) {
     return this.autoRun(configFile, SetupEnvironment.autoSetupAllInOne)    
+  }  
+  autoUpdateConfigFiles(configFile: string) {
+    return this.autoRun(configFile, SetupEnvironment.autoUpdateConfigFiles)    
   }  
   getEtcDefault() {
     return this.etcDefault
@@ -1527,33 +1692,64 @@ export class Utils {
       resolve(res)   
     })
   }
-  unregisterAgent(msg = 'Would you like to unregister this agent?  Y/n ') {
+  unregisterAsNeeded() {
     return new Observable((observer) => {
-      console.log(`\n${msg}`)
-      prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
-        if(question.answer.toUpperCase() === 'Y') {
-          utils.isNodeConfigured()
-          .subscribe({
-            next: (res) => {
-              if(res) {
-                let arg = `hzn unregister -frDv`;
-                utils.shell(arg, 'done unregistering agent', 'failed to unregister agent', false)
-                .subscribe({
-                  next: (res) => observer.complete(),
-                  error: (e) => observer.error(e)
-                })      
-              } else {
-                console.log('no need to unregister...')
-                observer.complete()
-              }
-            }, error(e) {
-              observer.complete()
-            }
-          })
-        } else {
+      utils.isNodeConfigured()
+      .subscribe({
+        next: (res) => {
+          if(res) {
+            const arg = `hzn unregister -frDv`;
+            utils.shell(arg, 'done unregistering agent', 'failed to unregister agent', false)
+            .subscribe({
+              next: (res) => observer.complete(),
+              error: (e) => observer.error(e)
+            })      
+          } else {
+            console.log('no need to unregister...')
+            observer.complete()
+          }
+        }, error(e) {
           observer.complete()
         }
-      })  
+      })
+    })
+  }
+  unregisterAgent(auto = false, msg = 'Would you like to unregister this agent?  Y/n ') {
+    return new Observable((observer) => {
+      if(auto) {
+        utils.unregisterAsNeeded()
+        .subscribe({
+          complete: () => observer.complete(),
+          error: (e) => observer.error(e)
+        })
+      } else {
+        console.log(`\n${msg}`)
+        prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
+          if(question.answer.toUpperCase() === 'Y') {
+            // TODO: should call utils.unregisterAsNeeded()
+            utils.isNodeConfigured()
+            .subscribe({
+              next: (res) => {
+                if(res) {
+                  const arg = `hzn unregister -frDv`;
+                  utils.shell(arg, 'done unregistering agent', 'failed to unregister agent', false)
+                  .subscribe({
+                    next: (res) => observer.complete(),
+                    error: (e) => observer.error(e)
+                  })      
+                } else {
+                  console.log('no need to unregister...')
+                  observer.complete()
+                }
+              }, error(e) {
+                observer.complete()
+              }
+            })
+          } else {
+            observer.complete()
+          }
+        })            
+      }
     })  
   }
   register(hzn: Hzn) {
@@ -1564,20 +1760,21 @@ export class Utils {
         observer.complete()
       } else if(answer == 1) {
         console.log('\x1b[32m', '\nRegister with a Policy') 
-        this.registerWithPolicy(hzn)
+        this.registerWithPolicy(hzn.param.name, this.getPolicyJson(policyType.nodePolicy))
         .subscribe(() => {observer.next(1); observer.complete()})
       } else if(answer == 2) {
         console.log('\x1b[32m', '\nRegister with a Pattern') 
-        this.registerWithPattern(hzn)
+        this.registerWithPattern(hzn.mmsPattern, this.getPolicyJson(policyType.nodePolicy))
         .subscribe(() => {observer.next(2); observer.complete()})
       }
     })     
   }
-  registerWithPolicy(hzn: Hzn) {
+  registerWithPolicy(name: string, policy: string, auto = false) {
     return new Observable((observer) => {
-      this.unregisterAgent().subscribe({
+      this.unregisterAgent(auto).subscribe({
         complete: () => {
-          let arg = hzn.param.name.length > 0 ? `hzn register --policy ${hzn.getPolicyInfo()} --name ${hzn.param.name}` : `hzn register --policy ${hzn.getPolicyInfo()}`
+          console.log(process.env.HZN_ORG_ID)
+          let arg = name.length > 0 ? `hzn register --policy ${policy} --name ${name}` : `hzn register --policy ${policy}`
           utils.shell(arg, 'done registering agent with policy', 'failed to register agent')
           .subscribe({
             complete: () => {
@@ -1592,11 +1789,11 @@ export class Utils {
       })  
     })  
   }
-  registerWithPattern(hzn: Hzn) {
+  registerWithPattern(pattern: string, policy: string, auto = false) {
     return new Observable((observer) => {
-      this.unregisterAgent().subscribe({
+      this.unregisterAgent(auto).subscribe({
         complete: () => {
-          let arg = `hzn register --policy ${hzn.nodePolicyJson} --pattern "${hzn.mmsPattern}"`;
+          let arg = `hzn register --policy ${policy} --pattern "${pattern}"`;
           utils.shell(arg, 'done registering agent', 'failed to register agent')
           .subscribe({
             complete: () => observer.complete(),
@@ -1607,6 +1804,17 @@ export class Utils {
         }    
       })  
     })      
+  }
+  getPolicyJson(type: string) {
+    // TODO: refactor and move logic from hzn.ts
+    const policy = {
+      nodePolicyJson: `${this.hznConfig}/node.policy.json`,
+      deploymentPolicyJson: `${this.hznConfig}/deployment.policy.json`,
+      servicePolicyJson: `${this.hznConfig}/service.policy.json`,
+      objectPolicyJson: `${this.hznConfig}/object.policy.json`,
+      objectPatternJson: `${this.hznConfig}/object.pattern.json`
+    }
+    return policy[type]  
   }
   updatePolicy(param: IHznParam, policy: any) {
     return this.addPolicy(param, policy, true)
@@ -1628,7 +1836,7 @@ export class Utils {
         .subscribe(() => {observer.next(2); observer.complete()})
       } else if(answer == 3) {
         console.log('\x1b[32m', '\nAdding Node Policy') 
-        this.addNodePolicy(param, policy)
+        this.updateNodePolicy(param, policy)
         .subscribe(() => {observer.next(3); observer.complete()})
       } else if(answer == 4) {
         console.log('\x1b[32m', '\nAdding Object Policy')
@@ -1653,6 +1861,10 @@ export class Utils {
   }
   addObjectPattern(param: IHznParam) {
     // Todo 
+  }
+  updateNodePolicy(param: IHznParam, policy: any) {
+    const arg = `hzn exchange node addpolicy --json-file ${policy.nodePolicyJson} ${process.env.HZN_CUSTOM_NODE_ID}`
+    return utils.shell(arg, `done add/update for this agent`, `failed to add/update for this agent`)
   }
   addNodePolicy(param: IHznParam, policy: any) {
     return new Observable((observer) => {

@@ -1,11 +1,12 @@
-import type { Arguments, CommandBuilder } from 'yargs';
-import { Hzn, utils } from '../common/src/hzn';
-import { IHznParam, justRun, runDirectly, promptForUpdate, customRun, loop } from '../common/src/interface';
 import chalk from 'chalk';
 import clear from 'clear';
 import figlet from 'figlet';
 import { existsSync } from 'fs';
 
+import { Hzn, utils } from '../common/src/hzn';
+import { customRun, IHznParam, justRun, loop, promptForUpdate, runDirectly } from '../common/src/interface';
+
+import type { Arguments, CommandBuilder } from 'yargs';
 type Options = {
   action: string;
   org: string | undefined;
@@ -74,7 +75,8 @@ export const handler = (argv: Arguments<Options>): void => {
       const hznModel = {
         org: env, 
         configPath: configPath, 
-        name: name || '', 
+        name: name || '',
+        mmsPattern: p, 
         objectType: object_type || '', 
         objectId: object_id || '', 
         objectFile: object || '',
@@ -84,7 +86,7 @@ export const handler = (argv: Arguments<Options>): void => {
         configFile: config_file || ''
       } as IHznParam;
       const hzn = new Hzn(hznModel);
-  
+
       hzn.init()
       .subscribe({
         complete: () => {

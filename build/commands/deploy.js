@@ -4,12 +4,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handler = exports.builder = exports.desc = exports.command = void 0;
-const hzn_1 = require("../common/src/hzn");
-const interface_1 = require("../common/src/interface");
 const chalk_1 = __importDefault(require("chalk"));
 const clear_1 = __importDefault(require("clear"));
 const figlet_1 = __importDefault(require("figlet"));
 const fs_1 = require("fs");
+const hzn_1 = require("../common/src/hzn");
+const interface_1 = require("../common/src/interface");
 exports.command = 'deploy <action>';
 exports.desc = 'Deploy <action> to Org <org>';
 let availableActions = 'Available actions:';
@@ -58,6 +58,7 @@ const handler = (argv) => {
                 org: env,
                 configPath: configPath,
                 name: name || '',
+                mmsPattern: p,
                 objectType: object_type || '',
                 objectId: object_id || '',
                 objectFile: object || '',

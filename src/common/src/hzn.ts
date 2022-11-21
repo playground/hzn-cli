@@ -202,7 +202,7 @@ export class Hzn {
   }
   publishMMSPattern() {
     const arg = `hzn exchange pattern publish -f ${this.mmsPatternJson}`;
-    return utils.shell(arg, 'done publishing mss pattern', 'failed to publish mms pattern');
+    return utils.shell(arg, 'done publishing mss pattern', 'failed to publish mms pattern', false);
   }
   unregisterAgent() {
     return utils.unregisterAgent()
