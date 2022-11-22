@@ -412,6 +412,7 @@ export class Utils {
                 let policy = configJson.register.policy
                 if(typeof policy !== 'string') {
                   policy = JSON.stringify(configJson.register.policy)
+                  policy = policy.replace(/\"/g, '\\"')
                 }
                 this.registerOnly()
                 .subscribe({
@@ -1912,12 +1913,14 @@ export class Utils {
   }
   updateNodePolicyFromStdin(param: string) {
     // echo "{\"deployment\": {\"properties\": [{\"name\": \"worker-safety\", \"value\": \"Worker Safety\"},{\"name\": \"mms-agent\", \"value\": \"MMS Agent\"}]}}" | hzn exchange node addpolicy -f- fyre-216-dock -v
-    const arg = `echo ${param} | hzn exchange node addpolicy -f- ${process.env.HZN_CUSTOM_NODE_ID} -v`
+    const nodeId = process.env.HZN_DEVICE_ID || process.env.HZN_CUSTOM_NODE_ID || ''
+    const arg = `echo "${param}" | hzn exchange node addpolicy -f- ${nodeId} -v`
     return utils.shell(arg, `done add/update for this node policy`, `failed to add/update this node policy`)
   }
   updateNodePolicy(param: string) {
     //const arg = `hzn exchange node addpolicy --json-file ${policy.nodePolicyJson} ${process.env.HZN_CUSTOM_NODE_ID}`
-    const arg = `hzn exchange node addpolicy ${param} ${process.env.HZN_CUSTOM_NODE_ID} -v`
+    const nodeId = process.env.HZN_DEVICE_ID || process.env.HZN_CUSTOM_NODE_ID || ''
+    const arg = `hzn exchange node addpolicy ${param} ${nodeId} -v`
     return utils.shell(arg, `done add/update for this node policy`, `failed to add/update this node policy`)
   }
   addNodePolicy(param: IHznParam, policy: any) {
