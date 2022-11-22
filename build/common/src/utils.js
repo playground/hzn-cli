@@ -367,8 +367,9 @@ class Utils {
             });
         });
     }
-    autoRun(configFile, setup) {
+    autoRun(params, setup) {
         return new rxjs_1.Observable((observer) => {
+            const configFile = params.configFile;
             if (!configFile || configFile.length == 0 || !(0, fs_1.existsSync)(configFile)) {
                 observer.next('Please provide --config_file name');
                 observer.complete();
@@ -390,11 +391,43 @@ class Utils {
                 });
             }
             else if (setup == interface_1.SetupEnvironment.autoUpdateConfigFiles) {
+                let configJson;
                 this.updateConfig(configFile)
                     .subscribe({
+                    next: (json) => {
+                        configJson = json;
+                    },
                     complete: () => {
-                        observer.next('');
-                        observer.complete();
+                        try {
+                            if (configJson.register && configJson.register.policy) {
+                                let arg = '';
+                                let policy = configJson.register.policy;
+                                if (typeof policy !== 'string') {
+                                    policy = JSON.stringify(configJson.register.policy);
+                                }
+                                this.registerOnly()
+                                    .subscribe({
+                                    complete: () => {
+                                        this.updateNodePolicyFromStdin(policy)
+                                            .subscribe({
+                                            complete: () => {
+                                                observer.next('');
+                                                observer.complete();
+                                            },
+                                            error: (err) => observer.error(err)
+                                        });
+                                    },
+                                    error: (err) => observer.error(err)
+                                });
+                            }
+                            else {
+                                observer.next('');
+                                observer.complete();
+                            }
+                        }
+                        catch (e) {
+                            observer.error(e);
+                        }
                     },
                     error: (err) => observer.error(err)
                 });
@@ -566,8 +599,8 @@ class Utils {
                                 case interface_1.AutoCommand.autoUnregister:
                                     action = _1.utils.unregisterAgent(true);
                                     break;
-                                case interface_1.AutoCommand.autoAddNodePolicy:
-                                    action = _1.utils.updateNodePolicy(`-f- ${params.object}`);
+                                case interface_1.AutoCommand.autoUpdateNodePolicy:
+                                    action = _1.utils.updateNodePolicyFromStdin(`${params.object}`);
                                     break;
                             }
                             if (action) {
@@ -595,7 +628,7 @@ class Utils {
         });
     }
     autoUpdateNodePolicy(params) {
-        return this.autoCommand(params, interface_1.AutoCommand.autoAddNodePolicy);
+        return this.autoCommand(params, interface_1.AutoCommand.autoUpdateNodePolicy);
     }
     autoRegisterWithPolicy(params) {
         return this.autoCommand(params, interface_1.AutoCommand.autoRegisterWithPolicy);
@@ -615,25 +648,25 @@ class Utils {
         return input;
     }
     autoSetup(params) {
-        return this.autoRun(params.configFile, interface_1.SetupEnvironment.autoSetup);
+        return this.autoRun(params, interface_1.SetupEnvironment.autoSetup);
     }
     autoSetupCliOnly(params) {
-        return this.autoRun(params.configFile, interface_1.SetupEnvironment.autoSetupCliOnly);
+        return this.autoRun(params, interface_1.SetupEnvironment.autoSetupCliOnly);
     }
     autoSetupAnaxInContainer(params) {
-        return this.autoRun(params.configFile, interface_1.SetupEnvironment.autoSetupAnaxInContainer);
+        return this.autoRun(params, interface_1.SetupEnvironment.autoSetupAnaxInContainer);
     }
     autoSetupCliInContainer(params) {
-        return this.autoRun(params.configFile, interface_1.SetupEnvironment.autoSetupCliInContainer);
+        return this.autoRun(params, interface_1.SetupEnvironment.autoSetupCliInContainer);
     }
     autoSetupContainer(params) {
-        return this.autoRun(params.configFile, interface_1.SetupEnvironment.autoSetupContainer);
+        return this.autoRun(params, interface_1.SetupEnvironment.autoSetupContainer);
     }
     autoSetupAllInOne(params) {
-        return this.autoRun(params.configFile, interface_1.SetupEnvironment.autoSetupAllInOne);
+        return this.autoRun(params, interface_1.SetupEnvironment.autoSetupAllInOne);
     }
     autoUpdateConfigFiles(params) {
-        return this.autoRun(params.configFile, interface_1.SetupEnvironment.autoUpdateConfigFiles);
+        return this.autoRun(params, interface_1.SetupEnvironment.autoUpdateConfigFiles);
     }
     getEtcDefault() {
         return this.etcDefault;
@@ -827,6 +860,10 @@ class Utils {
                 error: () => observer.complete() // Ignore errors
             });
         });
+    }
+    clearUnconfiguring() {
+        const arg = `docker exec horizon1 rm -rf /var/horizon/anax.db`;
+        return this.shell(arg);
     }
     purgeManagementHub() {
         const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`;
@@ -1816,6 +1853,10 @@ class Utils {
             }
         });
     }
+    registerOnly() {
+        const arg = `hzn register`;
+        return _1.utils.shell(arg, `done registering this node`, `failed to register this node`);
+    }
     registerWithPolicy(name, policy, auto = false) {
         return new rxjs_1.Observable((observer) => {
             this.unregisterAgent(auto).subscribe({
@@ -1840,7 +1881,7 @@ class Utils {
         return new rxjs_1.Observable((observer) => {
             this.unregisterAgent(auto).subscribe({
                 complete: () => {
-                    let arg = `hzn register --policy ${policy} --pattern "${pattern}"`;
+                    let arg = `hzn register --pattern "${pattern}"`;
                     _1.utils.shell(arg, 'done registering agent', 'failed to register agent')
                         .subscribe({
                         complete: () => observer.complete(),
@@ -1913,10 +1954,15 @@ class Utils {
     addObjectPattern(param) {
         // Todo 
     }
+    updateNodePolicyFromStdin(param) {
+        // echo "{\"deployment\": {\"properties\": [{\"name\": \"worker-safety\", \"value\": \"Worker Safety\"},{\"name\": \"mms-agent\", \"value\": \"MMS Agent\"}]}}" | hzn exchange node addpolicy -f- fyre-216-dock -v
+        const arg = `echo ${param} | hzn exchange node addpolicy -f- ${process.env.HZN_CUSTOM_NODE_ID} -v`;
+        return _1.utils.shell(arg, `done add/update for this node policy`, `failed to add/update this node policy`);
+    }
     updateNodePolicy(param) {
         //const arg = `hzn exchange node addpolicy --json-file ${policy.nodePolicyJson} ${process.env.HZN_CUSTOM_NODE_ID}`
-        const arg = `hzn exchange node addpolicy ${param} ${process.env.HZN_CUSTOM_NODE_ID}`;
-        return _1.utils.shell(arg, `done add/update for this agent`, `failed to add/update for this agent`);
+        const arg = `hzn exchange node addpolicy ${param} ${process.env.HZN_CUSTOM_NODE_ID} -v`;
+        return _1.utils.shell(arg, `done add/update for this node policy`, `failed to add/update this node policy`);
     }
     addNodePolicy(param, policy) {
         return new rxjs_1.Observable((observer) => {

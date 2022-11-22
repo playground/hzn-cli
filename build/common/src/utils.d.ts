@@ -24,7 +24,7 @@ export declare class Utils {
     installAnaxInContainer(configJson: any): Observable<unknown>;
     updateConfig(configFile: string): Observable<unknown>;
     proceedWithAutoInstall(setup: SetupEnvironment): Observable<unknown>;
-    autoRun(configFile: string, setup: SetupEnvironment): Observable<unknown>;
+    autoRun(params: IAutoParam, setup: SetupEnvironment): Observable<unknown>;
     setEnvFromEnvLocal(): void;
     setEnvFromConfig(configFile: string): Observable<unknown>;
     getTopLevelPatternName(): string;
@@ -71,6 +71,7 @@ export declare class Utils {
     getIpAddress(): any[];
     aptUpdate(): Observable<unknown>;
     installPrereq(): Observable<unknown>;
+    clearUnconfiguring(): Observable<unknown>;
     purgeManagementHub(): Observable<unknown>;
     cleanUp(): Observable<unknown>;
     installCliOnly(anax: string): Observable<unknown>;
@@ -111,6 +112,7 @@ export declare class Utils {
     unregisterAsNeeded(): Observable<unknown>;
     unregisterAgent(auto?: boolean, msg?: string): Observable<unknown>;
     register(hzn: Hzn): Observable<unknown>;
+    registerOnly(): Observable<unknown>;
     registerWithPolicy(name: string, policy: string, auto?: boolean): Observable<unknown>;
     registerWithPattern(pattern: string, policy: string, auto?: boolean): Observable<unknown>;
     getPolicyJson(type: string): any;
@@ -120,6 +122,7 @@ export declare class Utils {
     addServicePolicy(policy: any): Observable<unknown>;
     addObjectPolicy(param: IHznParam): Observable<unknown>;
     addObjectPattern(param: IHznParam): void;
+    updateNodePolicyFromStdin(param: string): Observable<unknown>;
     updateNodePolicy(param: string): Observable<unknown>;
     addNodePolicy(param: IHznParam, policy: any): Observable<unknown>;
     addRemoteNodePolicy(param: IHznParam, policy: any): Observable<unknown>;

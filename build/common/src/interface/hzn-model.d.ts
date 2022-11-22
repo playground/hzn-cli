@@ -40,7 +40,7 @@ export declare enum AutoCommand {
     autoPublishService = 0,
     autoPublishMMSService = 1,
     autoAddDeploymentPolicy = 2,
-    autoAddNodePolicy = 3,
+    autoUpdateNodePolicy = 3,
     autoRegisterWithPolicy = 4,
     autoRegisterWithPattern = 5,
     autoUnregister = 6

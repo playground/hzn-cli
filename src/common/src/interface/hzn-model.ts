@@ -15,7 +15,7 @@ export const promptForUpdate = [
 export const customRun = [
   'autoSetup', 'autoSetupAllInOne', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer',
   'autoRegisterWithPolicy', 'autoRegisterWithPattern', 'autoUnregister', 'autoUpdateConfigFiles', 'autoUpdateNodePolicy',
-  'cleanUp', 'purgeManagementHub'
+  'cleanUp', 'clearUnconfiguring', 'purgeManagementHub'
 ];
 export const runDirectly = [
   'appendSupport', 'deleteObject', 'removeCliContainer', 'removeAnaxContainer', 'stopRemoveContainer', 
@@ -61,7 +61,7 @@ export enum AutoCommand {
   autoPublishService = 0,
   autoPublishMMSService = 1,
   autoAddDeploymentPolicy = 2,
-  autoAddNodePolicy = 3,
+  autoUpdateNodePolicy = 3,
   autoRegisterWithPolicy = 4,
   autoRegisterWithPattern = 5,
   autoUnregister = 6

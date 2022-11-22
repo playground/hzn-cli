@@ -18,7 +18,7 @@ exports.promptForUpdate = [
 exports.customRun = [
     'autoSetup', 'autoSetupAllInOne', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer',
     'autoRegisterWithPolicy', 'autoRegisterWithPattern', 'autoUnregister', 'autoUpdateConfigFiles', 'autoUpdateNodePolicy',
-    'cleanUp', 'purgeManagementHub'
+    'cleanUp', 'clearUnconfiguring', 'purgeManagementHub'
 ];
 exports.runDirectly = [
     'appendSupport', 'deleteObject', 'removeCliContainer', 'removeAnaxContainer', 'stopRemoveContainer',
@@ -66,7 +66,7 @@ var AutoCommand;
     AutoCommand[AutoCommand["autoPublishService"] = 0] = "autoPublishService";
     AutoCommand[AutoCommand["autoPublishMMSService"] = 1] = "autoPublishMMSService";
     AutoCommand[AutoCommand["autoAddDeploymentPolicy"] = 2] = "autoAddDeploymentPolicy";
-    AutoCommand[AutoCommand["autoAddNodePolicy"] = 3] = "autoAddNodePolicy";
+    AutoCommand[AutoCommand["autoUpdateNodePolicy"] = 3] = "autoUpdateNodePolicy";
     AutoCommand[AutoCommand["autoRegisterWithPolicy"] = 4] = "autoRegisterWithPolicy";
     AutoCommand[AutoCommand["autoRegisterWithPattern"] = 5] = "autoRegisterWithPattern";
     AutoCommand[AutoCommand["autoUnregister"] = 6] = "autoUnregister";
