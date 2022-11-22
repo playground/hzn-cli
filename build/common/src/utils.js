@@ -406,6 +406,10 @@ class Utils {
                                     policy = JSON.stringify(configJson.register.policy);
                                     policy = policy.replace(/\"/g, '\\"');
                                 }
+                                else {
+                                    policy = policy.replace(/\\/g, '');
+                                    policy = policy.replace(/\"/g, '\\"');
+                                }
                                 this.registerOnly()
                                     .subscribe({
                                     complete: () => {
