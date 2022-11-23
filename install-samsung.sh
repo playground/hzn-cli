@@ -177,7 +177,7 @@ else echo "nvm not installed"
 	export NVM_DIR=
 
 	# Install nvm 
-	curl -sSL https://raw.githubusercontent.com/nvm-sh/nvm/v$INSTALL_NVM_VER/install.sh --output install.sh && chmod +x install.sh && ./install.sh
+	curl -sSL https://raw.githubusercontent.com/nvm-sh/nvm/v$INSTALL_NVM_VER/install.sh --output install.sh && chmod 777 install.sh && ./install.sh
 	# Make nvm command available to terminal
 	source ~/.nvm/nvm.sh
 
