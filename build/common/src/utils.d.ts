@@ -31,6 +31,7 @@ export declare class Utils {
     getArch(): Observable<unknown>;
     getByKey(file: string, key: string): any;
     autoCommand(params: IAutoParam, command: AutoCommand): Observable<unknown>;
+    autoListPolicy(params: IAutoParam): Observable<unknown>;
     autoUpdateNodePolicy(params: IAutoParam): Observable<unknown>;
     autoRegisterWithPolicy(params: IAutoParam): Observable<unknown>;
     autoRegisterWithPattern(params: IAutoParam): Observable<unknown>;

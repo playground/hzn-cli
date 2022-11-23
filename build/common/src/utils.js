@@ -604,6 +604,9 @@ class Utils {
                                 case interface_1.AutoCommand.autoUnregister:
                                     action = _1.utils.unregisterAgent(true);
                                     break;
+                                case interface_1.AutoCommand.autoListPolicy:
+                                    action = _1.utils.listPolicy();
+                                    break;
                                 case interface_1.AutoCommand.autoUpdateNodePolicy:
                                     try {
                                         let policy = params.object;
@@ -645,6 +648,9 @@ class Utils {
                 }, error: (err) => observer.error(err)
             });
         });
+    }
+    autoListPolicy(params) {
+        return this.autoCommand(params, interface_1.AutoCommand.autoListPolicy);
     }
     autoUpdateNodePolicy(params) {
         return this.autoCommand(params, interface_1.AutoCommand.autoUpdateNodePolicy);

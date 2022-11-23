@@ -600,7 +600,10 @@ export class Utils {
                 case AutoCommand.autoUnregister:
                   action = utils.unregisterAgent(true)
                   break;
-                case AutoCommand.autoUpdateNodePolicy:
+                  case AutoCommand.autoListPolicy:
+                    action = utils.listPolicy()
+                    break;
+                  case AutoCommand.autoUpdateNodePolicy:
                   try {
                     let policy = params.object
                     let policyStr = ''
@@ -638,6 +641,9 @@ export class Utils {
         }, error: (err) => observer.error(err)
       })
     })      
+  }
+  autoListPolicy(params: IAutoParam) {
+    return this.autoCommand(params, AutoCommand.autoListPolicy)
   }
   autoUpdateNodePolicy(params: IAutoParam) {
     return this.autoCommand(params, AutoCommand.autoUpdateNodePolicy)

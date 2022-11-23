@@ -16,6 +16,7 @@ exports.promptForUpdate = [
     'publishMMSPattern', 'pushMMSImage', 'pushServiceImage', 'registerAgent'
 ];
 exports.customRun = [
+    'autoListPolicy',
     'autoSetup', 'autoSetupAllInOne', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer',
     'autoRegisterWithPolicy', 'autoRegisterWithPattern', 'autoUnregister', 'autoUpdateConfigFiles', 'autoUpdateNodePolicy',
     'cleanUp', 'clearUnconfiguring', 'purgeManagementHub'
@@ -70,6 +71,7 @@ var AutoCommand;
     AutoCommand[AutoCommand["autoRegisterWithPolicy"] = 4] = "autoRegisterWithPolicy";
     AutoCommand[AutoCommand["autoRegisterWithPattern"] = 5] = "autoRegisterWithPattern";
     AutoCommand[AutoCommand["autoUnregister"] = 6] = "autoUnregister";
+    AutoCommand[AutoCommand["autoListPolicy"] = 7] = "autoListPolicy";
 })(AutoCommand = exports.AutoCommand || (exports.AutoCommand = {}));
 exports.keyMap = {
     org: 'credential',

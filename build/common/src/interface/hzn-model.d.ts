@@ -43,7 +43,8 @@ export declare enum AutoCommand {
     autoUpdateNodePolicy = 3,
     autoRegisterWithPolicy = 4,
     autoRegisterWithPattern = 5,
-    autoUnregister = 6
+    autoUnregister = 6,
+    autoListPolicy = 7
 }
 export declare const keyMap: {
     org: string;

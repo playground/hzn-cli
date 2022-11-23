@@ -13,6 +13,7 @@ export const promptForUpdate = [
   'publishMMSPattern', 'pushMMSImage', 'pushServiceImage', 'registerAgent'
 ];
 export const customRun = [
+  'autoListPolicy',
   'autoSetup', 'autoSetupAllInOne', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer',
   'autoRegisterWithPolicy', 'autoRegisterWithPattern', 'autoUnregister', 'autoUpdateConfigFiles', 'autoUpdateNodePolicy',
   'cleanUp', 'clearUnconfiguring', 'purgeManagementHub'
@@ -64,7 +65,8 @@ export enum AutoCommand {
   autoUpdateNodePolicy = 3,
   autoRegisterWithPolicy = 4,
   autoRegisterWithPattern = 5,
-  autoUnregister = 6
+  autoUnregister = 6,
+  autoListPolicy = 7
 }
 export const keyMap = {
   org: 'credential',
