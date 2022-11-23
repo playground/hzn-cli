@@ -605,7 +605,21 @@ class Utils {
                                     action = _1.utils.unregisterAgent(true);
                                     break;
                                 case interface_1.AutoCommand.autoUpdateNodePolicy:
-                                    action = _1.utils.updateNodePolicyFromStdin(`${params.object}`);
+                                    try {
+                                        let policy = params.object;
+                                        let policyStr = '';
+                                        if (typeof policy !== 'string') {
+                                            policyStr = JSON.stringify(policy);
+                                            policy = policyStr.replace(/\"/g, '\\"');
+                                        }
+                                        else {
+                                            policyStr = policy.replace(/\\/g, '');
+                                            policyStr = policyStr.replace(/\"/g, '\\"');
+                                        }
+                                        action = _1.utils.updateNodePolicyFromStdin(`${policyStr}`);
+                                    }
+                                    catch (e) {
+                                    }
                                     break;
                             }
                             if (action) {

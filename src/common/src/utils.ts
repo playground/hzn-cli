@@ -601,7 +601,19 @@ export class Utils {
                   action = utils.unregisterAgent(true)
                   break;
                 case AutoCommand.autoUpdateNodePolicy:
-                  action = utils.updateNodePolicyFromStdin(`${params.object}`)
+                  try {
+                    let policy = params.object
+                    let policyStr = ''
+                    if(typeof policy !== 'string') {
+                      policyStr = JSON.stringify(policy)
+                      policy = policyStr.replace(/\"/g, '\\"')
+                    } else {
+                      policyStr = policy.replace(/\\/g, '')
+                      policyStr = policyStr.replace(/\"/g, '\\"')
+                    }    
+                    action = utils.updateNodePolicyFromStdin(`${policyStr}`)
+                  } catch(e) {
+                  }
                   break    
               }
               if(action) {
