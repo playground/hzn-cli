@@ -40,10 +40,11 @@ export declare enum AutoCommand {
     autoPublishService = 0,
     autoPublishMMSService = 1,
     autoAddDeploymentPolicy = 2,
-    autoAddNodePolicy = 3,
+    autoUpdateNodePolicy = 3,
     autoRegisterWithPolicy = 4,
     autoRegisterWithPattern = 5,
-    autoUnregister = 6
+    autoUnregister = 6,
+    autoListPolicy = 7
 }
 export declare const keyMap: {
     org: string;
@@ -123,6 +124,10 @@ export declare const configTemplate: {
         SUPPORTED_REDHAT_ARCH_APPEND: string;
     };
 };
+export interface IAutoParam {
+    configFile: string;
+    object: Object;
+}
 export interface IHznParam {
     org: string;
     configPath: string;

@@ -19,6 +19,7 @@ import {
   policyType,
   SetupEnvironment,
 } from './interface';
+import { IAutoParam } from './interface/hzn-model';
 
 const dotenv = require('dotenv');
 
@@ -169,6 +170,7 @@ export class Utils {
       })
       console.log(content)
       if(content.length > 0) {
+        const dest = pEnv['VAR_DIRECTORIES_FILES'] || '/var'; 
         writeFileSync(`${process.cwd()}/horizon`, content);
         this.copyFile(`sudo mv ${process.cwd()}/horizon /var`).then(() => {
           const folders = configJson.folders;
@@ -375,8 +377,9 @@ export class Utils {
       }) 
     })
   }
-  autoRun(configFile: string, setup: SetupEnvironment) {
+  autoRun(params: IAutoParam, setup: SetupEnvironment) {
     return new Observable((observer) => {
+      const configFile = params.configFile;
       if(!configFile || configFile.length == 0 || !existsSync(configFile)) {
         observer.next('Please provide --config_file name')
         observer.complete()
@@ -396,11 +399,45 @@ export class Utils {
           error: (err) => observer.error(err)
         })  
       } else if(setup == SetupEnvironment.autoUpdateConfigFiles) {
+        let configJson
         this.updateConfig(configFile)
         .subscribe({
+          next: (json) => {
+            configJson = json;
+          },
           complete: () => {
-            observer.next('')
-            observer.complete();              
+            try {
+              if(configJson.register && configJson.register.policy) {
+                let arg = ''
+                let policy = configJson.register.policy
+                if(typeof policy !== 'string') {
+                  policy = JSON.stringify(configJson.register.policy)
+                  policy = policy.replace(/\"/g, '\\"')
+                } else {
+                  policy = policy.replace(/\\/g, '')
+                  policy = policy.replace(/\"/g, '\\"')
+                }
+                this.registerOnly()
+                .subscribe({
+                  complete: () => {
+                    this.updateNodePolicyFromStdin(policy)
+                    .subscribe({
+                      complete: () => {
+                        observer.next('')
+                        observer.complete();              
+                      },
+                      error: (err) => observer.error(err)
+                    })      
+                  },
+                  error: (err) => observer.error(err)
+                })
+              } else {
+                observer.next('')
+                observer.complete();              
+              }
+            } catch(e) {
+              observer.error(e)
+            }
           },
           error: (err) => observer.error(err)
         })
@@ -542,13 +579,13 @@ export class Utils {
     }
     return value;
   }
-  autoCommand(configFile: string, command: AutoCommand) {
+  autoCommand(params: IAutoParam, command: AutoCommand) {
     return new Observable((observer) => {
       this.setEnvFromEnvLocal()
       this.getArch()
       .subscribe({
         complete: () => {
-          this.setEnvFromConfig(configFile)
+          this.setEnvFromConfig(params.configFile)
           .subscribe({
             next: (data) => console.log(data),
             complete: () => {
@@ -562,7 +599,25 @@ export class Utils {
                   break;
                 case AutoCommand.autoUnregister:
                   action = utils.unregisterAgent(true)
-                  break;    
+                  break;
+                  case AutoCommand.autoListPolicy:
+                    action = utils.listPolicy()
+                    break;
+                  case AutoCommand.autoUpdateNodePolicy:
+                  try {
+                    let policy = params.object
+                    let policyStr = ''
+                    if(typeof policy !== 'string') {
+                      policyStr = JSON.stringify(policy)
+                      policy = policyStr.replace(/\"/g, '\\"')
+                    } else {
+                      policyStr = policy.replace(/\\/g, '')
+                      policyStr = policyStr.replace(/\"/g, '\\"')
+                    }    
+                    action = utils.updateNodePolicyFromStdin(`${policyStr}`)
+                  } catch(e) {
+                  }
+                  break    
               }
               if(action) {
                 action
@@ -587,14 +642,20 @@ export class Utils {
       })
     })      
   }
-  autoRegisterWithPolicy(configFile: string) {
-    return this.autoCommand(configFile, AutoCommand.autoRegisterWithPolicy)
+  autoListPolicy(params: IAutoParam) {
+    return this.autoCommand(params, AutoCommand.autoListPolicy)
   }
-  autoRegisterWithPattern(configFile: string) {
-    return this.autoCommand(configFile, AutoCommand.autoRegisterWithPattern)
+  autoUpdateNodePolicy(params: IAutoParam) {
+    return this.autoCommand(params, AutoCommand.autoUpdateNodePolicy)
   }
-  autoUnregister(configFile: string) {
-    return this.autoCommand(configFile, AutoCommand.autoUnregister)
+  autoRegisterWithPolicy(params: IAutoParam) {
+    return this.autoCommand(params, AutoCommand.autoRegisterWithPolicy)
+  }
+  autoRegisterWithPattern(params: IAutoParam) {
+    return this.autoCommand(params, AutoCommand.autoRegisterWithPattern)
+  }
+  autoUnregister(params: IAutoParam) {
+    return this.autoCommand(params, AutoCommand.autoUnregister)
   }
   replaceEnvTokens(input: string, tokens: any) {
     let envTokens = {}
@@ -604,26 +665,26 @@ export class Utils {
     this.tokenReplace(input, envTokens)
     return input;
   }
-  autoSetup(configFile: string) {
-    return this.autoRun(configFile, SetupEnvironment.autoSetup)
+  autoSetup(params: IAutoParam) {
+    return this.autoRun(params, SetupEnvironment.autoSetup)
   }
-  autoSetupCliOnly(configFile: string) {
-    return this.autoRun(configFile, SetupEnvironment.autoSetupCliOnly)    
+  autoSetupCliOnly(params: IAutoParam) {
+    return this.autoRun(params, SetupEnvironment.autoSetupCliOnly)    
   }
-  autoSetupAnaxInContainer(configFile: string) {
-    return this.autoRun(configFile, SetupEnvironment.autoSetupAnaxInContainer)    
+  autoSetupAnaxInContainer(params: IAutoParam) {
+    return this.autoRun(params, SetupEnvironment.autoSetupAnaxInContainer)    
   }
-  autoSetupCliInContainer(configFile: string) {
-    return this.autoRun(configFile, SetupEnvironment.autoSetupCliInContainer)    
+  autoSetupCliInContainer(params: IAutoParam) {
+    return this.autoRun(params, SetupEnvironment.autoSetupCliInContainer)    
   }
-  autoSetupContainer(configFile: string) {
-    return this.autoRun(configFile, SetupEnvironment.autoSetupContainer)    
+  autoSetupContainer(params: IAutoParam) {
+    return this.autoRun(params, SetupEnvironment.autoSetupContainer)    
   }  
-  autoSetupAllInOne(configFile: string) {
-    return this.autoRun(configFile, SetupEnvironment.autoSetupAllInOne)    
+  autoSetupAllInOne(params: IAutoParam) {
+    return this.autoRun(params, SetupEnvironment.autoSetupAllInOne)    
   }  
-  autoUpdateConfigFiles(configFile: string) {
-    return this.autoRun(configFile, SetupEnvironment.autoUpdateConfigFiles)    
+  autoUpdateConfigFiles(params: IAutoParam) {
+    return this.autoRun(params, SetupEnvironment.autoUpdateConfigFiles)    
   }  
   getEtcDefault() {
     return this.etcDefault
@@ -816,6 +877,10 @@ export class Utils {
       })
     });
   }
+  clearUnconfiguring() {
+    const arg = `docker exec horizon1 rm -rf /var/horizon/anax.db`
+    return this.shell(arg)
+  }
   purgeManagementHub() {
     const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`
     return this.shell(arg)
@@ -826,6 +891,7 @@ export class Utils {
     arg += existsSync(this.etcHorizon) ? `sudo rm -rf ${this.etcHorizon} -y || true && ` : ''
     arg += existsSync(`${this.etcDefault}/horizon`) ? `sudo rm ${this.etcDefault}/horizon || true && `: ''
     arg += existsSync(`${this.homePath}/.hzn`) ? `sudo rm -rf ${this.homePath}/.hzn -y || true && ` : ''
+    arg += existsSync(`/var/tmp/horizon`) ? `sudo rm -rf /var/tmp/horizon -y || true && ` : ''
     arg += ':'
     return this.shell(arg)
   }
@@ -1769,6 +1835,10 @@ export class Utils {
       }
     })     
   }
+  registerOnly() {
+    const arg = `hzn register`
+    return utils.shell(arg, `done registering this node`, `failed to register this node`)
+  }
   registerWithPolicy(name: string, policy: string, auto = false) {
     return new Observable((observer) => {
       this.unregisterAgent(auto).subscribe({
@@ -1793,7 +1863,7 @@ export class Utils {
     return new Observable((observer) => {
       this.unregisterAgent(auto).subscribe({
         complete: () => {
-          let arg = `hzn register --policy ${policy} --pattern "${pattern}"`;
+          let arg = `hzn register --pattern "${pattern}"`;
           utils.shell(arg, 'done registering agent', 'failed to register agent')
           .subscribe({
             complete: () => observer.complete(),
@@ -1836,7 +1906,7 @@ export class Utils {
         .subscribe(() => {observer.next(2); observer.complete()})
       } else if(answer == 3) {
         console.log('\x1b[32m', '\nAdding Node Policy') 
-        this.updateNodePolicy(param, policy)
+        this.updateNodePolicy(`--json-file ${policy.nodePolicyJson}`)
         .subscribe(() => {observer.next(3); observer.complete()})
       } else if(answer == 4) {
         console.log('\x1b[32m', '\nAdding Object Policy')
@@ -1862,9 +1932,17 @@ export class Utils {
   addObjectPattern(param: IHznParam) {
     // Todo 
   }
-  updateNodePolicy(param: IHznParam, policy: any) {
-    const arg = `hzn exchange node addpolicy --json-file ${policy.nodePolicyJson} ${process.env.HZN_CUSTOM_NODE_ID}`
-    return utils.shell(arg, `done add/update for this agent`, `failed to add/update for this agent`)
+  updateNodePolicyFromStdin(param: string) {
+    // echo "{\"deployment\": {\"properties\": [{\"name\": \"worker-safety\", \"value\": \"Worker Safety\"},{\"name\": \"mms-agent\", \"value\": \"MMS Agent\"}]}}" | hzn exchange node addpolicy -f- fyre-216-dock -v
+    const nodeId = process.env.HZN_DEVICE_ID || process.env.HZN_CUSTOM_NODE_ID || ''
+    const arg = `echo "${param}" | hzn exchange node addpolicy -f- ${nodeId} -v`
+    return utils.shell(arg, `done add/update for this node policy`, `failed to add/update this node policy`)
+  }
+  updateNodePolicy(param: string) {
+    //const arg = `hzn exchange node addpolicy --json-file ${policy.nodePolicyJson} ${process.env.HZN_CUSTOM_NODE_ID}`
+    const nodeId = process.env.HZN_DEVICE_ID || process.env.HZN_CUSTOM_NODE_ID || ''
+    const arg = `hzn exchange node addpolicy ${param} ${nodeId} -v`
+    return utils.shell(arg, `done add/update for this node policy`, `failed to add/update this node policy`)
   }
   addNodePolicy(param: IHznParam, policy: any) {
     return new Observable((observer) => {

@@ -158,6 +158,7 @@ class Utils {
             });
             console.log(content);
             if (content.length > 0) {
+                const dest = pEnv['VAR_DIRECTORIES_FILES'] || '/var';
                 (0, fs_1.writeFileSync)(`${process.cwd()}/horizon`, content);
                 this.copyFile(`sudo mv ${process.cwd()}/horizon /var`).then(() => {
                     const folders = configJson.folders;
@@ -366,8 +367,9 @@ class Utils {
             });
         });
     }
-    autoRun(configFile, setup) {
+    autoRun(params, setup) {
         return new rxjs_1.Observable((observer) => {
+            const configFile = params.configFile;
             if (!configFile || configFile.length == 0 || !(0, fs_1.existsSync)(configFile)) {
                 observer.next('Please provide --config_file name');
                 observer.complete();
@@ -389,11 +391,48 @@ class Utils {
                 });
             }
             else if (setup == interface_1.SetupEnvironment.autoUpdateConfigFiles) {
+                let configJson;
                 this.updateConfig(configFile)
                     .subscribe({
+                    next: (json) => {
+                        configJson = json;
+                    },
                     complete: () => {
-                        observer.next('');
-                        observer.complete();
+                        try {
+                            if (configJson.register && configJson.register.policy) {
+                                let arg = '';
+                                let policy = configJson.register.policy;
+                                if (typeof policy !== 'string') {
+                                    policy = JSON.stringify(configJson.register.policy);
+                                    policy = policy.replace(/\"/g, '\\"');
+                                }
+                                else {
+                                    policy = policy.replace(/\\/g, '');
+                                    policy = policy.replace(/\"/g, '\\"');
+                                }
+                                this.registerOnly()
+                                    .subscribe({
+                                    complete: () => {
+                                        this.updateNodePolicyFromStdin(policy)
+                                            .subscribe({
+                                            complete: () => {
+                                                observer.next('');
+                                                observer.complete();
+                                            },
+                                            error: (err) => observer.error(err)
+                                        });
+                                    },
+                                    error: (err) => observer.error(err)
+                                });
+                            }
+                            else {
+                                observer.next('');
+                                observer.complete();
+                            }
+                        }
+                        catch (e) {
+                            observer.error(e);
+                        }
                     },
                     error: (err) => observer.error(err)
                 });
@@ -544,13 +583,13 @@ class Utils {
         }
         return value;
     }
-    autoCommand(configFile, command) {
+    autoCommand(params, command) {
         return new rxjs_1.Observable((observer) => {
             this.setEnvFromEnvLocal();
             this.getArch()
                 .subscribe({
                 complete: () => {
-                    this.setEnvFromConfig(configFile)
+                    this.setEnvFromConfig(params.configFile)
                         .subscribe({
                         next: (data) => console.log(data),
                         complete: () => {
@@ -564,6 +603,26 @@ class Utils {
                                     break;
                                 case interface_1.AutoCommand.autoUnregister:
                                     action = _1.utils.unregisterAgent(true);
+                                    break;
+                                case interface_1.AutoCommand.autoListPolicy:
+                                    action = _1.utils.listPolicy();
+                                    break;
+                                case interface_1.AutoCommand.autoUpdateNodePolicy:
+                                    try {
+                                        let policy = params.object;
+                                        let policyStr = '';
+                                        if (typeof policy !== 'string') {
+                                            policyStr = JSON.stringify(policy);
+                                            policy = policyStr.replace(/\"/g, '\\"');
+                                        }
+                                        else {
+                                            policyStr = policy.replace(/\\/g, '');
+                                            policyStr = policyStr.replace(/\"/g, '\\"');
+                                        }
+                                        action = _1.utils.updateNodePolicyFromStdin(`${policyStr}`);
+                                    }
+                                    catch (e) {
+                                    }
                                     break;
                             }
                             if (action) {
@@ -590,14 +649,20 @@ class Utils {
             });
         });
     }
-    autoRegisterWithPolicy(configFile) {
-        return this.autoCommand(configFile, interface_1.AutoCommand.autoRegisterWithPolicy);
+    autoListPolicy(params) {
+        return this.autoCommand(params, interface_1.AutoCommand.autoListPolicy);
     }
-    autoRegisterWithPattern(configFile) {
-        return this.autoCommand(configFile, interface_1.AutoCommand.autoRegisterWithPattern);
+    autoUpdateNodePolicy(params) {
+        return this.autoCommand(params, interface_1.AutoCommand.autoUpdateNodePolicy);
     }
-    autoUnregister(configFile) {
-        return this.autoCommand(configFile, interface_1.AutoCommand.autoUnregister);
+    autoRegisterWithPolicy(params) {
+        return this.autoCommand(params, interface_1.AutoCommand.autoRegisterWithPolicy);
+    }
+    autoRegisterWithPattern(params) {
+        return this.autoCommand(params, interface_1.AutoCommand.autoRegisterWithPattern);
+    }
+    autoUnregister(params) {
+        return this.autoCommand(params, interface_1.AutoCommand.autoUnregister);
     }
     replaceEnvTokens(input, tokens) {
         let envTokens = {};
@@ -607,26 +672,26 @@ class Utils {
         this.tokenReplace(input, envTokens);
         return input;
     }
-    autoSetup(configFile) {
-        return this.autoRun(configFile, interface_1.SetupEnvironment.autoSetup);
+    autoSetup(params) {
+        return this.autoRun(params, interface_1.SetupEnvironment.autoSetup);
     }
-    autoSetupCliOnly(configFile) {
-        return this.autoRun(configFile, interface_1.SetupEnvironment.autoSetupCliOnly);
+    autoSetupCliOnly(params) {
+        return this.autoRun(params, interface_1.SetupEnvironment.autoSetupCliOnly);
     }
-    autoSetupAnaxInContainer(configFile) {
-        return this.autoRun(configFile, interface_1.SetupEnvironment.autoSetupAnaxInContainer);
+    autoSetupAnaxInContainer(params) {
+        return this.autoRun(params, interface_1.SetupEnvironment.autoSetupAnaxInContainer);
     }
-    autoSetupCliInContainer(configFile) {
-        return this.autoRun(configFile, interface_1.SetupEnvironment.autoSetupCliInContainer);
+    autoSetupCliInContainer(params) {
+        return this.autoRun(params, interface_1.SetupEnvironment.autoSetupCliInContainer);
     }
-    autoSetupContainer(configFile) {
-        return this.autoRun(configFile, interface_1.SetupEnvironment.autoSetupContainer);
+    autoSetupContainer(params) {
+        return this.autoRun(params, interface_1.SetupEnvironment.autoSetupContainer);
     }
-    autoSetupAllInOne(configFile) {
-        return this.autoRun(configFile, interface_1.SetupEnvironment.autoSetupAllInOne);
+    autoSetupAllInOne(params) {
+        return this.autoRun(params, interface_1.SetupEnvironment.autoSetupAllInOne);
     }
-    autoUpdateConfigFiles(configFile) {
-        return this.autoRun(configFile, interface_1.SetupEnvironment.autoUpdateConfigFiles);
+    autoUpdateConfigFiles(params) {
+        return this.autoRun(params, interface_1.SetupEnvironment.autoUpdateConfigFiles);
     }
     getEtcDefault() {
         return this.etcDefault;
@@ -821,6 +886,10 @@ class Utils {
             });
         });
     }
+    clearUnconfiguring() {
+        const arg = `docker exec horizon1 rm -rf /var/horizon/anax.db`;
+        return this.shell(arg);
+    }
     purgeManagementHub() {
         const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`;
         return this.shell(arg);
@@ -831,6 +900,7 @@ class Utils {
         arg += (0, fs_1.existsSync)(this.etcHorizon) ? `sudo rm -rf ${this.etcHorizon} -y || true && ` : '';
         arg += (0, fs_1.existsSync)(`${this.etcDefault}/horizon`) ? `sudo rm ${this.etcDefault}/horizon || true && ` : '';
         arg += (0, fs_1.existsSync)(`${this.homePath}/.hzn`) ? `sudo rm -rf ${this.homePath}/.hzn -y || true && ` : '';
+        arg += (0, fs_1.existsSync)(`/var/tmp/horizon`) ? `sudo rm -rf /var/tmp/horizon -y || true && ` : '';
         arg += ':';
         return this.shell(arg);
     }
@@ -1808,6 +1878,10 @@ class Utils {
             }
         });
     }
+    registerOnly() {
+        const arg = `hzn register`;
+        return _1.utils.shell(arg, `done registering this node`, `failed to register this node`);
+    }
     registerWithPolicy(name, policy, auto = false) {
         return new rxjs_1.Observable((observer) => {
             this.unregisterAgent(auto).subscribe({
@@ -1832,7 +1906,7 @@ class Utils {
         return new rxjs_1.Observable((observer) => {
             this.unregisterAgent(auto).subscribe({
                 complete: () => {
-                    let arg = `hzn register --policy ${policy} --pattern "${pattern}"`;
+                    let arg = `hzn register --pattern "${pattern}"`;
                     _1.utils.shell(arg, 'done registering agent', 'failed to register agent')
                         .subscribe({
                         complete: () => observer.complete(),
@@ -1878,7 +1952,7 @@ class Utils {
             }
             else if (answer == 3) {
                 console.log('\x1b[32m', '\nAdding Node Policy');
-                this.updateNodePolicy(param, policy)
+                this.updateNodePolicy(`--json-file ${policy.nodePolicyJson}`)
                     .subscribe(() => { observer.next(3); observer.complete(); });
             }
             else if (answer == 4) {
@@ -1905,9 +1979,17 @@ class Utils {
     addObjectPattern(param) {
         // Todo 
     }
-    updateNodePolicy(param, policy) {
-        const arg = `hzn exchange node addpolicy --json-file ${policy.nodePolicyJson} ${process.env.HZN_CUSTOM_NODE_ID}`;
-        return _1.utils.shell(arg, `done add/update for this agent`, `failed to add/update for this agent`);
+    updateNodePolicyFromStdin(param) {
+        // echo "{\"deployment\": {\"properties\": [{\"name\": \"worker-safety\", \"value\": \"Worker Safety\"},{\"name\": \"mms-agent\", \"value\": \"MMS Agent\"}]}}" | hzn exchange node addpolicy -f- fyre-216-dock -v
+        const nodeId = process.env.HZN_DEVICE_ID || process.env.HZN_CUSTOM_NODE_ID || '';
+        const arg = `echo "${param}" | hzn exchange node addpolicy -f- ${nodeId} -v`;
+        return _1.utils.shell(arg, `done add/update for this node policy`, `failed to add/update this node policy`);
+    }
+    updateNodePolicy(param) {
+        //const arg = `hzn exchange node addpolicy --json-file ${policy.nodePolicyJson} ${process.env.HZN_CUSTOM_NODE_ID}`
+        const nodeId = process.env.HZN_DEVICE_ID || process.env.HZN_CUSTOM_NODE_ID || '';
+        const arg = `hzn exchange node addpolicy ${param} ${nodeId} -v`;
+        return _1.utils.shell(arg, `done add/update for this node policy`, `failed to add/update this node policy`);
     }
     addNodePolicy(param, policy) {
         return new rxjs_1.Observable((observer) => {
