@@ -10,11 +10,11 @@ Open Horizon toolkit is a CLI built with Typescript for the NodeJS developers. I
 
 ## Pre-release version of hzn-cli, howto?
 
-### Docker image
+### Auto-dock
 
-Containerized version is available here `docker pull playbox21/hzn-cli[amd64|arm]`
+NOTE: Auto-dock is a containerized service that comes with hzn-cli built into this service. Please refer to https://github.com/playground/auto-dock
 
-### To setup Edge Node Agent, All-In-One and etc.
+### To setup Edge Node Agent, All-In-One, running CLI & agent in containers and etc.
 
 `curl -sSL https://raw.githubusercontent.com/playground/hzn-cli/main/install.sh --output install.sh && bash ./install.sh`
 

@@ -13,9 +13,10 @@ export const promptForUpdate = [
   'publishMMSPattern', 'pushMMSImage', 'pushServiceImage', 'registerAgent'
 ];
 export const customRun = [
+  'autoListPolicy',
   'autoSetup', 'autoSetupAllInOne', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer',
-  'autoRegisterWithPolicy', 'autoRegisterWithPattern', 'autoUnregister', 'autoUpdateConfigFiles',
-  'cleanUp', 'purgeManagementHub'
+  'autoRegisterWithPolicy', 'autoRegisterWithPattern', 'autoUnregister', 'autoUpdateConfigFiles', 'autoUpdateNodePolicy',
+  'cleanUp', 'clearUnconfiguring', 'purgeManagementHub'
 ];
 export const runDirectly = [
   'appendSupport', 'deleteObject', 'removeCliContainer', 'removeAnaxContainer', 'stopRemoveContainer', 
@@ -61,10 +62,11 @@ export enum AutoCommand {
   autoPublishService = 0,
   autoPublishMMSService = 1,
   autoAddDeploymentPolicy = 2,
-  autoAddNodePolicy = 3,
+  autoUpdateNodePolicy = 3,
   autoRegisterWithPolicy = 4,
   autoRegisterWithPattern = 5,
-  autoUnregister = 6
+  autoUnregister = 6,
+  autoListPolicy = 7
 }
 export const keyMap = {
   org: 'credential',
@@ -146,6 +148,10 @@ export const configTemplate = {
   }
 }
 
+export interface IAutoParam {
+  configFile: string;
+  object: Object;
+}
 export interface IHznParam {
   org: string;
   configPath: string;

@@ -3,9 +3,8 @@
     "objectType": "$MMS_OBJECT_TYPE",
     "destinationOrgID": "$HZN_ORG_ID",
     "destinationPolicy": {
-        "properties": [
+        "constrints": [
             {
-                "type": "deployment",
                 "name": "workersafety",
                 "value": "Worker Safety"
             }
