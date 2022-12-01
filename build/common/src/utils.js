@@ -1923,6 +1923,7 @@ class Utils {
         const policy = {
             nodePolicyJson: `${this.hznConfig}/node.policy.json`,
             deploymentPolicyJson: `${this.hznConfig}/deployment.policy.json`,
+            topLevelDeploymentPolicyJson: `${this.hznConfig}/top.level.deployment.policy.json`,
             servicePolicyJson: `${this.hznConfig}/service.policy.json`,
             objectPolicyJson: `${this.hznConfig}/object.policy.json`,
             objectPatternJson: `${this.hznConfig}/object.pattern.json`
@@ -1941,13 +1942,13 @@ class Utils {
                 observer.complete();
             }
             else if (answer == 1) {
-                console.log('\x1b[32m', '\nAdding Service Policy');
-                this.addServicePolicy(policy)
+                console.log('\x1b[32m', '\nAdding Deployment Policy');
+                this.addDeploymentPolicy(policy)
                     .subscribe(() => { observer.next(1); observer.complete(); });
             }
             else if (answer == 2) {
-                console.log('\x1b[32m', '\nAdding Deployment Policy');
-                this.addDeploymentPolicy(policy)
+                console.log('\x1b[32m', '\nAdding Top Level Deployment Policy');
+                this.addTopLevelDeploymentPolicy(policy)
                     .subscribe(() => { observer.next(2); observer.complete(); });
             }
             else if (answer == 3) {
@@ -1963,8 +1964,12 @@ class Utils {
         });
     }
     addDeploymentPolicy(policy) {
+        const arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('ARCH')}`;
+        return _1.utils.shell(arg);
+    }
+    addTopLevelDeploymentPolicy(policy) {
         // const arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('MMS_SERVICE_NAME')}_${policy.envVar.getEnvValue('MMS_SERVICE_VERSION')}_${policy.envVar.getEnvValue('ARCH')}`
-        const arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('MMS_SERVICE_NAME')}_${policy.envVar.getEnvValue('ARCH')}`;
+        const arg = `hzn exchange deployment addpolicy -f ${policy.topLevelDeploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('MMS_SERVICE_NAME')}_${policy.envVar.getEnvValue('ARCH')}`;
         return _1.utils.shell(arg);
     }
     addServicePolicy(policy) {

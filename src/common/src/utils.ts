@@ -1880,6 +1880,7 @@ export class Utils {
     const policy = {
       nodePolicyJson: `${this.hznConfig}/node.policy.json`,
       deploymentPolicyJson: `${this.hznConfig}/deployment.policy.json`,
+      topLevelDeploymentPolicyJson: `${this.hznConfig}/top.level.deployment.policy.json`,
       servicePolicyJson: `${this.hznConfig}/service.policy.json`,
       objectPolicyJson: `${this.hznConfig}/object.policy.json`,
       objectPatternJson: `${this.hznConfig}/object.pattern.json`
@@ -1897,12 +1898,12 @@ export class Utils {
         observer.next(0) 
         observer.complete()
       } else if(answer == 1) {
-        console.log('\x1b[32m', '\nAdding Service Policy') 
-        this.addServicePolicy(policy)
-        .subscribe(() => {observer.next(1); observer.complete()})
-      } else if(answer == 2) {
         console.log('\x1b[32m', '\nAdding Deployment Policy') 
         this.addDeploymentPolicy(policy)
+        .subscribe(() => {observer.next(1); observer.complete()})
+      } else if(answer == 2) {
+        console.log('\x1b[32m', '\nAdding Top Level Deployment Policy') 
+        this.addTopLevelDeploymentPolicy(policy)
         .subscribe(() => {observer.next(2); observer.complete()})
       } else if(answer == 3) {
         console.log('\x1b[32m', '\nAdding Node Policy') 
@@ -1916,8 +1917,12 @@ export class Utils {
     })  
   }
   addDeploymentPolicy(policy: any) {
+    const arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('ARCH')}`
+    return utils.shell(arg)
+  }
+  addTopLevelDeploymentPolicy(policy: any) {
     // const arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('MMS_SERVICE_NAME')}_${policy.envVar.getEnvValue('MMS_SERVICE_VERSION')}_${policy.envVar.getEnvValue('ARCH')}`
-    const arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('MMS_SERVICE_NAME')}_${policy.envVar.getEnvValue('ARCH')}`
+    const arg = `hzn exchange deployment addpolicy -f ${policy.topLevelDeploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('MMS_SERVICE_NAME')}_${policy.envVar.getEnvValue('ARCH')}`
     return utils.shell(arg)
   }
   addServicePolicy(policy: any) {

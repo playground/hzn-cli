@@ -1,13 +1,13 @@
 {
-  "label": "$SERVICE_NAME Deployment Policy",
+  "label": "$MMS_SERVICE_NAME Deployment Policy",
   "description": "A super-simple sample Horizon Deployment Policy",
   "service": {
-    "name": "$SERVICE_NAME",
+    "name": "$MMS_SERVICE_NAME",
     "org": "$HZN_ORG_ID",
     "arch": "$ARCH",
     "serviceVersions": [
       {
-        "version": "$SERVICE_VERSION",
+        "version": "$MMS_SERVICE_VERSION",
         "priority":{
           "priority_value": 2,
           "retries": 2,
@@ -17,7 +17,7 @@
         "upgradePolicy": {}
       },
       {
-        "version":"$SERVICE_VERSION_RANGE_LOWER",
+        "version":"$MMS_SERVICE_FALLBACK_VERSION",
         "priority":{
           "priority_value": 3,
           "retries": 3,
@@ -36,7 +36,7 @@
   "userInput": [
     {
       "serviceOrgid": "$HZN_ORG_ID",
-      "serviceUrl": "$SERVICE_NAME",
+      "serviceUrl": "$MMS_SERVICE_NAME",
       "serviceVersionRange": "[0.0.0,INFINITY)",
       "inputs": [
         {
