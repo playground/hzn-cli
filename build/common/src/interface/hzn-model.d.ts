@@ -88,6 +88,7 @@ export declare const configTemplate: {
             MMS_OBJECT_ID: string;
             MMS_OBJECT_FILE: string;
             UPDATE_FILE_NAME: string;
+            SERVICE_CONSTRAINTS: string;
             HZN_CSS: string;
             EDGE_OWNER: string;
             EDGE_DEPLOY: string;

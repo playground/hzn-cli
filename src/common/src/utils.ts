@@ -57,7 +57,8 @@ const mustHave = [
   "MMS_SERVICE_NAME",
   "MMS_SERVICE_VERSION",
   "MMS_SERVICE_FALLBACK_VERSION",
-  "UPDATE_FILE_NAME"
+  "UPDATE_FILE_NAME",
+  "SERVICE_CONSTRAINTS"
 ];
 // ToDo: use configTemplate instead
 const credentialVars = [
@@ -1991,7 +1992,7 @@ export class Utils {
   }
   promptPolicySelection(msg: string = `Please select the type of policy you would like to work with: `) {
     let answer;
-    console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n4) Object Policy\n0) To exit`)
+    console.log('\x1b[36m', `\nType of policies:\n1) Service Deployment Policy\n2) Top Level Service Deployment Policy\n3) Node Policy\n4) Object Policy\n0) To exit`)
     do {
       answer = parseInt(promptSync(msg))
       if(answer < 0 || answer > 4) {

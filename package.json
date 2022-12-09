@@ -1,10 +1,13 @@
 {
   "name": "hzn-cli",
-  "version": "0.3.42",
+  "version": "0.3.43",
   "description": "Open Horizon CLI toolkit helps streamline the process of preparing node agents and perform tasks between orgs environments",
   "main": "./build/index.js",
   "bin": {
     "oh": "./build/index.js"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
     "start": "nodemon -e ts --watch 'src/**/*.ts' --exec 'npm run build'",
@@ -23,6 +26,10 @@
     "test:watch": "jest --watch && npm run build:watch",
     "clean": "rm -rf coverage src/**/*.js src/**/*.map",
     "view:coverage": "serve coverage/lcov-report"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/playground/hzn-cli.git"
   },
   "keywords": [
     "IEAM",
