@@ -17,6 +17,7 @@ jobs:
       - run: |
           echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc
           cat .npmrc
+      - run: npm whoami
       - run: npm ci
       - run: npm install
       - run: npm publish --access public
