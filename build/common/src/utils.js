@@ -1294,8 +1294,8 @@ class Utils {
                 }
                 if (key == 'SERVICE_CONSTRAINTS') {
                     let str = value;
-                    str = str.replace(/\\\\/g, '\\');
-                    props[i] = str;
+                    str = str.replace(/\\/g, '');
+                    props[i] = { name: key, default: str, required: notRequired.indexOf(key) < 0 };
                 }
                 i++;
             }
@@ -1322,7 +1322,7 @@ class Utils {
                                 for (const [key, value] of Object.entries(result)) {
                                     if (key == 'SERVICE_CONSTRAINTS') {
                                         let str = value;
-                                        str = str.replace(/\\\\/g, '\\');
+                                        str = str.replace(/\\/g, '');
                                         str = str.replace(/\"/g, '\\\"');
                                         envVars[key] = str;
                                     }

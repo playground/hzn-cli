@@ -1,11 +1,12 @@
 {
   "name": "hzn-cli",
-  "version": "0.4.13",
+  "version": "0.4.14",
   "description": "Open Horizon CLI toolkit helps streamline the process of preparing node agents and perform tasks between orgs environments",
   "main": "./build/index.js",
   "bin": {
     "oh": "./build/index.js"
   },
+  "homepage": "https://github.com/playground/hzn-cli#readme",
   "scripts": {
     "start": "nodemon -e ts --watch 'src/**/*.ts' --exec 'npm run build'",
     "build": "npx tsc && chmod +x build/*.js && chmod +x build/**/*.js && cp src/env-* build/common/src && cp -r src/hzn-config build/common/src",
