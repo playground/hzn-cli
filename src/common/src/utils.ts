@@ -1275,7 +1275,11 @@ export class Utils {
           props[i]['pattern'] = /^(true|false)$/
           props[i]['message'] = 'Must be true or false'
         }
-
+        if(key == 'SERVICE_CONSTRAINTS') {
+          let str = value as string;
+          str = str.replace(/\\\\/g, '\\')
+          props[i] = str;
+        }
         i++;
       }
       console.log(props)
