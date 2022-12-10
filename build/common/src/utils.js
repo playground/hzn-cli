@@ -1315,7 +1315,15 @@ class Utils {
                         prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                             if (question.answer.toUpperCase() === 'Y') {
                                 for (const [key, value] of Object.entries(result)) {
-                                    envVars[key] = value;
+                                    if (key == 'SERVICE_CONSTRAINTS') {
+                                        let str = value;
+                                        str = str.replace(/\\\\/g, '\\');
+                                        str = str.replace(/\"/g, '\\\"');
+                                        envVars[key] = str;
+                                    }
+                                    else {
+                                        envVars[key] = value;
+                                    }
                                 }
                                 jsonfile_1.default.writeFileSync('.env-hzn.json', hznJson, { spaces: 2 });
                                 this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json && sudo chmod 766 ${this.hznConfig}/.env-hzn.json`).then(() => {
