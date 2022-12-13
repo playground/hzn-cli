@@ -883,8 +883,12 @@ export class Utils {
     return this.shell(arg)
   }
   purgeManagementHub() {
-    const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`
-    return this.shell(arg)
+    if(os.arch() == 'x64' || process.platform == 'darwin') {
+      const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`
+      return this.shell(arg)  
+    } else {
+      return of()
+    }
   }
   cleanUp() {
     console.log('cleaning up', existsSync(`${this.etcDefault}/horizon`), existsSync(this.etcHorizon), this.etcHorizon)
