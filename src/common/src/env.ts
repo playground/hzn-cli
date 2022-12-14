@@ -1,7 +1,8 @@
+import { readFileSync } from 'fs';
+import { Observable } from 'rxjs';
+
 declare var require: any
 
-import { Observable } from 'rxjs';
-import { readFileSync, existsSync } from 'fs';
 const cp = require('child_process'),
 exec = cp.exec;
 const dotenv = require('dotenv');
@@ -71,12 +72,16 @@ export class Env {
     });
   }
   setAdditionalEnv() {
-    let container = pEnv.MMS_CONTAINER_NAME || pEnv.MMS_SERVICE_NAME;
+    let mmsContainer = pEnv.MMS_CONTAINER_NAME || pEnv.MMS_SERVICE_NAME;
+    let container = pEnv.SERVICE_CONTAINER_NAME || pEnv.SERVICE_NAME;
+    let registry = '';
+    if(this.getDockerRegistry() == 'quay.io') {
+      registry = 'quay.io/';
+    }
     pEnv.MMS_PATTERN_NAME = `pattern-${pEnv.MMS_SERVICE_NAME}-${pEnv.ARCH}`;
-    pEnv.MMS_CONTAINER = `${pEnv.YOUR_DOCKERHUB_ID}/${container}_${pEnv.ARCH}:${pEnv.MMS_SERVICE_VERSION}`.replace(/\r?\n|\r/g, '')
+    pEnv.MMS_CONTAINER = `${registry}${pEnv.YOUR_DOCKERHUB_ID}/${mmsContainer}_${pEnv.ARCH}:${pEnv.MMS_SERVICE_VERSION}`.replace(/\r?\n|\r/g, '')
     pEnv.PATTERN_NAME = `pattern-${pEnv.SERVICE_NAME}`;
-    container = pEnv.SERVICE_CONTAINER_NAME || pEnv.SERVICE_NAME;
-    pEnv.SERVICE_CONTAINER = `${pEnv.YOUR_DOCKERHUB_ID}/${container}_${pEnv.ARCH}:${pEnv.SERVICE_VERSION}`.replace(/\r?\n|\r/g, '')
+    pEnv.SERVICE_CONTAINER = `${registry}${pEnv.YOUR_DOCKERHUB_ID}/${container}_${pEnv.ARCH}:${pEnv.SERVICE_VERSION}`.replace(/\r?\n|\r/g, '')
   }
   updateContainerAndServiceNames() {
     console.log('update', this.getEdgeDeploy(), this.getEdgeOwner(), this.getServiceContainerName(), this.getServiceContainerName())
