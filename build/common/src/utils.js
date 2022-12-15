@@ -134,10 +134,6 @@ class Utils {
     }
     createHorizonSystemFiles(configJson) {
         return new rxjs_1.Observable((observer) => {
-            if (configJson.test === 'undefined' || !configJson.test) {
-                observer.next('');
-                observer.complete();
-            }
             let content = '';
             const pEnv = process.env;
             Object.keys(interface_1.HorizonTemplate).forEach((key) => {
@@ -158,6 +154,11 @@ class Utils {
                 }
             });
             console.log(content);
+            if (configJson.test === 'undefined' || !configJson.test) {
+                // start with horizon-container instead of manually docker run
+                observer.next('');
+                observer.complete();
+            }
             if (content.length > 0) {
                 const dest = pEnv['VAR_DIRECTORIES_FILES'] || '/var';
                 (0, fs_1.writeFileSync)(`${process.cwd()}/horizon`, content);
