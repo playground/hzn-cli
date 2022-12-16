@@ -173,6 +173,7 @@ export interface IPolicy {
   servicePolicyJson: string;
   objectPolicyJson: string;
   deploymentPolicyJson: string;
+  topLevelDeploymentPolicyJson: string;
 }
 export class RequiredService {
   org = '$HZN_ORG_ID';

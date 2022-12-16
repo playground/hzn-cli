@@ -11,6 +11,7 @@ class Hzn {
     constructor(param) {
         this.nodePolicyJson = '';
         this.deploymentPolicyJson = '';
+        this.topLevelDeploymentPolicyJson = '';
         this.servicePolicyJson = '';
         this.objectPolicyJson = '';
         this.objectPatternJson = '';
@@ -44,7 +45,8 @@ class Hzn {
                     this.mmsPolicyJson = `${this.configPath}/mms/policy.json`;
                     this.nodePolicyJson = `${this.configPath}/node.policy.json`;
                     this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
-                    this.servicePolicyJson = `${this.configPath}/service.policy.json`;
+                    this.topLevelDeploymentPolicyJson = `${this.configPath}/top.level.deployment.policy.json`,
+                        this.servicePolicyJson = `${this.configPath}/service.policy.json`;
                     this.objectPolicyJson = `${this.configPath}/object.policy.json`;
                     this.objectPatternJson = `${this.configPath}/object.pattern.json`;
                     this.param.policy = this.getPolicyInfo();
@@ -337,7 +339,8 @@ class Hzn {
             nodePolicyJson: this.nodePolicyJson,
             servicePolicyJson: this.servicePolicyJson,
             objectPolicyJson: this.objectPolicyJson,
-            deploymentPolicyJson: this.deploymentPolicyJson
+            deploymentPolicyJson: this.deploymentPolicyJson,
+            topLevelDeploymentPolicyJson: this.topLevelDeploymentPolicyJson
         };
         return policyInfo;
     }

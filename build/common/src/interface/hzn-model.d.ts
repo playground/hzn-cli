@@ -149,6 +149,7 @@ export interface IPolicy {
     servicePolicyJson: string;
     objectPolicyJson: string;
     deploymentPolicyJson: string;
+    topLevelDeploymentPolicyJson: string;
 }
 export declare class RequiredService {
     org: string;
