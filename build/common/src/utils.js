@@ -90,13 +90,21 @@ class Utils {
                     this.installHznCli(anax, nodeId, css, token)
                         .subscribe({
                         complete: () => {
-                            this.createHznKey(orgId, this.randomString())
+                            this.shell('hzn architecture')
                                 .subscribe({
                                 complete: () => {
-                                    observer.complete();
+                                    this.createHznKey(orgId, this.randomString())
+                                        .subscribe({
+                                        complete: () => {
+                                            observer.complete();
+                                        },
+                                        error: (err) => {
+                                            observer.error(err);
+                                        }
+                                    });
                                 },
                                 error: (err) => {
-                                    observer.error(err);
+                                    observer.complete();
                                 }
                             });
                         },
