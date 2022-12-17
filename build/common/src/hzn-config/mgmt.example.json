@@ -1,0 +1,9 @@
+{
+  "org": {
+    "HZN_ORG_ID": "myhub",
+    "HZN_TRANSPORT": "http",
+    "OH_ANAX_RELEASES": "https://github.com/open-horizon/anax/releases/download/v2.30.0-934",
+    "DEPLOY_MGMT_HUB_SCRIPT": "./deploy-mgmt-hub-works.sh",
+    "MONGO_IMAGE_TAG": "5.0.9"
+  }
+}  

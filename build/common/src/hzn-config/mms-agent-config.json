@@ -1,0 +1,67 @@
+{
+  "hello": "Greeting from IEAM",
+  "events": [
+    {
+      "action": "autoRegisterWithPolicy",
+      "type": "scheduled",
+      "start": "Sat, 19 Nov 2022 14:00:15 GMT",
+      "end": "Sat, 19 Nov 2022 14:05:15 GMT"
+    },
+    {
+      "action": "autoUpdateNodePolicy",
+      "type": "recurring",
+      "start": "Sat, 19 Nov 2022 23:00:15 GMT",
+      "end": "Sun, 23 Nov 2022 23:15:15 GMT",
+      "meta": {
+        "policy": {
+          "properties": [
+            {
+              "name": "openhorizon.allowPrivileged",
+              "value": true
+            }
+          ],
+          "deployment": {
+            "properties": [
+              {"name": "mms-agent", "value": "MMS Agent"},
+              {"name": "worker-safety", "value": "Worker Safety"}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "action": "autoUpdateNodePolicy",
+      "type": "recurring",
+      "start": "Sat, 19 Nov 2022 23:40:15 GMT",
+      "end": "Sun, 22 Nov 2022 23:55:15 GMT",
+      "meta": {
+        "policy": {
+          "properties": [
+            {
+              "name": "openhorizon.allowPrivileged",
+              "value": true
+            }
+          ],
+          "deployment": {
+            "properties": [
+              {"name": "mms-agent", "value": "MMS Agent"},
+              {"name": "homehub", "value": "Home Automation"}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "action": "autoUnregister",
+      "type": "recurring",
+      "start": "Sat, 19 Nov 2022 14:00:15 GMT",
+      "end": "Sun, 20 Nov 2022 14:05:15 GMT"
+    },
+    {
+      "action": "autoRegisterWithPattern",
+      "type": "recurring",
+      "start": "Sat, 19 Nov 2022 14:00:15 GMT",
+      "end": "Sun, 20 Nov 2022 14:05:15 GMT"
+    }
+  ]
+}

@@ -1,4 +1,6 @@
 #! /usr/bin/env node
+import { configTemplate } from '../src/common/src/interface';
+
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -9,8 +11,6 @@ const homePath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HO
 const hznConfig = `${homePath}/hzn-config`;
 const defaultConfig = __dirname;
 const constants = fs.constants;
-import { configTemplate } from "../src/common/src/interface";
-
 const template = configTemplate;
 
 const getPropsFromFile = (file) => {
@@ -82,7 +82,7 @@ const checkSystemFiles = () => {
     let cwd = process.cwd()
     let files = {
       env: ['env-hzn.json', 'env-local', 'env-support'],
-      json: ['deployment.policy.json', 'service.policy.json', 'node.policy.json', 'object.policy.json', 'object.pattern.json']
+      json: ['deployment.policy.json', 'service.policy.json', 'node.policy.json', 'object.policy.json', 'object.pattern.json', 'top.level.deployment.policy.json', 'example.json', 'mgmt.example.json', 'mms-agent-config.json']
     }
     if(!fs.existsSync(hznConfig)) {
       fs.mkdirSync(hznConfig)

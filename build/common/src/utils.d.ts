@@ -120,6 +120,7 @@ export declare class Utils {
     updatePolicy(param: IHznParam, policy: any): Observable<unknown>;
     addPolicy(param: IHznParam, policy: any, update?: boolean): Observable<unknown>;
     addDeploymentPolicy(policy: any): Observable<unknown>;
+    addTopLevelDeploymentPolicy(policy: any): Observable<unknown>;
     addServicePolicy(policy: any): Observable<unknown>;
     addObjectPolicy(param: IHznParam): Observable<unknown>;
     addObjectPattern(param: IHznParam): void;

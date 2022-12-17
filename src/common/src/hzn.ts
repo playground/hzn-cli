@@ -22,6 +22,7 @@ export class Hzn {
 
   nodePolicyJson: string = '';
   deploymentPolicyJson: string = '';
+  topLevelDeploymentPolicyJson: string = '';
   servicePolicyJson: string = '';
   objectPolicyJson: string = '';
   objectPatternJson: string = '';
@@ -66,6 +67,7 @@ export class Hzn {
 
           this.nodePolicyJson = `${this.configPath}/node.policy.json`;
           this.deploymentPolicyJson = `${this.configPath}/deployment.policy.json`;
+          this.topLevelDeploymentPolicyJson = `${this.configPath}/top.level.deployment.policy.json`,
           this.servicePolicyJson = `${this.configPath}/service.policy.json`;
           this.objectPolicyJson = `${this.configPath}/object.policy.json`;
           this.objectPatternJson = `${this.configPath}/object.pattern.json`;
@@ -357,7 +359,8 @@ export class Hzn {
       nodePolicyJson: this.nodePolicyJson,
       servicePolicyJson: this.servicePolicyJson,
       objectPolicyJson: this.objectPolicyJson,
-      deploymentPolicyJson: this.deploymentPolicyJson
+      deploymentPolicyJson: this.deploymentPolicyJson,
+      topLevelDeploymentPolicyJson: this.topLevelDeploymentPolicyJson
     }
     return policyInfo
   }
