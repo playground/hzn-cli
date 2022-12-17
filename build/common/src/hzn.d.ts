@@ -16,6 +16,7 @@ export declare class Hzn {
     mmsPolicyJson: any;
     nodePolicyJson: string;
     deploymentPolicyJson: string;
+    topLevelDeploymentPolicyJson: string;
     servicePolicyJson: string;
     objectPolicyJson: string;
     objectPatternJson: string;

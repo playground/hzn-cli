@@ -1,13 +1,15 @@
 {
   "properties": [
     {
-      "name": "homehub",
-      "value": "Home Automation"
-    },
-    {
       "name": "openhorizon.allowPrivileged",
       "value": true
     }
   ],
-  "constraints": []
+  "constraints": [],
+  "deployment": {
+    "properties": [
+      {"name": "mms-agent", "value": "MMS Agent"},
+      {"name": "worker-safety", "value": "Worker Safety"}
+    ]
+  }
 }

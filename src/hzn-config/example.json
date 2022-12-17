@@ -42,6 +42,23 @@
     "DOCKER_REGISTRY": "hub.docker.com",
     "DOCKER_TOKEN": "dckr_pat_w......"
   },
-  "anaxInContainer": "docker run -d -t --restart always --name horizon1 --privileged -p 127.0.0.1:8081:8510 -e DOCKER_NAME=horizon1 -e HZN_VAR_RUN_BASE=/var/tmp/horizon/horizon1 -v /var/run/docker.sock:/var/run/docker.sock -v /var/horizon:/etc/default/horizon:ro -v /var/agent-install.crt:/var/agent-install.crt -v horizon1_var:/var/horizon/ -v horizon1_etc:/etc/horizon/ -v /var/tmp/horizon/horizon1:/var/tmp/horizon/horizon1 openhorizon/amd64_anax:2.30.0-952",
-  "cliInContainer": "docker run -d -it --restart always --name hzn-cli --privileged --network=\"host\" -v /var/run/docker.sock:/var/run/docker.sock -v /var/agent-install.crt:/var/agent-install.crt -e HORIZON_URL=http://localhost:8081 -e HZN_ORG_ID=${HZN_ORG_ID} -e HZN_EXCHANGE_USER_AUTH=${HZN_EXCHANGE_USER_AUTH} -e HZN_FSS_CSSURL=${HZN_FSS_CSSURL} -e HZN_EXCHANGE_URL=${HZN_EXCHANGE_URL} -e version=v2.30.0-952 playbox21/hzn-cli_amd64"
+  "register": {
+    "policy": {
+      "properties": [
+        {
+          "name": "openhorizon.allowPrivileged",
+          "value": true
+        }
+      ],
+      "deployment": {
+        "properties": [
+          {"name": "mms-agent", "value": "MMS Agent"},
+          {"name": "worker-safety", "value": "Worker Safety"}
+        ]
+      }
+    }
+  },
+  "anaxInContainer": "/Users/jeff/sandbox/test/horizon-container.sh start 1",
+  "anaxInContainer1": "docker run -d -t --restart always --name horizon1 --privileged -p 127.0.0.1:8081:8510 -e DOCKER_NAME=horizon1 -e HZN_VAR_RUN_BASE=/var/tmp/horizon/horizon1 -v /var/run/docker.sock:/var/run/docker.sock -v /var/horizon:/etc/default/horizon:ro -v /var/agent-install.crt:/var/agent-install.crt -v horizon1_var:/var/horizon/ -v horizon1_etc:/etc/horizon/ -v /var/tmp/horizon/horizon1:/var/tmp/horizon/horizon1 openhorizon/arm64_anax:2.30.0-1044",
+  "cliInContainer": "docker run -d -it -v /var/run/docker.sock:/var/run/docker.sock --restart always --name auto-dock --privileged --network=\"host\" -v mms_shared_volume:/mms-shared -v /var/agent-install.crt:/var/agent-install.crt -v /Users/jeff/sandbox/templates/mac.example2.m1.json:/var/mac.example2.m1.json -e HORIZON_URL=http://localhost:8081 -e HZN_ORG_ID=${HZN_ORG_ID} -e HZN_EXCHANGE_USER_AUTH=${HZN_EXCHANGE_USER_AUTH} -e HZN_FSS_CSSURL=${HZN_FSS_CSSURL} -e HZN_EXCHANGE_URL=${HZN_EXCHANGE_URL} -e HZN_CONFIG_FILE=/var/mac.example2.m1.json -e version=v2.30.0-1044 playbox21/auto-dock-express_arm64:1.0.0"
 }

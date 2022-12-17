@@ -88,6 +88,7 @@ export declare const configTemplate: {
             MMS_OBJECT_ID: string;
             MMS_OBJECT_FILE: string;
             UPDATE_FILE_NAME: string;
+            SERVICE_CONSTRAINTS: string;
             HZN_CSS: string;
             EDGE_OWNER: string;
             EDGE_DEPLOY: string;
@@ -148,6 +149,7 @@ export interface IPolicy {
     servicePolicyJson: string;
     objectPolicyJson: string;
     deploymentPolicyJson: string;
+    topLevelDeploymentPolicyJson: string;
 }
 export declare class RequiredService {
     org: string;

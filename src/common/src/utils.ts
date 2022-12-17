@@ -57,7 +57,8 @@ const mustHave = [
   "MMS_SERVICE_NAME",
   "MMS_SERVICE_VERSION",
   "MMS_SERVICE_FALLBACK_VERSION",
-  "UPDATE_FILE_NAME"
+  "UPDATE_FILE_NAME",
+  "SERVICE_CONSTRAINTS"
 ];
 // ToDo: use configTemplate instead
 const credentialVars = [
@@ -104,15 +105,23 @@ export class Utils {
           this.installHznCli(anax, nodeId, css, token)
           .subscribe({
             complete: () => {
-              this.createHznKey(orgId, this.randomString())
+              this.shell('hzn architecture')
               .subscribe({
-                complete: () => {
-                  observer.complete();
+                complete: () => {    
+                  this.createHznKey(orgId, this.randomString())
+                  .subscribe({
+                    complete: () => {
+                      observer.complete();
+                    },
+                    error: (err) => {
+                      observer.error(err);
+                    }
+                  })
                 },
                 error: (err) => {
-                  observer.error(err);
+                  observer.complete();
                 }
-              })
+              })  
             },
             error: (err) => {
               observer.error(err);
@@ -147,10 +156,6 @@ export class Utils {
   }
   createHorizonSystemFiles(configJson: any) {
     return new Observable((observer) => {
-      if(configJson.test === 'undefined' || !configJson.test) {
-        observer.next('')
-        observer.complete()
-      }
       let content = ''
       const pEnv = process.env
       Object.keys(HorizonTemplate).forEach((key) => {
@@ -169,6 +174,11 @@ export class Utils {
         }    
       })
       console.log(content)
+      if(configJson.test === 'undefined' || !configJson.test) {
+        // start with horizon-container instead of manually docker run
+        observer.next('')
+        observer.complete()
+      }
       if(content.length > 0) {
         const dest = pEnv['VAR_DIRECTORIES_FILES'] || '/var'; 
         writeFileSync(`${process.cwd()}/horizon`, content);
@@ -882,8 +892,12 @@ export class Utils {
     return this.shell(arg)
   }
   purgeManagementHub() {
-    const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`
-    return this.shell(arg)
+    if(os.arch() == 'x64' || process.platform == 'darwin') {
+      const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`
+      return this.shell(arg)  
+    } else {
+      return of()
+    }
   }
   cleanUp() {
     console.log('cleaning up', existsSync(`${this.etcDefault}/horizon`), existsSync(this.etcHorizon), this.etcHorizon)
@@ -1274,7 +1288,11 @@ export class Utils {
           props[i]['pattern'] = /^(true|false)$/
           props[i]['message'] = 'Must be true or false'
         }
-
+        if(key == 'SERVICE_CONSTRAINTS') {
+          let str = value as string;
+          str = str.replace(/\\/g, '')
+          props[i] = {name: key, default: str, required: notRequired.indexOf(key) < 0};
+        }
         i++;
       }
       console.log(props)
@@ -1299,7 +1317,14 @@ export class Utils {
             prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
               if(question.answer.toUpperCase() === 'Y') {
                 for(const [key, value] of Object.entries(result)) {
-                  envVars[key] = value;
+                  if(key == 'SERVICE_CONSTRAINTS') {
+                    let str = value as string;
+                    str = str.replace(/\\/g, '')
+                    str = str.replace(/\"/g, '\\\"')
+                    envVars[key] = str;
+                  } else {
+                    envVars[key] = value;
+                  }              
                 }
                 jsonfile.writeFileSync('.env-hzn.json', hznJson, {spaces: 2});
                 this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json && sudo chmod 766 ${this.hznConfig}/.env-hzn.json`).then(() => {
@@ -1880,6 +1905,7 @@ export class Utils {
     const policy = {
       nodePolicyJson: `${this.hznConfig}/node.policy.json`,
       deploymentPolicyJson: `${this.hznConfig}/deployment.policy.json`,
+      topLevelDeploymentPolicyJson: `${this.hznConfig}/top.level.deployment.policy.json`,
       servicePolicyJson: `${this.hznConfig}/service.policy.json`,
       objectPolicyJson: `${this.hznConfig}/object.policy.json`,
       objectPatternJson: `${this.hznConfig}/object.pattern.json`
@@ -1897,12 +1923,12 @@ export class Utils {
         observer.next(0) 
         observer.complete()
       } else if(answer == 1) {
-        console.log('\x1b[32m', '\nAdding Service Policy') 
-        this.addServicePolicy(policy)
-        .subscribe(() => {observer.next(1); observer.complete()})
-      } else if(answer == 2) {
         console.log('\x1b[32m', '\nAdding Deployment Policy') 
         this.addDeploymentPolicy(policy)
+        .subscribe(() => {observer.next(1); observer.complete()})
+      } else if(answer == 2) {
+        console.log('\x1b[32m', '\nAdding Top Level Deployment Policy') 
+        this.addTopLevelDeploymentPolicy(policy)
         .subscribe(() => {observer.next(2); observer.complete()})
       } else if(answer == 3) {
         console.log('\x1b[32m', '\nAdding Node Policy') 
@@ -1916,8 +1942,12 @@ export class Utils {
     })  
   }
   addDeploymentPolicy(policy: any) {
+    const arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('SERVICE_NAME')}_${policy.envVar.getEnvValue('ARCH')}`
+    return utils.shell(arg)
+  }
+  addTopLevelDeploymentPolicy(policy: any) {
     // const arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('MMS_SERVICE_NAME')}_${policy.envVar.getEnvValue('MMS_SERVICE_VERSION')}_${policy.envVar.getEnvValue('ARCH')}`
-    const arg = `hzn exchange deployment addpolicy -f ${policy.deploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('MMS_SERVICE_NAME')}_${policy.envVar.getEnvValue('ARCH')}`
+    const arg = `hzn exchange deployment addpolicy -f ${policy.topLevelDeploymentPolicyJson} ${policy.envVar.getEnvValue('HZN_ORG_ID')}/policy-${policy.envVar.getEnvValue('MMS_SERVICE_NAME')}_${policy.envVar.getEnvValue('ARCH')}`
     return utils.shell(arg)
   }
   addServicePolicy(policy: any) {
@@ -1986,7 +2016,7 @@ export class Utils {
   }
   promptPolicySelection(msg: string = `Please select the type of policy you would like to work with: `) {
     let answer;
-    console.log('\x1b[36m', `\nType of policies:\n1) Service Policy\n2) Deployment Policy\n3) Node Policy\n4) Object Policy\n0) To exit`)
+    console.log('\x1b[36m', `\nType of policies:\n1) Service Deployment Policy\n2) Top Level Service Deployment Policy\n3) Node Policy\n4) Object Policy\n0) To exit`)
     do {
       answer = parseInt(promptSync(msg))
       if(answer < 0 || answer > 4) {
