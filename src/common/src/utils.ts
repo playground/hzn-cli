@@ -105,7 +105,7 @@ export class Utils {
           this.installHznCli(anax, nodeId, css, token)
           .subscribe({
             complete: () => {
-              this.shell('hzn architecture')
+              this.getDeviceArch()
               .subscribe({
                 complete: () => {    
                   this.createHznKey(orgId, this.randomString())
