@@ -82,7 +82,7 @@ export const HorizonTemplate = {
   "HZN_NODE_ID": "",
   "HZN_AGBOT_URL": "",
   "HZN_SDO_SVC_URL": "",
-  "HZN_MGMT_HUB_CERT_PATH": "/var/agent-install.crt",
+  "HZN_MGMT_HUB_CERT_PATH": "",
   "HZN_AGENT_PORT": ""
 }
 export const HorizonKeyMap = {
