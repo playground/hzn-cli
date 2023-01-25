@@ -90,7 +90,7 @@ class Utils {
                     this.installHznCli(anax, nodeId, css, token)
                         .subscribe({
                         complete: () => {
-                            this.shell('hzn architecture')
+                            this.getDeviceArch()
                                 .subscribe({
                                 complete: () => {
                                     this.createHznKey(orgId, this.randomString())
@@ -336,7 +336,7 @@ class Utils {
     proceedWithAutoInstall(setup) {
         return new rxjs_1.Observable((observer) => {
             // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
-            this.purgeManagementHub() // Leverage this functin to cleanup and install prerequisites, maynot need preInstallHznCli anymore
+            this.purgeManagementHub() // Leverage this function to cleanup and install prerequisites, maynot need preInstallHznCli anymore
                 .subscribe({
                 complete: () => {
                     const pEnv = process.env;
@@ -939,12 +939,13 @@ class Utils {
         let nodeId = id && id.length > 0 ? `-a ${id}:${token}` : `-a ${os_1.default.hostname}:${token}`;
         if (anax && anax.indexOf('open-horizon') > 0) {
             // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download
-            let tag = css === 'true' ? 'css:' : 'anax:';
+            let tag = 'anax:';
             if (anax.indexOf('latest') < 0) {
                 tag = anax.replace('download', 'tag');
             }
             anax = anax.replace('/agent-install.sh', '');
-            return this.shell(`sudo touch /etc/default/horizon && sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} -k css: -c css:`);
+            let icss = css === 'true' || css == true ? '-i css:' : '';
+            return this.shell(`sudo touch /etc/default/horizon && sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} ${icss} -k css: -c css:`);
         }
         else {
             // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data
