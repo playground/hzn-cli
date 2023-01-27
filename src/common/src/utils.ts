@@ -1873,8 +1873,23 @@ export class Utils {
     })     
   }
   registerOnly() {
-    const arg = `hzn register`
-    return utils.shell(arg, `done registering this node`, `failed to register this node`)
+    return new Observable((observer) => {
+      this.unregisterAgent(true).subscribe({
+        complete: () => {
+          const arg = `hzn register`
+          utils.shell(arg, `done registering this node`, `failed to register this node`)
+          .subscribe({
+            complete: () => {
+              observer.next()
+              observer.complete()
+            },  
+            error: (err) => observer.error(err)
+          })
+        }, error: (err) => {
+          observer.error(err);
+        }    
+      })  
+    })
   }
   registerWithPolicy(name: string, policy: string, auto = false) {
     return new Observable((observer) => {

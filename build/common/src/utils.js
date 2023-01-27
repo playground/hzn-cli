@@ -1919,8 +1919,23 @@ class Utils {
         });
     }
     registerOnly() {
-        const arg = `hzn register`;
-        return _1.utils.shell(arg, `done registering this node`, `failed to register this node`);
+        return new rxjs_1.Observable((observer) => {
+            this.unregisterAgent(true).subscribe({
+                complete: () => {
+                    const arg = `hzn register`;
+                    _1.utils.shell(arg, `done registering this node`, `failed to register this node`)
+                        .subscribe({
+                        complete: () => {
+                            observer.next();
+                            observer.complete();
+                        },
+                        error: (err) => observer.error(err)
+                    });
+                }, error: (err) => {
+                    observer.error(err);
+                }
+            });
+        });
     }
     registerWithPolicy(name, policy, auto = false) {
         return new rxjs_1.Observable((observer) => {
