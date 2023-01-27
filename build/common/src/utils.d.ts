@@ -15,13 +15,13 @@ export declare class Utils {
     invalidTemplate(json: any): boolean;
     randomString(): string;
     preInstallHznCli(orgId: string, anax: string, nodeId: string, css: string, token: string): Observable<unknown>;
-    installCliInContainer(configJson: any): Observable<unknown>;
     createHorizonSystemFiles(configJson: any): Observable<unknown>;
     removeCliContainer(name?: string): Observable<unknown>;
     removeAnaxContainer(name?: string): Observable<unknown>;
     stopRemoveContainer(name: string): Observable<unknown>;
     installCliAndAnaxInContainers(configJson: any): Observable<unknown>;
     installAnaxInContainer(configJson: any): Observable<unknown>;
+    installCliInContainer(configJson: any): Observable<unknown>;
     updateConfig(configFile: string): Observable<unknown>;
     proceedWithAutoInstall(setup: SetupEnvironment): Observable<unknown>;
     autoRun(params: IAutoParam, setup: SetupEnvironment): Observable<unknown>;

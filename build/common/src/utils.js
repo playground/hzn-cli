@@ -120,26 +120,6 @@ class Utils {
             });
         });
     }
-    installCliInContainer(configJson) {
-        return new rxjs_1.Observable((observer) => {
-            if (configJson.cliInContainer) {
-                this.shell(configJson.cliInContainer)
-                    .subscribe({
-                    complete: () => {
-                        observer.next();
-                        observer.complete();
-                    },
-                    error: (err) => {
-                        observer.error(err);
-                    }
-                });
-            }
-            else {
-                console.log('Missing cliInContainer property in configuration file');
-                observer.error();
-            }
-        });
-    }
     createHorizonSystemFiles(configJson) {
         return new rxjs_1.Observable((observer) => {
             let content = '';
@@ -248,8 +228,19 @@ class Utils {
                                 });
                             }
                             else {
-                                console.log('Missing anaxInContainer property in configuration file');
-                                observer.error();
+                                let pEnv = process.env;
+                                let anax = pEnv.ANAX.replace('/agent-install.sh', '') + '/agent-install.sh';
+                                let container = process.platform == 'darwin' ? '' : '--container';
+                                let containerStr = `sudo curl -sSL ${anax} | sudo -s -E bash -s -- -i ${anax} ${container} -i css: -k css: -c css:`;
+                                this.shell(containerStr)
+                                    .subscribe({
+                                    complete: () => {
+                                        observer.complete();
+                                    },
+                                    error: (err) => {
+                                        observer.error(err);
+                                    }
+                                });
                             }
                         },
                         error: (err) => {
@@ -262,6 +253,26 @@ class Utils {
                     observer.error(err);
                 }
             });
+        });
+    }
+    installCliInContainer(configJson) {
+        return new rxjs_1.Observable((observer) => {
+            if (configJson.cliInContainer) {
+                this.shell(configJson.cliInContainer)
+                    .subscribe({
+                    complete: () => {
+                        observer.next();
+                        observer.complete();
+                    },
+                    error: (err) => {
+                        observer.error(err);
+                    }
+                });
+            }
+            else {
+                console.log('Missing cliInContainer property in configuration file');
+                observer.error();
+            }
         });
     }
     updateConfig(configFile) {
