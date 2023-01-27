@@ -241,7 +241,9 @@ export class Utils {
                 let pEnv = process.env;
                 let anax = pEnv.ANAX.replace('/agent-install.sh', '') + '/agent-install.sh';
                 let container = process.platform == 'darwin' ? '' : '--container'
-                let containerStr = `sudo curl -sSL ${anax} | sudo -s -E bash -s -- -i ${anax} ${container} -i css: -k css: -c css:`
+                let nodeId = pEnv.HZN_NODE_ID || pEnv.HZN_DEVICE_ID || '';
+                nodeId = nodeId.length > 0 ? `-a ${nodeId}:some-device-token` : '';
+                let containerStr = `sudo curl -sSL ${anax} | sudo -s -E bash -s -- -i ${anax} ${container} ${nodeId} -i css: -k css: -c css:`
                 this.shell(containerStr)
                 .subscribe({
                   complete: () => {
