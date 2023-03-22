@@ -105,7 +105,7 @@ export class Utils {
           this.installHznCli(anax, nodeId, css, token)
           .subscribe({
             complete: () => {
-              this.shell('hzn architecture')
+              this.getDeviceArch()
               .subscribe({
                 complete: () => {    
                   this.createHznKey(orgId, this.randomString())
@@ -134,25 +134,6 @@ export class Utils {
         }
       })
     });  
-  }
-  installCliInContainer(configJson: any) {
-    return new Observable((observer) => {
-      if(configJson.cliInContainer) {
-        this.shell(configJson.cliInContainer)
-        .subscribe({
-          complete: () => {
-            observer.next()
-            observer.complete();
-          },
-          error: (err) => {
-            observer.error(err);
-          }
-        })
-      } else {
-        console.log('Missing cliInContainer property in configuration file')
-        observer.error();
-      }
-    })
   }
   createHorizonSystemFiles(configJson: any) {
     return new Observable((observer) => {
@@ -257,8 +238,21 @@ export class Utils {
                   }
                 })  
               } else {
-                console.log('Missing anaxInContainer property in configuration file')
-                observer.error();
+                let pEnv = process.env;
+                let anax = pEnv.ANAX.replace('/agent-install.sh', '') + '/agent-install.sh';
+                let container = process.platform == 'darwin' ? '' : '--container'
+                let nodeId = pEnv.HZN_NODE_ID || pEnv.HZN_DEVICE_ID || '';
+                nodeId = nodeId.length > 0 ? `-a ${nodeId}:some-device-token` : '';
+                let containerStr = `sudo curl -sSL ${anax} | sudo -s -E bash -s -- -i ${anax} ${container} ${nodeId} -i css: -k css: -c css:`
+                this.shell(containerStr)
+                .subscribe({
+                  complete: () => {
+                    observer.complete();
+                  },
+                  error: (err) => {
+                    observer.error(err);
+                  }
+                })  
               }
             },
             error: (err) => {
@@ -271,6 +265,25 @@ export class Utils {
           observer.error(err);
         }
       })
+    })
+  }
+  installCliInContainer(configJson: any) {
+    return new Observable((observer) => {
+      if(configJson.cliInContainer) {
+        this.shell(configJson.cliInContainer)
+        .subscribe({
+          complete: () => {
+            observer.next()
+            observer.complete();
+          },
+          error: (err) => {
+            observer.error(err);
+          }
+        })
+      } else {
+        console.log('Missing cliInContainer property in configuration file')
+        observer.error();
+      }
     })
   }
   updateConfig(configFile: string) {
@@ -346,7 +359,7 @@ export class Utils {
   proceedWithAutoInstall(setup: SetupEnvironment) {
     return new Observable((observer) => {
       // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
-      this.purgeManagementHub() // Leverage this functin to cleanup and install prerequisites, maynot need preInstallHznCli anymore
+      this.purgeManagementHub() // Leverage this function to cleanup and install prerequisites, maynot need preInstallHznCli anymore
       .subscribe({
         complete: () => {
           const pEnv: any = process.env;
@@ -928,12 +941,13 @@ export class Utils {
     let nodeId = id && id.length > 0 ? `-a ${id}:${token}` : `-a ${os.hostname}:${token}`;
     if(anax && anax.indexOf('open-horizon') > 0) {
       // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download
-      let tag = css === 'true' ? 'css:' : 'anax:'
+      let tag = 'anax:'
       if(anax.indexOf('latest') < 0) {
         tag = anax.replace('download', 'tag')
       }
       anax = anax.replace('/agent-install.sh', '')
-      return this.shell(`sudo touch /etc/default/horizon && sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} -k css: -c css:`)
+      let icss = css === 'true' || css == true ? '-i css:' : ''
+      return this.shell(`sudo touch /etc/default/horizon && sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} ${icss} -k css: -c css:`)
     } else {
       // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data
       return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`)
@@ -1861,8 +1875,23 @@ export class Utils {
     })     
   }
   registerOnly() {
-    const arg = `hzn register`
-    return utils.shell(arg, `done registering this node`, `failed to register this node`)
+    return new Observable((observer) => {
+      this.unregisterAgent(true).subscribe({
+        complete: () => {
+          const arg = `hzn register`
+          utils.shell(arg, `done registering this node`, `failed to register this node`)
+          .subscribe({
+            complete: () => {
+              observer.next()
+              observer.complete()
+            },  
+            error: (err) => observer.error(err)
+          })
+        }, error: (err) => {
+          observer.error(err);
+        }    
+      })  
+    })
   }
   registerWithPolicy(name: string, policy: string, auto = false) {
     return new Observable((observer) => {
