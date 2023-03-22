@@ -2248,7 +2248,7 @@ export class Utils {
           observer.error(err);
         }
       });
-      child.stdout.pipe(process.stdout);
+      //child.stdout.pipe(process.stdout);
       child.stdout.on('data', (data) => {
         console.log(`-> ${data}`)
         if(data.indexOf(`Run 'hzn agreement list' to view`) > 0 || data.indexOf(`agent started successfully`) > 0) {
