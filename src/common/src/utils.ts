@@ -2250,7 +2250,7 @@ export class Utils {
       });
       child.stdout.pipe(process.stdout);
       child.stdout.on('data', (data) => {
-        if(data.indexOf(`Run 'hzn agreement list' to view`) > 0) {
+        if(data.indexOf(`Run 'hzn agreement list' to view`) > 0 || data.indexOf(`agent started successfully`) > 0) {
           console.log(success);
           observer.next(prnStdout ? data : '');
           observer.complete();
