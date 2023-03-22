@@ -90,7 +90,7 @@ class Utils {
                     this.installHznCli(anax, nodeId, css, token)
                         .subscribe({
                         complete: () => {
-                            this.shell('hzn architecture')
+                            this.getDeviceArch()
                                 .subscribe({
                                 complete: () => {
                                     this.createHznKey(orgId, this.randomString())
@@ -118,26 +118,6 @@ class Utils {
                     observer.error(err);
                 }
             });
-        });
-    }
-    installCliInContainer(configJson) {
-        return new rxjs_1.Observable((observer) => {
-            if (configJson.cliInContainer) {
-                this.shell(configJson.cliInContainer)
-                    .subscribe({
-                    complete: () => {
-                        observer.next();
-                        observer.complete();
-                    },
-                    error: (err) => {
-                        observer.error(err);
-                    }
-                });
-            }
-            else {
-                console.log('Missing cliInContainer property in configuration file');
-                observer.error();
-            }
         });
     }
     createHorizonSystemFiles(configJson) {
@@ -248,8 +228,21 @@ class Utils {
                                 });
                             }
                             else {
-                                console.log('Missing anaxInContainer property in configuration file');
-                                observer.error();
+                                let pEnv = process.env;
+                                let anax = pEnv.ANAX.replace('/agent-install.sh', '') + '/agent-install.sh';
+                                let container = process.platform == 'darwin' ? '' : '--container';
+                                let nodeId = pEnv.HZN_NODE_ID || pEnv.HZN_DEVICE_ID || '';
+                                nodeId = nodeId.length > 0 ? `-a ${nodeId}:some-device-token` : '';
+                                let containerStr = `sudo curl -sSL ${anax} | sudo -s -E bash -s -- -i ${anax} ${container} ${nodeId} -i css: -k css: -c css:`;
+                                this.shell(containerStr)
+                                    .subscribe({
+                                    complete: () => {
+                                        observer.complete();
+                                    },
+                                    error: (err) => {
+                                        observer.error(err);
+                                    }
+                                });
                             }
                         },
                         error: (err) => {
@@ -262,6 +255,26 @@ class Utils {
                     observer.error(err);
                 }
             });
+        });
+    }
+    installCliInContainer(configJson) {
+        return new rxjs_1.Observable((observer) => {
+            if (configJson.cliInContainer) {
+                this.shell(configJson.cliInContainer)
+                    .subscribe({
+                    complete: () => {
+                        observer.next();
+                        observer.complete();
+                    },
+                    error: (err) => {
+                        observer.error(err);
+                    }
+                });
+            }
+            else {
+                console.log('Missing cliInContainer property in configuration file');
+                observer.error();
+            }
         });
     }
     updateConfig(configFile) {
@@ -336,7 +349,7 @@ class Utils {
     proceedWithAutoInstall(setup) {
         return new rxjs_1.Observable((observer) => {
             // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
-            this.purgeManagementHub() // Leverage this functin to cleanup and install prerequisites, maynot need preInstallHznCli anymore
+            this.purgeManagementHub() // Leverage this function to cleanup and install prerequisites, maynot need preInstallHznCli anymore
                 .subscribe({
                 complete: () => {
                     const pEnv = process.env;
@@ -939,12 +952,13 @@ class Utils {
         let nodeId = id && id.length > 0 ? `-a ${id}:${token}` : `-a ${os_1.default.hostname}:${token}`;
         if (anax && anax.indexOf('open-horizon') > 0) {
             // NOTE: for Open Horizon anax would be https://github.com/open-horizon/anax/releases/latest/download
-            let tag = css === 'true' ? 'css:' : 'anax:';
+            let tag = 'anax:';
             if (anax.indexOf('latest') < 0) {
                 tag = anax.replace('download', 'tag');
             }
             anax = anax.replace('/agent-install.sh', '');
-            return this.shell(`sudo touch /etc/default/horizon && sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} -k css: -c css:`);
+            let icss = css === 'true' || css == true ? '-i css:' : '';
+            return this.shell(`sudo touch /etc/default/horizon && sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} ${icss} -k css: -c css:`);
         }
         else {
             // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data
@@ -1907,8 +1921,23 @@ class Utils {
         });
     }
     registerOnly() {
-        const arg = `hzn register`;
-        return _1.utils.shell(arg, `done registering this node`, `failed to register this node`);
+        return new rxjs_1.Observable((observer) => {
+            this.unregisterAgent(true).subscribe({
+                complete: () => {
+                    const arg = `hzn register`;
+                    _1.utils.shell(arg, `done registering this node`, `failed to register this node`)
+                        .subscribe({
+                        complete: () => {
+                            observer.next();
+                            observer.complete();
+                        },
+                        error: (err) => observer.error(err)
+                    });
+                }, error: (err) => {
+                    observer.error(err);
+                }
+            });
+        });
     }
     registerWithPolicy(name, policy, auto = false) {
         return new rxjs_1.Observable((observer) => {
