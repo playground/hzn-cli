@@ -270,7 +270,8 @@ export class Utils {
   installCliInContainer(configJson: any) {
     return new Observable((observer) => {
       if(configJson.cliInContainer) {
-        this.shell(configJson.cliInContainer)
+        let containerStr = this.replaceEnvTokens(configJson.cliInContainer, configJson.org)
+        this.shell(containerStr)
         .subscribe({
           complete: () => {
             observer.next()
