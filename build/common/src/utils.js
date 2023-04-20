@@ -260,7 +260,8 @@ class Utils {
     installCliInContainer(configJson) {
         return new rxjs_1.Observable((observer) => {
             if (configJson.cliInContainer) {
-                this.shell(configJson.cliInContainer)
+                let containerStr = this.replaceEnvTokens(configJson.cliInContainer, configJson.org);
+                this.shell(containerStr)
                     .subscribe({
                     complete: () => {
                         observer.next();
@@ -2309,16 +2310,27 @@ class Utils {
                     observer.error(err);
                 }
             });
-            child.stdout.pipe(process.stdout);
+            //child.stdout.pipe(process.stdout);
             child.stdout.on('data', (data) => {
-                if (data.indexOf(`Run 'hzn agreement list' to view`) > 0) {
+                console.log(`-> ${data}`);
+                if (data.indexOf(`Run 'hzn agreement list' to view`) > 0 || data.indexOf(`agent started successfully`) > 0) {
                     console.log(success);
                     observer.next(prnStdout ? data : '');
                     observer.complete();
                 }
             });
+            child.on('exit', (code) => {
+                console.log('child process exited with code ' + code.toString());
+                observer.next(prnStdout ? code.toString() : '');
+                observer.complete();
+            });
             child.on('data', (data) => {
-                console.log(data);
+                console.log(`=> ${data}`);
+                if (data.indexOf(`Run 'hzn agreement list' to view`) > 0 || data.indexOf(`agent started successfully`) > 0) {
+                    console.log(success);
+                    observer.next(prnStdout ? data : '');
+                    observer.complete();
+                }
             });
         });
     }
