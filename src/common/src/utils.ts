@@ -172,7 +172,7 @@ export class Utils {
                 if(arg.length > 0) {
                   arg += ' && '
                 }
-                arg += `sudo mkdir -p ${folder}`
+                arg += `sudo mkdir -p ${folder} && sudo chmod 766 ${folder}`
               })
               this.shell(arg)
               .subscribe({
