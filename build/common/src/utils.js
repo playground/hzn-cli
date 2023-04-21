@@ -414,7 +414,7 @@ class Utils {
                     error: (err) => observer.error(err)
                 });
             }
-            else if (setup == interface_1.SetupEnvironment.autoUpdateConfigFiles) {
+            else if (setup == interface_1.SetupEnvironment.autoUpdateConfigFiles || setup == interface_1.SetupEnvironment.autoSetupCliInContainer) {
                 let configJson;
                 this.updateConfig(configFile)
                     .subscribe({

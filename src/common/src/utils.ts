@@ -422,7 +422,7 @@ export class Utils {
           },
           error: (err) => observer.error(err)
         })  
-      } else if(setup == SetupEnvironment.autoUpdateConfigFiles) {
+      } else if(setup == SetupEnvironment.autoUpdateConfigFiles || setup == SetupEnvironment.autoSetupCliInContainer) {
         let configJson
         this.updateConfig(configFile)
         .subscribe({
