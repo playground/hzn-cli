@@ -399,20 +399,37 @@ class Utils {
                 observer.complete();
             }
             else if (setup == interface_1.SetupEnvironment.autoSetupAllInOne || setup == interface_1.SetupEnvironment.autoSetupCliInContainer || setup == interface_1.SetupEnvironment.autoSetupAnaxInContainer) {
-                const config = jsonfile_1.default.readFileSync(configFile);
-                const pEnv = process.env;
-                const org = config.org;
-                Object.keys(org).forEach((key) => {
-                    pEnv[key] = org[key];
-                });
-                this.proceedWithAutoInstall(setup)
+                let configJson;
+                this.updateConfig(configFile)
                     .subscribe({
-                    complete: () => {
-                        observer.next('');
-                        observer.complete();
+                    next: (json) => {
+                        configJson = json;
                     },
-                    error: (err) => observer.error(err)
+                    complete: () => {
+                        this.proceedWithAutoInstall(setup)
+                            .subscribe({
+                            complete: () => {
+                                observer.next('');
+                                observer.complete();
+                            },
+                            error: (err) => observer.error(err)
+                        });
+                    }
                 });
+                //const config = jsonfile.readFileSync(configFile);
+                //const pEnv: any = process.env;
+                //const org = config.org
+                //Object.keys(org).forEach((key) => {
+                //  pEnv[key] = org[key]
+                //})
+                //this.proceedWithAutoInstall(setup)
+                //.subscribe({
+                //  complete: () => {
+                //    observer.next('')
+                //    observer.complete();              
+                //  },
+                //  error: (err) => observer.error(err)
+                //})  
             }
             else if (setup == interface_1.SetupEnvironment.autoUpdateConfigFiles) {
                 let configJson;

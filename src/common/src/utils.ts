@@ -408,20 +408,37 @@ export class Utils {
         observer.next('Please provide --config_file name')
         observer.complete()
       } else if(setup == SetupEnvironment.autoSetupAllInOne || setup == SetupEnvironment.autoSetupCliInContainer || setup == SetupEnvironment.autoSetupAnaxInContainer) {
-        const config = jsonfile.readFileSync(configFile);
-        const pEnv: any = process.env;
-        const org = config.org
-        Object.keys(org).forEach((key) => {
-          pEnv[key] = org[key]
-        })
-        this.proceedWithAutoInstall(setup)
+        let configJson
+        this.updateConfig(configFile)
         .subscribe({
-          complete: () => {
-            observer.next('')
-            observer.complete();              
+          next: (json) => {
+            configJson = json;
           },
-          error: (err) => observer.error(err)
-        })  
+          complete: () => {
+            this.proceedWithAutoInstall(setup)
+            .subscribe({
+              complete: () => {
+                observer.next('')
+                observer.complete();              
+              },
+              error: (err) => observer.error(err)
+            })      
+          }
+        })
+        //const config = jsonfile.readFileSync(configFile);
+        //const pEnv: any = process.env;
+        //const org = config.org
+        //Object.keys(org).forEach((key) => {
+        //  pEnv[key] = org[key]
+        //})
+        //this.proceedWithAutoInstall(setup)
+        //.subscribe({
+        //  complete: () => {
+        //    observer.next('')
+        //    observer.complete();              
+        //  },
+        //  error: (err) => observer.error(err)
+        //})  
       } else if(setup == SetupEnvironment.autoUpdateConfigFiles) {
         let configJson
         this.updateConfig(configFile)
