@@ -398,7 +398,7 @@ class Utils {
                 observer.next('Please provide --config_file name');
                 observer.complete();
             }
-            else if (setup == interface_1.SetupEnvironment.autoSetupAllInOne || setup == interface_1.SetupEnvironment.autoSetupCliInContainer || setup == interface_1.SetupEnvironment.autoSetupAnaxInContainer) {
+            else if (setup == interface_1.SetupEnvironment.autoSetupAllInOne || setup == interface_1.SetupEnvironment.autoSetupCliInContainer || setup == interface_1.SetupEnvironment.autoSetupAnaxInContainer || setup == interface_1.SetupEnvironment.autoSetupContainer) {
                 let configJson;
                 this.updateConfig(configFile)
                     .subscribe({
