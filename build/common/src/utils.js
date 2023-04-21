@@ -406,6 +406,12 @@ class Utils {
                         configJson = json;
                     },
                     complete: () => {
+                        const config = jsonfile_1.default.readFileSync(configFile);
+                        const pEnv = process.env;
+                        const org = config.org;
+                        Object.keys(org).forEach((key) => {
+                            pEnv[key] = org[key];
+                        });
                         this.proceedWithAutoInstall(setup)
                             .subscribe({
                             complete: () => {
