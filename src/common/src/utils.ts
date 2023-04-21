@@ -407,7 +407,7 @@ export class Utils {
       if(!configFile || configFile.length == 0 || !existsSync(configFile)) {
         observer.next('Please provide --config_file name')
         observer.complete()
-      } else if(setup == SetupEnvironment.autoSetupAllInOne) {
+      } else if(setup == SetupEnvironment.autoSetupAllInOne || setup == SetupEnvironment.autoSetupCliInContainer || setup == SetupEnvironment.autoSetupAnaxInContainer) {
         const config = jsonfile.readFileSync(configFile);
         const pEnv: any = process.env;
         const org = config.org

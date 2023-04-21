@@ -398,7 +398,7 @@ class Utils {
                 observer.next('Please provide --config_file name');
                 observer.complete();
             }
-            else if (setup == interface_1.SetupEnvironment.autoSetupAllInOne) {
+            else if (setup == interface_1.SetupEnvironment.autoSetupAllInOne || setup == interface_1.SetupEnvironment.autoSetupCliInContainer || setup == interface_1.SetupEnvironment.autoSetupAnaxInContainer) {
                 const config = jsonfile_1.default.readFileSync(configFile);
                 const pEnv = process.env;
                 const org = config.org;
