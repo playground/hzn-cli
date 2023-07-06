@@ -153,7 +153,10 @@ export class Utils {
             content += `${key}=${pEnv.HZN_DEVICE_ID}` 
           }
           if(key == 'HZN_MGMT_HUB_CERT_PATH') {
-            content += `${key}=${pEnv.CONFIG_CERT_PATH}`
+            const cert = /[^\/]+$/.exec(pEnv.CONFIG_CERT_PATH)
+            if(cert) {
+              content += `/var/${key}=${cert[0]}`
+            }
           }
         }    
       })
