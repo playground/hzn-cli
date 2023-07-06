@@ -152,6 +152,9 @@ export class Utils {
           if(key == 'HZN_NODE_ID') {
             content += `${key}=${pEnv.HZN_DEVICE_ID}` 
           }
+          if(key == 'HZN_MGMT_HUB_CERT_PATH') {
+            content += `${key}=${pEnv.CONFIG_CERT_PATH}`
+          }
         }    
       })
       console.log(content)

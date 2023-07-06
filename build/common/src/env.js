@@ -66,16 +66,37 @@ class Env {
         });
     }
     setAdditionalEnv() {
-        let mmsContainer = pEnv.MMS_CONTAINER_NAME || pEnv.MMS_SERVICE_NAME;
-        let container = pEnv.SERVICE_CONTAINER_NAME || pEnv.SERVICE_NAME;
+        let mmsContainer = pEnv.MMS_CONTAINER_NAME;
+        let container = pEnv.SERVICE_CONTAINER_NAME;
         let registry = '';
-        if (this.getDockerRegistry() == 'quay.io') {
-            registry = 'quay.io/';
+        if (pEnv.SERVICE_CONTAINER_NAME != pEnv.SERVICE_NAME) {
+            container = container[container.length - 1] == '/' ? container : `${container}/`;
+            pEnv.SERVICE_CONTAINER = `${container}${pEnv.SERVICE_NAME}_${pEnv.ARCH}:${pEnv.SERVICE_VERSION}`.replace(/\r?\n|\r/g, '');
+        }
+        else {
+            if (this.getDockerRegistry() == 'quay.io') {
+                registry = 'quay.io/';
+            }
+            pEnv.SERVICE_CONTAINER = `${registry}${pEnv.YOUR_DOCKERHUB_ID}/${container}_${pEnv.ARCH}:${pEnv.SERVICE_VERSION}`.replace(/\r?\n|\r/g, '');
+        }
+        if (pEnv.MMS_CONTAINER_NAME != pEnv.MMS_SERVICE_NAME) {
+            //"us.icr.io/ieam-samsung-app/liquid-prep-express_arm64:1.0.0"
+            mmsContainer = mmsContainer[mmsContainer.length - 1] == '/' ? mmsContainer : `${mmsContainer}/`;
+            pEnv.MMS_CONTAINER = `${mmsContainer}${pEnv.MMS_SERVICE_NAME}_${pEnv.ARCH}:${pEnv.MMS_SERVICE_VERSION}`.replace(/\r?\n|\r/g, '');
+        }
+        else {
+            if (this.getDockerRegistry() == 'quay.io') {
+                registry = 'quay.io/';
+            }
+            pEnv.MMS_CONTAINER = `${registry}${pEnv.YOUR_DOCKERHUB_ID}/${mmsContainer}_${pEnv.ARCH}:${pEnv.MMS_SERVICE_VERSION}`.replace(/\r?\n|\r/g, '');
         }
         pEnv.MMS_PATTERN_NAME = `pattern-${pEnv.MMS_SERVICE_NAME}-${pEnv.ARCH}`;
-        pEnv.MMS_CONTAINER = `${registry}${pEnv.YOUR_DOCKERHUB_ID}/${mmsContainer}_${pEnv.ARCH}:${pEnv.MMS_SERVICE_VERSION}`.replace(/\r?\n|\r/g, '');
         pEnv.PATTERN_NAME = `pattern-${pEnv.SERVICE_NAME}`;
-        pEnv.SERVICE_CONTAINER = `${registry}${pEnv.YOUR_DOCKERHUB_ID}/${container}_${pEnv.ARCH}:${pEnv.SERVICE_VERSION}`.replace(/\r?\n|\r/g, '');
+        //if(this.getDockerRegistry() == 'quay.io') {
+        //  registry = 'quay.io/';
+        //}
+        //pEnv.SERVICE_CONTAINER = `${registry}${pEnv.YOUR_DOCKERHUB_ID}/${container}_${pEnv.ARCH}:${pEnv.SERVICE_VERSION}`.replace(/\r?\n|\r/g, '')
+        //pEnv.MMS_CONTAINER = `${registry}${pEnv.YOUR_DOCKERHUB_ID}/${mmsContainer}_${pEnv.ARCH}:${pEnv.MMS_SERVICE_VERSION}`.replace(/\r?\n|\r/g, '')
     }
     updateContainerAndServiceNames() {
         console.log('update', this.getEdgeDeploy(), this.getEdgeOwner(), this.getServiceContainerName(), this.getServiceContainerName());
