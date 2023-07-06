@@ -132,7 +132,7 @@ class Utils {
                     if (key == 'HZN_MGMT_HUB_CERT_PATH') {
                         const cert = /[^\/]+$/.exec(pEnv.CONFIG_CERT_PATH);
                         if (cert) {
-                            content += `/var/${key}=${cert[0]}`;
+                            content += `${key}=/var/${cert[0]}`;
                         }
                     }
                     else {
@@ -150,7 +150,7 @@ class Utils {
                     else if (key == 'HZN_MGMT_HUB_CERT_PATH') {
                         const cert = /[^\/]+$/.exec(pEnv.CONFIG_CERT_PATH);
                         if (cert) {
-                            content += `/var/${key}=${cert[0]}`;
+                            content += `${key}=/var/${cert[0]}`;
                         }
                     }
                 }
