@@ -129,15 +129,29 @@ class Utils {
                 if (content.length > 0)
                     content += '\n';
                 if (pEnv[key]) {
-                    content += `${key}=${pEnv[key]}`;
+                    if (key == 'HZN_MGMT_HUB_CERT_PATH') {
+                        const cert = /[^\/]+$/.exec(pEnv.CONFIG_CERT_PATH);
+                        if (cert) {
+                            content += `/var/${key}=${cert[0]}`;
+                        }
+                    }
+                    else {
+                        content += `${key}=${pEnv[key]}`;
+                    }
                 }
                 else {
                     if (interface_1.HorizonKeyMap[key]) {
                         pEnv[key] = interface_1.HorizonTemplate[key];
                         content += `${key}=${pEnv[key]}`;
                     }
-                    if (key == 'HZN_NODE_ID') {
+                    else if (key == 'HZN_NODE_ID') {
                         content += `${key}=${pEnv.HZN_DEVICE_ID}`;
+                    }
+                    else if (key == 'HZN_MGMT_HUB_CERT_PATH') {
+                        const cert = /[^\/]+$/.exec(pEnv.CONFIG_CERT_PATH);
+                        if (cert) {
+                            content += `/var/${key}=${cert[0]}`;
+                        }
                     }
                 }
             });
