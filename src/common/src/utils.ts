@@ -1900,7 +1900,7 @@ export class Utils {
         observer.complete()
       } else if(answer == 1) {
         console.log('\x1b[32m', '\nRegister with a Policy') 
-        this.registerWithPolicy(hzn.param.name, this.getPolicyJson(policyType.nodePolicy))
+        this.registerWithPolicy(hzn.param.name, this.getPolicyJson(policyType.nodePolicy), true)
         .subscribe(() => {observer.next(1); observer.complete()})
       } else if(answer == 2) {
         console.log('\x1b[32m', '\nRegister with a Pattern') 
