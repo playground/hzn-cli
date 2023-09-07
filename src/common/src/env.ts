@@ -72,16 +72,18 @@ export class Env {
     });
   }
   setAdditionalEnv() {
-    let mmsContainer = pEnv.MMS_CONTAINER_NAME || pEnv.MMS_SERVICE_NAME;
-    let container = pEnv.SERVICE_CONTAINER_NAME || pEnv.SERVICE_NAME;
-    let registry = '';
-    if(this.getDockerRegistry() == 'quay.io') {
-      registry = 'quay.io/';
+    if(pEnv.SERVICE_CONTAINER_NAME == pEnv.SERVICE_NAME) {
+      let mmsContainer = pEnv.MMS_CONTAINER_NAME || pEnv.MMS_SERVICE_NAME;
+      let container = pEnv.SERVICE_CONTAINER_NAME || pEnv.SERVICE_NAME;
+      let registry = '';
+      if(this.getDockerRegistry() == 'quay.io') {
+        registry = 'quay.io/';
+      }
+      pEnv.MMS_PATTERN_NAME = `pattern-${pEnv.MMS_SERVICE_NAME}-${pEnv.ARCH}`;
+      pEnv.MMS_CONTAINER = `${registry}${pEnv.YOUR_DOCKERHUB_ID}/${mmsContainer}_${pEnv.ARCH}:${pEnv.MMS_SERVICE_VERSION}`.replace(/\r?\n|\r/g, '')
+      pEnv.PATTERN_NAME = `pattern-${pEnv.SERVICE_NAME}`;
+      pEnv.SERVICE_CONTAINER = `${registry}${pEnv.YOUR_DOCKERHUB_ID}/${container}_${pEnv.ARCH}:${pEnv.SERVICE_VERSION}`.replace(/\r?\n|\r/g, '')  
     }
-    pEnv.MMS_PATTERN_NAME = `pattern-${pEnv.MMS_SERVICE_NAME}-${pEnv.ARCH}`;
-    pEnv.MMS_CONTAINER = `${registry}${pEnv.YOUR_DOCKERHUB_ID}/${mmsContainer}_${pEnv.ARCH}:${pEnv.MMS_SERVICE_VERSION}`.replace(/\r?\n|\r/g, '')
-    pEnv.PATTERN_NAME = `pattern-${pEnv.SERVICE_NAME}`;
-    pEnv.SERVICE_CONTAINER = `${registry}${pEnv.YOUR_DOCKERHUB_ID}/${container}_${pEnv.ARCH}:${pEnv.SERVICE_VERSION}`.replace(/\r?\n|\r/g, '')
   }
   updateContainerAndServiceNames() {
     console.log('update', this.getEdgeDeploy(), this.getEdgeOwner(), this.getServiceContainerName(), this.getServiceContainerName())

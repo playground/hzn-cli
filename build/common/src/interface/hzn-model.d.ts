@@ -64,7 +64,6 @@ export declare const HorizonTemplate: {
     HZN_AGENT_PORT: string;
 };
 export declare const HorizonKeyMap: {
-    HZN_MGMT_HUB_CERT_PATH: string;
     HZN_CUSTOM_NODE_ID: string;
     DEFAULT_ORG: string;
 };

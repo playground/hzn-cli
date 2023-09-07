@@ -86,7 +86,7 @@ export const HorizonTemplate = {
   "HZN_AGENT_PORT": ""
 }
 export const HorizonKeyMap = {
-  "HZN_MGMT_HUB_CERT_PATH": "CONFIG_CERT_PATH",
+  //"HZN_MGMT_HUB_CERT_PATH": "CONFIG_CERT_PATH",
   "HZN_CUSTOM_NODE_ID": 'HZN_DEVICE_ID',
   "DEFAULT_ORG": "HZN_ORG_ID"
 }
