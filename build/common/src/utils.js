@@ -1948,7 +1948,7 @@ class Utils {
             }
             else if (answer == 1) {
                 console.log('\x1b[32m', '\nRegister with a Policy');
-                this.registerWithPolicy(hzn.param.name, this.getPolicyJson(interface_1.policyType.nodePolicy))
+                this.registerWithPolicy(hzn.param.name, this.getPolicyJson(interface_1.policyType.nodePolicy), true)
                     .subscribe(() => { observer.next(1); observer.complete(); });
             }
             else if (answer == 2) {

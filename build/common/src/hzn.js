@@ -186,7 +186,7 @@ class Hzn {
         return exports.utils.shell(arg, 'done publishing mss pattern', 'failed to publish mms pattern', false);
     }
     unregisterAgent() {
-        return exports.utils.unregisterAgent();
+        return exports.utils.unregisterAgent(true);
     }
     register() {
         return exports.utils.register(this);
