@@ -143,14 +143,25 @@ export class Utils {
         console.log(key)
         if(content.length > 0) content += '\n'
         if(pEnv[key]) {
-          content += `${key}=${pEnv[key]}`          
+          if(key == 'HZN_MGMT_HUB_CERT_PATH') {
+            const cert = /[^\/]+$/.exec(pEnv.CONFIG_CERT_PATH)
+            if(cert) {
+              content += `${key}=/var/${cert[0]}`
+            }
+          } else {
+            content += `${key}=${pEnv[key]}`          
+          }
         } else {
           if(HorizonKeyMap[key]) {
             pEnv[key] = HorizonTemplate[key]
             content += `${key}=${pEnv[key]}`          
-          }
-          if(key == 'HZN_NODE_ID') {
+          } else if(key == 'HZN_NODE_ID') {
             content += `${key}=${pEnv.HZN_DEVICE_ID}` 
+          } else if(key == 'HZN_MGMT_HUB_CERT_PATH') {
+            const cert = /[^\/]+$/.exec(pEnv.CONFIG_CERT_PATH)
+            if(cert) {
+              content += `${key}=/var/${cert[0]}`
+            }
           }
         }    
       })
@@ -166,13 +177,13 @@ export class Utils {
         this.copyFile(`sudo mv ${process.cwd()}/horizon /var`).then(() => {
           const folders = configJson.folders;
           if(existsSync(pEnv.CONFIG_CERT_PATH) && folders) {
-            this.copyFile(`sudo cp ${pEnv.CONFIG_CERT_PATH} /var`).then(() => {
+            this.copyFile(`sudo cp ${pEnv.CONFIG_CERT_PATH} /var/agent-install.crt`).then(() => {
               let arg = ''
               folders.forEach((folder) => {
                 if(arg.length > 0) {
                   arg += ' && '
                 }
-                arg += `sudo mkdir -p ${folder}`
+                arg += `sudo mkdir -p ${folder} && sudo chmod 766 ${folder}`
               })
               this.shell(arg)
               .subscribe({
@@ -270,7 +281,8 @@ export class Utils {
   installCliInContainer(configJson: any) {
     return new Observable((observer) => {
       if(configJson.cliInContainer) {
-        this.shell(configJson.cliInContainer)
+        let containerStr = this.replaceEnvTokens(configJson.cliInContainer, configJson.org)
+        this.shell(containerStr)
         .subscribe({
           complete: () => {
             observer.next()
@@ -406,21 +418,44 @@ export class Utils {
       if(!configFile || configFile.length == 0 || !existsSync(configFile)) {
         observer.next('Please provide --config_file name')
         observer.complete()
-      } else if(setup == SetupEnvironment.autoSetupAllInOne) {
-        const config = jsonfile.readFileSync(configFile);
-        const pEnv: any = process.env;
-        const org = config.org
-        Object.keys(org).forEach((key) => {
-          pEnv[key] = org[key]
-        })
-        this.proceedWithAutoInstall(setup)
+      } else if(setup == SetupEnvironment.autoSetupAllInOne || setup == SetupEnvironment.autoSetupCliInContainer || setup == SetupEnvironment.autoSetupAnaxInContainer || setup == SetupEnvironment.autoSetupContainer) {
+        let configJson
+        this.updateConfig(configFile)
         .subscribe({
-          complete: () => {
-            observer.next('')
-            observer.complete();              
+          next: (json) => {
+            configJson = json;
           },
-          error: (err) => observer.error(err)
-        })  
+          complete: () => {
+            const config = jsonfile.readFileSync(configFile);
+            const pEnv: any = process.env;
+            const org = config.org
+            Object.keys(org).forEach((key) => {
+              pEnv[key] = org[key]
+            })
+            this.proceedWithAutoInstall(setup)
+            .subscribe({
+              complete: () => {
+                observer.next('')
+                observer.complete();              
+              },
+              error: (err) => observer.error(err)
+            })      
+          }
+        })
+        //const config = jsonfile.readFileSync(configFile);
+        //const pEnv: any = process.env;
+        //const org = config.org
+        //Object.keys(org).forEach((key) => {
+        //  pEnv[key] = org[key]
+        //})
+        //this.proceedWithAutoInstall(setup)
+        //.subscribe({
+        //  complete: () => {
+        //    observer.next('')
+        //    observer.complete();              
+        //  },
+        //  error: (err) => observer.error(err)
+        //})  
       } else if(setup == SetupEnvironment.autoUpdateConfigFiles) {
         let configJson
         this.updateConfig(configFile)
@@ -1865,7 +1900,7 @@ export class Utils {
         observer.complete()
       } else if(answer == 1) {
         console.log('\x1b[32m', '\nRegister with a Policy') 
-        this.registerWithPolicy(hzn.param.name, this.getPolicyJson(policyType.nodePolicy))
+        this.registerWithPolicy(hzn.param.name, this.getPolicyJson(policyType.nodePolicy), true)
         .subscribe(() => {observer.next(1); observer.complete()})
       } else if(answer == 2) {
         console.log('\x1b[32m', '\nRegister with a Pattern') 
@@ -2248,16 +2283,27 @@ export class Utils {
           observer.error(err);
         }
       });
-      child.stdout.pipe(process.stdout);
+      //child.stdout.pipe(process.stdout);
       child.stdout.on('data', (data) => {
-        if(data.indexOf(`Run 'hzn agreement list' to view`) > 0) {
+        console.log(`-> ${data}`)
+        if(data.indexOf(`Run 'hzn agreement list' to view`) > 0 || data.indexOf(`agent started successfully`) > 0) {
           console.log(success);
           observer.next(prnStdout ? data : '');
           observer.complete();
         }
       })
+      child.on('exit', (code) => {
+        console.log('child process exited with code ' + code.toString());
+        observer.next(prnStdout ? code.toString() : '');
+        observer.complete();
+      })
       child.on('data', (data) => {
-        console.log(data)
+        console.log(`=> ${data}`)
+        if(data.indexOf(`Run 'hzn agreement list' to view`) > 0 || data.indexOf(`agent started successfully`) > 0) {
+          console.log(success);
+          observer.next(prnStdout ? data : '');
+          observer.complete();
+        }
       })  
     });
   }
