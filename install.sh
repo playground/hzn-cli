@@ -158,8 +158,8 @@ if [[ -f "${HOME}/.nvm/nvm.sh" ]]; then
   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 else echo "nvm not installed"
 	# Define versions
-	INSTALL_NODE_VER=16
-	INSTALL_NVM_VER=0.39.1
+	INSTALL_NODE_VER=20
+	INSTALL_NVM_VER=0.39.5
 
 	# You can pass argument to this script --version 8
 	if [ "$1" = '--version' ]; then
