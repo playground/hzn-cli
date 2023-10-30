@@ -60,6 +60,8 @@ export declare class Utils {
     listServicePolicy(name: string): Observable<unknown>;
     listDeploymentPolicy(name: string): Observable<unknown>;
     removeDeploymentPolicy(name: string): Observable<unknown>;
+    removeServicePolicy(name: string): Observable<unknown>;
+    deployCheck(name: string): Observable<unknown>;
     areYouSure(arg: string, msg: string): Observable<unknown>;
     removeNode(name: string): Observable<unknown>;
     listObject(param: IHznParam): Observable<unknown>;
