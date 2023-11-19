@@ -167,7 +167,7 @@ class Utils {
                 this.copyFile(`sudo mv ${process.cwd()}/horizon /var`).then(() => {
                     const folders = configJson.folders;
                     if ((0, fs_1.existsSync)(pEnv.CONFIG_CERT_PATH) && folders) {
-                        this.copyFile(`sudo cp ${pEnv.CONFIG_CERT_PATH} /var/agent-install.crt`).then(() => {
+                        this.copyFile(`sudo cp -ut ${pEnv.CONFIG_CERT_PATH} /var/agent-install.crt`).then(() => {
                             let arg = '';
                             folders.forEach((folder) => {
                                 if (arg.length > 0) {
@@ -848,6 +848,25 @@ class Utils {
                 error: (err) => observer.error(err)
             });
         });
+    }
+    removeServicePolicy(name) {
+        //hzn exchange service removepolicy chunk-saved-model-service_1.0.0_amd64
+        return new rxjs_1.Observable((observer) => {
+            const arg = `yes | hzn exchange service removepolicy ${name}`;
+            const msg = `\nAre you sure you want to remove ${name} service policy from the Horizon Exchange? [y/N]:`;
+            this.areYouSure(arg, msg)
+                .subscribe({
+                complete: () => {
+                    observer.complete();
+                },
+                error: (err) => observer.error(err)
+            });
+        });
+    }
+    deployCheck(name) {
+        //hzn deploycheck all -b policy-chunk-saved-model-service_amd64 -n biz/jeff-work-vm
+        const arg = name.length > 0 ? `hzn exchange deployment listpolicy ${name}` : 'hzn exchange deployment listpolicy';
+        return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
     }
     areYouSure(arg, msg) {
         return new rxjs_1.Observable((observer) => {
@@ -2358,8 +2377,8 @@ class Utils {
             });
             child.on('exit', (code) => {
                 console.log('child process exited with code ' + code.toString());
-                observer.next(prnStdout ? code.toString() : '');
-                observer.complete();
+                //observer.next(prnStdout ? code.toString() : '');
+                //observer.complete();
             });
             child.on('data', (data) => {
                 console.log(`=> ${data}`);
