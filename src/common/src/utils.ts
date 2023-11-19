@@ -177,7 +177,7 @@ export class Utils {
         this.copyFile(`sudo mv ${process.cwd()}/horizon /var`).then(() => {
           const folders = configJson.folders;
           if(existsSync(pEnv.CONFIG_CERT_PATH) && folders) {
-            this.copyFile(`sudo cp ${pEnv.CONFIG_CERT_PATH} /var/agent-install.crt`).then(() => {
+            this.copyFile(`sudo cp -ut ${pEnv.CONFIG_CERT_PATH} /var/agent-install.crt`).then(() => {
               let arg = ''
               folders.forEach((folder) => {
                 if(arg.length > 0) {
