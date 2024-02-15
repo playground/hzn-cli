@@ -26,7 +26,7 @@ ENV_SETUP=""
 CONFIG_FILE=""
 K8S_SETUP=""
 PS3='Choose your environment setup: '
-envsetup=("Cli-And-Anax" "CLI-Only" "CLI-In-Container" "Anax-In-Container" "Run-In-Containers" "All-In-One" "Confirm" "Quit")
+envsetup=("Cli-And-Anax" "CLI-Only" "CLI-In-Container" "Anax-In-Container" "Run-In-Containers" "All-In-One" "OH-Mesh" "Confirm" "Quit")
 select fav in "${envsetup[@]}"; do
 	case $fav in
 		"Cli-And-Anax")
