@@ -17,7 +17,6 @@ then
 		ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 	fi
 	brew install socat jq
-fi
 else
 	echo "Update and install jq"
 	sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install jq
