@@ -18,6 +18,10 @@ then
 	fi
 	brew install socat jq
 fi
+else
+	echo "Update and install jq"
+	sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install jq
+fi
 
 ENV_SETUP=""
 CONFIG_FILE=""
