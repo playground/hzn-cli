@@ -368,7 +368,7 @@ export class Utils {
       }
     })
   }
-  proceedWithAutoInstall(setup: SetupEnvironment) {
+  proceedWithAutoInstall(params: IAutoParam, setup: SetupEnvironment) {
     return new Observable((observer) => {
       // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
       this.purgeManagementHub() // Leverage this function to cleanup and install prerequisites, maynot need preInstallHznCli anymore
@@ -395,7 +395,13 @@ export class Utils {
             case SetupEnvironment.autoSetupAllInOne:
               action = this.setupManagementHub()
               break;
-            }
+            case SetupEnvironment.autoSetupAllInOne:
+              action = this.setupManagementHub()
+              break;
+            case SetupEnvironment.autoSetupOpenHorizonMesh:
+              action = this.setupOpenHorizonMesh(params, pEnv.ANAX)
+              break;  
+          }
           action
           .subscribe({
             next: (msg) => console.log('next here'),
@@ -418,7 +424,7 @@ export class Utils {
       if(!configFile || configFile.length == 0 || !existsSync(configFile)) {
         observer.next('Please provide --config_file name')
         observer.complete()
-      } else if(setup == SetupEnvironment.autoSetupAllInOne || setup == SetupEnvironment.autoSetupCliInContainer || setup == SetupEnvironment.autoSetupAnaxInContainer || setup == SetupEnvironment.autoSetupContainer) {
+      } else if(setup == SetupEnvironment.autoSetupAllInOne || setup == SetupEnvironment.autoSetupCliInContainer || setup == SetupEnvironment.autoSetupAnaxInContainer || setup == SetupEnvironment.autoSetupContainer || setup == SetupEnvironment.autoSetupOpenHorizonMesh) {
         let configJson
         this.updateConfig(configFile)
         .subscribe({
@@ -432,7 +438,7 @@ export class Utils {
             Object.keys(org).forEach((key) => {
               pEnv[key] = org[key]
             })
-            this.proceedWithAutoInstall(setup)
+            this.proceedWithAutoInstall(params, setup)
             .subscribe({
               complete: () => {
                 observer.next('')
@@ -442,20 +448,6 @@ export class Utils {
             })      
           }
         })
-        //const config = jsonfile.readFileSync(configFile);
-        //const pEnv: any = process.env;
-        //const org = config.org
-        //Object.keys(org).forEach((key) => {
-        //  pEnv[key] = org[key]
-        //})
-        //this.proceedWithAutoInstall(setup)
-        //.subscribe({
-        //  complete: () => {
-        //    observer.next('')
-        //    observer.complete();              
-        //  },
-        //  error: (err) => observer.error(err)
-        //})  
       } else if(setup == SetupEnvironment.autoUpdateConfigFiles) {
         let configJson
         this.updateConfig(configFile)
@@ -516,7 +508,7 @@ export class Utils {
                   next: (resp: string) => answer = resp,
                   complete: () => {
                     if(answer === 'Y') {
-                      this.proceedWithAutoInstall(setup)
+                      this.proceedWithAutoInstall(params, setup)
                       .subscribe({
                         complete: () => {
                           observer.next('')
@@ -535,7 +527,7 @@ export class Utils {
                 })
               },
               error: (err) => {
-                this.proceedWithAutoInstall(setup)
+                this.proceedWithAutoInstall(params, setup)
                 .subscribe({
                   complete: () => {
                     observer.next('')
@@ -658,10 +650,10 @@ export class Utils {
                 case AutoCommand.autoUnregister:
                   action = utils.unregisterAgent(true)
                   break;
-                  case AutoCommand.autoListPolicy:
-                    action = utils.listPolicy()
-                    break;
-                  case AutoCommand.autoUpdateNodePolicy:
+                case AutoCommand.autoListPolicy:
+                  action = utils.listPolicy()
+                  break;
+                case AutoCommand.autoUpdateNodePolicy:
                   try {
                     let policy = params.object
                     let policyStr = ''
@@ -743,6 +735,9 @@ export class Utils {
   }  
   autoUpdateConfigFiles(params: IAutoParam) {
     return this.autoRun(params, SetupEnvironment.autoUpdateConfigFiles)    
+  }
+  autoSetupOpenHorizonMesh(params: IAutoParam) {
+    return this.autoRun(params, SetupEnvironment.autoSetupOpenHorizonMesh)    
   }  
   getEtcDefault() {
     return this.etcDefault
@@ -976,6 +971,24 @@ export class Utils {
     arg += existsSync(`/var/tmp/horizon`) ? `sudo rm -rf /var/tmp/horizon -y || true && ` : ''
     arg += ':'
     return this.shell(arg)
+  }
+  setupOpenHorizonMesh(params: IAutoParam, anax: string) {
+    return new Observable((observer) => {
+      this.installCliOnly(anax)
+      .subscribe({
+        complete: () => {
+          const k8s = params.k8s;
+          console.log('k8s', k8s)
+          observer.complete()
+        },
+        error: (err) => {
+          if(err.indexOf('400 from: vaultUnseal') > 0) {
+            console.log('You might want to purge existing instance by running "oh deploy purgeManagementHub.')
+          }
+          observer.error(err)
+        } 
+      })  
+    })
   }
   installCliOnly(anax: string) {
     const tarFile = process.platform == 'darwin' ? installTar['darwin'] : installTar[os.arch()];

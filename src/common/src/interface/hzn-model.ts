@@ -16,7 +16,7 @@ export const customRun = [
   'autoListPolicy',
   'autoSetup', 'autoSetupAllInOne', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer',
   'autoRegisterWithPolicy', 'autoRegisterWithPattern', 'autoUnregister', 'autoUpdateConfigFiles', 'autoUpdateNodePolicy',
-  'cleanUp', 'clearUnconfiguring', 'purgeManagementHub'
+  'cleanUp', 'clearUnconfiguring', 'purgeManagementHub', 'autoSetupOpenHorizonMesh'
 ];
 export const runDirectly = [
   'appendSupport', 'deleteObject', 'removeCliContainer', 'removeAnaxContainer', 'stopRemoveContainer', 
@@ -56,7 +56,8 @@ export enum SetupEnvironment {
   autoSetupCliInContainer = 3,
   autoSetupContainer = 4,
   autoSetupAllInOne = 5,
-  autoUpdateConfigFiles = 6
+  autoUpdateConfigFiles = 6,
+  autoSetupOpenHorizonMesh = 7
 }
 export enum AutoCommand {
   autoPublishService = 0,
@@ -152,6 +153,7 @@ export const configTemplate = {
 export interface IAutoParam {
   configFile: string;
   object: Object;
+  k8s: string;
 }
 export interface IHznParam {
   org: string;
@@ -166,6 +168,7 @@ export interface IHznParam {
   filter?: string;
   policy: IPolicy;
   configFile: string;
+  k8s: string;
 }
 export interface IPolicy {
   envVar: string;
