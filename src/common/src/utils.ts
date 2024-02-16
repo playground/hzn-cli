@@ -987,7 +987,7 @@ export class Utils {
           const k8s = params.k8s;
           let arg = '';
           if(k8s == 'K3S') {
-            const bashrc = readFileSync(`~/.bashrc`);
+            const bashrc = readFileSync(`${this.homePath}/.bashrc`);
             let kubeConfig = '';
             if(bashrc.indexOf('export KUBECONFIG=') < 0) {
               kubeConfig = 'echo export KUBECONFIG=/home/mesh/.kube/config >> ~/.bashrc && ';
