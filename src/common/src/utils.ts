@@ -977,6 +977,7 @@ export class Utils {
   }
   setupOpenHorizonMesh(params: IAutoParam, anax: string) {
     return new Observable((observer) => {
+      const pEnv = process.env;
       this.installCliOnly(anax)
       .subscribe({
         complete: () => {
