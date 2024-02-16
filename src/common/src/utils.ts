@@ -989,7 +989,7 @@ export class Utils {
           if(k8s == 'K3S') {
             arg = `curl -sfL https://get.k3s.io | sh - && 
                   echo export KUBECONFIG=/home/mesh/.kube/config >> ~/.bashrc && 
-                  mkdir ~/.kube && 
+                  mkdir -p ~/.kube && 
                   source ~/.bashrc && 
                   sudo systemctl restart k3s && 
                   systemctl status k3s && 
