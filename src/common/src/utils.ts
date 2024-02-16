@@ -1010,6 +1010,12 @@ export class Utils {
                       rm agent-install.sh && 
                       wget https://raw.githubusercontent.com/open-horizon/anax/master/agent-install/agent-install.sh && 
                       chmod 755 agent-install.sh && 
+                      export IMAGE_ON_EDGE_CLUSTER_REGISTRY=${pEnv.IMAGE_ON_EDGE_CLUSTER_REGISTRY} && 
+                      export EDGE_CLUSTER_REGISTRY_TOKEN=${pEnv.EDGE_CLUSTER_REGISTRY_TOKEN} && 
+                      export EDGE_CLUSTER_REGISTRY_USERNAME=${pEnv.EDGE_CLUSTER_REGISTRY_USERNAME} && 
+                      export EDGE_CLUSTER_STORAGE_CLASS=${pEnv.EDGE_CLUSTER_STORAGE_CLASS} && 
+                      export ENABLE_AUTO_UPGRADE_CRONJOB=${pEnv.ENABLE_AUTO_UPGRADE_CRONJOB} && 
+                      export USE_EDGE_CLUSTER_REGISTRY=${pEnv.USE_EDGE_CLUSTER_REGISTRY} && 
                       sudo -s -E ${pEnv.PWD}/agent-install.sh -D cluster -u "${pEnv.HZN_EXCHANGE_USER_AUTH}" --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ${pEnv.PWD}/agent-install.cfg -i 'remote:2.31.0-1482' -c 'css:'`;
                 this.shell(arg)
                 .subscribe({
