@@ -974,21 +974,49 @@ export class Utils {
   }
   setupOpenHorizonMesh(params: IAutoParam, anax: string) {
     return new Observable((observer) => {
-      this.installCliOnly(anax)
+      const pEnv = process.env;
+      let nodeId = pEnv.HZN_CUSTOM_NODE_ID ? pEnv.HZN_CUSTOM_NODE_ID : '';
+      this.installHznCli(anax, nodeId, pEnv.HZN_CSS)
       .subscribe({
         complete: () => {
           const k8s = params.k8s;
-          console.log('k8s', k8s)
-          observer.complete()
+          let arg = '';
+          if(k8s == 'K3S') {
+            arg = `curl -sfL https://get.k3s.io | sh - && systemctl status k3s && mkdir ~/.kube 2>$1 && sudo ${k8s.toLowerCase()} kubectl config view --raw > ${pEnv.KUBECONFIG}`
+          } else if(k8s == 'K8S') {
+
+          }
+          if(arg.length > 0) {
+            this.shell(arg)
+            .subscribe({
+              complete: ()=> {
+                arg = `curl -sSfLO https://github.com/IBM/palmctl/releases/latest/download/${pEnv.PALMCTL_FILE_NAME} && palmctl config user --token ${pEnv.MESH_API_KEY} && 
+                      palmctl config endpoint --url ${pEnv.MESH_ENDPOINT} && 
+                      palmctl get openhorizon && 
+                      tar -xvzf openhorizon-agent-install-files.tar.gz && 
+                      chmod 755 agent-install.sh && 
+                      sudo -s -E ./agent-install.sh -D cluster -u ${pEnv.HZN_EXCHANGE_USER_AUTH} --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ./agent-install.cfg -i 'remote:2.31.0-1482' -c 'css:'`;
+                this.shell(arg)
+                .subscribe({
+                  complete: () => {
+                    observer.next();
+                    observer.complete();
+                  },
+                  error: (err) => observer.error(err)
+                })
+              },
+              error: (err) => observer.error(err)
+            })
+          }
         },
         error: (err) => {
-          if(err.indexOf('400 from: vaultUnseal') > 0) {
-            console.log('You might want to purge existing instance by running "oh deploy purgeManagementHub.')
-          }
           observer.error(err)
         } 
       })  
     })
+  }
+  installKube(kube: string) {
+
   }
   installCliOnly(anax: string) {
     const tarFile = process.platform == 'darwin' ? installTar['darwin'] : installTar[os.arch()];
