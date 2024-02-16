@@ -2,7 +2,7 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from
 import jsonfile from 'jsonfile';
 import os from 'os';
 import prompt from 'prompt';
-import { firstValueFrom, Observable, of } from 'rxjs';
+import { firstValueFrom, Observable, of, forkJoin } from 'rxjs';
 import { URL } from 'url';
 
 import { Hzn, utils } from '.';
@@ -375,34 +375,37 @@ export class Utils {
       .subscribe({
         complete: () => {
           const pEnv: any = process.env;
-          let action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
+          let action = {};
+          if(setup != SetupEnvironment.autoSetupOpenHorizonMesh) {
+            action['preReq'] = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
+          } 
           switch(setup) {
             case SetupEnvironment.autoSetup:
-              action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
+              //action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
               break;
             case SetupEnvironment.autoSetupCliOnly:
-              action = this.installCliOnly(pEnv.ANAX)
+              action[setup] = this.installCliOnly(pEnv.ANAX)
               break;
             case SetupEnvironment.autoSetupAnaxInContainer:
-              action = this.installAnaxInContainer(this.configJson)
+              action[setup] = this.installAnaxInContainer(this.configJson)
               break;
             case SetupEnvironment.autoSetupCliInContainer:
-              action = this.installCliInContainer(this.configJson)
+              action[setup] = this.installCliInContainer(this.configJson)
               break;
             case SetupEnvironment.autoSetupContainer:
-              action = this.installCliAndAnaxInContainers(this.configJson)
+              action[setup] = this.installCliAndAnaxInContainers(this.configJson)
               break;
             case SetupEnvironment.autoSetupAllInOne:
-              action = this.setupManagementHub()
+              action[setup] = this.setupManagementHub()
               break;
             case SetupEnvironment.autoSetupAllInOne:
-              action = this.setupManagementHub()
+              action[setup] = this.setupManagementHub()
               break;
             case SetupEnvironment.autoSetupOpenHorizonMesh:
-              action = this.setupOpenHorizonMesh(params, pEnv.ANAX)
+              action[setup] = this.setupOpenHorizonMesh(params, pEnv.ANAX)
               break;  
           }
-          action
+          forkJoin(action)
           .subscribe({
             next: (msg) => console.log('next here'),
             complete: () => {
@@ -974,9 +977,7 @@ export class Utils {
   }
   setupOpenHorizonMesh(params: IAutoParam, anax: string) {
     return new Observable((observer) => {
-      const pEnv = process.env;
-      let nodeId = pEnv.HZN_CUSTOM_NODE_ID ? pEnv.HZN_CUSTOM_NODE_ID : '';
-      this.installHznCli(anax, nodeId, pEnv.HZN_CSS)
+      this.installCliOnly(anax)
       .subscribe({
         complete: () => {
           const k8s = params.k8s;
@@ -1014,9 +1015,6 @@ export class Utils {
         } 
       })  
     })
-  }
-  installKube(kube: string) {
-
   }
   installCliOnly(anax: string) {
     const tarFile = process.platform == 'darwin' ? installTar['darwin'] : installTar[os.arch()];
