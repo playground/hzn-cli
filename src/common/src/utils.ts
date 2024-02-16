@@ -990,7 +990,7 @@ export class Utils {
             arg = `curl -sfL https://get.k3s.io | sh - && 
                   echo export KUBECONFIG=/home/mesh/.kube/config >> ~/.bashrc && 
                   mkdir -p ~/.kube && 
-                  source ~/.bashrc && 
+                  . ~/.bashrc && 
                   sudo systemctl restart k3s && 
                   systemctl status k3s && 
                   sudo ${k8s.toLowerCase()} kubectl config view --raw > ${pEnv.KUBECONFIG}`
