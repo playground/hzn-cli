@@ -254,8 +254,11 @@ npm --version
 echo -e "==> Update npm to latest version, if this stuck then terminate (CTRL+C) the execution"
 npm install -g npm
 
-echo "==> Installing oh cli"
-npm i -g hzn-cli
+if [ "$1" = '--skip-hzn-cli' ]; then
+else
+	echo "==> Installing oh cli"
+	npm i -g hzn-cli
+fi
 
 echo "==> Checking oh version"
 oh --version
