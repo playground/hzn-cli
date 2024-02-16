@@ -975,6 +975,9 @@ export class Utils {
     arg += ':'
     return this.shell(arg)
   }
+  uninstallK3s() {
+    return this.shell(`/usr/local/bin/k3s-uninstall.sh`);
+  }
   setupOpenHorizonMesh(params: IAutoParam, anax: string) {
     return new Observable((observer) => {
       const pEnv = process.env;
@@ -984,7 +987,7 @@ export class Utils {
           const k8s = params.k8s;
           let arg = '';
           if(k8s == 'K3S') {
-            arg = `curl -sfL https://get.k3s.io | sh - && systemctl status k3s && mkdir ~/.kube 2>$1 && sudo ${k8s.toLowerCase()} kubectl config view --raw > ${pEnv.KUBECONFIG}`
+            arg = `curl -sfL https://get.k3s.io | sh - && systemctl status k3s && mkdir ~/.kube && sudo ${k8s.toLowerCase()} kubectl config view --raw > ${pEnv.KUBECONFIG}`
           } else if(k8s == 'K8S') {
 
           }
