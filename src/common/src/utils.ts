@@ -1007,8 +1007,10 @@ export class Utils {
                       palmctl config endpoint --url ${pEnv.MESH_ENDPOINT} && 
                       palmctl get openhorizon && 
                       tar -xvzf openhorizon-agent-install-files.tar.gz && 
+                      rm agent-install.sh && 
+                      wget https://raw.githubusercontent.com/open-horizon/anax/master/agent-install/agent-install.sh && 
                       chmod 755 agent-install.sh && 
-                      sudo -s -E ${pEnv.PWD}/agent-install.sh -D cluster -u "${pEnv.HZN_EXCHANGE_USER_AUTH}" --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ${pEnv.PWD}/agent-install.cfg -c 'css:'`;
+                      sudo -s -E ${pEnv.PWD}/agent-install.sh -D cluster -u "${pEnv.HZN_EXCHANGE_USER_AUTH}" --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ${pEnv.PWD}/agent-install.cfg -i 'remote:2.31.0-1482' -c 'css:'`;
                 this.shell(arg)
                 .subscribe({
                   complete: () => {
