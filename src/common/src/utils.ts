@@ -987,8 +987,13 @@ export class Utils {
           const k8s = params.k8s;
           let arg = '';
           if(k8s == 'K3S') {
+            const bashrc = `~/.bashrc`;
+            let kubeConfig = '';
+            if(bashrc.indexOf('export KUBECONFIG=') < 0) {
+              kubeConfig = 'echo export KUBECONFIG=/home/mesh/.kube/config >> ~/.bashrc && ';
+            }
             arg = `curl -sfL https://get.k3s.io | sh - && 
-                  echo export KUBECONFIG=/home/mesh/.kube/config >> ~/.bashrc && 
+                  ${kubeConfig}
                   mkdir -p ~/.kube && 
                   . ~/.bashrc && 
                   sudo systemctl restart k3s && 
@@ -1010,14 +1015,11 @@ export class Utils {
                       rm agent-install.sh && 
                       wget https://raw.githubusercontent.com/open-horizon/anax/master/agent-install/agent-install.sh && 
                       chmod 755 agent-install.sh && 
-                      export IMAGE_ON_EDGE_CLUSTER_REGISTRY=${pEnv.IMAGE_ON_EDGE_CLUSTER_REGISTRY} && 
-                      export EDGE_CLUSTER_REGISTRY_TOKEN=${pEnv.EDGE_CLUSTER_REGISTRY_TOKEN} && 
-                      export EDGE_CLUSTER_REGISTRY_USERNAME=${pEnv.EDGE_CLUSTER_REGISTRY_USERNAME} && 
-                      export EDGE_CLUSTER_STORAGE_CLASS=${pEnv.EDGE_CLUSTER_STORAGE_CLASS} && 
-                      export ENABLE_AUTO_UPGRADE_CRONJOB=${pEnv.ENABLE_AUTO_UPGRADE_CRONJOB} && 
-                      export USE_EDGE_CLUSTER_REGISTRY=${pEnv.USE_EDGE_CLUSTER_REGISTRY} && 
                       sudo -s -E ${pEnv.PWD}/agent-install.sh -D cluster -u "${pEnv.HZN_EXCHANGE_USER_AUTH}" --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ${pEnv.PWD}/agent-install.cfg -i 'remote:2.31.0-1482' -c 'css:'`;
-                this.shell(arg)
+                this.shell(arg, 'command executed successfully', 'command failed', true, {
+                  maxBuffer: 1024 * 2000,
+                  env: pEnv
+                })
                 .subscribe({
                   complete: () => {
                     observer.next();
@@ -2348,7 +2350,7 @@ export class Utils {
       })
     })  
   }
-  shell(arg: string, success='command executed successfully', error='command failed', prnStdout=true, options={maxBuffer: 1024 * 2000}) {
+  shell(arg: string, success='command executed successfully', error='command failed', prnStdout=true, options:any={maxBuffer: 1024 * 2000}) {
     return new Observable((observer) => {
       console.log(arg);
       let child = exec(arg, options, (err: any, stdout: any, stderr: any) => {
