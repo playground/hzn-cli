@@ -1002,7 +1002,7 @@ export class Utils {
             .subscribe({
               complete: ()=> {
                 arg = `curl -sSfLO https://github.com/IBM/palmctl/releases/latest/download/${pEnv.PALMCTL_FILE_NAME} && palmctl config user --token ${pEnv.MESH_API_KEY} && 
-                      sudo apt install "${pEnv.PWD}/${pEnv.PALMCTL_FILE_NAME}"
+                      sudo apt install ${pEnv.PWD}/${pEnv.PALMCTL_FILE_NAME} && 
                       palmctl config endpoint --url ${pEnv.MESH_ENDPOINT} && 
                       palmctl get openhorizon && 
                       tar -xvzf openhorizon-agent-install-files.tar.gz && 
