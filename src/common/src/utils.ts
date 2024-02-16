@@ -987,7 +987,7 @@ export class Utils {
           const k8s = params.k8s;
           let arg = '';
           if(k8s == 'K3S') {
-            const bashrc = `~/.bashrc`;
+            const bashrc = readFileSync(`~/.bashrc`);
             let kubeConfig = '';
             if(bashrc.indexOf('export KUBECONFIG=') < 0) {
               kubeConfig = 'echo export KUBECONFIG=/home/mesh/.kube/config >> ~/.bashrc && ';
@@ -1018,7 +1018,7 @@ export class Utils {
                       sudo -s -E ${pEnv.PWD}/agent-install.sh -D cluster -u "${pEnv.HZN_EXCHANGE_USER_AUTH}" --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ${pEnv.PWD}/agent-install.cfg -i 'remote:2.31.0-1482' -c 'css:'`;
                 this.shell(arg, 'command executed successfully', 'command failed', true, {
                   maxBuffer: 1024 * 2000,
-                  env: pEnv
+                  env: {...pEnv}
                 })
                 .subscribe({
                   complete: () => {
