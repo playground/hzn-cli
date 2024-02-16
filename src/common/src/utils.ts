@@ -1008,7 +1008,7 @@ export class Utils {
                       palmctl get openhorizon && 
                       tar -xvzf openhorizon-agent-install-files.tar.gz && 
                       chmod 755 agent-install.sh && 
-                      sudo -s -E ./agent-install.sh -D cluster -u ${pEnv.HZN_EXCHANGE_USER_AUTH} --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ./agent-install.cfg -i 'remote:2.31.0-1482' -c 'css:'`;
+                      sudo -s -E ${pEnv.PWD}/agent-install.sh -D cluster -u ${pEnv.HZN_EXCHANGE_USER_AUTH} --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ${pEnv.PWD}/agent-install.cfg -i 'remote:2.31.0-1482' -c 'css:'`;
                 this.shell(arg)
                 .subscribe({
                   complete: () => {
