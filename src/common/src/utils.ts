@@ -976,7 +976,7 @@ export class Utils {
     return this.shell(arg)
   }
   uninstallK3s() {
-    return this.shell(`/usr/local/bin/k3s-uninstall.sh`);
+    return this.shell(`sudo systemctl stop k3s && /usr/local/bin/k3s-uninstall.sh`);
   }
   setupOpenHorizonMesh(params: IAutoParam, anax: string) {
     return new Observable((observer) => {
@@ -987,7 +987,13 @@ export class Utils {
           const k8s = params.k8s;
           let arg = '';
           if(k8s == 'K3S') {
-            arg = `curl -sfL https://get.k3s.io | sh - && systemctl status k3s && mkdir ~/.kube && sudo ${k8s.toLowerCase()} kubectl config view --raw > ${pEnv.KUBECONFIG}`
+            arg = `curl -sfL https://get.k3s.io | sh - && 
+                  echo export KUBECONFIG=/home/mesh/.kube/config >> ~/.bashrc && 
+                  mkdir ~/.kube && 
+                  source ~/.bashrc && 
+                  sudo systemctl restart k3s && 
+                  systemctl status k3s && 
+                  sudo ${k8s.toLowerCase()} kubectl config view --raw > ${pEnv.KUBECONFIG}`
           } else if(k8s == 'K8S') {
 
           }
@@ -996,6 +1002,7 @@ export class Utils {
             .subscribe({
               complete: ()=> {
                 arg = `curl -sSfLO https://github.com/IBM/palmctl/releases/latest/download/${pEnv.PALMCTL_FILE_NAME} && palmctl config user --token ${pEnv.MESH_API_KEY} && 
+                      sudo apt install "${pEnv.PWD}/${pEnv.PALMCTL_FILE_NAME}"
                       palmctl config endpoint --url ${pEnv.MESH_ENDPOINT} && 
                       palmctl get openhorizon && 
                       tar -xvzf openhorizon-agent-install-files.tar.gz && 
