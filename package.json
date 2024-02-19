@@ -1,6 +1,6 @@
 {
   "name": "hzn-cli",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Open Horizon CLI toolkit helps streamline the process of preparing node agents and perform tasks between orgs environments",
   "main": "./build/index.js",
   "bin": {
@@ -11,6 +11,7 @@
     "start": "nodemon -e ts --watch 'src/**/*.ts' --exec 'npm run build'",
     "build": "npx tsc && chmod +x build/*.js && chmod +x build/**/*.js && cp src/env-* build/common/src && cp -r src/hzn-config build/common/src",
     "build:watch": "onchange 'src/**/*.ts' -- npm run build",
+    "test:local": "bash ./install.sh --skip-hzn-cli",
     "local": "npm run build && npm i -g && oh && npm run postinstall",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install",
     "publishObjectPolicy": "oh deploy publishMMSObjectPolicy --object=/Users/jeff/Downloads/demo-model/demo/version1/model.zip",

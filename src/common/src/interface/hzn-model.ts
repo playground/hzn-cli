@@ -4,7 +4,7 @@ export const justRun = [
   'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodes', 'listOrg', 'listNodePattern', 'listObject', 'listPattern', 
   'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'publishMMSObject', 'publishMMSObjectPattern', 'publishMMSObjectPolicy', 
   'register', 'removeDeploymentPolicy', 'removeObject', 'removeOrg', 
-  'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition'
+  'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition', 'unregisterMeshAgent'
 ];
 export const promptForUpdate = [
   'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister', 
@@ -16,11 +16,11 @@ export const customRun = [
   'autoListPolicy',
   'autoSetup', 'autoSetupAllInOne', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer',
   'autoRegisterWithPolicy', 'autoRegisterWithPattern', 'autoUnregister', 'autoUpdateConfigFiles', 'autoUpdateNodePolicy',
-  'cleanUp', 'clearUnconfiguring', 'purgeManagementHub'
+  'cleanUp', 'clearUnconfiguring', 'purgeManagementHub', 'autoSetupOpenHorizonMesh'
 ];
 export const runDirectly = [
   'appendSupport', 'deleteObject', 'removeCliContainer', 'removeAnaxContainer', 'stopRemoveContainer', 
-  'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent'
+  'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent', 'uninstallK3s'
 ];
 export const loop = [
   'addPolicy', 'editPolicy', 'reviewPolicy', 'reviewServiceDefinition'
@@ -56,7 +56,8 @@ export enum SetupEnvironment {
   autoSetupCliInContainer = 3,
   autoSetupContainer = 4,
   autoSetupAllInOne = 5,
-  autoUpdateConfigFiles = 6
+  autoUpdateConfigFiles = 6,
+  autoSetupOpenHorizonMesh = 7
 }
 export enum AutoCommand {
   autoPublishService = 0,
@@ -117,10 +118,22 @@ export const configTemplate = {
     },
     "credential": {
       "HZN_ORG_ID": "",
+      "HZN_DEVICE_ID": "fyre-cluster-frontend-ns-agent",
       "HZN_EXCHANGE_USER_AUTH": "",
       "HZN_EXCHANGE_URL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-exchange/v1",
       "HZN_FSS_CSSURL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-css",
-      "ANAX": "api/v1/objects/IBM/agent_files/agent-install.sh/data"
+      "ANAX": "api/v1/objects/IBM/agent_files/agent-install.sh/data",
+      "MESH_API_KEY": "",
+      "MESH_ENDPOINT": "https://mcnm-preprod.multicloud-mesh-preprod.test.cloud.ibm.com",
+      "PALMCTL_FILE_NAME": "palmctl_latest_amd64.deb",
+      "USE_EDGE_CLUSTER_REGISTRY": false,
+      "ENABLE_AUTO_UPGRADE_CRONJOB": false,
+      "IMAGE_ON_EDGE_CLUSTER_REGISTRY": "docker.io/openhorizon/amd64_anax_k8s",
+      "EDGE_CLUSTER_REGISTRY_USERNAME": "",
+      "EDGE_CLUSTER_REGISTRY_TOKEN": "",
+      "EDGE_CLUSTER_STORAGE_CLASS": "local-path",
+      "AGENT_NAMESPACE": "frontend-test-ns",
+      "KUBECONFIG": "$HOME/.kube/config"
     },
     "metaVars": {
     }
@@ -152,6 +165,7 @@ export const configTemplate = {
 export interface IAutoParam {
   configFile: string;
   object: Object;
+  k8s: string;
 }
 export interface IHznParam {
   org: string;
@@ -166,6 +180,7 @@ export interface IHznParam {
   filter?: string;
   policy: IPolicy;
   configFile: string;
+  k8s: string;
 }
 export interface IPolicy {
   envVar: string;

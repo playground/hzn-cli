@@ -12,6 +12,7 @@ declare type Options = {
     filter: string | undefined;
     skip_config_update: string | undefined;
     config_file: string | undefined;
+    k8s: string | undefined;
 };
 export declare const command: string;
 export declare const desc: string;
