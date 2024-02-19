@@ -44,6 +44,7 @@ export declare class Hzn {
     publishPattern(): Observable<unknown>;
     publishMMSService(): Observable<unknown>;
     publishMMSPattern(): Observable<unknown>;
+    registerMeshAgent(): Observable<unknown>;
     unregisterMeshAgent(): Observable<unknown>;
     unregisterAgent(): Observable<unknown>;
     register(): Observable<unknown>;
