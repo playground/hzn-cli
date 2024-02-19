@@ -34,7 +34,8 @@ export declare enum SetupEnvironment {
     autoSetupCliInContainer = 3,
     autoSetupContainer = 4,
     autoSetupAllInOne = 5,
-    autoUpdateConfigFiles = 6
+    autoUpdateConfigFiles = 6,
+    autoSetupOpenHorizonMesh = 7
 }
 export declare enum AutoCommand {
     autoPublishService = 0,
@@ -94,10 +95,22 @@ export declare const configTemplate: {
         };
         credential: {
             HZN_ORG_ID: string;
+            HZN_DEVICE_ID: string;
             HZN_EXCHANGE_USER_AUTH: string;
             HZN_EXCHANGE_URL: string;
             HZN_FSS_CSSURL: string;
             ANAX: string;
+            MESH_API_KEY: string;
+            MESH_ENDPOINT: string;
+            PALMCTL_FILE_NAME: string;
+            USE_EDGE_CLUSTER_REGISTRY: boolean;
+            ENABLE_AUTO_UPGRADE_CRONJOB: boolean;
+            IMAGE_ON_EDGE_CLUSTER_REGISTRY: string;
+            EDGE_CLUSTER_REGISTRY_USERNAME: string;
+            EDGE_CLUSTER_REGISTRY_TOKEN: string;
+            EDGE_CLUSTER_STORAGE_CLASS: string;
+            AGENT_NAMESPACE: string;
+            KUBECONFIG: string;
         };
         metaVars: {};
     };
@@ -127,6 +140,7 @@ export declare const configTemplate: {
 export interface IAutoParam {
     configFile: string;
     object: Object;
+    k8s: string;
 }
 export interface IHznParam {
     org: string;
@@ -141,6 +155,7 @@ export interface IHznParam {
     filter?: string;
     policy: IPolicy;
     configFile: string;
+    k8s: string;
 }
 export interface IPolicy {
     envVar: string;

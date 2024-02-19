@@ -185,6 +185,9 @@ class Hzn {
         const arg = `hzn exchange pattern publish -f ${this.mmsPatternJson}`;
         return exports.utils.shell(arg, 'done publishing mss pattern', 'failed to publish mms pattern', false);
     }
+    unregisterMeshAgent() {
+        return exports.utils.unregisterMeshAgent();
+    }
     unregisterAgent() {
         return exports.utils.unregisterAgent(true);
     }

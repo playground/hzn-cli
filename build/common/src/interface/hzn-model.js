@@ -7,7 +7,7 @@ exports.justRun = [
     'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodes', 'listOrg', 'listNodePattern', 'listObject', 'listPattern',
     'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'publishMMSObject', 'publishMMSObjectPattern', 'publishMMSObjectPolicy',
     'register', 'removeDeploymentPolicy', 'removeObject', 'removeOrg',
-    'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition'
+    'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition', 'unregisterMeshAgent'
 ];
 exports.promptForUpdate = [
     'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister',
@@ -19,11 +19,11 @@ exports.customRun = [
     'autoListPolicy',
     'autoSetup', 'autoSetupAllInOne', 'autoSetupCliOnly', 'autoSetupCliInContainer', 'autoSetupAnaxInContainer', 'autoSetupContainer',
     'autoRegisterWithPolicy', 'autoRegisterWithPattern', 'autoUnregister', 'autoUpdateConfigFiles', 'autoUpdateNodePolicy',
-    'cleanUp', 'clearUnconfiguring', 'purgeManagementHub'
+    'cleanUp', 'clearUnconfiguring', 'purgeManagementHub', 'autoSetupOpenHorizonMesh'
 ];
 exports.runDirectly = [
     'appendSupport', 'deleteObject', 'removeCliContainer', 'removeAnaxContainer', 'stopRemoveContainer',
-    'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent'
+    'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent', 'uninstallK3s'
 ];
 exports.loop = [
     'addPolicy', 'editPolicy', 'reviewPolicy', 'reviewServiceDefinition'
@@ -61,6 +61,7 @@ var SetupEnvironment;
     SetupEnvironment[SetupEnvironment["autoSetupContainer"] = 4] = "autoSetupContainer";
     SetupEnvironment[SetupEnvironment["autoSetupAllInOne"] = 5] = "autoSetupAllInOne";
     SetupEnvironment[SetupEnvironment["autoUpdateConfigFiles"] = 6] = "autoUpdateConfigFiles";
+    SetupEnvironment[SetupEnvironment["autoSetupOpenHorizonMesh"] = 7] = "autoSetupOpenHorizonMesh";
 })(SetupEnvironment = exports.SetupEnvironment || (exports.SetupEnvironment = {}));
 var AutoCommand;
 (function (AutoCommand) {
@@ -122,10 +123,22 @@ exports.configTemplate = {
         },
         "credential": {
             "HZN_ORG_ID": "",
+            "HZN_DEVICE_ID": "fyre-cluster-frontend-ns-agent",
             "HZN_EXCHANGE_USER_AUTH": "",
             "HZN_EXCHANGE_URL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-exchange/v1",
             "HZN_FSS_CSSURL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-css",
-            "ANAX": "api/v1/objects/IBM/agent_files/agent-install.sh/data"
+            "ANAX": "api/v1/objects/IBM/agent_files/agent-install.sh/data",
+            "MESH_API_KEY": "",
+            "MESH_ENDPOINT": "https://mcnm-preprod.multicloud-mesh-preprod.test.cloud.ibm.com",
+            "PALMCTL_FILE_NAME": "palmctl_latest_amd64.deb",
+            "USE_EDGE_CLUSTER_REGISTRY": false,
+            "ENABLE_AUTO_UPGRADE_CRONJOB": false,
+            "IMAGE_ON_EDGE_CLUSTER_REGISTRY": "docker.io/openhorizon/amd64_anax_k8s",
+            "EDGE_CLUSTER_REGISTRY_USERNAME": "",
+            "EDGE_CLUSTER_REGISTRY_TOKEN": "",
+            "EDGE_CLUSTER_STORAGE_CLASS": "local-path",
+            "AGENT_NAMESPACE": "frontend-test-ns",
+            "KUBECONFIG": "$HOME/.kube/config"
         },
         "metaVars": {}
     },

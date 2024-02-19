@@ -28,7 +28,8 @@ const builder = (yargs) => yargs
     watch: { type: 'string', desc: 'watch = true/false' },
     filter: { type: 'string', desc: 'filter search result = arm, amd64, arm64 & etc' },
     skip_config_update: { type: 'string', desc: 'Do not prompt for config updates = true/false' },
-    config_file: { type: 'string', desc: 'Provide config json file for auto setup' }
+    config_file: { type: 'string', desc: 'Provide config json file for auto setup' },
+    k8s: { type: 'string', desc: 'Provide type of cluster to install' }
 })
     .positional('action', {
     type: 'string',
@@ -39,7 +40,7 @@ exports.builder = builder;
 const handler = (argv) => {
     (0, clear_1.default)();
     console.log(chalk_1.default.greenBright(figlet_1.default.textSync('hzn-cli', { horizontalLayout: 'full' })));
-    const { action, org, config_path, name, object_type, object_id, object, pattern, watch, filter, skip_config_update, config_file } = argv;
+    const { action, org, config_path, name, object_type, object_id, object, pattern, watch, filter, skip_config_update, config_file, k8s } = argv;
     let env = org || '';
     const n = name || '';
     const objType = object_type || '';
@@ -65,7 +66,8 @@ const handler = (argv) => {
                 action: action,
                 watch: watch && watch === 'true' ? 'watch ' : '',
                 filter: filter,
-                configFile: config_file || ''
+                configFile: config_file || '',
+                k8s: k8s || ''
             };
             const hzn = new hzn_1.Hzn(hznModel);
             hzn.init()
@@ -126,7 +128,7 @@ const handler = (argv) => {
         }
         else if (interface_1.customRun.indexOf(action) >= 0) {
             console.log(action);
-            const params = { configFile: config_file, object: obj };
+            const params = { configFile: config_file, object: obj, k8s: k8s };
             hzn_1.utils[action](params)
                 .subscribe({
                 next: (msg) => console.log(msg),

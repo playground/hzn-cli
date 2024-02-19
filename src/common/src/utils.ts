@@ -978,6 +978,11 @@ export class Utils {
   uninstallK3s() {
     return this.shell(`sudo systemctl stop k3s && /usr/local/bin/k3s-uninstall.sh`);
   }
+  unregisterMeshAgent() {
+    const pEnv = process.env;
+    const arg = `curl -sL --insecure -u $HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH -X DELETE ${pEnv.MESH_ENDPOINT}/v1/orgs/${pEnv.HZN_ORG_ID}/nodes/${pEnv.HZN_DEVICE_ID}`;
+    return this.shell(arg);
+  }
   setupOpenHorizonMesh(params: IAutoParam, anax: string) {
     return new Observable((observer) => {
       const pEnv = process.env;
@@ -987,10 +992,10 @@ export class Utils {
           const k8s = params.k8s;
           let arg = '';
           if(k8s == 'K3S') {
-            const bashrc = readFileSync(`${this.homePath}/.bashrc`);
             let kubeConfig = '';
+            const bashrc = readFileSync(`${this.homePath}/.bashrc`);
             if(bashrc.indexOf('export KUBECONFIG=') < 0) {
-              kubeConfig = 'echo export KUBECONFIG=/home/mesh/.kube/config >> ~/.bashrc && ';
+              kubeConfig = 'echo export KUBECONFIG=$HOME/.kube/config >> $HOME/.bashrc && ';
             }
             arg = `curl -sfL https://get.k3s.io | sh - && 
                   ${kubeConfig}
@@ -1014,16 +1019,20 @@ export class Utils {
                       tar -xvzf openhorizon-agent-install-files.tar.gz && 
                       rm agent-install.sh && 
                       wget https://raw.githubusercontent.com/open-horizon/anax/master/agent-install/agent-install.sh && 
-                      chmod 755 agent-install.sh && 
-                      sudo -s -E ${pEnv.PWD}/agent-install.sh -D cluster -u "${pEnv.HZN_EXCHANGE_USER_AUTH}" --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ${pEnv.PWD}/agent-install.cfg -i 'remote:2.31.0-1482' -c 'css:'`;
-                this.shell(arg, 'command executed successfully', 'command failed', true, {
-                  maxBuffer: 1024 * 2000,
-                  env: {...pEnv}
-                })
+                      chmod 755 agent-install.sh`;
+                this.shell(arg)
                 .subscribe({
                   complete: () => {
-                    observer.next();
-                    observer.complete();
+                    //arg = `KUBECONFIG="${pEnv.KUBECONFIG}" IMAGE_ON_EDGE_CLUSTER_REGISTRY="${pEnv.IMAGE_ON_EDGE_CLUSTER_REGISTRY}" EDGE_CLUSTER_REGISTRY_USERNAME="${pEnv.EDGE_CLUSTER_REGISTRY_USERNAME}" EDGE_CLUSTER_REGISTRY_TOKEN="${pEnv.EDGE_CLUSTER_REGISTRY_TOKEN}" USE_EDGE_CLUSTER_REGISTRY="${pEnv.USE_EDGE_CLUSTER_REGISTRY}" ENABLE_AUTO_UPGRADE_CRONJOB="${pEnv.ENABLE_AUTO_UPGRADE_CRONJOB}" EDGE_CLUSTER_STORAGE_CLASS="${pEnv.EDGE_CLUSTER_STORAGE_CLASS}"`;
+                    arg = `sudo -s -E ${pEnv.PWD}/agent-install.sh -D cluster -u "${pEnv.HZN_EXCHANGE_USER_AUTH}" --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ${pEnv.PWD}/agent-install.cfg -i 'remote:2.31.0-1482' -c 'css:'`;
+                    this.shell(arg)
+                    .subscribe({
+                      complete: () => {
+                        observer.next();
+                        observer.complete();
+                      },
+                      error: (err) => observer.error(err)
+                    })
                   },
                   error: (err) => observer.error(err)
                 })
