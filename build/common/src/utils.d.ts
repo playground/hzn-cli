@@ -23,7 +23,7 @@ export declare class Utils {
     installAnaxInContainer(configJson: any): Observable<unknown>;
     installCliInContainer(configJson: any): Observable<unknown>;
     updateConfig(configFile: string): Observable<unknown>;
-    proceedWithAutoInstall(params: IAutoParam, setup: SetupEnvironment): Observable<unknown>;
+    proceedWithAutoInstall(params: IAutoParam, setup: SetupEnvironment, purge?: boolean): Observable<unknown>;
     autoRun(params: IAutoParam, setup: SetupEnvironment): Observable<unknown>;
     setEnvFromEnvLocal(): void;
     setEnvFromConfig(configFile: string): Observable<unknown>;
@@ -76,7 +76,7 @@ export declare class Utils {
     aptUpdate(): Observable<unknown>;
     installPrereq(): Observable<unknown>;
     clearUnconfiguring(): Observable<unknown>;
-    purgeManagementHub(): Observable<unknown>;
+    purgeManagementHub(purge: boolean): Observable<unknown>;
     cleanUp(): Observable<unknown>;
     uninstallK3s(): Observable<unknown>;
     unregisterMeshAgent(): Observable<unknown>;

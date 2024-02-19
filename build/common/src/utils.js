@@ -361,10 +361,10 @@ class Utils {
             }
         });
     }
-    proceedWithAutoInstall(params, setup) {
+    proceedWithAutoInstall(params, setup, purge = true) {
         return new rxjs_1.Observable((observer) => {
             // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
-            this.purgeManagementHub() // Leverage this function to cleanup and install prerequisites, maynot need preInstallHznCli anymore
+            this.purgeManagementHub(purge) // Leverage this function to cleanup and install prerequisites, maynot need preInstallHznCli anymore
                 .subscribe({
                 complete: () => {
                     const pEnv = process.env;
@@ -422,6 +422,7 @@ class Utils {
                 observer.complete();
             }
             else if (setup == interface_1.SetupEnvironment.autoSetupAllInOne || setup == interface_1.SetupEnvironment.autoSetupCliInContainer || setup == interface_1.SetupEnvironment.autoSetupAnaxInContainer || setup == interface_1.SetupEnvironment.autoSetupContainer || setup == interface_1.SetupEnvironment.autoSetupOpenHorizonMesh) {
+                const purge = setup != interface_1.SetupEnvironment.autoSetupOpenHorizonMesh;
                 let configJson;
                 this.updateConfig(configFile)
                     .subscribe({
@@ -435,7 +436,7 @@ class Utils {
                         Object.keys(org).forEach((key) => {
                             pEnv[key] = org[key];
                         });
-                        this.proceedWithAutoInstall(params, setup)
+                        this.proceedWithAutoInstall(params, setup, purge)
                             .subscribe({
                             complete: () => {
                                 observer.next('');
@@ -968,8 +969,8 @@ class Utils {
         const arg = `docker exec horizon1 rm -rf /var/horizon/anax.db`;
         return this.shell(arg);
     }
-    purgeManagementHub() {
-        if (os_1.default.arch() == 'x64' || process.platform == 'darwin') {
+    purgeManagementHub(purge) {
+        if (purge && (os_1.default.arch() == 'x64' || process.platform == 'darwin')) {
             const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`;
             return this.shell(arg);
         }
@@ -992,7 +993,7 @@ class Utils {
     }
     unregisterMeshAgent() {
         const pEnv = process.env;
-        const arg = `curl -sL --insecure -u $HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH -X DELETE ${pEnv.MESH_ENDPOINT}/v1/orgs/${pEnv.HZN_ORG_ID}/nodes/${pEnv.HZN_DEVICE_ID}`;
+        const arg = `curl -sL --insecure -u ${pEnv.HZN_ORG_ID}/${pEnv.HZN_EXCHANGE_USER_AUTH} -X DELETE ${pEnv.MESH_ENDPOINT}/v1/orgs/${pEnv.HZN_ORG_ID}/nodes/${pEnv.HZN_DEVICE_ID}`;
         return this.shell(arg);
     }
     setupOpenHorizonMesh(params, anax) {
