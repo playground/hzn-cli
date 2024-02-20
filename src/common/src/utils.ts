@@ -1016,7 +1016,7 @@ export class Utils {
       palmctl config user --token ${pEnv.MESH_API_KEY} && 
       palmctl config endpoint --url ${pEnv.MESH_ENDPOINT} && 
       cat ~/palmctl_config.yaml && 
-      sudo rm agent-*.* && 
+      sudo rm -f /p/a/t/h agent-*.* && 
       palmctl get openhorizon && 
       tar -xvzf openhorizon-agent-install-files.tar.gz && 
       rm agent-install.sh && 
