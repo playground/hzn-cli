@@ -1015,6 +1015,8 @@ export class Utils {
       sudo apt-get install ${pEnv.PWD}/${pEnv.PALMCTL_FILE_NAME} && 
       palmctl config user --token ${pEnv.MESH_API_KEY} && 
       palmctl config endpoint --url ${pEnv.MESH_ENDPOINT} && 
+      cat ~/palmctl_config.yaml && 
+      sudo rm agent-*.* && 
       palmctl get openhorizon && 
       tar -xvzf openhorizon-agent-install-files.tar.gz && 
       rm agent-install.sh && 
