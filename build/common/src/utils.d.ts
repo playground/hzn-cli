@@ -23,7 +23,7 @@ export declare class Utils {
     installAnaxInContainer(configJson: any): Observable<unknown>;
     installCliInContainer(configJson: any): Observable<unknown>;
     updateConfig(configFile: string): Observable<unknown>;
-    proceedWithAutoInstall(setup: SetupEnvironment): Observable<unknown>;
+    proceedWithAutoInstall(params: IAutoParam, setup: SetupEnvironment, purge?: boolean): Observable<unknown>;
     autoRun(params: IAutoParam, setup: SetupEnvironment): Observable<unknown>;
     setEnvFromEnvLocal(): void;
     setEnvFromConfig(configFile: string): Observable<unknown>;
@@ -44,6 +44,7 @@ export declare class Utils {
     autoSetupContainer(params: IAutoParam): Observable<unknown>;
     autoSetupAllInOne(params: IAutoParam): Observable<unknown>;
     autoUpdateConfigFiles(params: IAutoParam): Observable<unknown>;
+    autoSetupOpenHorizonMesh(params: IAutoParam): Observable<unknown>;
     getEtcDefault(): string;
     getHznConfig(): string;
     listAgreement(param: IHznParam): Observable<unknown>;
@@ -75,8 +76,13 @@ export declare class Utils {
     aptUpdate(): Observable<unknown>;
     installPrereq(): Observable<unknown>;
     clearUnconfiguring(): Observable<unknown>;
-    purgeManagementHub(): Observable<unknown>;
+    purgeManagementHub(purge: boolean): Observable<unknown>;
     cleanUp(): Observable<unknown>;
+    uninstallK3s(): Observable<unknown>;
+    unregisterMeshAgent(): Observable<unknown>;
+    installK3s(params: IAutoParam): Observable<unknown>;
+    registerMeshAgent(): Observable<unknown>;
+    setupOpenHorizonMesh(params: IAutoParam, anax: string): Observable<unknown>;
     installCliOnly(anax: string): Observable<unknown>;
     installHznCli(anax: string, id: string, css: any, deviceToken?: string): Observable<unknown>;
     uninstallHorizon(msg?: string, yes?: string): Observable<unknown>;
@@ -144,9 +150,7 @@ export declare class Utils {
     getJsonFromFile(jsonFile: string): any;
     editTypePolicy(filename: string): Observable<unknown>;
     isNodeConfigured(): Observable<unknown>;
-    shell(arg: string, success?: string, error?: string, prnStdout?: boolean, options?: {
-        maxBuffer: number;
-    }): Observable<unknown>;
+    shell(arg: string, success?: string, error?: string, prnStdout?: boolean, options?: any): Observable<unknown>;
     shell2(arg: string, success?: string, error?: string, prnStdout?: boolean, options?: {
         maxBuffer: number;
     }): Observable<unknown>;

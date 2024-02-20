@@ -17,12 +17,16 @@ then
 		ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 	fi
 	brew install socat jq
+else
+	echo "Update and install jq"
+	sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install jq
 fi
 
 ENV_SETUP=""
 CONFIG_FILE=""
+K8S_SETUP=""
 PS3='Choose your environment setup: '
-envsetup=("Cli-And-Anax" "CLI-Only" "CLI-In-Container" "Anax-In-Container" "Run-In-Containers" "All-In-One" "Confirm" "Quit")
+envsetup=("Cli-And-Anax" "CLI-Only" "CLI-In-Container" "Anax-In-Container" "Run-In-Containers" "All-In-One" "OH-Mesh" "Confirm" "Quit")
 select fav in "${envsetup[@]}"; do
 	case $fav in
 		"Cli-And-Anax")
@@ -55,6 +59,11 @@ select fav in "${envsetup[@]}"; do
 			ENV_SETUP=$fav
 			# optionally call a function or run some code here
 			;;
+		"OH-Mesh")
+			echo "$fav, Set up OH Agent with Mesh, choose <Confirm> to continue setup."
+			ENV_SETUP=$fav
+			# optionally call a function or run some code here
+			;;
 		"Confirm")
 			if [ "${ENV_SETUP}" = "" ]
 			then
@@ -72,6 +81,41 @@ select fav in "${envsetup[@]}"; do
     *) echo "invalid option $REPLY";;
   esac
 done
+
+if [ "${ENV_SETUP}" = "OH-Mesh" ]
+then
+	PS3='Choose your kube to install: '
+	k8ssetup=("None" "K3S" "K8S" "Confirm" "Quit")
+	select fav in "${k8ssetup[@]}"; do
+		case $fav in
+			"None")
+				echo "$fav, Kube is already setup."
+				K8S_SETUP="None"
+				# optionally call a function or run some code here
+				;;
+			"K3S")
+			echo "Setup $fav for OH Agent with Mesh, choose <Confirm> to continue setup."
+			K8S_SETUP=$fav
+			# optionally call a function or run some code here
+			;;
+			"K8S")
+			echo "Setup $fav for OH Agent with Mesh, choose <Confirm> to continue setup."
+			K8S_SETUP=$fav
+			# optionally call a function or run some code here
+			;;
+			"Confirm")
+					echo "You have chosen $K8S_SETUP for your setup."
+					break
+				# optionally call a function or run some code here
+				;;
+			"Quit")
+				echo "User requested exit"
+				exit
+				;;
+			*) echo "invalid option $REPLY";;
+		esac
+	done
+fi
 
 PS3='Continue with setup: '
 configfile=("Config-File" "Confirm" "Help" "Quit")
@@ -210,8 +254,13 @@ npm --version
 echo -e "==> Update npm to latest version, if this stuck then terminate (CTRL+C) the execution"
 npm install -g npm
 
-echo "==> Installing oh cli"
-npm i -g hzn-cli
+if [ "$1" = "--skip-hzn-cli" ] 
+then
+	echo "==> Skipping oh cli installation"
+else
+	echo "==> Installing oh cli"
+	npm i -g hzn-cli
+fi
 
 echo "==> Checking oh version"
 oh --version
@@ -243,6 +292,10 @@ elif [ "${ENV_SETUP}" = "All-In-One" ]
 then
 	echo "$ENV_SETUP, here we go."
 	oh deploy autoSetupAllInOne --config_file ${CONFIG_FILE}
+elif [ "${ENV_SETUP}" = "OH-Mesh" ]
+then
+	echo "$ENV_SETUP, here we go."
+	oh deploy autoSetupOpenHorizonMesh --config_file ${CONFIG_FILE} --k8s ${K8S_SETUP}
 else
 	echo "Something went wrong...$ENV_SETUP"
 	break

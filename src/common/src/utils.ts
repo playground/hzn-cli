@@ -2,7 +2,7 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from
 import jsonfile from 'jsonfile';
 import os from 'os';
 import prompt from 'prompt';
-import { firstValueFrom, Observable, of } from 'rxjs';
+import { firstValueFrom, Observable, of, forkJoin } from 'rxjs';
 import { URL } from 'url';
 
 import { Hzn, utils } from '.';
@@ -368,35 +368,44 @@ export class Utils {
       }
     })
   }
-  proceedWithAutoInstall(setup: SetupEnvironment) {
+  proceedWithAutoInstall(params: IAutoParam, setup: SetupEnvironment, purge = true) {
     return new Observable((observer) => {
       // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
-      this.purgeManagementHub() // Leverage this function to cleanup and install prerequisites, maynot need preInstallHznCli anymore
+      this.purgeManagementHub(purge) // Leverage this function to cleanup and install prerequisites, maynot need preInstallHznCli anymore
       .subscribe({
         complete: () => {
           const pEnv: any = process.env;
-          let action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
+          let action = {};
+          if(setup != SetupEnvironment.autoSetupOpenHorizonMesh) {
+            action['preReq'] = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
+          } 
           switch(setup) {
             case SetupEnvironment.autoSetup:
-              action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
+              //action = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
               break;
             case SetupEnvironment.autoSetupCliOnly:
-              action = this.installCliOnly(pEnv.ANAX)
+              action[setup] = this.installCliOnly(pEnv.ANAX)
               break;
             case SetupEnvironment.autoSetupAnaxInContainer:
-              action = this.installAnaxInContainer(this.configJson)
+              action[setup] = this.installAnaxInContainer(this.configJson)
               break;
             case SetupEnvironment.autoSetupCliInContainer:
-              action = this.installCliInContainer(this.configJson)
+              action[setup] = this.installCliInContainer(this.configJson)
               break;
             case SetupEnvironment.autoSetupContainer:
-              action = this.installCliAndAnaxInContainers(this.configJson)
+              action[setup] = this.installCliAndAnaxInContainers(this.configJson)
               break;
             case SetupEnvironment.autoSetupAllInOne:
-              action = this.setupManagementHub()
+              action[setup] = this.setupManagementHub()
               break;
-            }
-          action
+            case SetupEnvironment.autoSetupAllInOne:
+              action[setup] = this.setupManagementHub()
+              break;
+            case SetupEnvironment.autoSetupOpenHorizonMesh:
+              action[setup] = this.setupOpenHorizonMesh(params, pEnv.ANAX)
+              break;  
+          }
+          forkJoin(action)
           .subscribe({
             next: (msg) => console.log('next here'),
             complete: () => {
@@ -418,7 +427,8 @@ export class Utils {
       if(!configFile || configFile.length == 0 || !existsSync(configFile)) {
         observer.next('Please provide --config_file name')
         observer.complete()
-      } else if(setup == SetupEnvironment.autoSetupAllInOne || setup == SetupEnvironment.autoSetupCliInContainer || setup == SetupEnvironment.autoSetupAnaxInContainer || setup == SetupEnvironment.autoSetupContainer) {
+      } else if(setup == SetupEnvironment.autoSetupAllInOne || setup == SetupEnvironment.autoSetupCliInContainer || setup == SetupEnvironment.autoSetupAnaxInContainer || setup == SetupEnvironment.autoSetupContainer || setup == SetupEnvironment.autoSetupOpenHorizonMesh) {
+        const purge = setup != SetupEnvironment.autoSetupOpenHorizonMesh;
         let configJson
         this.updateConfig(configFile)
         .subscribe({
@@ -432,7 +442,7 @@ export class Utils {
             Object.keys(org).forEach((key) => {
               pEnv[key] = org[key]
             })
-            this.proceedWithAutoInstall(setup)
+            this.proceedWithAutoInstall(params, setup, purge)
             .subscribe({
               complete: () => {
                 observer.next('')
@@ -442,20 +452,6 @@ export class Utils {
             })      
           }
         })
-        //const config = jsonfile.readFileSync(configFile);
-        //const pEnv: any = process.env;
-        //const org = config.org
-        //Object.keys(org).forEach((key) => {
-        //  pEnv[key] = org[key]
-        //})
-        //this.proceedWithAutoInstall(setup)
-        //.subscribe({
-        //  complete: () => {
-        //    observer.next('')
-        //    observer.complete();              
-        //  },
-        //  error: (err) => observer.error(err)
-        //})  
       } else if(setup == SetupEnvironment.autoUpdateConfigFiles) {
         let configJson
         this.updateConfig(configFile)
@@ -516,7 +512,7 @@ export class Utils {
                   next: (resp: string) => answer = resp,
                   complete: () => {
                     if(answer === 'Y') {
-                      this.proceedWithAutoInstall(setup)
+                      this.proceedWithAutoInstall(params, setup)
                       .subscribe({
                         complete: () => {
                           observer.next('')
@@ -535,7 +531,7 @@ export class Utils {
                 })
               },
               error: (err) => {
-                this.proceedWithAutoInstall(setup)
+                this.proceedWithAutoInstall(params, setup)
                 .subscribe({
                   complete: () => {
                     observer.next('')
@@ -658,10 +654,10 @@ export class Utils {
                 case AutoCommand.autoUnregister:
                   action = utils.unregisterAgent(true)
                   break;
-                  case AutoCommand.autoListPolicy:
-                    action = utils.listPolicy()
-                    break;
-                  case AutoCommand.autoUpdateNodePolicy:
+                case AutoCommand.autoListPolicy:
+                  action = utils.listPolicy()
+                  break;
+                case AutoCommand.autoUpdateNodePolicy:
                   try {
                     let policy = params.object
                     let policyStr = ''
@@ -743,6 +739,9 @@ export class Utils {
   }  
   autoUpdateConfigFiles(params: IAutoParam) {
     return this.autoRun(params, SetupEnvironment.autoUpdateConfigFiles)    
+  }
+  autoSetupOpenHorizonMesh(params: IAutoParam) {
+    return this.autoRun(params, SetupEnvironment.autoSetupOpenHorizonMesh)    
   }  
   getEtcDefault() {
     return this.etcDefault
@@ -959,8 +958,8 @@ export class Utils {
     const arg = `docker exec horizon1 rm -rf /var/horizon/anax.db`
     return this.shell(arg)
   }
-  purgeManagementHub() {
-    if(os.arch() == 'x64' || process.platform == 'darwin') {
+  purgeManagementHub(purge: boolean) {
+    if(purge && (os.arch() == 'x64' || process.platform == 'darwin')) {
       const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`
       return this.shell(arg)  
     } else {
@@ -976,6 +975,101 @@ export class Utils {
     arg += existsSync(`/var/tmp/horizon`) ? `sudo rm -rf /var/tmp/horizon -y || true && ` : ''
     arg += ':'
     return this.shell(arg)
+  }
+  uninstallK3s() {
+    return this.shell(`sudo systemctl stop k3s && /usr/local/bin/k3s-uninstall.sh`);
+  }
+  unregisterMeshAgent() {
+    const pEnv = process.env;
+    const arg = `curl -sL --insecure -u $HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH -X DELETE ${pEnv.MESH_ENDPOINT}/v1/orgs/${pEnv.HZN_ORG_ID}/nodes/${pEnv.HZN_DEVICE_ID}`;
+    return this.shell(arg);
+  }
+  installK3s(params: IAutoParam) {
+    return new Observable((observer) => {
+      let kubeConfig = '';
+      const bashrc = readFileSync(`${this.homePath}/.bashrc`);
+      if(bashrc.indexOf('export KUBECONFIG=') < 0) {
+        kubeConfig = 'echo export KUBECONFIG=$HOME/.kube/config >> $HOME/.bashrc && ';
+      }
+      let arg = `curl -sfL https://get.k3s.io | sh - && 
+            ${kubeConfig}
+            mkdir -p ~/.kube && 
+            . ~/.bashrc && 
+            sudo systemctl restart k3s && 
+            systemctl status k3s && 
+            sudo k3s kubectl config view --raw > ${process.env.KUBECONFIG}`
+      this.shell(arg)
+      .subscribe({
+        complete: () => {
+          observer.next();
+          observer.complete();
+        },
+        error: (err) => observer.error(err)
+      })
+    })
+  }
+  registerMeshAgent() {
+    return new Observable((observer) => {
+      const pEnv = process.env;
+      let arg = `curl -sSfLO https://github.com/IBM/palmctl/releases/latest/download/${pEnv.PALMCTL_FILE_NAME} && 
+      sudo apt-get install -y --allow-downgrades ${pEnv.PWD}/${pEnv.PALMCTL_FILE_NAME} && 
+      palmctl config user --token ${pEnv.MESH_API_KEY} && 
+      palmctl config endpoint --url ${pEnv.MESH_ENDPOINT} && 
+      cat ~/palmctl_config.yaml && 
+      sudo rm agent-*.* && 
+      palmctl get openhorizon && 
+      tar -xvzf openhorizon-agent-install-files.tar.gz && 
+      rm agent-install.sh && 
+      wget https://raw.githubusercontent.com/open-horizon/anax/master/agent-install/agent-install.sh && 
+      chmod +x agent-install.sh && 
+      sudo -s -E ${pEnv.PWD}/agent-install.sh -D cluster -u "${pEnv.HZN_EXCHANGE_USER_AUTH}" --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ${pEnv.PWD}/agent-install.cfg -i "remote:2.31.0-1482" -c "css:"`;
+
+      this.shell(arg, 'command executed successfully', 'command failed', true, {maxBuffer: 4096 * 2000})
+      .subscribe({
+        complete: () => {
+          observer.next();
+          observer.complete();
+        },
+        error: (err) => observer.error(err)
+      })
+    })
+  }
+  setupOpenHorizonMesh(params: IAutoParam, anax: string) {
+    return new Observable((observer) => {
+      const pEnv = process.env;
+      //this.installCliOnly(anax)
+      //.subscribe({
+      //  complete: () => {
+          const k8s = params.k8s;
+          let arg = '';
+          let $shell: any;
+          if(k8s == 'K3S') {
+            $shell = this.installK3s(params);
+          } else if(k8s == 'K8S') {
+
+          }
+          if($shell) {
+            $shell
+            .subscribe({
+              complete: ()=> {
+                this.registerMeshAgent()
+                .subscribe({
+                  complete: () => {
+                    observer.next();
+                    observer.complete();
+                  },
+                  error: (err) => observer.error(err)
+                })
+              },
+              error: (err) => observer.error(err)
+            })
+          }
+        //},
+      //  error: (err) => {
+      //    observer.error(err)
+      //  } 
+      //})  
+    })
   }
   installCliOnly(anax: string) {
     const tarFile = process.platform == 'darwin' ? installTar['darwin'] : installTar[os.arch()];
@@ -2289,7 +2383,7 @@ export class Utils {
       })
     })  
   }
-  shell(arg: string, success='command executed successfully', error='command failed', prnStdout=true, options={maxBuffer: 1024 * 2000}) {
+  shell(arg: string, success='command executed successfully', error='command failed', prnStdout=true, options:any={maxBuffer: 1024 * 2000}) {
     return new Observable((observer) => {
       console.log(arg);
       let child = exec(arg, options, (err: any, stdout: any, stderr: any) => {
