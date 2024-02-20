@@ -4,7 +4,7 @@ export const justRun = [
   'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodes', 'listOrg', 'listNodePattern', 'listObject', 'listPattern', 
   'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'publishMMSObject', 'publishMMSObjectPattern', 'publishMMSObjectPolicy', 
   'register', 'removeDeploymentPolicy', 'removeObject', 'removeOrg', 
-  'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition', 'unregisterMeshAgent'
+  'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition', 'unregisterMeshAgent', "registerMeshAgent"
 ];
 export const promptForUpdate = [
   'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister', 
@@ -20,7 +20,7 @@ export const customRun = [
 ];
 export const runDirectly = [
   'appendSupport', 'deleteObject', 'removeCliContainer', 'removeAnaxContainer', 'stopRemoveContainer', 
-  'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent', 'uninstallK3s'
+  'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent', 'uninstallK3s', "installK3s"
 ];
 export const loop = [
   'addPolicy', 'editPolicy', 'reviewPolicy', 'reviewServiceDefinition'

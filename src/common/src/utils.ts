@@ -981,59 +981,82 @@ export class Utils {
   }
   unregisterMeshAgent() {
     const pEnv = process.env;
-    const arg = `curl -sL --insecure -u ${pEnv.HZN_ORG_ID}/${pEnv.HZN_EXCHANGE_USER_AUTH} -X DELETE ${pEnv.MESH_ENDPOINT}/v1/orgs/${pEnv.HZN_ORG_ID}/nodes/${pEnv.HZN_DEVICE_ID}`;
+    const arg = `curl -sL --insecure -u $HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH -X DELETE ${pEnv.MESH_ENDPOINT}/v1/orgs/${pEnv.HZN_ORG_ID}/nodes/${pEnv.HZN_DEVICE_ID}`;
     return this.shell(arg);
+  }
+  installK3s(params: IAutoParam) {
+    return new Observable((observer) => {
+      let kubeConfig = '';
+      const bashrc = readFileSync(`${this.homePath}/.bashrc`);
+      if(bashrc.indexOf('export KUBECONFIG=') < 0) {
+        kubeConfig = 'echo export KUBECONFIG=$HOME/.kube/config >> $HOME/.bashrc && ';
+      }
+      let arg = `curl -sfL https://get.k3s.io | sh - && 
+            ${kubeConfig}
+            mkdir -p ~/.kube && 
+            . ~/.bashrc && 
+            sudo systemctl restart k3s && 
+            systemctl status k3s && 
+            sudo k3s kubectl config view --raw > ${process.env.KUBECONFIG}`
+      this.shell(arg)
+      .subscribe({
+        complete: () => {
+          observer.next();
+          observer.complete();
+        },
+        error: (err) => observer.error(err)
+      })
+    })
+  }
+  registerMeshAgent() {
+    return new Observable((observer) => {
+      const pEnv = process.env;
+      let arg = `curl -sSfLO https://github.com/IBM/palmctl/releases/latest/download/${pEnv.PALMCTL_FILE_NAME} && 
+      sudo apt-get install -y --allow-downgrades ${pEnv.PWD}/${pEnv.PALMCTL_FILE_NAME} && 
+      palmctl config user --token ${pEnv.MESH_API_KEY} && 
+      palmctl config endpoint --url ${pEnv.MESH_ENDPOINT} && 
+      cat ~/palmctl_config.yaml && 
+      sudo rm agent-*.* && 
+      palmctl get openhorizon && 
+      tar -xvzf openhorizon-agent-install-files.tar.gz && 
+      rm agent-install.sh && 
+      wget https://raw.githubusercontent.com/open-horizon/anax/master/agent-install/agent-install.sh && 
+      chmod +x agent-install.sh && 
+      sudo -s -E ${pEnv.PWD}/agent-install.sh -D cluster -u "${pEnv.HZN_EXCHANGE_USER_AUTH}" --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ${pEnv.PWD}/agent-install.cfg -i "remote:2.31.0-1482" -c "css:"`;
+
+      this.shell(arg, 'command executed successfully', 'command failed', true, {maxBuffer: 4096 * 2000})
+      .subscribe({
+        complete: () => {
+          observer.next();
+          observer.complete();
+        },
+        error: (err) => observer.error(err)
+      })
+    })
   }
   setupOpenHorizonMesh(params: IAutoParam, anax: string) {
     return new Observable((observer) => {
       const pEnv = process.env;
-      this.installCliOnly(anax)
-      .subscribe({
-        complete: () => {
+      //this.installCliOnly(anax)
+      //.subscribe({
+      //  complete: () => {
           const k8s = params.k8s;
           let arg = '';
+          let $shell: any;
           if(k8s == 'K3S') {
-            let kubeConfig = '';
-            const bashrc = readFileSync(`${this.homePath}/.bashrc`);
-            if(bashrc.indexOf('export KUBECONFIG=') < 0) {
-              kubeConfig = 'echo export KUBECONFIG=$HOME/.kube/config >> $HOME/.bashrc && ';
-            }
-            arg = `curl -sfL https://get.k3s.io | sh - && 
-                  ${kubeConfig}
-                  mkdir -p ~/.kube && 
-                  . ~/.bashrc && 
-                  sudo systemctl restart k3s && 
-                  systemctl status k3s && 
-                  sudo ${k8s.toLowerCase()} kubectl config view --raw > ${pEnv.KUBECONFIG}`
+            $shell = this.installK3s(params);
           } else if(k8s == 'K8S') {
 
           }
-          if(arg.length > 0) {
-            this.shell(arg)
+          if($shell) {
+            $shell
             .subscribe({
               complete: ()=> {
-                arg = `curl -sSfLO https://github.com/IBM/palmctl/releases/latest/download/${pEnv.PALMCTL_FILE_NAME} && 
-                      sudo apt install ${pEnv.PWD}/${pEnv.PALMCTL_FILE_NAME} && 
-                      palmctl config user --token ${pEnv.MESH_API_KEY} && 
-                      palmctl config endpoint --url ${pEnv.MESH_ENDPOINT} && 
-                      palmctl get openhorizon && 
-                      tar -xvzf openhorizon-agent-install-files.tar.gz && 
-                      rm agent-install.sh && 
-                      wget https://raw.githubusercontent.com/open-horizon/anax/master/agent-install/agent-install.sh && 
-                      chmod 755 agent-install.sh`;
-                this.shell(arg)
+                this.registerMeshAgent()
                 .subscribe({
                   complete: () => {
-                    //arg = `KUBECONFIG="${pEnv.KUBECONFIG}" IMAGE_ON_EDGE_CLUSTER_REGISTRY="${pEnv.IMAGE_ON_EDGE_CLUSTER_REGISTRY}" EDGE_CLUSTER_REGISTRY_USERNAME="${pEnv.EDGE_CLUSTER_REGISTRY_USERNAME}" EDGE_CLUSTER_REGISTRY_TOKEN="${pEnv.EDGE_CLUSTER_REGISTRY_TOKEN}" USE_EDGE_CLUSTER_REGISTRY="${pEnv.USE_EDGE_CLUSTER_REGISTRY}" ENABLE_AUTO_UPGRADE_CRONJOB="${pEnv.ENABLE_AUTO_UPGRADE_CRONJOB}" EDGE_CLUSTER_STORAGE_CLASS="${pEnv.EDGE_CLUSTER_STORAGE_CLASS}"`;
-                    arg = `sudo -s -E ${pEnv.PWD}/agent-install.sh -D cluster -u "${pEnv.HZN_EXCHANGE_USER_AUTH}" --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ${pEnv.PWD}/agent-install.cfg -i 'remote:2.31.0-1482' -c 'css:'`;
-                    this.shell(arg)
-                    .subscribe({
-                      complete: () => {
-                        observer.next();
-                        observer.complete();
-                      },
-                      error: (err) => observer.error(err)
-                    })
+                    observer.next();
+                    observer.complete();
                   },
                   error: (err) => observer.error(err)
                 })
@@ -1041,11 +1064,11 @@ export class Utils {
               error: (err) => observer.error(err)
             })
           }
-        },
-        error: (err) => {
-          observer.error(err)
-        } 
-      })  
+        //},
+      //  error: (err) => {
+      //    observer.error(err)
+      //  } 
+      //})  
     })
   }
   installCliOnly(anax: string) {

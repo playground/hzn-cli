@@ -80,6 +80,8 @@ export declare class Utils {
     cleanUp(): Observable<unknown>;
     uninstallK3s(): Observable<unknown>;
     unregisterMeshAgent(): Observable<unknown>;
+    installK3s(params: IAutoParam): Observable<unknown>;
+    registerMeshAgent(): Observable<unknown>;
     setupOpenHorizonMesh(params: IAutoParam, anax: string): Observable<unknown>;
     installCliOnly(anax: string): Observable<unknown>;
     installHznCli(anax: string, id: string, css: any, deviceToken?: string): Observable<unknown>;
