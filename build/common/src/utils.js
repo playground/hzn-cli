@@ -1024,27 +1024,22 @@ class Utils {
         return new rxjs_1.Observable((observer) => {
             const pEnv = process.env;
             let arg = `curl -sSfLO https://github.com/IBM/palmctl/releases/latest/download/${pEnv.PALMCTL_FILE_NAME} && 
-      sudo apt-get install ${pEnv.PWD}/${pEnv.PALMCTL_FILE_NAME} && 
+      sudo apt-get install -y --allow-downgrades ${pEnv.PWD}/${pEnv.PALMCTL_FILE_NAME} && 
       palmctl config user --token ${pEnv.MESH_API_KEY} && 
       palmctl config endpoint --url ${pEnv.MESH_ENDPOINT} && 
+      cat ~/palmctl_config.yaml && 
+      sudo rm agent-*.* && 
       palmctl get openhorizon && 
       tar -xvzf openhorizon-agent-install-files.tar.gz && 
       rm agent-install.sh && 
       wget https://raw.githubusercontent.com/open-horizon/anax/master/agent-install/agent-install.sh && 
-      chmod 755 agent-install.sh`;
-            this.shell(arg)
+      chmod +x agent-install.sh && 
+      sudo -s -E ${pEnv.PWD}/agent-install.sh -D cluster -u "${pEnv.HZN_EXCHANGE_USER_AUTH}" --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ${pEnv.PWD}/agent-install.cfg -i "remote:2.31.0-1482" -c "css:"`;
+            this.shell(arg, 'command executed successfully', 'command failed', true, { maxBuffer: 4096 * 2000 })
                 .subscribe({
                 complete: () => {
-                    //arg = `KUBECONFIG="${pEnv.KUBECONFIG}" IMAGE_ON_EDGE_CLUSTER_REGISTRY="${pEnv.IMAGE_ON_EDGE_CLUSTER_REGISTRY}" EDGE_CLUSTER_REGISTRY_USERNAME="${pEnv.EDGE_CLUSTER_REGISTRY_USERNAME}" EDGE_CLUSTER_REGISTRY_TOKEN="${pEnv.EDGE_CLUSTER_REGISTRY_TOKEN}" USE_EDGE_CLUSTER_REGISTRY="${pEnv.USE_EDGE_CLUSTER_REGISTRY}" ENABLE_AUTO_UPGRADE_CRONJOB="${pEnv.ENABLE_AUTO_UPGRADE_CRONJOB}" EDGE_CLUSTER_STORAGE_CLASS="${pEnv.EDGE_CLUSTER_STORAGE_CLASS}"`;
-                    arg = `KUBECONFIG="${pEnv.KUBECONFIG}" sudo -s -E ${pEnv.PWD}/agent-install.sh -D cluster -u "${pEnv.HZN_EXCHANGE_USER_AUTH}" --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ${pEnv.PWD}/agent-install.cfg -i 'remote:2.31.0-1482' -c 'css:'`;
-                    this.shell(arg)
-                        .subscribe({
-                        complete: () => {
-                            observer.next();
-                            observer.complete();
-                        },
-                        error: (err) => observer.error(err)
-                    });
+                    observer.next();
+                    observer.complete();
                 },
                 error: (err) => observer.error(err)
             });
