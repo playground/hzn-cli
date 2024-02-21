@@ -21,6 +21,7 @@ type Options = {
   filter: string | undefined;
   skip_config_update: string | undefined;
   config_file: string | undefined;
+  image: string | undefined;
   k8s: string | undefined;
 };
 export const command: string = 'deploy <action>';
@@ -35,7 +36,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
     .options({
       org: {type: 'string', desc: 'Organization to be deployed to'},
       config_path: {type: 'string', desc: 'Specify path to your configuration, default is ./config'},
-      name: {type: 'string', desc: 'Name of service, pattern, policy & etc.'},
+      name: {type: 'string', desc: 'Name of service, pattern, policy, agent & etc.'},
       object_type: {type: 'string', desc: 'Type of object'},
       object_id: {type: 'string', desc: 'Id of object to be published'},
       object: {type: 'string', desc: 'Object file to be published'},
@@ -44,6 +45,9 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
       filter: {type: 'string', desc: 'filter search result = arm, amd64, arm64 & etc'},
       skip_config_update: {type: 'string', desc: 'Do not prompt for config updates = true/false'},
       config_file: {type: 'string', desc: 'Provide config json file for auto setup'},
+      image: {type: 'string', desc: 'Docker image'},
+      port: {type: 'string', desc: 'Port number'},
+      type: {type: 'string', desc: 'type: LoadBalancer'},
       k8s: {type: 'string', desc: 'Provide type of cluster to install'}
     })
     .positional('action', {
@@ -59,7 +63,7 @@ export const handler = (argv: Arguments<Options>): void => {
       figlet.textSync('hzn-cli', { horizontalLayout: 'full' })
     )
   );
-  const { action, org, config_path, name, object_type, object_id, object, pattern, watch, filter, skip_config_update, config_file, k8s } = argv;
+  const { action, org, config_path, name, object_type, object_id, object, pattern, watch, filter, skip_config_update, config_file, image, port, type, k8s } = argv;
   let env = org || '';
   const n = name || '';
   const objType = object_type || '';
@@ -87,6 +91,9 @@ export const handler = (argv: Arguments<Options>): void => {
         watch: watch && watch === 'true' ? 'watch ' : '',
         filter: filter,
         configFile: config_file || '',
+        image: image || '',
+        port: port || '',
+        type: type || '',
         k8s: k8s || ''
       } as IHznParam;
       const hzn = new Hzn(hznModel);

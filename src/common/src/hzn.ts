@@ -88,7 +88,9 @@ export class Hzn {
           console.log(err.message);
           this.envVar.setOrgId()
           if(err.message.indexOf('hzn:') >= 0) {
-            console.log('need to install hzn');
+            if(!cliOptional) {
+              console.log('need to install hzn');
+            }
             const answer = utils.promptCliOrAnax();
             if(answer == 'Y') {
               utils.installCliOnly(this.envVar.getAnax())
@@ -209,6 +211,26 @@ export class Hzn {
   publishMMSPattern() {
     const arg = `hzn exchange pattern publish -f ${this.mmsPatternJson}`;
     return utils.shell(arg, 'done publishing mss pattern', 'failed to publish mms pattern', false);
+  }
+  createDeployment() {
+    return this.param.image.length > 0 && this.param.name.length > 0 ?
+      utils.shell(`kubectl create deployment ${this.param.name} --image ${this.param.image} -n $AGENT_NAMESPACE`) :
+      of('Please specify deploment --name and --image')
+  }
+  exposeDeployment() {
+    return this.param.name.length > 0 && this.param.type.length > 0 && this.param.port.length > 0 ?
+      utils.shell(`kubectl create deployment ${this.param.name} --port ${this.param.port} --type ${this.param.type} -n $AGENT_NAMESPACE`) :
+      of('Please specify deploment --name, --port and --type')
+  }
+  meshNodeList() {
+    return this.param.name.length > 0 ? 
+      utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn node list`) : 
+      of('Please specify agent name')    
+  }
+  meshAgreementList() {
+    return this.param.name.length > 0 ? 
+      utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn agreement list`) : 
+      of('Please specify agent name')    
   }
   registerMeshAgent() {
     return utils.registerMeshAgent();

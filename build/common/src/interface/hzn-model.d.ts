@@ -156,6 +156,9 @@ export interface IHznParam {
     filter?: string;
     policy: IPolicy;
     configFile: string;
+    image: string;
+    port: string;
+    type: string;
     k8s: string;
 }
 export interface IPolicy {
