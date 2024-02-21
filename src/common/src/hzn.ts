@@ -48,7 +48,7 @@ export class Hzn {
     this.mmsPattern = param.mmsPattern;
   }
 
-  init() {
+  init(cliOptional = false) {
     return new Observable((observer) => {
       this.envVar.init()
       .subscribe({
@@ -102,16 +102,20 @@ export class Hzn {
                 }
               })  
             } else {
-              this.preInstallHznCli()
-              .subscribe({
-                complete: () => {
-                  console.log('done installing hzn.');
-                  observer.complete();
-                },
-                error: (err) => {
-                  observer.error(err);
-                }
-              })  
+              if(cliOptional == true) {
+                observer.complete();
+              } else {
+                this.preInstallHznCli()
+                .subscribe({
+                  complete: () => {
+                    console.log('done installing hzn.');
+                    observer.complete();
+                  },
+                  error: (err) => {
+                    observer.error(err);
+                  }
+                })    
+              }
             }
           } else {
             observer.error(err);
@@ -210,7 +214,7 @@ export class Hzn {
     return utils.registerMeshAgent();
   }
   unregisterMeshAgent() {
-    return utils.unregisterMeshAgent();
+    return this.param.name.length > 0 ? utils.unregisterMeshAgent(this.param) : of('Please specify agent name')    
   }
   unregisterAgent() {
     return utils.unregisterAgent(true)
