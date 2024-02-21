@@ -29,7 +29,7 @@ export declare class Hzn {
     param: IHznParam;
     utils: Utils;
     constructor(param: IHznParam);
-    init(): Observable<unknown>;
+    init(cliOptional?: boolean): Observable<unknown>;
     test(): Observable<unknown>;
     setup(): Observable<unknown>;
     appendSupport(): Observable<unknown>;
@@ -44,6 +44,10 @@ export declare class Hzn {
     publishPattern(): Observable<unknown>;
     publishMMSService(): Observable<unknown>;
     publishMMSPattern(): Observable<unknown>;
+    createDeployment(): Observable<unknown>;
+    exposeDeployment(): Observable<unknown>;
+    meshNodeList(): Observable<unknown>;
+    meshAgreementList(): Observable<unknown>;
     registerMeshAgent(): Observable<unknown>;
     unregisterMeshAgent(): Observable<unknown>;
     unregisterAgent(): Observable<unknown>;

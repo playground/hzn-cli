@@ -1,4 +1,5 @@
 export declare const justRun: string[];
+export declare const justRunCliOptional: string[];
 export declare const promptForUpdate: string[];
 export declare const customRun: string[];
 export declare const runDirectly: string[];
@@ -155,6 +156,9 @@ export interface IHznParam {
     filter?: string;
     policy: IPolicy;
     configFile: string;
+    image: string;
+    port: string;
+    type: string;
     k8s: string;
 }
 export interface IPolicy {

@@ -991,9 +991,11 @@ class Utils {
     uninstallK3s() {
         return this.shell(`sudo systemctl stop k3s && /usr/local/bin/k3s-uninstall.sh`);
     }
-    unregisterMeshAgent() {
+    unregisterMeshAgent(params) {
         const pEnv = process.env;
-        const arg = `curl -sL --insecure -u $HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH -X DELETE ${pEnv.MESH_ENDPOINT}/v1/orgs/${pEnv.HZN_ORG_ID}/nodes/${pEnv.HZN_DEVICE_ID}`;
+        //const arg = `curl -sL --insecure -u $HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH -X DELETE ${pEnv.MESH_ENDPOINT}/v1/orgs/${pEnv.HZN_ORG_ID}/nodes/${pEnv.HZN_DEVICE_ID}`;
+        //const arg = `kubectl -n ohmesh3-frontend-ns exec -i agent-769d687ff9-8kssh -- hzn unregister -r -f --timeout 3`;
+        const arg = `kubectl -n ${pEnv.AGENT_NAMESPACE} exec -i ${params.name} -- hzn unregister -r -f --timeout 3`;
         return this.shell(arg);
     }
     installK3s(params) {

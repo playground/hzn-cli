@@ -1,13 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Service = exports.Deployment = exports.Container = exports.RequiredService = exports.configTemplate = exports.HorizonKeyMap = exports.HorizonTemplate = exports.keyMap = exports.AutoCommand = exports.SetupEnvironment = exports.policyType = exports.supportPlatform = exports.installPrompt = exports.installTar = exports.loop = exports.runDirectly = exports.customRun = exports.promptForUpdate = exports.justRun = void 0;
+exports.Service = exports.Deployment = exports.Container = exports.RequiredService = exports.configTemplate = exports.HorizonKeyMap = exports.HorizonTemplate = exports.keyMap = exports.AutoCommand = exports.SetupEnvironment = exports.policyType = exports.supportPlatform = exports.installPrompt = exports.installTar = exports.loop = exports.runDirectly = exports.customRun = exports.promptForUpdate = exports.justRunCliOptional = exports.justRun = void 0;
 exports.justRun = [
     'addPolicy', 'addRemoteNodePolicy', 'updatePolicy',
     'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement',
     'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodes', 'listOrg', 'listNodePattern', 'listObject', 'listPattern',
     'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'publishMMSObject', 'publishMMSObjectPattern', 'publishMMSObjectPolicy',
     'register', 'removeDeploymentPolicy', 'removeObject', 'removeOrg',
-    'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition', 'unregisterMeshAgent', "registerMeshAgent"
+    'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition',
+    'unregisterMeshAgent', 'registerMeshAgent', 'createDeployment', 'exposeDeployment', 'meshNodeList', 'meshAgreementList'
+];
+exports.justRunCliOptional = [
+    'registerMeshAgent', 'unregisterMeshAgent', 'createDeployment', 'exposeDeployment', 'meshNodeList', 'meshAgreementList'
 ];
 exports.promptForUpdate = [
     'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister',

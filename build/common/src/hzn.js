@@ -28,7 +28,7 @@ class Hzn {
         this.objectFile = param.objectFile;
         this.mmsPattern = param.mmsPattern;
     }
-    init() {
+    init(cliOptional = false) {
         return new rxjs_1.Observable((observer) => {
             this.envVar.init()
                 .subscribe({
@@ -65,7 +65,9 @@ class Hzn {
                     console.log(err.message);
                     this.envVar.setOrgId();
                     if (err.message.indexOf('hzn:') >= 0) {
-                        console.log('need to install hzn');
+                        if (!cliOptional) {
+                            console.log('need to install hzn');
+                        }
                         const answer = exports.utils.promptCliOrAnax();
                         if (answer == 'Y') {
                             exports.utils.installCliOnly(this.envVar.getAnax())
@@ -80,16 +82,21 @@ class Hzn {
                             });
                         }
                         else {
-                            this.preInstallHznCli()
-                                .subscribe({
-                                complete: () => {
-                                    console.log('done installing hzn.');
-                                    observer.complete();
-                                },
-                                error: (err) => {
-                                    observer.error(err);
-                                }
-                            });
+                            if (cliOptional == true) {
+                                observer.complete();
+                            }
+                            else {
+                                this.preInstallHznCli()
+                                    .subscribe({
+                                    complete: () => {
+                                        console.log('done installing hzn.');
+                                        observer.complete();
+                                    },
+                                    error: (err) => {
+                                        observer.error(err);
+                                    }
+                                });
+                            }
                         }
                     }
                     else {
@@ -185,11 +192,31 @@ class Hzn {
         const arg = `hzn exchange pattern publish -f ${this.mmsPatternJson}`;
         return exports.utils.shell(arg, 'done publishing mss pattern', 'failed to publish mms pattern', false);
     }
+    createDeployment() {
+        return this.param.image.length > 0 && this.param.name.length > 0 ?
+            exports.utils.shell(`kubectl create deployment ${this.param.name} --image ${this.param.image} -n $AGENT_NAMESPACE`) :
+            (0, rxjs_1.of)('Please specify deploment --name and --image');
+    }
+    exposeDeployment() {
+        return this.param.name.length > 0 && this.param.type.length > 0 && this.param.port.length > 0 ?
+            exports.utils.shell(`kubectl create deployment ${this.param.name} --port ${this.param.port} --type ${this.param.type} -n $AGENT_NAMESPACE`) :
+            (0, rxjs_1.of)('Please specify deploment --name, --port and --type');
+    }
+    meshNodeList() {
+        return this.param.name.length > 0 ?
+            exports.utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn node list`) :
+            (0, rxjs_1.of)('Please specify agent name');
+    }
+    meshAgreementList() {
+        return this.param.name.length > 0 ?
+            exports.utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn agreement list`) :
+            (0, rxjs_1.of)('Please specify agent name');
+    }
     registerMeshAgent() {
         return exports.utils.registerMeshAgent();
     }
     unregisterMeshAgent() {
-        return exports.utils.unregisterMeshAgent();
+        return this.param.name.length > 0 ? exports.utils.unregisterMeshAgent(this.param) : (0, rxjs_1.of)('Please specify agent name');
     }
     unregisterAgent() {
         return exports.utils.unregisterAgent(true);
