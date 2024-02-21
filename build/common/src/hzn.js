@@ -199,7 +199,7 @@ class Hzn {
     }
     exposeDeployment() {
         return this.param.name.length > 0 && this.param.type.length > 0 && this.param.port.length > 0 ?
-            exports.utils.shell(`kubectl create deployment ${this.param.name} --port ${this.param.port} --type ${this.param.type} -n $AGENT_NAMESPACE`) :
+            exports.utils.shell(`kubectl expose deployment ${this.param.name} --port ${this.param.port} --type ${this.param.type} -n $AGENT_NAMESPACE`) :
             (0, rxjs_1.of)('Please specify deploment --name, --port and --type');
     }
     meshNodeList() {
