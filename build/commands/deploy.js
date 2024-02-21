@@ -10,6 +10,7 @@ const figlet_1 = __importDefault(require("figlet"));
 const fs_1 = require("fs");
 const hzn_1 = require("../common/src/hzn");
 const interface_1 = require("../common/src/interface");
+const hzn_model_1 = require("../common/src/interface/hzn-model");
 exports.command = 'deploy <action>';
 exports.desc = 'Deploy <action> to Org <org>';
 let availableActions = 'Available actions:';
@@ -70,7 +71,7 @@ const handler = (argv) => {
                 k8s: k8s || ''
             };
             const hzn = new hzn_1.Hzn(hznModel);
-            hzn.init()
+            hzn.init(hzn_model_1.justRunCliOptional.indexOf(action) >= 0)
                 .subscribe({
                 complete: () => {
                     if (interface_1.loop.includes(action)) {

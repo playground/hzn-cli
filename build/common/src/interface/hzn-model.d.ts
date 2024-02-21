@@ -1,4 +1,5 @@
 export declare const justRun: string[];
+export declare const justRunCliOptional: string[];
 export declare const promptForUpdate: string[];
 export declare const customRun: string[];
 export declare const runDirectly: string[];

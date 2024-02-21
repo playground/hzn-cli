@@ -28,7 +28,7 @@ class Hzn {
         this.objectFile = param.objectFile;
         this.mmsPattern = param.mmsPattern;
     }
-    init() {
+    init(cliOptional = false) {
         return new rxjs_1.Observable((observer) => {
             this.envVar.init()
                 .subscribe({
@@ -80,16 +80,21 @@ class Hzn {
                             });
                         }
                         else {
-                            this.preInstallHznCli()
-                                .subscribe({
-                                complete: () => {
-                                    console.log('done installing hzn.');
-                                    observer.complete();
-                                },
-                                error: (err) => {
-                                    observer.error(err);
-                                }
-                            });
+                            if (cliOptional == true) {
+                                observer.complete();
+                            }
+                            else {
+                                this.preInstallHznCli()
+                                    .subscribe({
+                                    complete: () => {
+                                        console.log('done installing hzn.');
+                                        observer.complete();
+                                    },
+                                    error: (err) => {
+                                        observer.error(err);
+                                    }
+                                });
+                            }
                         }
                     }
                     else {
@@ -189,7 +194,7 @@ class Hzn {
         return exports.utils.registerMeshAgent();
     }
     unregisterMeshAgent() {
-        return exports.utils.unregisterMeshAgent();
+        return this.param.name.length > 0 ? exports.utils.unregisterMeshAgent(this.param) : (0, rxjs_1.of)('Please specify agent name');
     }
     unregisterAgent() {
         return exports.utils.unregisterAgent(true);
