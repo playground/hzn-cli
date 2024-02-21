@@ -6,6 +6,9 @@ export const justRun = [
   'register', 'removeDeploymentPolicy', 'removeObject', 'removeOrg', 
   'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition', 'unregisterMeshAgent', "registerMeshAgent"
 ];
+export const justRunCliOptional = [
+  'registerMeshAgent', 'unregisterMeshAgent'
+];
 export const promptForUpdate = [
   'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister', 
   'buildMMSImage', 'buildServiceImage', 'editDeploymentPoicy', 'editNodePolicy', 'editServicePolicy', 'publishAndRegister', 
