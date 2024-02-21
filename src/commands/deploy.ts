@@ -5,7 +5,7 @@ import { existsSync } from 'fs';
 
 import { Hzn, utils } from '../common/src/hzn';
 import { customRun, IHznParam, justRun, loop, promptForUpdate, runDirectly } from '../common/src/interface';
-import { IAutoParam } from '../common/src/interface/hzn-model';
+import { IAutoParam, justRunCliOptional } from '../common/src/interface/hzn-model';
 
 import type { Arguments, CommandBuilder } from 'yargs';
 type Options = {
@@ -91,7 +91,7 @@ export const handler = (argv: Arguments<Options>): void => {
       } as IHznParam;
       const hzn = new Hzn(hznModel);
 
-      hzn.init()
+      hzn.init(justRunCliOptional.indexOf(action) >= 0)
       .subscribe({
         complete: () => {
           if(loop.includes(action)) {
