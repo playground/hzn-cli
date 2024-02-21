@@ -4,10 +4,11 @@ export const justRun = [
   'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodes', 'listOrg', 'listNodePattern', 'listObject', 'listPattern', 
   'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'publishMMSObject', 'publishMMSObjectPattern', 'publishMMSObjectPolicy', 
   'register', 'removeDeploymentPolicy', 'removeObject', 'removeOrg', 
-  'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition', 'unregisterMeshAgent', "registerMeshAgent"
+  'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition', 
+  'unregisterMeshAgent', 'registerMeshAgent', 'createDeployment', 'exposeDeployment', 'meshNodeList', 'meshAgreementList'
 ];
 export const justRunCliOptional = [
-  'registerMeshAgent', 'unregisterMeshAgent'
+  'registerMeshAgent', 'unregisterMeshAgent', 'createDeployment', 'exposeDeployment', 'meshNodeList', 'meshAgreementList'
 ];
 export const promptForUpdate = [
   'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister', 
@@ -183,6 +184,9 @@ export interface IHznParam {
   filter?: string;
   policy: IPolicy;
   configFile: string;
+  image: string;
+  port: string;
+  type: string;
   k8s: string;
 }
 export interface IPolicy {
