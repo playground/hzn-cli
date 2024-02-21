@@ -29,7 +29,7 @@ export declare class Hzn {
     param: IHznParam;
     utils: Utils;
     constructor(param: IHznParam);
-    init(): Observable<unknown>;
+    init(cliOptional?: boolean): Observable<unknown>;
     test(): Observable<unknown>;
     setup(): Observable<unknown>;
     appendSupport(): Observable<unknown>;
