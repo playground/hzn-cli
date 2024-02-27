@@ -7,11 +7,11 @@ exports.justRun = [
     'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodes', 'listOrg', 'listNodePattern', 'listObject', 'listPattern',
     'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'publishMMSObject', 'publishMMSObjectPattern', 'publishMMSObjectPolicy',
     'register', 'removeDeploymentPolicy', 'removeObject', 'removeOrg',
-    'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition',
+    'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition', 'createNetworkSegment',
     'unregisterMeshAgent', 'registerMeshAgent', 'createDeployment', 'exposeDeployment', 'meshNodeList', 'meshAgreementList'
 ];
 exports.justRunCliOptional = [
-    'registerMeshAgent', 'unregisterMeshAgent', 'createDeployment', 'exposeDeployment', 'meshNodeList', 'meshAgreementList'
+    'registerMeshAgent', 'unregisterMeshAgent', 'createDeployment', 'exposeDeployment', 'meshNodeList', 'meshAgreementList', 'createNetworkSegment'
 ];
 exports.promptForUpdate = [
     'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister',

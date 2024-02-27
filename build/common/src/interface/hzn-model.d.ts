@@ -160,6 +160,7 @@ export interface IHznParam {
     port: string;
     type: string;
     k8s: string;
+    compatibility: string;
 }
 export interface IPolicy {
     envVar: string;
