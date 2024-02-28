@@ -45,6 +45,7 @@ export declare class Hzn {
     publishMMSService(): Observable<unknown>;
     publishMMSPattern(): Observable<unknown>;
     createDeployment(): Observable<unknown>;
+    createNetworkSegment(): Observable<unknown>;
     exposeDeployment(): Observable<unknown>;
     meshNodeList(): Observable<unknown>;
     meshAgreementList(): Observable<unknown>;

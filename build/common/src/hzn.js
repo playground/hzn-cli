@@ -197,6 +197,13 @@ class Hzn {
             exports.utils.shell(`kubectl create deployment ${this.param.name} --image ${this.param.image} -n $AGENT_NAMESPACE`) :
             (0, rxjs_1.of)('Please specify deploment --name and --image');
     }
+    createNetworkSegment() {
+        return this.param.name.length > 0 ?
+            exports.utils.shell(`cat << EOM | palmctl create networksegment -f - 
+        name: ${this.param.name} 
+        compatibility_set: ${this.param.compatibility}`) :
+            (0, rxjs_1.of)('Please specify agent name');
+    }
     exposeDeployment() {
         return this.param.name.length > 0 && this.param.type.length > 0 && this.param.port.length > 0 ?
             exports.utils.shell(`kubectl expose deployment ${this.param.name} --port ${this.param.port} --type ${this.param.type} -n $AGENT_NAMESPACE`) :
