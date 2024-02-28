@@ -23,6 +23,7 @@ type Options = {
   config_file: string | undefined;
   image: string | undefined;
   k8s: string | undefined;
+  compatibility: string | undefined;
 };
 export const command: string = 'deploy <action>';
 export const desc: string = 'Deploy <action> to Org <org>';
@@ -48,7 +49,8 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
       image: {type: 'string', desc: 'Docker image'},
       port: {type: 'string', desc: 'Port number'},
       type: {type: 'string', desc: 'type: LoadBalancer'},
-      k8s: {type: 'string', desc: 'Provide type of cluster to install'}
+      k8s: {type: 'string', desc: 'Provide type of cluster to install'},
+      compatibility: {type: 'string', desc: 'Network segment compatibility'}
     })
     .positional('action', {
       type: 'string', 
@@ -63,7 +65,7 @@ export const handler = (argv: Arguments<Options>): void => {
       figlet.textSync('hzn-cli', { horizontalLayout: 'full' })
     )
   );
-  const { action, org, config_path, name, object_type, object_id, object, pattern, watch, filter, skip_config_update, config_file, image, port, type, k8s } = argv;
+  const { action, org, config_path, name, object_type, object_id, object, pattern, watch, filter, skip_config_update, config_file, image, port, type, k8s, compatibility } = argv;
   let env = org || '';
   const n = name || '';
   const objType = object_type || '';
@@ -94,7 +96,8 @@ export const handler = (argv: Arguments<Options>): void => {
         image: image || '',
         port: port || '',
         type: type || '',
-        k8s: k8s || ''
+        k8s: k8s || '',
+        compatibility: compatibility || 'RHSI'
       } as IHznParam;
       const hzn = new Hzn(hznModel);
 
@@ -143,18 +146,18 @@ export const handler = (argv: Arguments<Options>): void => {
   if(action && skipInitialize.concat(runDirectly).concat(justRun).concat(promptForUpdate).concat(customRun).includes(action)) {
     if(runDirectly.indexOf(action) >= 0) {
       console.log(action, env);
-      utils[action]()
+      utils[action] ? utils[action]()
       .subscribe({
         complete: () => process.exit(0),
         error: (err) => {
           console.log(err);      
           process.exit(0);  
         }
-      })
+      }) : console.log('command not found, oh deploy -h for help.')
     } else if(customRun.indexOf(action) >= 0) {
       console.log(action);
       const params: IAutoParam = {configFile: config_file, object: obj, k8s: k8s}
-      utils[action](params)
+      utils[action] ? utils[action](params)
       .subscribe({
         next: (msg) => console.log(msg),
         complete: () => process.exit(0),
@@ -162,7 +165,7 @@ export const handler = (argv: Arguments<Options>): void => {
           console.log(err);      
           process.exit(0);  
         }
-      })
+      }) : console.log('command not found, oh deploy -h for help.')
     } else {
       console.log(action, env);
       utils.checkDefaultConfig()

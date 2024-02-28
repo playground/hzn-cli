@@ -14,6 +14,7 @@ declare type Options = {
     config_file: string | undefined;
     image: string | undefined;
     k8s: string | undefined;
+    compatibility: string | undefined;
 };
 export declare const command: string;
 export declare const desc: string;

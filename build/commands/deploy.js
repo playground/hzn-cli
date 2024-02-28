@@ -33,7 +33,8 @@ const builder = (yargs) => yargs
     image: { type: 'string', desc: 'Docker image' },
     port: { type: 'string', desc: 'Port number' },
     type: { type: 'string', desc: 'type: LoadBalancer' },
-    k8s: { type: 'string', desc: 'Provide type of cluster to install' }
+    k8s: { type: 'string', desc: 'Provide type of cluster to install' },
+    compatibility: { type: 'string', desc: 'Network segment compatibility' }
 })
     .positional('action', {
     type: 'string',
@@ -44,7 +45,7 @@ exports.builder = builder;
 const handler = (argv) => {
     (0, clear_1.default)();
     console.log(chalk_1.default.greenBright(figlet_1.default.textSync('hzn-cli', { horizontalLayout: 'full' })));
-    const { action, org, config_path, name, object_type, object_id, object, pattern, watch, filter, skip_config_update, config_file, image, port, type, k8s } = argv;
+    const { action, org, config_path, name, object_type, object_id, object, pattern, watch, filter, skip_config_update, config_file, image, port, type, k8s, compatibility } = argv;
     let env = org || '';
     const n = name || '';
     const objType = object_type || '';
@@ -74,7 +75,8 @@ const handler = (argv) => {
                 image: image || '',
                 port: port || '',
                 type: type || '',
-                k8s: k8s || ''
+                k8s: k8s || '',
+                compatibility: compatibility || 'RHSI'
             };
             const hzn = new hzn_1.Hzn(hznModel);
             hzn.init(hzn_model_1.justRunCliOptional.indexOf(action) >= 0)
@@ -124,19 +126,19 @@ const handler = (argv) => {
     if (action && skipInitialize.concat(interface_1.runDirectly).concat(interface_1.justRun).concat(interface_1.promptForUpdate).concat(interface_1.customRun).includes(action)) {
         if (interface_1.runDirectly.indexOf(action) >= 0) {
             console.log(action, env);
-            hzn_1.utils[action]()
+            hzn_1.utils[action] ? hzn_1.utils[action]()
                 .subscribe({
                 complete: () => process.exit(0),
                 error: (err) => {
                     console.log(err);
                     process.exit(0);
                 }
-            });
+            }) : console.log('command not found, oh deploy -h for help.');
         }
         else if (interface_1.customRun.indexOf(action) >= 0) {
             console.log(action);
             const params = { configFile: config_file, object: obj, k8s: k8s };
-            hzn_1.utils[action](params)
+            hzn_1.utils[action] ? hzn_1.utils[action](params)
                 .subscribe({
                 next: (msg) => console.log(msg),
                 complete: () => process.exit(0),
@@ -144,7 +146,7 @@ const handler = (argv) => {
                     console.log(err);
                     process.exit(0);
                 }
-            });
+            }) : console.log('command not found, oh deploy -h for help.');
         }
         else {
             console.log(action, env);
