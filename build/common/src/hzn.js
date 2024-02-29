@@ -222,8 +222,11 @@ class Hzn {
     registerMeshAgent() {
         return exports.utils.registerMeshAgent();
     }
+    unregisterMeshAgentByName() {
+        return this.param.name.length > 0 ? exports.utils.unregisterMeshAgentByName(this.param) : (0, rxjs_1.of)('Please specify agent name');
+    }
     unregisterMeshAgent() {
-        return this.param.name.length > 0 ? exports.utils.unregisterMeshAgent(this.param) : (0, rxjs_1.of)('Please specify agent name');
+        return exports.utils.unregisterMeshAgent(this.param);
     }
     unregisterAgent() {
         return exports.utils.unregisterAgent(true);
