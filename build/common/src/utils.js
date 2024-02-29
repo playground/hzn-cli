@@ -993,15 +993,14 @@ class Utils {
     }
     unregisterMeshAgent(params) {
         const pEnv = process.env;
-        const arg = `curl -sL --insecure -u $HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH -X DELETE ${pEnv.HZN_EXCHANGE_URL}/v1/orgs/${pEnv.HZN_ORG_ID}/nodes/${pEnv.HZN_DEVICE_ID}`;
+        //curl -sL --insecure -u "Tenant3_Corp/ohuser:spqmt@M3u43v4<7u" -X DELETE https://ibm-edge-exchange-preprod.multicloud-mesh-preprod.test.cloud.ibm.com/v1/orgs/Tenant3_Corp/nodes/fyre-cluster-frontend-ns-agent
+        const arg = `curl -sL --insecure -u $HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH -X DELETE ${pEnv.HZN_EXCHANGE_URL}/orgs/${pEnv.HZN_ORG_ID}/nodes/${pEnv.HZN_DEVICE_ID}`;
         //const arg = `kubectl -n ohmesh3-frontend-ns exec -i agent-769d687ff9-8kssh -- hzn unregister -r -f --timeout 3`;
         //const arg = `kubectl -n ${pEnv.AGENT_NAMESPACE} exec -i ${params.name} -- hzn unregister -r -f --timeout 3`;
         return this.shell(arg);
     }
     unregisterMeshAgentByName(params) {
         const pEnv = process.env;
-        //const arg = `curl -sL --insecure -u $HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH -X DELETE ${pEnv.HZN_EXCHANGE_URL}/v1/orgs/${pEnv.HZN_ORG_ID}/nodes/${pEnv.HZN_DEVICE_ID}`;
-        //const arg = `kubectl -n ohmesh3-frontend-ns exec -i agent-769d687ff9-8kssh -- hzn unregister -r -f --timeout 3`;
         const arg = `kubectl -n ${pEnv.AGENT_NAMESPACE} exec -i ${params.name} -- hzn unregister -r -f --timeout 3`;
         return this.shell(arg);
     }
