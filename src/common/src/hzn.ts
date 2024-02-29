@@ -239,6 +239,12 @@ export class Hzn {
       utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn agreement list`, 'commande executed successfully', 'failed to execute command', false) : 
       of('Please specify agent name')    
   }
+  meshPodList() {
+    return utils.shell(`kubectl get pods -A`, 'commande executed successfully', 'failed to execute command', false);
+  }
+  meshServiceList() {
+    return utils.shell(`kubectl get services -A`, 'commande executed successfully', 'failed to execute command', false);
+  }
   registerMeshAgent() {
     return utils.registerMeshAgent();
   }
