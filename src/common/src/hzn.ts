@@ -231,12 +231,12 @@ export class Hzn {
   }
   meshNodeList() {
     return this.param.name.length > 0 ? 
-      utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn node list`) : 
+      utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn node list`, 'commande executed successfully', 'failed to execute command', false) : 
       of('Please specify agent name')    
   }
   meshAgreementList() {
     return this.param.name.length > 0 ? 
-      utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn agreement list`) : 
+      utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn agreement list`, 'commande executed successfully', 'failed to execute command', false) : 
       of('Please specify agent name')    
   }
   registerMeshAgent() {
