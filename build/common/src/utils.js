@@ -363,7 +363,7 @@ class Utils {
     }
     proceedWithAutoInstall(params, setup, purge = true) {
         return new rxjs_1.Observable((observer) => {
-            // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
+            console.log('proceedWithAutoInstall', setup);
             this.purgeManagementHub(purge) // Leverage this function to cleanup and install prerequisites, maynot need preInstallHznCli anymore
                 .subscribe({
                 complete: () => {
@@ -424,6 +424,7 @@ class Utils {
             else if (setup == interface_1.SetupEnvironment.autoSetupAllInOne || setup == interface_1.SetupEnvironment.autoSetupCliInContainer || setup == interface_1.SetupEnvironment.autoSetupAnaxInContainer || setup == interface_1.SetupEnvironment.autoSetupContainer || setup == interface_1.SetupEnvironment.autoSetupOpenHorizonMesh) {
                 const purge = setup != interface_1.SetupEnvironment.autoSetupOpenHorizonMesh;
                 let configJson;
+                console.log('autoRun', setup);
                 this.updateConfig(configFile)
                     .subscribe({
                     next: (json) => {
@@ -1056,9 +1057,6 @@ class Utils {
     setupOpenHorizonMesh(params, anax) {
         return new rxjs_1.Observable((observer) => {
             const pEnv = process.env;
-            //this.installCliOnly(anax)
-            //.subscribe({
-            //  complete: () => {
             const k8s = params.k8s;
             let arg = '';
             let $shell;
@@ -1066,6 +1064,9 @@ class Utils {
                 $shell = this.installK3s(params);
             }
             else if (k8s == 'K8S') {
+            }
+            else {
+                $shell = (0, rxjs_1.of)();
             }
             if ($shell) {
                 $shell
@@ -1083,11 +1084,6 @@ class Utils {
                     error: (err) => observer.error(err)
                 });
             }
-            //},
-            //  error: (err) => {
-            //    observer.error(err)
-            //  } 
-            //})  
         });
     }
     installCliOnly(anax) {

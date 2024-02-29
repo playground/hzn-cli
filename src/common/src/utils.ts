@@ -370,7 +370,7 @@ export class Utils {
   }
   proceedWithAutoInstall(params: IAutoParam, setup: SetupEnvironment, purge = true) {
     return new Observable((observer) => {
-      // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
+      console.log('proceedWithAutoInstall', setup)
       this.purgeManagementHub(purge) // Leverage this function to cleanup and install prerequisites, maynot need preInstallHznCli anymore
       .subscribe({
         complete: () => {
@@ -429,7 +429,8 @@ export class Utils {
         observer.complete()
       } else if(setup == SetupEnvironment.autoSetupAllInOne || setup == SetupEnvironment.autoSetupCliInContainer || setup == SetupEnvironment.autoSetupAnaxInContainer || setup == SetupEnvironment.autoSetupContainer || setup == SetupEnvironment.autoSetupOpenHorizonMesh) {
         const purge = setup != SetupEnvironment.autoSetupOpenHorizonMesh;
-        let configJson
+        let configJson;
+        console.log('autoRun', setup)
         this.updateConfig(configFile)
         .subscribe({
           next: (json) => {
@@ -1045,38 +1046,32 @@ export class Utils {
   setupOpenHorizonMesh(params: IAutoParam, anax: string) {
     return new Observable((observer) => {
       const pEnv = process.env;
-      //this.installCliOnly(anax)
-      //.subscribe({
-      //  complete: () => {
-          const k8s = params.k8s;
-          let arg = '';
-          let $shell: any;
-          if(k8s == 'K3S') {
-            $shell = this.installK3s(params);
-          } else if(k8s == 'K8S') {
+      const k8s = params.k8s;
+      let arg = '';
+      let $shell: any;
+      if(k8s == 'K3S') {
+        $shell = this.installK3s(params);
+      } else if(k8s == 'K8S') {
 
-          }
-          if($shell) {
-            $shell
+      } else {
+        $shell = of();
+      }
+      if($shell) {
+        $shell
+        .subscribe({
+          complete: ()=> {
+            this.registerMeshAgent()
             .subscribe({
-              complete: ()=> {
-                this.registerMeshAgent()
-                .subscribe({
-                  complete: () => {
-                    observer.next();
-                    observer.complete();
-                  },
-                  error: (err) => observer.error(err)
-                })
+              complete: () => {
+                observer.next();
+                observer.complete();
               },
               error: (err) => observer.error(err)
             })
-          }
-        //},
-      //  error: (err) => {
-      //    observer.error(err)
-      //  } 
-      //})  
+          },
+          error: (err) => observer.error(err)
+        })
+      }
     })
   }
   installCliOnly(anax: string) {
