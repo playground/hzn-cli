@@ -130,12 +130,21 @@ Register agent with Policy
 
 ```
   - Run curl -sSL https://raw.githubusercontent.com/playground/hzn-cli/main/install.sh --output install.sh && bash ./install.sh
-  - 1) Cli-And-Anax	      3) CLI-In-Container   5) Run-In-Containers  7) Confirm
-    2) CLI-Only	      4) Anax-In-Container  6) All-In-One	  8) Quit
-    Choose your environment setup: 1
-  - Cli-And-Anax runs both CLI & Agent on host machine, choose <Confirm> to continue setup.
+  - 1) Cli-And-Anax	  3) CLI-In-Container   5) Run-In-Containers  7) OH-Mesh		9) Quit
+    2) CLI-Only	      4) Anax-In-Container  6) All-In-One	        8) Confirm
     Choose your environment setup: 7
-  - You have chosen Cli-And-Anax
+    OH-Mesh, Set up OH Agent with Mesh, choose <Confirm> to continue setup.
+    Choose your environment setup: 8
+    You have chosen OH-Mesh
+  - 1) None
+    2) K3S
+    3) K8S
+    4) Confirm
+    5) Quit
+    Choose your kube to install: 2
+    Setup K3S for OH Agent with Mesh, choose <Confirm> to continue setup.
+    Choose your kube to install: 4
+  - You have chosen K3S for your setup
     1) Config-File
     2) Confirm
     3) Help

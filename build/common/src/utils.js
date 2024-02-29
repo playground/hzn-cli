@@ -363,7 +363,7 @@ class Utils {
     }
     proceedWithAutoInstall(params, setup, purge = true) {
         return new rxjs_1.Observable((observer) => {
-            // console.log('hzn_css', pEnv.HZN_CSS, typeof pEnv.HZN_CSS, Boolean(pEnv.HZN_CSS))
+            console.log('proceedWithAutoInstall', setup);
             this.purgeManagementHub(purge) // Leverage this function to cleanup and install prerequisites, maynot need preInstallHznCli anymore
                 .subscribe({
                 complete: () => {
@@ -424,6 +424,7 @@ class Utils {
             else if (setup == interface_1.SetupEnvironment.autoSetupAllInOne || setup == interface_1.SetupEnvironment.autoSetupCliInContainer || setup == interface_1.SetupEnvironment.autoSetupAnaxInContainer || setup == interface_1.SetupEnvironment.autoSetupContainer || setup == interface_1.SetupEnvironment.autoSetupOpenHorizonMesh) {
                 const purge = setup != interface_1.SetupEnvironment.autoSetupOpenHorizonMesh;
                 let configJson;
+                console.log('autoRun', setup);
                 this.updateConfig(configFile)
                     .subscribe({
                     next: (json) => {
@@ -993,8 +994,14 @@ class Utils {
     }
     unregisterMeshAgent(params) {
         const pEnv = process.env;
-        //const arg = `curl -sL --insecure -u $HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH -X DELETE ${pEnv.MESH_ENDPOINT}/v1/orgs/${pEnv.HZN_ORG_ID}/nodes/${pEnv.HZN_DEVICE_ID}`;
+        //curl -sL --insecure -u "Tenant3_Corp/ohuser:spqmt@M3u43v4<7u" -X DELETE https://ibm-edge-exchange-preprod.multicloud-mesh-preprod.test.cloud.ibm.com/v1/orgs/Tenant3_Corp/nodes/fyre-cluster-frontend-ns-agent
+        const arg = `curl -sL --insecure -u $HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH -X DELETE ${pEnv.HZN_EXCHANGE_URL}/orgs/${pEnv.HZN_ORG_ID}/nodes/${pEnv.HZN_DEVICE_ID}`;
         //const arg = `kubectl -n ohmesh3-frontend-ns exec -i agent-769d687ff9-8kssh -- hzn unregister -r -f --timeout 3`;
+        //const arg = `kubectl -n ${pEnv.AGENT_NAMESPACE} exec -i ${params.name} -- hzn unregister -r -f --timeout 3`;
+        return this.shell(arg);
+    }
+    unregisterMeshAgentByName(params) {
+        const pEnv = process.env;
         const arg = `kubectl -n ${pEnv.AGENT_NAMESPACE} exec -i ${params.name} -- hzn unregister -r -f --timeout 3`;
         return this.shell(arg);
     }
@@ -1050,9 +1057,6 @@ class Utils {
     setupOpenHorizonMesh(params, anax) {
         return new rxjs_1.Observable((observer) => {
             const pEnv = process.env;
-            //this.installCliOnly(anax)
-            //.subscribe({
-            //  complete: () => {
             const k8s = params.k8s;
             let arg = '';
             let $shell;
@@ -1060,6 +1064,9 @@ class Utils {
                 $shell = this.installK3s(params);
             }
             else if (k8s == 'K8S') {
+            }
+            else {
+                $shell = (0, rxjs_1.of)();
             }
             if ($shell) {
                 $shell
@@ -1077,11 +1084,6 @@ class Utils {
                     error: (err) => observer.error(err)
                 });
             }
-            //},
-            //  error: (err) => {
-            //    observer.error(err)
-            //  } 
-            //})  
         });
     }
     installCliOnly(anax) {
