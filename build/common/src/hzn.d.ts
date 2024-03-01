@@ -29,9 +29,10 @@ export declare class Hzn {
     param: IHznParam;
     utils: Utils;
     constructor(param: IHznParam);
-    init(cliOptional?: boolean): Observable<unknown>;
+    init(cliBypass?: boolean, cliOptional?: boolean): Observable<unknown>;
     test(): Observable<unknown>;
     setup(): Observable<unknown>;
+    updateConfigFile(): Observable<unknown>;
     appendSupport(): Observable<unknown>;
     installAnaxInContainer(): Observable<unknown>;
     buildServiceImage(): Observable<unknown>;
