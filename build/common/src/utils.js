@@ -12,6 +12,7 @@ const rxjs_1 = require("rxjs");
 const url_1 = require("url");
 const _1 = require(".");
 const interface_1 = require("./interface");
+const hzn_model_1 = require("./interface/hzn-model");
 const dotenv = require('dotenv');
 const cp = require('child_process'), exec = cp.exec;
 const ifs = os_1.default.networkInterfaces();
@@ -989,40 +990,113 @@ class Utils {
         arg += ':';
         return this.shell(arg);
     }
-    uninstallK3s() {
-        return this.shell(`sudo systemctl stop k3s && /usr/local/bin/k3s-uninstall.sh`);
+    uninstallK3s(msg = 'Would you like to uninstall K3S?  Y/n ') {
+        return new rxjs_1.Observable((observer) => {
+            console.log(`\n${msg}`);
+            prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                if (question.answer.toUpperCase() === 'Y') {
+                    this.shell(`sudo systemctl stop k3s && /usr/local/bin/k3s-uninstall.sh`)
+                        .subscribe(() => {
+                        observer.next();
+                        observer.complete();
+                    });
+                }
+                else {
+                    observer.next();
+                    observer.complete();
+                }
+            });
+        });
     }
-    unregisterMeshAgent(params) {
-        const pEnv = process.env;
-        //curl -sL --insecure -u "Tenant3_Corp/ohuser:spqmt@M3u43v4<7u" -X DELETE https://ibm-edge-exchange-preprod.multicloud-mesh-preprod.test.cloud.ibm.com/v1/orgs/Tenant3_Corp/nodes/fyre-cluster-frontend-ns-agent
-        const arg = `curl -sL --insecure -u $HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH -X DELETE ${pEnv.HZN_EXCHANGE_URL}/orgs/${pEnv.HZN_ORG_ID}/nodes/${pEnv.HZN_DEVICE_ID}`;
-        //const arg = `kubectl -n ohmesh3-frontend-ns exec -i agent-769d687ff9-8kssh -- hzn unregister -r -f --timeout 3`;
-        //const arg = `kubectl -n ${pEnv.AGENT_NAMESPACE} exec -i ${params.name} -- hzn unregister -r -f --timeout 3`;
-        return this.shell(arg);
+    unregisterMeshAgent(params, msg = 'Would you like to unregister this Mesh agent?  Y/n ') {
+        return new rxjs_1.Observable((observer) => {
+            console.log(`\n${msg}`);
+            prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                if (question.answer.toUpperCase() === 'Y') {
+                    const pEnv = process.env;
+                    //curl -sL --insecure -u "Tenant3_Corp/ohuser:spqmt@M3u43v4<7u" -X DELETE https://ibm-edge-exchange-preprod.multicloud-mesh-preprod.test.cloud.ibm.com/v1/orgs/Tenant3_Corp/nodes/fyre-cluster-frontend-ns-agent
+                    const arg = `curl -sL --insecure -u $HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH -X DELETE ${pEnv.HZN_EXCHANGE_URL}/orgs/${pEnv.HZN_ORG_ID}/nodes/${pEnv.HZN_DEVICE_ID}`;
+                    //const arg = `kubectl -n ohmesh3-frontend-ns exec -i agent-769d687ff9-8kssh -- hzn unregister -r -f --timeout 3`;
+                    //const arg = `kubectl -n ${pEnv.AGENT_NAMESPACE} exec -i ${params.name} -- hzn unregister -r -f --timeout 3`;
+                    this.shell(arg)
+                        .subscribe(() => {
+                        observer.next('');
+                        observer.complete();
+                    });
+                }
+                else {
+                    observer.next('');
+                    observer.complete();
+                }
+            });
+        });
     }
-    unregisterMeshAgentByName(params) {
-        const pEnv = process.env;
-        const arg = `kubectl -n ${pEnv.AGENT_NAMESPACE} exec -i ${params.name} -- hzn unregister -r -f --timeout 3`;
-        return this.shell(arg);
+    unregisterMeshAgentByName(params, msg = 'Would you like to unregister this Mesh agent?  Y/n ') {
+        return new rxjs_1.Observable((observer) => {
+            console.log(`\n${msg}`);
+            prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                if (question.answer.toUpperCase() === 'Y') {
+                    const pEnv = process.env;
+                    const arg = `kubectl -n ${pEnv.AGENT_NAMESPACE} exec -i ${params.name} -- hzn unregister -r -f --timeout 3`;
+                    this.shell(arg)
+                        .subscribe(() => {
+                        observer.next('');
+                        observer.complete();
+                    });
+                }
+                else {
+                    observer.next('');
+                    observer.complete();
+                }
+            });
+        });
+    }
+    systemOS() {
+        let os = (0, fs_1.readFileSync)('/etc/os-release', 'utf8');
+        let opJson = {};
+        os?.split('\n')?.forEach((line, index) => {
+            let words = line?.split('=');
+            let key = words[0]?.toLowerCase();
+            if (key === '')
+                return;
+            let value = words[1]?.replace(/"/g, '');
+            opJson[key] = value;
+        });
+        return opJson;
     }
     installK3s(params) {
         return new rxjs_1.Observable((observer) => {
+            if (!process.env.KUBECONFIG) {
+                process.env.KUBECONFIG = `$HOME/.kube/config`;
+            }
             let kubeConfig = '';
             const bashrc = (0, fs_1.readFileSync)(`${this.homePath}/.bashrc`);
             if (bashrc.indexOf('export KUBECONFIG=') < 0) {
                 kubeConfig = 'echo export KUBECONFIG=$HOME/.kube/config >> $HOME/.bashrc && ';
             }
+            //let arg = `curl -sfL https://get.k3s.io | sh - && 
+            //      ${kubeConfig}
+            //      mkdir -p ~/.kube && 
+            //      . ~/.bashrc && source ~/.bashrc && 
+            //      sudo systemctl restart k3s && 
+            //      systemctl status k3s && 
+            //      sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config && 
+            //      sudo chown $USER ~/.kube/config && 
+            //      sudo chmod 600 ~/.kube/config
+            //      sudo k3s kubectl config view --raw > ${process.env.KUBECONFIG}`
             let arg = `curl -sfL https://get.k3s.io | sh - && 
             ${kubeConfig}
             mkdir -p ~/.kube && 
             . ~/.bashrc && 
             sudo systemctl restart k3s && 
             systemctl status k3s && 
-            sudo k3s kubectl config view --raw > ${process.env.KUBECONFIG}`;
+            sudo cp /etc/rancher/k3s/k3s.yaml ${process.env.KUBECONFIG} && 
+            sudo chown $USER ${process.env.KUBECONFIG} && 
+            sudo chmod 664 ${process.env.KUBECONFIG}`;
             this.shell(arg)
                 .subscribe({
                 complete: () => {
-                    observer.next();
+                    observer.next('');
                     observer.complete();
                 },
                 error: (err) => observer.error(err)
@@ -1031,9 +1105,16 @@ class Utils {
     }
     registerMeshAgent() {
         return new rxjs_1.Observable((observer) => {
+            const opJson = this.systemOS();
             const pEnv = process.env;
+            const aptGet = hzn_model_1.ICommand['app-get'](opJson.id);
+            const downgrades = opJson.id == 'rhel' ? '' : '--allow-downgrades';
+            // Todo:  revisit this
+            const extraEnv = opJson.id == 'rhel' ? 'export PATH=/usr/local/bin:$PATH;' : '';
+            const agentInstall = `sudo -s -E ${extraEnv} ${pEnv.PWD}/agent-install.sh -D cluster -u "${pEnv.HZN_EXCHANGE_USER_AUTH}" --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ${pEnv.PWD}/agent-install.cfg -i "remote:2.31.0-1482" -c "css:"`;
+            console.log('aptGet', aptGet, opJson.id);
             let arg = `curl -sSfLO https://github.com/IBM/palmctl/releases/latest/download/${pEnv.PALMCTL_FILE_NAME} && 
-      sudo apt-get install -y --allow-downgrades ${pEnv.PWD}/${pEnv.PALMCTL_FILE_NAME} && 
+      sudo ${aptGet} install -y ${downgrades} ${pEnv.PWD}/${pEnv.PALMCTL_FILE_NAME} && 
       palmctl config user --token ${pEnv.MESH_API_KEY} && 
       palmctl config endpoint --url ${pEnv.MESH_ENDPOINT} && 
       cat ~/palmctl_config.yaml && 
@@ -1043,11 +1124,12 @@ class Utils {
       rm agent-install.sh && 
       wget https://raw.githubusercontent.com/open-horizon/anax/master/agent-install/agent-install.sh && 
       chmod +x agent-install.sh && 
-      sudo -s -E ${pEnv.PWD}/agent-install.sh -D cluster -u "${pEnv.HZN_EXCHANGE_USER_AUTH}" --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ${pEnv.PWD}/agent-install.cfg -i "remote:2.31.0-1482" -c "css:"`;
+      ${agentInstall}`;
+            //sudo -s -E ${pEnv.PWD}/agent-install.sh -D cluster -u "${pEnv.HZN_EXCHANGE_USER_AUTH}" --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ${pEnv.PWD}/agent-install.cfg -i "remote:2.31.0-1482" -c "css:"`;
             this.shell(arg, 'command executed successfully', 'command failed', true, { maxBuffer: 4096 * 2000 })
                 .subscribe({
                 complete: () => {
-                    observer.next();
+                    observer.next('');
                     observer.complete();
                 },
                 error: (err) => observer.error(err)
@@ -1123,10 +1205,12 @@ class Utils {
         // TODO:  Weird, have to force yes otherwise the script will hang
         return new rxjs_1.Observable((observer) => {
             console.log(`\n${msg}`);
+            const opJson = this.systemOS();
+            const aptGet = hzn_model_1.ICommand['app-get'](opJson.id);
             prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                 const resp = question.answer.toUpperCase();
                 if (resp === 'Y') {
-                    let arg = `sudo apt-get purge -y bluehorizon horizon horizon-cli && sudo rm agent-install.* -y`;
+                    let arg = `sudo ${aptGet} purge -y bluehorizon horizon horizon-cli && sudo rm agent-install.* -y`;
                     if (process.platform == 'darwin') {
                         arg = `${yes} sudo /Users/Shared/horizon-cli/bin/horizon-cli-uninstall.sh && sudo pkgutil --forget com.github.open-horizon.pkg.horizon-cli`;
                     }

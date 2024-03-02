@@ -28,7 +28,7 @@ class Hzn {
         this.objectFile = param.objectFile;
         this.mmsPattern = param.mmsPattern;
     }
-    init(cliOptional = false) {
+    init(cliBypass = false, cliOptional = false) {
         return new rxjs_1.Observable((observer) => {
             this.envVar.init()
                 .subscribe({
@@ -65,37 +65,46 @@ class Hzn {
                     console.log(err.message);
                     this.envVar.setOrgId();
                     if (err.message.indexOf('hzn:') >= 0) {
-                        if (!cliOptional) {
-                            console.log('need to install hzn');
-                        }
-                        const answer = exports.utils.promptCliOrAnax();
-                        if (answer == 'Y') {
-                            exports.utils.installCliOnly(this.envVar.getAnax())
-                                .subscribe({
-                                complete: () => {
-                                    console.log('done installing hzn cli.');
-                                    observer.complete();
-                                },
-                                error: (err) => {
-                                    observer.error(err);
-                                }
+                        if (cliBypass) {
+                            this.updateConfigFile()
+                                .subscribe(() => {
+                                observer.next('');
+                                observer.complete();
                             });
                         }
                         else {
-                            if (cliOptional == true) {
-                                observer.complete();
+                            if (!cliOptional) {
+                                console.log('need to install hzn');
                             }
-                            else {
-                                this.preInstallHznCli()
+                            const answer = exports.utils.promptCliOrAnax();
+                            if (answer == 'Y') {
+                                exports.utils.installCliOnly(this.envVar.getAnax())
                                     .subscribe({
                                     complete: () => {
-                                        console.log('done installing hzn.');
+                                        console.log('done installing hzn cli.');
                                         observer.complete();
                                     },
                                     error: (err) => {
                                         observer.error(err);
                                     }
                                 });
+                            }
+                            else {
+                                if (cliOptional == true) {
+                                    observer.complete();
+                                }
+                                else {
+                                    this.preInstallHznCli()
+                                        .subscribe({
+                                        complete: () => {
+                                            console.log('done installing hzn.');
+                                            observer.complete();
+                                        },
+                                        error: (err) => {
+                                            observer.error(err);
+                                        }
+                                    });
+                                }
                             }
                         }
                     }
@@ -117,6 +126,11 @@ class Hzn {
             console.log(`it works..., your environment is ready to go!`);
             observer.complete();
         });
+    }
+    updateConfigFile() {
+        return this.param.configFile.length > 0 ?
+            exports.utils.updateConfig(this.param.configFile) :
+            (0, rxjs_1.of)('Please specify config file name');
     }
     appendSupport() {
         return exports.utils.appendSupport();
@@ -211,13 +225,19 @@ class Hzn {
     }
     meshNodeList() {
         return this.param.name.length > 0 ?
-            exports.utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn node list`) :
+            exports.utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn node list`, 'commande executed successfully', 'failed to execute command', false) :
             (0, rxjs_1.of)('Please specify agent name');
     }
     meshAgreementList() {
         return this.param.name.length > 0 ?
-            exports.utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn agreement list`) :
+            exports.utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn agreement list`, 'commande executed successfully', 'failed to execute command', false) :
             (0, rxjs_1.of)('Please specify agent name');
+    }
+    meshPodList() {
+        return exports.utils.shell(`kubectl get pods -A`, 'commande executed successfully', 'failed to execute command', false);
+    }
+    meshServiceList() {
+        return exports.utils.shell(`kubectl get services -A`, 'commande executed successfully', 'failed to execute command', false);
     }
     registerMeshAgent() {
         return exports.utils.registerMeshAgent();

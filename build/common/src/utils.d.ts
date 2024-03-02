@@ -78,9 +78,10 @@ export declare class Utils {
     clearUnconfiguring(): Observable<unknown>;
     purgeManagementHub(purge: boolean): Observable<unknown>;
     cleanUp(): Observable<unknown>;
-    uninstallK3s(): Observable<unknown>;
-    unregisterMeshAgent(params: IHznParam): Observable<unknown>;
-    unregisterMeshAgentByName(params: IHznParam): Observable<unknown>;
+    uninstallK3s(msg?: string): Observable<unknown>;
+    unregisterMeshAgent(params: IHznParam, msg?: string): Observable<unknown>;
+    unregisterMeshAgentByName(params: IHznParam, msg?: string): Observable<unknown>;
+    systemOS(): {};
     installK3s(params: IAutoParam): Observable<unknown>;
     registerMeshAgent(): Observable<unknown>;
     setupOpenHorizonMesh(params: IAutoParam, anax: string): Observable<unknown>;
