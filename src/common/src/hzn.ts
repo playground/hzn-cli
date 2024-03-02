@@ -48,7 +48,7 @@ export class Hzn {
     this.mmsPattern = param.mmsPattern;
   }
 
-  init(cliOptional = false) {
+  init(cliBypass = false, cliOptional = false) {
     return new Observable((observer) => {
       this.envVar.init()
       .subscribe({
@@ -88,36 +88,44 @@ export class Hzn {
           console.log(err.message);
           this.envVar.setOrgId()
           if(err.message.indexOf('hzn:') >= 0) {
-            if(!cliOptional) {
-              console.log('need to install hzn');
-            }
-            const answer = utils.promptCliOrAnax();
-            if(answer == 'Y') {
-              utils.installCliOnly(this.envVar.getAnax())
-              .subscribe({
-                complete: () => {
-                  console.log('done installing hzn cli.');
-                  observer.complete();
-                },
-                error: (err) => {
-                  observer.error(err);
-                }
-              })  
-            } else {
-              if(cliOptional == true) {
+            if(cliBypass) {
+              this.updateConfigFile()
+              .subscribe(() => {
+                observer.next('');
                 observer.complete();
-              } else {
-                this.preInstallHznCli()
+              })
+            } else {
+              if(!cliOptional) {
+                console.log('need to install hzn');
+              }
+              const answer = utils.promptCliOrAnax();
+              if(answer == 'Y') {
+                utils.installCliOnly(this.envVar.getAnax())
                 .subscribe({
                   complete: () => {
-                    console.log('done installing hzn.');
+                    console.log('done installing hzn cli.');
                     observer.complete();
                   },
                   error: (err) => {
                     observer.error(err);
                   }
-                })    
-              }
+                })  
+              } else {
+                if(cliOptional == true) {
+                  observer.complete();
+                } else {
+                  this.preInstallHznCli()
+                  .subscribe({
+                    complete: () => {
+                      console.log('done installing hzn.');
+                      observer.complete();
+                    },
+                    error: (err) => {
+                      observer.error(err);
+                    }
+                  })    
+                }
+              }  
             }
           } else {
             observer.error(err);
@@ -137,6 +145,11 @@ export class Hzn {
       console.log(`it works..., your environment is ready to go!`)
       observer.complete();
     });  
+  }
+  updateConfigFile() {
+    return this.param.configFile.length > 0 ? 
+      utils.updateConfig(this.param.configFile) : 
+      of('Please specify config file name')    
   }
   appendSupport() {
     return utils.appendSupport()
@@ -231,13 +244,19 @@ export class Hzn {
   }
   meshNodeList() {
     return this.param.name.length > 0 ? 
-      utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn node list`) : 
+      utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn node list`, 'commande executed successfully', 'failed to execute command', false) : 
       of('Please specify agent name')    
   }
   meshAgreementList() {
     return this.param.name.length > 0 ? 
-      utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn agreement list`) : 
+      utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn agreement list`, 'commande executed successfully', 'failed to execute command', false) : 
       of('Please specify agent name')    
+  }
+  meshPodList() {
+    return utils.shell(`kubectl get pods -A`, 'commande executed successfully', 'failed to execute command', false);
+  }
+  meshServiceList() {
+    return utils.shell(`kubectl get services -A`, 'commande executed successfully', 'failed to execute command', false);
   }
   registerMeshAgent() {
     return utils.registerMeshAgent();

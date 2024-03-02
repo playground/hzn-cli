@@ -3,10 +3,13 @@ export const justRun = [
   'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement', 
   'listDeploymentPolicy', 'listExchangeNode', 'listExchangeNodePolicy', 'listNode', 'listNodes', 'listOrg', 'listNodePattern', 'listObject', 'listPattern', 
   'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'publishMMSObject', 'publishMMSObjectPattern', 'publishMMSObjectPolicy', 
-  'register', 'removeDeploymentPolicy', 'removeObject', 'removeOrg', 
-  'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition', 'createNetworkSegment', 
+  'register', 'removeDeploymentPolicy', 'removeObject', 'removeOrg', 'updateConfigFile',
+  'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition', 'createNetworkSegment', 'meshPodList', 'meshServiceList',
   'unregisterMeshAgent', 'unregisterMeshAgentByName', 'registerMeshAgent', 'createDeployment', 'exposeDeployment', 'meshNodeList', 'meshAgreementList'
 ];
+export const cliBypass = [
+  'updateConfigFile'
+]
 export const justRunCliOptional = [
   'registerMeshAgent', 'unregisterMeshAgent', 'unregisterMeshAgentByName', 'createDeployment', 'exposeDeployment', 'meshNodeList', 'meshAgreementList', 'createNetworkSegment'
 ];
@@ -23,7 +26,7 @@ export const customRun = [
   'cleanUp', 'clearUnconfiguring', 'purgeManagementHub', 'autoSetupOpenHorizonMesh'
 ];
 export const runDirectly = [
-  'appendSupport', 'deleteObject', 'removeCliContainer', 'removeAnaxContainer', 'stopRemoveContainer', 
+  'appendSupport', 'deleteObject', 'removeCliContainer', 'removeAnaxContainer', 'stopRemoveContainer', 'updateConfig',
   'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent', 'uninstallK3s', "installK3s"
 ];
 export const loop = [
@@ -236,4 +239,37 @@ export class Service {
   source?: string;
   display?: string;
   owner?: string;
+}
+
+export const PlatformDistro = {
+  darwin: 'darwin',
+  freebsd: 'freebsd',
+  linux: 'linux',
+  win32: 'win32',
+  ubuntu: 'ubuntu',
+  fedora: 'fefora',
+  centos: 'centos',
+  rhel: 'rhel'
+}
+
+export const ICommand = {
+  'app-get': (os: string) => ['darwin', 'ubuntu'].indexOf(os) >= 0 ? 'app-get' : 'dnf'
+}
+
+export const PalmCtl = {
+  rhel: {
+    "x86_64": "palmctl_latest_x86_64.rpm",
+    "x64": "palmctl_latest_x86_64.rpm"  
+  },
+  darwin: {
+    "i386": "palmctl_latest_macos_amd64.tar.gz",
+    "arm64": "palmctl_latest_macos_arm64.tar.gz",  
+  },
+  win32: {
+
+  },
+  linux: {
+    "x86_64": "horizon-agent-linux-deb-amd64.tar.gz",
+    "x64": "horizon-agent-linux-deb-amd64.tar.gz"  
+  }
 }

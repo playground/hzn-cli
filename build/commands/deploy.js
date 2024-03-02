@@ -79,7 +79,7 @@ const handler = (argv) => {
                 compatibility: compatibility || 'RHSI'
             };
             const hzn = new hzn_1.Hzn(hznModel);
-            hzn.init(hzn_model_1.justRunCliOptional.indexOf(action) >= 0)
+            hzn.init(hzn_model_1.cliBypass.indexOf(action) >= 0, hzn_model_1.justRunCliOptional.indexOf(action) >= 0)
                 .subscribe({
                 complete: () => {
                     if (interface_1.loop.includes(action)) {

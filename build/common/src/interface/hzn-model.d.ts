@@ -1,4 +1,5 @@
 export declare const justRun: string[];
+export declare const cliBypass: string[];
 export declare const justRunCliOptional: string[];
 export declare const promptForUpdate: string[];
 export declare const customRun: string[];
@@ -205,3 +206,31 @@ export declare class Service {
     display?: string;
     owner?: string;
 }
+export declare const PlatformDistro: {
+    darwin: string;
+    freebsd: string;
+    linux: string;
+    win32: string;
+    ubuntu: string;
+    fedora: string;
+    centos: string;
+    rhel: string;
+};
+export declare const ICommand: {
+    'app-get': (os: string) => "app-get" | "dnf";
+};
+export declare const PalmCtl: {
+    rhel: {
+        x86_64: string;
+        x64: string;
+    };
+    darwin: {
+        i386: string;
+        arm64: string;
+    };
+    win32: {};
+    linux: {
+        x86_64: string;
+        x64: string;
+    };
+};
