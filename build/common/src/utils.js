@@ -1110,7 +1110,8 @@ class Utils {
             const aptGet = hzn_model_1.ICommand['app-get'](opJson.id);
             const downgrades = opJson.id == 'rhel' ? '' : '--allow-downgrades';
             // Todo:  revisit this
-            const agentInstall = opJson.id == 'rhel' ? `sudo -s -E -b ./agent-install.sh -i 'css:' -C` : `sudo -s -E ${pEnv.PWD}/agent-install.sh -D cluster -u "${pEnv.HZN_EXCHANGE_USER_AUTH}" --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ${pEnv.PWD}/agent-install.cfg -i "remote:2.31.0-1482" -c "css:"`;
+            const extraEnv = opJson.id == 'rhel' ? 'export PATH=/usr/local/bin:$PATH;' : '';
+            const agentInstall = `sudo -s -E ${extraEnv} ${pEnv.PWD}/agent-install.sh -D cluster -u "${pEnv.HZN_EXCHANGE_USER_AUTH}" --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ${pEnv.PWD}/agent-install.cfg -i "remote:2.31.0-1482" -c "css:"`;
             console.log('aptGet', aptGet, opJson.id);
             let arg = `curl -sSfLO https://github.com/IBM/palmctl/releases/latest/download/${pEnv.PALMCTL_FILE_NAME} && 
       sudo ${aptGet} install -y ${downgrades} ${pEnv.PWD}/${pEnv.PALMCTL_FILE_NAME} && 
