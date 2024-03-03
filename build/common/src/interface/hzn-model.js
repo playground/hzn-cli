@@ -218,7 +218,7 @@ exports.PlatformDistro = {
     rhel: 'rhel'
 };
 exports.ICommand = {
-    'app-get': (os) => ['darwin', 'ubuntu'].indexOf(os) >= 0 ? 'app-get' : 'dnf'
+    'apt-get': (os) => ['darwin', 'ubuntu'].indexOf(os) >= 0 ? 'apt-get' : 'dnf'
 };
 exports.PalmCtl = {
     rhel: {
