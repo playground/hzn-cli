@@ -217,7 +217,7 @@ export declare const PlatformDistro: {
     rhel: string;
 };
 export declare const ICommand: {
-    'app-get': (os: string) => "app-get" | "dnf";
+    'apt-get': (os: string) => "apt-get" | "dnf";
 };
 export declare const PalmCtl: {
     rhel: {

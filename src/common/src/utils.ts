@@ -1090,7 +1090,7 @@ export class Utils {
     return new Observable((observer) => {
       const opJson: any = this.systemOS();
       const pEnv = process.env;
-      const aptGet = ICommand['app-get'](opJson.id);
+      const aptGet = ICommand['apt-get'](opJson.id);
       const downgrades = opJson.id == 'rhel' ? '' : '--allow-downgrades';
       // Todo:  revisit this
       const extraEnv = opJson.id == 'rhel' ? 'export PATH=/usr/local/bin:$PATH;' : '';
@@ -1187,7 +1187,7 @@ export class Utils {
     return new Observable((observer) => { 
       console.log(`\n${msg}`)
       const opJson: any = this.systemOS();
-      const aptGet = ICommand['app-get'](opJson.id);
+      const aptGet = ICommand['apt-get'](opJson.id);
       prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
         const resp = question.answer.toUpperCase()
         if(resp === 'Y') {

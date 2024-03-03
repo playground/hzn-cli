@@ -1107,7 +1107,7 @@ class Utils {
         return new rxjs_1.Observable((observer) => {
             const opJson = this.systemOS();
             const pEnv = process.env;
-            const aptGet = hzn_model_1.ICommand['app-get'](opJson.id);
+            const aptGet = hzn_model_1.ICommand['apt-get'](opJson.id);
             const downgrades = opJson.id == 'rhel' ? '' : '--allow-downgrades';
             // Todo:  revisit this
             const extraEnv = opJson.id == 'rhel' ? 'export PATH=/usr/local/bin:$PATH;' : '';
@@ -1206,7 +1206,7 @@ class Utils {
         return new rxjs_1.Observable((observer) => {
             console.log(`\n${msg}`);
             const opJson = this.systemOS();
-            const aptGet = hzn_model_1.ICommand['app-get'](opJson.id);
+            const aptGet = hzn_model_1.ICommand['apt-get'](opJson.id);
             prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                 const resp = question.answer.toUpperCase();
                 if (resp === 'Y') {
