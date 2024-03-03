@@ -253,7 +253,7 @@ export const PlatformDistro = {
 }
 
 export const ICommand = {
-  'app-get': (os: string) => ['darwin', 'ubuntu'].indexOf(os) >= 0 ? 'app-get' : 'dnf'
+  'apt-get': (os: string) => ['darwin', 'ubuntu'].indexOf(os) >= 0 ? 'apt-get' : 'dnf'
 }
 
 export const PalmCtl = {
