@@ -14,9 +14,23 @@ Open Horizon toolkit is a CLI built with Typescript for the NodeJS developers. I
 
 NOTE: Auto-dock is a containerized service that comes with hzn-cli built into this service. Please refer to https://github.com/playground/auto-dock
 
-### To setup Edge Node Agent, All-In-One, running CLI & agent in containers and etc.
+### To setup Edge Node Agent, All-In-One, Agent with Mesh, running CLI & agent in containers and etc.
 
 `curl -sSL https://raw.githubusercontent.com/playground/hzn-cli/main/install.sh --output install.sh && bash ./install.sh`
+
+#### Some example commands to work with Mesh
+```
+oh deploy createDeployment --name frontend --image quay.io/skupper/hello-world-frontend
+oh deploy exposeDeployment --name frontend --port 8080 --type LoadBalancer
+oh deploy createDeployment --name backend --image quay.io/skupper/hello-world-backend 
+oh deploy exposeDeployment --name backend --port 8080
+oh deploy meshNodeList --name agent-5c4cb8c677-fs4hr
+oh deploy meshAgreementList --name agent-5c4cb8c677-c4skq
+oh deploy registerMeshAgent
+oh deploy unregisterMeshAgent --name agent-5c4cb8c677-c4skq
+oh deploy meshPodList
+oh deploy meshServiceList 
+```
 
 OR
 
