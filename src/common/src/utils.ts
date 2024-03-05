@@ -19,7 +19,7 @@ import {
   policyType,
   SetupEnvironment,
 } from './interface';
-import { IAutoParam, ICommand, PlatformDistro } from './interface/hzn-model';
+import { IAutoParam, ICommand, K8sInstall, PlatformDistro } from './interface/hzn-model';
 
 const dotenv = require('dotenv');
 
@@ -1047,6 +1047,26 @@ export class Utils {
     })
     return opJson;
   }
+  installK8s(params: IAutoParam) {
+    return new Observable((observer) => {
+      const kubectl = process.platform == 'darwin' ? K8sInstall['darwin'] : K8sInstall[os.arch()];
+      let arg = `${kubectl.install}
+              ${kubectl.validate}
+              echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check 
+              sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl 
+              kubectl version --client 
+              sudo systemctl restart k8s && 
+              systemctl status k8s`
+      this.shell(arg)
+      .subscribe({
+        complete: () => {
+          observer.next('');
+          observer.complete();
+        },
+        error: (err) => observer.error(err)
+      })  
+    })  
+  }
   installK3s(params: IAutoParam) {
     return new Observable((observer) => {
       if(!process.env.KUBECONFIG) {
@@ -1129,7 +1149,7 @@ export class Utils {
       if(k8s == 'K3S') {
         $shell = this.installK3s(params);
       } else if(k8s == 'K8S') {
-
+        $shell = this.installK8s(params);
       } else {
         $shell = of();
       }

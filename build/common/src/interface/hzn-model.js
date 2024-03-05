@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PalmCtl = exports.ICommand = exports.PlatformDistro = exports.Service = exports.Deployment = exports.Container = exports.RequiredService = exports.configTemplate = exports.HorizonKeyMap = exports.HorizonTemplate = exports.keyMap = exports.AutoCommand = exports.SetupEnvironment = exports.policyType = exports.supportPlatform = exports.installPrompt = exports.installTar = exports.loop = exports.runDirectly = exports.customRun = exports.promptForUpdate = exports.justRunCliOptional = exports.cliBypass = exports.justRun = void 0;
+exports.K8sInstall = exports.PalmCtl = exports.ICommand = exports.PlatformDistro = exports.Service = exports.Deployment = exports.Container = exports.RequiredService = exports.configTemplate = exports.HorizonKeyMap = exports.HorizonTemplate = exports.keyMap = exports.AutoCommand = exports.SetupEnvironment = exports.policyType = exports.supportPlatform = exports.installPrompt = exports.installTar = exports.loop = exports.runDirectly = exports.customRun = exports.promptForUpdate = exports.justRunCliOptional = exports.cliBypass = exports.justRun = void 0;
 exports.justRun = [
     'addPolicy', 'addRemoteNodePolicy', 'updatePolicy',
     'checkConfigState', 'createHznKey', 'editPolicy', 'getDeviceArch', 'isConfigured', 'listAgreement',
@@ -30,7 +30,8 @@ exports.customRun = [
 ];
 exports.runDirectly = [
     'appendSupport', 'deleteObject', 'removeCliContainer', 'removeAnaxContainer', 'stopRemoveContainer', 'updateConfig',
-    'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent', 'uninstallK3s', "installK3s"
+    'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent', 'uninstallK3s', 'installK3s',
+    'installK8s', 'uninstallK8s'
 ];
 exports.loop = [
     'addPolicy', 'editPolicy', 'reviewPolicy', 'reviewServiceDefinition'
@@ -234,5 +235,16 @@ exports.PalmCtl = {
         "x86_64": "horizon-agent-linux-deb-amd64.tar.gz",
         "x64": "horizon-agent-linux-deb-amd64.tar.gz"
     }
+};
+const k8sAMD64 = `curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"`;
+const k8sARM64 = `curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/arm64/kubectl"`;
+const k8sAMD64Validate = `curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"`;
+const k8sARM64Validate = `curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/arm64/kubectl.sha256"`;
+exports.K8sInstall = {
+    "x86_64": { install: k8sAMD64, validate: k8sAMD64Validate },
+    "x64": { install: k8sAMD64, validate: k8sAMD64Validate },
+    "darwin": { install: k8sARM64, validate: k8sARM64Validate },
+    "arrch64": { install: k8sARM64, validate: k8sARM64Validate },
+    "arm64": { install: k8sARM64, validate: k8sARM64Validate }
 };
 //# sourceMappingURL=hzn-model.js.map

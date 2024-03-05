@@ -1064,6 +1064,26 @@ class Utils {
         });
         return opJson;
     }
+    installK8s(params) {
+        return new rxjs_1.Observable((observer) => {
+            const kubectl = process.platform == 'darwin' ? hzn_model_1.K8sInstall['darwin'] : hzn_model_1.K8sInstall[os_1.default.arch()];
+            let arg = `${kubectl.install}
+              ${kubectl.validate}
+              echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check 
+              sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl 
+              kubectl version --client 
+              sudo systemctl restart k8s && 
+              systemctl status k8s`;
+            this.shell(arg)
+                .subscribe({
+                complete: () => {
+                    observer.next('');
+                    observer.complete();
+                },
+                error: (err) => observer.error(err)
+            });
+        });
+    }
     installK3s(params) {
         return new rxjs_1.Observable((observer) => {
             if (!process.env.KUBECONFIG) {
@@ -1146,6 +1166,7 @@ class Utils {
                 $shell = this.installK3s(params);
             }
             else if (k8s == 'K8S') {
+                $shell = this.installK8s(params);
             }
             else {
                 $shell = (0, rxjs_1.of)();

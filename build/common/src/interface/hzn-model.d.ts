@@ -234,3 +234,25 @@ export declare const PalmCtl: {
         x64: string;
     };
 };
+export declare const K8sInstall: {
+    x86_64: {
+        install: string;
+        validate: string;
+    };
+    x64: {
+        install: string;
+        validate: string;
+    };
+    darwin: {
+        install: string;
+        validate: string;
+    };
+    arrch64: {
+        install: string;
+        validate: string;
+    };
+    arm64: {
+        install: string;
+        validate: string;
+    };
+};

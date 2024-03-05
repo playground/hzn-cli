@@ -27,7 +27,8 @@ export const customRun = [
 ];
 export const runDirectly = [
   'appendSupport', 'deleteObject', 'removeCliContainer', 'removeAnaxContainer', 'stopRemoveContainer', 'updateConfig',
-  'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent', 'uninstallK3s', "installK3s"
+  'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent', 'uninstallK3s', 'installK3s',
+  'installK8s', 'uninstallK8s'
 ];
 export const loop = [
   'addPolicy', 'editPolicy', 'reviewPolicy', 'reviewServiceDefinition'
@@ -272,4 +273,15 @@ export const PalmCtl = {
     "x86_64": "horizon-agent-linux-deb-amd64.tar.gz",
     "x64": "horizon-agent-linux-deb-amd64.tar.gz"  
   }
+}
+const k8sAMD64 = `curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"`;
+const k8sARM64 = `curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/arm64/kubectl"`;
+const k8sAMD64Validate = `curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"`;
+const k8sARM64Validate = `curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/arm64/kubectl.sha256"`;
+export const K8sInstall = {
+  "x86_64": {install: k8sAMD64, validate: k8sAMD64Validate},
+  "x64": {install: k8sAMD64, validate: k8sAMD64Validate},
+  "darwin": {install: k8sARM64, validate: k8sARM64Validate},
+  "arrch64": {install: k8sARM64, validate: k8sARM64Validate},
+  "arm64": {install: k8sARM64, validate: k8sARM64Validate}
 }
