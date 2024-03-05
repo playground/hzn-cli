@@ -94,14 +94,6 @@ export declare const configTemplate: {
             HZN_CSS: string;
             EDGE_OWNER: string;
             EDGE_DEPLOY: string;
-        };
-        credential: {
-            HZN_ORG_ID: string;
-            HZN_DEVICE_ID: string;
-            HZN_EXCHANGE_USER_AUTH: string;
-            HZN_EXCHANGE_URL: string;
-            HZN_FSS_CSSURL: string;
-            ANAX: string;
             MESH_API_KEY: string;
             MESH_ENDPOINT: string;
             PALMCTL_FILE_NAME: string;
@@ -113,6 +105,14 @@ export declare const configTemplate: {
             EDGE_CLUSTER_STORAGE_CLASS: string;
             AGENT_NAMESPACE: string;
             KUBECONFIG: string;
+        };
+        credential: {
+            HZN_ORG_ID: string;
+            HZN_DEVICE_ID: string;
+            HZN_EXCHANGE_USER_AUTH: string;
+            HZN_EXCHANGE_URL: string;
+            HZN_FSS_CSSURL: string;
+            ANAX: string;
         };
         metaVars: {};
     };

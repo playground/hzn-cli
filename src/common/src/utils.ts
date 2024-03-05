@@ -1047,16 +1047,53 @@ export class Utils {
     })
     return opJson;
   }
+  uninstallK8s(msg = 'Would you like to uninstall K8S?  Y/n ') {
+    return new Observable((observer) => {
+      console.log(`\n${msg}`)
+      prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
+        if(question.answer.toUpperCase() === 'Y') {
+          this.shell(`
+            sudo microk8s stop && 
+            sudo snap remove microk8s`)
+          .subscribe(() => {
+            observer.next();
+            observer.complete();
+          })
+        } else {
+          observer.next();
+          observer.complete();
+        }
+      });
+    });
+  }
   installK8s(params: IAutoParam) {
     return new Observable((observer) => {
-      const kubectl = process.platform == 'darwin' ? K8sInstall['darwin'] : K8sInstall[os.arch()];
-      let arg = `${kubectl.install}
-              ${kubectl.validate}
-              echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check 
-              sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl 
-              kubectl version --client 
-              sudo systemctl restart k8s && 
-              systemctl status k8s`
+      const kube = `$HOME/.kube`
+      let kubeConfig = '';
+      const bashrc = readFileSync(`${this.homePath}/.bashrc`);
+      if(bashrc.indexOf('export KUBECONFIG=') < 0) {
+        kubeConfig = 'echo export KUBECONFIG=$HOME/.kube/config >> $HOME/.bashrc && ';
+      }
+
+      //let arg = `curl -sSfLO https://github.ibm.com/Edge-Fabric/qa-automation/blob/main/microk8s-install/run.sh -o run.sh && 
+      //        sudo chmod +x run.sh && 
+      //        sudo ./run.sh`
+      let arg = `
+            rm -rf ${kube} && 
+            mkdir -p ${kube} && 
+            ${kubeConfig}
+            sudo iptables -P FORWARD ACCEPT && 
+            sudo snap install microk8s --classic && 
+            sudo usermod -aG microk8s $USER && 
+            sudo chown $USER ${kube} && 
+            alias kubectl='sudo microk8s kubectl' && 
+            . ~/.bashrc && 
+            sudo microk8s kubectl config view --raw > ${kube}/config && 
+            kubectl get nodes && 
+            kubectl get pods -A && 
+            microk8s.enable hostpath-storage && 
+            microk8s enable dns && 
+            sudo microk8s status`
       this.shell(arg)
       .subscribe({
         complete: () => {
