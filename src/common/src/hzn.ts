@@ -252,6 +252,14 @@ export class Hzn {
       utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn agreement list`, 'commande executed successfully', 'failed to execute command', false) : 
       of('Please specify agent name')    
   }
+  meshAgentEventLog() {
+    return this.param.name.length > 0 ? 
+      utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn eventlog list`, 'commande executed successfully', 'failed to execute command', false) : 
+      of('Please specify agent name')    
+  }
+  deleteAgentNamespace() {
+    return utils.shell(`kubectl delete namespace ${process.env.AGENT_NAMESPACE}`, 'commande executed successfully', 'failed to execute command', false);    
+  }
   meshPodList() {
     return utils.shell(`kubectl get pods -A`, 'commande executed successfully', 'failed to execute command', false);
   }

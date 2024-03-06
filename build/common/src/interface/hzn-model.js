@@ -8,10 +8,11 @@ exports.justRun = [
     'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'publishMMSObject', 'publishMMSObjectPattern', 'publishMMSObjectPolicy',
     'register', 'removeDeploymentPolicy', 'removeObject', 'removeOrg', 'updateConfigFile',
     'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition', 'createNetworkSegment', 'meshPodList', 'meshServiceList',
-    'unregisterMeshAgent', 'unregisterMeshAgentByName', 'registerMeshAgent', 'createDeployment', 'exposeDeployment', 'meshNodeList', 'meshAgreementList'
+    'unregisterMeshAgent', 'unregisterMeshAgentByName', 'registerMeshAgent', 'createDeployment', 'exposeDeployment', 'meshNodeList', 'meshAgreementList',
+    'deleteAgentNamespace', 'meshAgentEventLog'
 ];
 exports.cliBypass = [
-    'updateConfigFile'
+    'updateConfigFile', 'deleteAgentNamespace', 'meshAgentEventLog'
 ];
 exports.justRunCliOptional = [
     'registerMeshAgent', 'unregisterMeshAgent', 'unregisterMeshAgentByName', 'createDeployment', 'exposeDeployment', 'meshNodeList', 'meshAgreementList', 'createNetworkSegment'
@@ -127,18 +128,7 @@ exports.configTemplate = {
             "SERVICE_CONSTRAINTS": "mms-agent == \"MMS Agent\"",
             "HZN_CSS": "false",
             "EDGE_OWNER": "",
-            "EDGE_DEPLOY": "",
-            "MESH_API_KEY": "",
-            "MESH_ENDPOINT": "https://mcnm-preprod.multicloud-mesh-preprod.test.cloud.ibm.com",
-            "PALMCTL_FILE_NAME": "palmctl_latest_amd64.deb",
-            "USE_EDGE_CLUSTER_REGISTRY": false,
-            "ENABLE_AUTO_UPGRADE_CRONJOB": false,
-            "IMAGE_ON_EDGE_CLUSTER_REGISTRY": "docker.io/openhorizon/amd64_anax_k8s",
-            "EDGE_CLUSTER_REGISTRY_USERNAME": "",
-            "EDGE_CLUSTER_REGISTRY_TOKEN": "",
-            "EDGE_CLUSTER_STORAGE_CLASS": "local-path",
-            "AGENT_NAMESPACE": "frontend-test-ns",
-            "KUBECONFIG": "$HOME/.kube/config"
+            "EDGE_DEPLOY": ""
         },
         "credential": {
             "HZN_ORG_ID": "",
@@ -160,7 +150,18 @@ exports.configTemplate = {
         "HZN_CUSTOM_NODE_ID": "",
         "DEFAULT_ORG": "biz",
         "ANAX": "api/v1/objects/IBM/agent_files/agent-install.sh/data",
-        "ANAX_IN_CONTAINER": "true"
+        "ANAX_IN_CONTAINER": "true",
+        "MESH_API_KEY": "",
+        "MESH_ENDPOINT": "https://mcnm-preprod.multicloud-mesh-preprod.test.cloud.ibm.com",
+        "PALMCTL_FILE_NAME": "palmctl_latest_amd64.deb",
+        "USE_EDGE_CLUSTER_REGISTRY": false,
+        "ENABLE_AUTO_UPGRADE_CRONJOB": false,
+        "IMAGE_ON_EDGE_CLUSTER_REGISTRY": "docker.io/openhorizon/amd64_anax_k8s",
+        "EDGE_CLUSTER_REGISTRY_USERNAME": "",
+        "EDGE_CLUSTER_REGISTRY_TOKEN": "",
+        "EDGE_CLUSTER_STORAGE_CLASS": "local-path",
+        "AGENT_NAMESPACE": "frontend-test-ns",
+        "KUBECONFIG": "$HOME/.kube/config"
     },
     envSupport: {
         "SUPPORTED_OS_APPEND": "",
