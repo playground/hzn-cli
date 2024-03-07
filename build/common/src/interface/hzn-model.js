@@ -12,11 +12,10 @@ exports.justRun = [
     'deleteAgentNamespace', 'meshAgentEventLog'
 ];
 exports.cliBypass = [
-    'updateConfigFile', 'deleteAgentNamespace', 'meshAgentEventLog'
+    'createDeployment', 'exposeDeployment', 'updateConfigFile', 'deleteAgentNamespace', 'meshAgentEventLog', 'registerMeshAgent', 'unregisterMeshAgent', 'unregisterMeshAgentByName',
+    'meshNodeList', 'meshAgreementList', 'createNetworkSegment'
 ];
-exports.justRunCliOptional = [
-    'registerMeshAgent', 'unregisterMeshAgent', 'unregisterMeshAgentByName', 'createDeployment', 'exposeDeployment', 'meshNodeList', 'meshAgreementList', 'createNetworkSegment'
-];
+exports.justRunCliOptional = [];
 exports.promptForUpdate = [
     'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister',
     'buildMMSImage', 'buildServiceImage', 'editDeploymentPoicy', 'editNodePolicy', 'editServicePolicy', 'publishAndRegister',
