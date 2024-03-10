@@ -1102,23 +1102,22 @@ export class Utils {
             mkdir -p ${kube} && 
             ${kubeConfig}
             sudo iptables -P FORWARD ACCEPT && 
+            sudo groupadd -f microk8s && 
+            sudo usermod -a -G microk8s $USER && 
             echo installing microk8s && 
             sudo snap install microk8s --classic && 
-            sudo usermod -a -G microk8s $USER && 
-            sudo chown -R $USER ${kube} && 
             alias kubectl='sudo microk8s kubectl' && 
             . ~/.bashrc && 
-            sudo microk8s status --wait-ready && 
             echo generate ${kube}/config && 
             sudo microk8s kubectl config view --raw > ${kube}/config && 
             microk8s.enable hostpath-storage && 
+            sudo chown -R $USER ${kube} && 
+            sudo chgrp -R microk8s ${kube} && 
+            sudo newgrp microk8s && 
             microk8s enable dns && 
-            sudo snap restart microk8s && 
-            echo restart microk8s && 
-            sudo microk8s status --wait-ready && 
-            kubectl get nodes && 
-            kubectl get pods -A && 
-            sudo microk8s status --wait-ready`
+            microk8s kubectl get nodes && 
+            microk8s kubectl get pods -A`
+            //sudo microk8s status --wait-ready`
       this.shell(arg)
       .subscribe({
         complete: () => {
