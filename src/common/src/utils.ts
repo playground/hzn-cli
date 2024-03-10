@@ -1072,6 +1072,7 @@ export class Utils {
       prompt.get({name: 'answer', required: true}, (err: any, question: any) => {
         if(question.answer.toUpperCase() === 'Y') {
           this.shell(`
+            sudo rm -rf /usr/local/bin/kubectl &&  
             sudo microk8s stop && 
             sudo snap remove microk8s`)
           .subscribe(() => {
@@ -1093,7 +1094,6 @@ export class Utils {
       if(bashrc.indexOf('export KUBECONFIG=') < 0) {
         kubeConfig = 'echo export KUBECONFIG=$HOME/.kube/config >> $HOME/.bashrc && ';
       }
-
       //let arg = `curl -sSfLO https://github.ibm.com/Edge-Fabric/qa-automation/blob/main/microk8s-install/run.sh -o run.sh && 
       //        sudo chmod +x run.sh && 
       //        sudo ./run.sh`
@@ -1102,15 +1102,19 @@ export class Utils {
             mkdir -p ${kube} && 
             ${kubeConfig}
             sudo iptables -P FORWARD ACCEPT && 
+            echo installing microk8s && 
             sudo snap install microk8s --classic && 
-            sudo usermod -aG microk8s $USER && 
-            sudo chown $USER ${kube} && 
+            sudo usermod -a -G microk8s $USER && 
+            sudo chown -R $USER ${kube} && 
             alias kubectl='sudo microk8s kubectl' && 
             . ~/.bashrc && 
+            sudo microk8s status --wait-ready && 
+            echo generate ${kube}/config && 
             sudo microk8s kubectl config view --raw > ${kube}/config && 
             microk8s.enable hostpath-storage && 
             microk8s enable dns && 
             sudo snap restart microk8s && 
+            echo restart microk8s && 
             sudo microk8s status --wait-ready && 
             kubectl get nodes && 
             kubectl get pods -A && 

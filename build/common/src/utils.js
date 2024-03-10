@@ -1089,6 +1089,7 @@ class Utils {
             prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                 if (question.answer.toUpperCase() === 'Y') {
                     this.shell(`
+            sudo rm -rf /usr/local/bin/kubectl &&  
             sudo microk8s stop && 
             sudo snap remove microk8s`)
                         .subscribe(() => {
@@ -1119,15 +1120,19 @@ class Utils {
             mkdir -p ${kube} && 
             ${kubeConfig}
             sudo iptables -P FORWARD ACCEPT && 
+            echo installing microk8s && 
             sudo snap install microk8s --classic && 
-            sudo usermod -aG microk8s $USER && 
-            sudo chown $USER ${kube} && 
+            sudo usermod -a -G microk8s $USER && 
+            sudo chown -R $USER ${kube} && 
             alias kubectl='sudo microk8s kubectl' && 
             . ~/.bashrc && 
+            sudo microk8s status --wait-ready && 
+            echo generate ${kube}/config && 
             sudo microk8s kubectl config view --raw > ${kube}/config && 
             microk8s.enable hostpath-storage && 
             microk8s enable dns && 
             sudo snap restart microk8s && 
+            echo restart microk8s && 
             sudo microk8s status --wait-ready && 
             kubectl get nodes && 
             kubectl get pods -A && 
