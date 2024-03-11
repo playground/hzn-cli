@@ -1127,12 +1127,10 @@ class Utils {
             alias kubectl='sudo microk8s kubectl' && 
             . ~/.bashrc && 
             echo generate ${kube}/config && 
-            sudo microk8s kubectl config view --raw > ${kube}/config && 
-            microk8s.enable hostpath-storage && 
             sudo chown -R $USER ${kube} && 
             sudo chgrp -R microk8s ${kube} && 
-            sudo newgrp microk8s && 
-            echo restart microk8s && 
+            sudo microk8s kubectl config view --raw > ${kube}/config && 
+            microk8s.enable hostpath-storage && 
             microk8s enable dns && 
             microk8s kubectl get nodes && 
             microk8s kubectl get pods -A`;

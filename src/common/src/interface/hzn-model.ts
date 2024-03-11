@@ -6,11 +6,11 @@ export const justRun = [
   'register', 'removeDeploymentPolicy', 'removeObject', 'removeOrg', 'updateConfigFile',
   'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition', 'createNetworkSegment', 'meshPodList', 'meshServiceList',
   'unregisterMeshAgent', 'unregisterMeshAgentByName', 'registerMeshAgent', 'createDeployment', 'exposeDeployment', 'meshNodeList', 'meshAgreementList',
-  'deleteAgentNamespace', 'meshAgentEventLog'
+  'deleteAgentNamespace', 'meshAgentEventLog', 'uninstallAgent'
 ];
 export const cliBypass = [
   'createDeployment', 'exposeDeployment', 'updateConfigFile', 'deleteAgentNamespace', 'meshAgentEventLog', 'registerMeshAgent', 'unregisterMeshAgent', 'unregisterMeshAgentByName',
-  'meshNodeList', 'meshAgreementList', 'createNetworkSegment'
+  'meshNodeList', 'meshAgreementList', 'createNetworkSegment', 'uninstallAgent'
 ]
 export const justRunCliOptional = [  
 ];

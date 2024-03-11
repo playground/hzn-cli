@@ -243,6 +243,14 @@ export class Hzn {
       utils.shell(`kubectl expose deployment/${this.param.name} --port ${this.param.port}${type} -n $AGENT_NAMESPACE`) :
       of('Please specify deploment --name, --port and --type')
   }
+  uninstallAgent() {
+    return this.param.name.length > 0 ?
+      utils.shell(`sudo chmod +x ${this.param.name} && ${this.param.name}`) :
+      of('Please specify agent uninstall script --name')
+  }
+  setDefaultNamespace() {
+    let arg = `microk8s kubectl config set-context --current --namespace=ohmesh-backend-k8s-ns`
+  }
   meshNodeList() {
     return this.param.name.length > 0 ? 
       utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn node list`, 'commande executed successfully', 'failed to execute command', false) : 
