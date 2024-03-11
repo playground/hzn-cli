@@ -48,6 +48,8 @@ export declare class Hzn {
     createDeployment(): Observable<unknown>;
     createNetworkSegment(): Observable<unknown>;
     exposeDeployment(): Observable<unknown>;
+    uninstallAgent(): Observable<unknown>;
+    setDefaultNamespace(): void;
     meshNodeList(): Observable<unknown>;
     meshAgreementList(): Observable<unknown>;
     meshAgentEventLog(): Observable<unknown>;
