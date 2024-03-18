@@ -4,10 +4,7 @@
     "destinationOrgID": "$HZN_ORG_ID",
     "destinationPolicy": {
         "constraints": [
-            {
-                "name": "worker-safety",
-                "value": "Worker Safety"
-            }
+            "worker-safety == \"Worker Safety\""
         ],
         "services": [
             {
