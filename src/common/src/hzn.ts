@@ -88,6 +88,7 @@ export class Hzn {
           console.log(err.message);
           this.envVar.setOrgId()
           if(err.message.indexOf('hzn:') >= 0) {
+            console.log('here:', cliBypass, cliOptional)
             if(cliBypass) {
               this.updateConfigFile()
               .subscribe(() => {
