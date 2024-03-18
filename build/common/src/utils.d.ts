@@ -82,6 +82,8 @@ export declare class Utils {
     unregisterMeshAgent(params: IHznParam, msg?: string): Observable<unknown>;
     unregisterMeshAgentByName(params: IHznParam, msg?: string): Observable<unknown>;
     systemOS(): {};
+    uninstallK8s(msg?: string): Observable<unknown>;
+    installK8s(params: IAutoParam): Observable<unknown>;
     installK3s(params: IAutoParam): Observable<unknown>;
     registerMeshAgent(): Observable<unknown>;
     setupOpenHorizonMesh(params: IAutoParam, anax: string): Observable<unknown>;

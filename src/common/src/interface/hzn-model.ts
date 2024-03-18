@@ -5,13 +5,14 @@ export const justRun = [
   'listPolicy', 'listService', 'listServicePolicy', 'listAllServices', 'publishMMSObject', 'publishMMSObjectPattern', 'publishMMSObjectPolicy', 
   'register', 'removeDeploymentPolicy', 'removeObject', 'removeOrg', 'updateConfigFile',
   'removeNode', 'removeService', 'reviewPolicy', 'reviewServiceDefinition', 'createNetworkSegment', 'meshPodList', 'meshServiceList',
-  'unregisterMeshAgent', 'unregisterMeshAgentByName', 'registerMeshAgent', 'createDeployment', 'exposeDeployment', 'meshNodeList', 'meshAgreementList'
+  'unregisterMeshAgent', 'unregisterMeshAgentByName', 'registerMeshAgent', 'createDeployment', 'exposeDeployment', 'meshNodeList', 'meshAgreementList',
+  'deleteAgentNamespace', 'meshAgentEventLog', 'uninstallAgent'
 ];
 export const cliBypass = [
-  'updateConfigFile'
+  'createDeployment', 'exposeDeployment', 'updateConfigFile', 'deleteAgentNamespace', 'meshAgentEventLog', 'registerMeshAgent', 'unregisterMeshAgent', 'unregisterMeshAgentByName',
+  'meshNodeList', 'meshAgreementList', 'createNetworkSegment', 'uninstallAgent'
 ]
-export const justRunCliOptional = [
-  'registerMeshAgent', 'unregisterMeshAgent', 'unregisterMeshAgentByName', 'createDeployment', 'exposeDeployment', 'meshNodeList', 'meshAgreementList', 'createNetworkSegment'
+export const justRunCliOptional = [  
 ];
 export const promptForUpdate = [
   'setup', 'test', 'buildAndPublish', 'buildPublishAndRegister', 
@@ -27,7 +28,8 @@ export const customRun = [
 ];
 export const runDirectly = [
   'appendSupport', 'deleteObject', 'removeCliContainer', 'removeAnaxContainer', 'stopRemoveContainer', 'updateConfig',
-  'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent', 'uninstallK3s', "installK3s"
+  'setupManagementHub', 'showHznInfo', 'updateHznInfo', 'uninstallHorizon', 'unregisterAgent', 'uninstallK3s', 'installK3s',
+  'installK8s', 'uninstallK8s'
 ];
 export const loop = [
   'addPolicy', 'editPolicy', 'reviewPolicy', 'reviewServiceDefinition'
@@ -129,18 +131,7 @@ export const configTemplate = {
       "HZN_EXCHANGE_USER_AUTH": "",
       "HZN_EXCHANGE_URL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-exchange/v1",
       "HZN_FSS_CSSURL": "https://cp-console.ieam42-edge-8e873dd4c685acf6fd2f13f4cdfb05bb-0000.us-south.containers.appdomain.cloud/edge-css",
-      "ANAX": "api/v1/objects/IBM/agent_files/agent-install.sh/data",
-      "MESH_API_KEY": "",
-      "MESH_ENDPOINT": "https://mcnm-preprod.multicloud-mesh-preprod.test.cloud.ibm.com",
-      "PALMCTL_FILE_NAME": "palmctl_latest_amd64.deb",
-      "USE_EDGE_CLUSTER_REGISTRY": false,
-      "ENABLE_AUTO_UPGRADE_CRONJOB": false,
-      "IMAGE_ON_EDGE_CLUSTER_REGISTRY": "docker.io/openhorizon/amd64_anax_k8s",
-      "EDGE_CLUSTER_REGISTRY_USERNAME": "",
-      "EDGE_CLUSTER_REGISTRY_TOKEN": "",
-      "EDGE_CLUSTER_STORAGE_CLASS": "local-path",
-      "AGENT_NAMESPACE": "frontend-test-ns",
-      "KUBECONFIG": "$HOME/.kube/config"
+      "ANAX": "api/v1/objects/IBM/agent_files/agent-install.sh/data"
     },
     "metaVars": {
     }
@@ -155,7 +146,18 @@ export const configTemplate = {
     "HZN_CUSTOM_NODE_ID": "",
     "DEFAULT_ORG": "biz",
     "ANAX": "api/v1/objects/IBM/agent_files/agent-install.sh/data",
-    "ANAX_IN_CONTAINER": "true"
+    "ANAX_IN_CONTAINER": "true",
+    "MESH_API_KEY": "",
+    "MESH_ENDPOINT": "https://mcnm-preprod.multicloud-mesh-preprod.test.cloud.ibm.com",
+    "PALMCTL_FILE_NAME": "palmctl_latest_amd64.deb",
+    "USE_EDGE_CLUSTER_REGISTRY": false,
+    "ENABLE_AUTO_UPGRADE_CRONJOB": false,
+    "IMAGE_ON_EDGE_CLUSTER_REGISTRY": "docker.io/openhorizon/amd64_anax_k8s",
+    "EDGE_CLUSTER_REGISTRY_USERNAME": "",
+    "EDGE_CLUSTER_REGISTRY_TOKEN": "",
+    "EDGE_CLUSTER_STORAGE_CLASS": "local-path",
+    "AGENT_NAMESPACE": "frontend-test-ns",
+    "KUBECONFIG": "$HOME/.kube/config"
   },
   envSupport: {
     "SUPPORTED_OS_APPEND": "",
@@ -272,4 +274,15 @@ export const PalmCtl = {
     "x86_64": "horizon-agent-linux-deb-amd64.tar.gz",
     "x64": "horizon-agent-linux-deb-amd64.tar.gz"  
   }
+}
+const k8sAMD64 = `curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"`;
+const k8sARM64 = `curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/arm64/kubectl"`;
+const k8sAMD64Validate = `curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"`;
+const k8sARM64Validate = `curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/arm64/kubectl.sha256"`;
+export const K8sInstall = {
+  "x86_64": {install: k8sAMD64, validate: k8sAMD64Validate},
+  "x64": {install: k8sAMD64, validate: k8sAMD64Validate},
+  "darwin": {install: k8sARM64, validate: k8sARM64Validate},
+  "arrch64": {install: k8sARM64, validate: k8sARM64Validate},
+  "arm64": {install: k8sARM64, validate: k8sARM64Validate}
 }
