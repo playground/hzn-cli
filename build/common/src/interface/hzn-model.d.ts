@@ -1,6 +1,6 @@
 export declare const justRun: string[];
 export declare const cliBypass: string[];
-export declare const justRunCliOptional: string[];
+export declare const justRunCliOptional: any[];
 export declare const promptForUpdate: string[];
 export declare const customRun: string[];
 export declare const runDirectly: string[];
@@ -102,17 +102,6 @@ export declare const configTemplate: {
             HZN_EXCHANGE_URL: string;
             HZN_FSS_CSSURL: string;
             ANAX: string;
-            MESH_API_KEY: string;
-            MESH_ENDPOINT: string;
-            PALMCTL_FILE_NAME: string;
-            USE_EDGE_CLUSTER_REGISTRY: boolean;
-            ENABLE_AUTO_UPGRADE_CRONJOB: boolean;
-            IMAGE_ON_EDGE_CLUSTER_REGISTRY: string;
-            EDGE_CLUSTER_REGISTRY_USERNAME: string;
-            EDGE_CLUSTER_REGISTRY_TOKEN: string;
-            EDGE_CLUSTER_STORAGE_CLASS: string;
-            AGENT_NAMESPACE: string;
-            KUBECONFIG: string;
         };
         metaVars: {};
     };
@@ -127,6 +116,17 @@ export declare const configTemplate: {
         DEFAULT_ORG: string;
         ANAX: string;
         ANAX_IN_CONTAINER: string;
+        MESH_API_KEY: string;
+        MESH_ENDPOINT: string;
+        PALMCTL_FILE_NAME: string;
+        USE_EDGE_CLUSTER_REGISTRY: boolean;
+        ENABLE_AUTO_UPGRADE_CRONJOB: boolean;
+        IMAGE_ON_EDGE_CLUSTER_REGISTRY: string;
+        EDGE_CLUSTER_REGISTRY_USERNAME: string;
+        EDGE_CLUSTER_REGISTRY_TOKEN: string;
+        EDGE_CLUSTER_STORAGE_CLASS: string;
+        AGENT_NAMESPACE: string;
+        KUBECONFIG: string;
     };
     envSupport: {
         SUPPORTED_OS_APPEND: string;
@@ -232,5 +232,27 @@ export declare const PalmCtl: {
     linux: {
         x86_64: string;
         x64: string;
+    };
+};
+export declare const K8sInstall: {
+    x86_64: {
+        install: string;
+        validate: string;
+    };
+    x64: {
+        install: string;
+        validate: string;
+    };
+    darwin: {
+        install: string;
+        validate: string;
+    };
+    arrch64: {
+        install: string;
+        validate: string;
+    };
+    arm64: {
+        install: string;
+        validate: string;
     };
 };

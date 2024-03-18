@@ -65,6 +65,7 @@ class Hzn {
                     console.log(err.message);
                     this.envVar.setOrgId();
                     if (err.message.indexOf('hzn:') >= 0) {
+                        console.log('here:', cliBypass, cliOptional);
                         if (cliBypass) {
                             this.updateConfigFile()
                                 .subscribe(() => {
@@ -219,9 +220,18 @@ class Hzn {
             (0, rxjs_1.of)('Please specify agent name');
     }
     exposeDeployment() {
-        return this.param.name.length > 0 && this.param.type.length > 0 && this.param.port.length > 0 ?
-            exports.utils.shell(`kubectl expose deployment ${this.param.name} --port ${this.param.port} --type ${this.param.type} -n $AGENT_NAMESPACE`) :
+        const type = this.param.type.length > 0 ? ` --type ${this.param.type}` : '';
+        return this.param.name.length > 0 && this.param.port.length > 0 ?
+            exports.utils.shell(`kubectl expose deployment/${this.param.name} --port ${this.param.port}${type} -n $AGENT_NAMESPACE`) :
             (0, rxjs_1.of)('Please specify deploment --name, --port and --type');
+    }
+    uninstallAgent() {
+        return this.param.name.length > 0 ?
+            exports.utils.shell(`sudo chmod +x ${this.param.name} && ${this.param.name}`) :
+            (0, rxjs_1.of)('Please specify agent uninstall script --name');
+    }
+    setDefaultNamespace() {
+        let arg = `microk8s kubectl config set-context --current --namespace=ohmesh-backend-k8s-ns`;
     }
     meshNodeList() {
         return this.param.name.length > 0 ?
@@ -232,6 +242,14 @@ class Hzn {
         return this.param.name.length > 0 ?
             exports.utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn agreement list`, 'commande executed successfully', 'failed to execute command', false) :
             (0, rxjs_1.of)('Please specify agent name');
+    }
+    meshAgentEventLog() {
+        return this.param.name.length > 0 ?
+            exports.utils.shell(`kubectl -n $AGENT_NAMESPACE exec -i ${this.param.name} -- hzn eventlog list`, 'commande executed successfully', 'failed to execute command', false) :
+            (0, rxjs_1.of)('Please specify agent name');
+    }
+    deleteAgentNamespace() {
+        return exports.utils.shell(`kubectl delete namespace ${process.env.AGENT_NAMESPACE}`, 'commande executed successfully', 'failed to execute command', false);
     }
     meshPodList() {
         return exports.utils.shell(`kubectl get pods -A`, 'commande executed successfully', 'failed to execute command', false);

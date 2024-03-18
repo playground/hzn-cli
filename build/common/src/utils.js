@@ -300,6 +300,7 @@ class Utils {
                 let hznJson = JSON.parse((0, fs_1.readFileSync)(`${this.hznConfig}/.env-hzn.json`).toString());
                 const config = jsonfile_1.default.readFileSync(configFile);
                 if (this.invalidTemplate(config)) {
+                    console.log('invalid template, please check your config');
                     observer.next('');
                     observer.complete();
                 }
@@ -320,24 +321,41 @@ class Utils {
                     }
                     let obj = envHzn[key];
                     if (config[interface_1.keyMap[key]]) {
-                        Object.keys(config[interface_1.keyMap[key]]).forEach((configKey) => {
-                            if (obj[configKey]) {
-                                hznJson[orgId][key][configKey] = config[interface_1.keyMap[key]][configKey] ? config[interface_1.keyMap[key]][configKey] : obj[configKey];
+                        console.log('$$$', orgId, key);
+                        Object.keys(obj).forEach((objKey) => {
+                            hznJson[orgId][key][objKey] = config[interface_1.keyMap[key]][objKey] ? config[interface_1.keyMap[key]][objKey] : obj[objKey];
+                            pEnv[objKey] = config[interface_1.keyMap[key]][objKey];
+                        });
+                        //Object.keys(config[keyMap[key]]).forEach((configKey) => {
+                        //  let value = envHzn[key][configKey];
+                        //  console.log(value, configKey)
+                        //  if(value && value.length >= 0) {
+                        //    console.log('!!!',configKey, value, hznJson[orgId][key][configKey])
+                        //    hznJson[orgId][key][configKey] = config[keyMap[key]][configKey] ? config[keyMap[key]][configKey] : value
+                        //    console.log('!!',configKey, value, hznJson[orgId][key][configKey])
+                        //  }
+                        //  pEnv[configKey] = config[keyMap[key]][configKey]
+                        //})  
+                        Object.keys(config[interface_1.keyMap[key]]).forEach(objKey => {
+                            //if(!hznJson[orgId][key][objKey]) {
+                            //  hznJson[orgId][key][objKey] = config[keyMap[key]][objKey] ? config[keyMap[key]][objKey] : obj[objKey]
+                            //}
+                            if (!pEnv[objKey]) {
+                                pEnv[objKey] = config[interface_1.keyMap[key]][objKey];
                             }
-                            pEnv[configKey] = config[interface_1.keyMap[key]][configKey];
                         });
                     }
-                    Object.keys(obj).forEach(objKey => {
-                        if (!hznJson[orgId][key][objKey]) {
-                            hznJson[orgId][key][objKey] = config[interface_1.keyMap[key]][objKey] ? config[interface_1.keyMap[key]][objKey] : obj[objKey];
-                        }
-                    });
+                    //Object.keys(obj).forEach(objKey => {
+                    //  if(!hznJson[orgId][key][objKey]) {
+                    //    hznJson[orgId][key][objKey] = config[keyMap[key]][objKey] ? config[keyMap[key]][objKey] : obj[objKey]
+                    //  }
+                    //   pEnv[objKey] = hznJson[orgId][key][objKey]
+                    //});
                     // Object.keys(obj).forEach((objKey) => {
                     //   hznJson[orgId][key][objKey] = config[keyMap[key]][objKey] ? config[keyMap[key]][objKey] : obj[objKey]
                     //   pEnv[objKey] = hznJson[orgId][key][objKey]
                     // })
                 });
-                // console.log(hznJson)
                 jsonfile_1.default.writeFileSync('.env-hzn.json', hznJson, { spaces: 2 });
                 this.copyFile(`sudo mv .env-hzn.json ${this.hznConfig}/.env-hzn.json && sudo chmod 644 ${this.hznConfig}/.env-hzn.json`).then(() => {
                     console.log(`config files updated for ${orgId}`);
@@ -1014,6 +1032,7 @@ class Utils {
             prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
                 if (question.answer.toUpperCase() === 'Y') {
                     const pEnv = process.env;
+                    console.log(pEnv.HZN_ORG_ID, pEnv.HZN_EXCHANGE_USER_AUTH);
                     //curl -sL --insecure -u "Tenant3_Corp/ohuser:spqmt@M3u43v4<7u" -X DELETE https://ibm-edge-exchange-preprod.multicloud-mesh-preprod.test.cloud.ibm.com/v1/orgs/Tenant3_Corp/nodes/fyre-cluster-frontend-ns-agent
                     const arg = `curl -sL --insecure -u $HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH -X DELETE ${pEnv.HZN_EXCHANGE_URL}/orgs/${pEnv.HZN_ORG_ID}/nodes/${pEnv.HZN_DEVICE_ID}`;
                     //const arg = `kubectl -n ohmesh3-frontend-ns exec -i agent-769d687ff9-8kssh -- hzn unregister -r -f --timeout 3`;
@@ -1063,6 +1082,68 @@ class Utils {
             opJson[key] = value;
         });
         return opJson;
+    }
+    uninstallK8s(msg = 'Would you like to uninstall K8S?  Y/n ') {
+        return new rxjs_1.Observable((observer) => {
+            console.log(`\n${msg}`);
+            prompt_1.default.get({ name: 'answer', required: true }, (err, question) => {
+                if (question.answer.toUpperCase() === 'Y') {
+                    this.shell(`
+            sudo rm -rf /usr/local/bin/kubectl &&  
+            sudo microk8s stop && 
+            sudo snap remove microk8s`)
+                        .subscribe(() => {
+                        observer.next();
+                        observer.complete();
+                    });
+                }
+                else {
+                    observer.next();
+                    observer.complete();
+                }
+            });
+        });
+    }
+    installK8s(params) {
+        return new rxjs_1.Observable((observer) => {
+            const kube = `$HOME/.kube`;
+            let kubeConfig = '';
+            const bashrc = (0, fs_1.readFileSync)(`${this.homePath}/.bashrc`);
+            if (bashrc.indexOf('export KUBECONFIG=') < 0) {
+                kubeConfig = 'echo export KUBECONFIG=$HOME/.kube/config >> $HOME/.bashrc && ';
+            }
+            //let arg = `curl -sSfLO https://github.ibm.com/Edge-Fabric/qa-automation/blob/main/microk8s-install/run.sh -o run.sh && 
+            //        sudo chmod +x run.sh && 
+            //        sudo ./run.sh`
+            let arg = `
+            sudo rm -rf ${kube} && 
+            mkdir -p ${kube} && 
+            ${kubeConfig}
+            sudo iptables -P FORWARD ACCEPT && 
+            sudo groupadd -f microk8s && 
+            sudo usermod -a -G microk8s $USER && 
+            echo installing microk8s && 
+            sudo snap install microk8s --classic && 
+            alias kubectl='sudo microk8s kubectl' && 
+            . ~/.bashrc && 
+            echo generate ${kube}/config && 
+            sudo chown -R $USER ${kube} && 
+            sudo chgrp -R microk8s ${kube} && 
+            sudo microk8s kubectl config view --raw > ${kube}/config && 
+            microk8s.enable hostpath-storage && 
+            microk8s enable dns && 
+            microk8s kubectl get nodes && 
+            microk8s kubectl get pods -A`;
+            //sudo microk8s status --wait-ready`
+            this.shell(arg)
+                .subscribe({
+                complete: () => {
+                    observer.next('');
+                    observer.complete();
+                },
+                error: (err) => observer.error(err)
+            });
+        });
     }
     installK3s(params) {
         return new rxjs_1.Observable((observer) => {
@@ -1146,6 +1227,7 @@ class Utils {
                 $shell = this.installK3s(params);
             }
             else if (k8s == 'K8S') {
+                $shell = this.installK8s(params);
             }
             else {
                 $shell = (0, rxjs_1.of)();

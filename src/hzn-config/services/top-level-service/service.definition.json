@@ -9,13 +9,6 @@
   "public": true,
   "sharable": "singleton",
   "requiredServices": [
-    {
-      "org": "$HZN_ORG_ID",
-      "url": "$SERVICE_NAME",
-      "version": "$SERVICE_VERSION_RANGE_UPPER",
-      "versionRange": "$SERVICE_VERSION_RANGE_LOWER",
-      "arch": "$ARCH"
-    }
   ],
   "userInput": [
     { "name": "MMS_OBJECT_TYPE", "label": "", "type": "string", "defaultValue": "$MMS_OBJECT_TYPE" },

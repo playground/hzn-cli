@@ -44,8 +44,12 @@ export class Env {
       this.envVars = this.hznJson[this.env]['envVars'];
       for(const [key, value] of Object.entries(this.envVars)) {
         if(!pEnv[key]) {
-          // @ts-ignore
-          pEnv[key] = value.replace(/\r?\n|\r/g, '');
+          if(!value) {
+            console.log('null', key, value)
+          } else {
+            // @ts-ignore
+            pEnv[key] = value.replace(/\r?\n|\r/g, '');
+          }
         } 
         // console.log(`${key}: ${pEnv[key]}`);
       }
