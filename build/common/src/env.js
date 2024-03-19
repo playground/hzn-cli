@@ -140,7 +140,7 @@ class Env {
         return `${pEnv.YOUR_DOCKERHUB_ID}/${pEnv.MMS_SERVICE_NAME}`;
     }
     getMMSContainerCreds() {
-        return pEnv.MMS_CONTAINER_CREDS;
+        return pEnv.MMS_CONTAINER_CREDS || '';
     }
     getMMSPatterName() {
         return pEnv.MMS_PATTERN_NAME;
@@ -176,7 +176,7 @@ class Env {
         return pEnv.MMS_OBJECT_FILE;
     }
     getServiceContainerCreds() {
-        return pEnv.SERVICE_CONTAINER_CREDS;
+        return pEnv.SERVICE_CONTAINER_CREDS || '';
     }
     getServiceContainerName() {
         return pEnv.SERVICE_CONTAINER_NAME;

@@ -1071,17 +1071,22 @@ class Utils {
         });
     }
     systemOS() {
-        let os = (0, fs_1.readFileSync)('/etc/os-release', 'utf8');
         let opJson = {};
-        os?.split('\n')?.forEach((line, index) => {
-            let words = line?.split('=');
-            let key = words[0]?.toLowerCase();
-            if (key === '')
-                return;
-            let value = words[1]?.replace(/"/g, '');
-            opJson[key] = value;
-        });
-        return opJson;
+        try {
+            let os = (0, fs_1.readFileSync)('/etc/os-release', 'utf8');
+            os?.split('\n')?.forEach((line, index) => {
+                let words = line?.split('=');
+                let key = words[0]?.toLowerCase();
+                if (key === '')
+                    return;
+                let value = words[1]?.replace(/"/g, '');
+                opJson[key] = value;
+            });
+            return opJson;
+        }
+        catch (e) {
+            return opJson;
+        }
     }
     uninstallK8s(msg = 'Would you like to uninstall K8S?  Y/n ') {
         return new rxjs_1.Observable((observer) => {
@@ -1276,7 +1281,8 @@ class Utils {
             }
             anax = anax.replace('/agent-install.sh', '');
             let icss = css === 'true' || css == true ? '-i css:' : '';
-            return this.shell(`sudo touch /etc/default/horizon && sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} ${icss} -k css: -c css:`);
+            let cfg = process.env.AGENT_INSTALL_CONFIG ? `-k ${process.env.AGENT_INSTALL_CONFIG}` : '-k css:';
+            return this.shell(`sudo touch /etc/default/horizon && sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} ${icss} ${cfg} -c css:`);
         }
         else {
             // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data

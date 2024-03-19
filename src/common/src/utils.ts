@@ -983,7 +983,7 @@ export class Utils {
       return this.shell(arg)  
     } else {
       return of()
-    }
+    }  
   }
   cleanUp() {
     console.log('cleaning up', existsSync(`${this.etcDefault}/horizon`), existsSync(this.etcHorizon), this.etcHorizon)
@@ -1055,16 +1055,20 @@ export class Utils {
     })
   }
   systemOS() {
-    let os = readFileSync('/etc/os-release', 'utf8')
     let opJson = {}    
-    os?.split('\n')?.forEach((line, index) => {
-        let words = line?.split('=')
-        let key = words[0]?.toLowerCase()
-        if (key === '') return
-        let value = words[1]?.replace(/"/g,'')
-        opJson[key] = value
-    })
-    return opJson;
+    try {
+      let os = readFileSync('/etc/os-release', 'utf8')
+      os?.split('\n')?.forEach((line, index) => {
+          let words = line?.split('=')
+          let key = words[0]?.toLowerCase()
+          if (key === '') return
+          let value = words[1]?.replace(/"/g,'')
+          opJson[key] = value
+      })
+      return opJson;  
+    } catch(e) {
+      return opJson;
+    }
   }
   uninstallK8s(msg = 'Would you like to uninstall K8S?  Y/n ') {
     return new Observable((observer) => {
@@ -1255,8 +1259,9 @@ export class Utils {
         tag = anax.replace('download', 'tag')
       }
       anax = anax.replace('/agent-install.sh', '')
-      let icss = css === 'true' || css == true ? '-i css:' : ''
-      return this.shell(`sudo touch /etc/default/horizon && sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} ${icss} -k css: -c css:`)
+      let icss = css === 'true' || css == true ? '-i css:' : '';
+      let cfg = process.env.AGENT_INSTALL_CONFIG? `-k ${process.env.AGENT_INSTALL_CONFIG}` : '-k css:';
+      return this.shell(`sudo touch /etc/default/horizon && sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} ${icss} ${cfg} -c css:`)
     } else {
       // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data
       return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`)
