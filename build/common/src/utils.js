@@ -158,43 +158,47 @@ class Utils {
             });
             console.log(content);
             if (configJson.test === 'undefined' || !configJson.test) {
-                // start with horizon-container instead of manually docker run
-                observer.next('');
-                observer.complete();
-            }
-            if (content.length > 0) {
-                const dest = pEnv['VAR_DIRECTORIES_FILES'] || '/var';
-                (0, fs_1.writeFileSync)(`${process.cwd()}/horizon`, content);
-                this.copyFile(`sudo mv ${process.cwd()}/horizon /var`).then(() => {
-                    const folders = configJson.folders;
-                    if ((0, fs_1.existsSync)(pEnv.CONFIG_CERT_PATH) && folders) {
-                        this.copyFile(`sudo cp -u ${pEnv.CONFIG_CERT_PATH} /var/agent-install.crt`).then(() => {
-                            let arg = '';
-                            folders.forEach((folder) => {
-                                if (arg.length > 0) {
-                                    arg += ' && ';
-                                }
-                                arg += `sudo mkdir -p ${folder} && sudo chmod 766 ${folder}`;
-                            });
-                            this.shell(arg)
-                                .subscribe({
-                                complete: () => {
-                                    observer.next();
-                                    observer.complete();
-                                },
-                                error: (err) => observer.error(err)
-                            });
-                        });
-                    }
-                    else {
-                        console.log(folders ? `CONFIG_CERT_PATH env var not found.` : `Missing folders property in config.`);
-                        observer.error('');
-                    }
+                this.copyFile(`sudo cp ${pEnv.CONFIG_CERT_PATH} /var/agent-install.crt`).then(() => {
+                    observer.next('');
+                    observer.complete();
                 });
             }
             else {
-                console.log(`Something went wrong, unable to create /var/horizon file`);
-                observer.error('');
+                if (content.length > 0) {
+                    const dest = pEnv['VAR_DIRECTORIES_FILES'] || '/var';
+                    (0, fs_1.writeFileSync)(`${process.cwd()}/horizon`, content);
+                    this.copyFile(`sudo mv ${process.cwd()}/horizon /var`).then(() => {
+                        const folders = configJson.folders;
+                        if ((0, fs_1.existsSync)(pEnv.CONFIG_CERT_PATH) && folders) {
+                            const option = process.platform == 'darwin' ? '' : '-u';
+                            this.copyFile(`sudo cp ${option} ${pEnv.CONFIG_CERT_PATH} /var/agent-install.crt`).then(() => {
+                                let arg = '';
+                                folders.forEach((folder) => {
+                                    if (arg.length > 0) {
+                                        arg += ' && ';
+                                    }
+                                    arg += `sudo mkdir -p ${folder} && sudo chmod 766 ${folder}`;
+                                });
+                                this.shell(arg)
+                                    .subscribe({
+                                    complete: () => {
+                                        observer.next();
+                                        observer.complete();
+                                    },
+                                    error: (err) => observer.error(err)
+                                });
+                            });
+                        }
+                        else {
+                            console.log(folders ? `CONFIG_CERT_PATH env var not found.` : `Missing folders property in config.`);
+                            observer.error('');
+                        }
+                    });
+                }
+                else {
+                    console.log(`Something went wrong, unable to create /var/horizon file`);
+                    observer.error('');
+                }
             }
         });
     }
@@ -991,8 +995,10 @@ class Utils {
     }
     purgeManagementHub(purge) {
         if (purge && (os_1.default.arch() == 'x64' || process.platform == 'darwin')) {
-            const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`;
-            return this.shell(arg);
+            return (0, rxjs_1.of)();
+            // TODO:  uncomment when the script is fixed
+            //const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`
+            //return this.shell(arg)  
         }
         else {
             return (0, rxjs_1.of)();

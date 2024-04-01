@@ -76,7 +76,7 @@ export declare class Utils {
     aptUpdate(): Observable<unknown>;
     installPrereq(): Observable<unknown>;
     clearUnconfiguring(): Observable<unknown>;
-    purgeManagementHub(purge: boolean): Observable<unknown>;
+    purgeManagementHub(purge: boolean): Observable<never>;
     cleanUp(): Observable<unknown>;
     uninstallK3s(msg?: string): Observable<unknown>;
     unregisterMeshAgent(params: IHznParam, msg?: string): Observable<unknown>;
