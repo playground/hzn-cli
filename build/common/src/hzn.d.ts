@@ -103,6 +103,7 @@ export declare class Hzn {
     listDeploymentPolicy(): Observable<unknown>;
     removeDeploymentPolicy(): Observable<unknown>;
     deleteObject(): Observable<unknown>;
+    deployCheck(): Observable<unknown>;
     checkConfigState(): Observable<unknown>;
     listNodePattern(): Observable<unknown>;
     getDeviceArch(): Observable<unknown>;

@@ -886,9 +886,9 @@ class Utils {
             });
         });
     }
-    deployCheck(name) {
+    deployCheck(name, nodeName) {
         //hzn deploycheck all -b policy-chunk-saved-model-service_amd64 -n biz/jeff-work-vm
-        const arg = name.length > 0 ? `hzn exchange deployment listpolicy ${name}` : 'hzn exchange deployment listpolicy';
+        const arg = `hzn deploycheck all -b ${name} -n ${nodeName}`;
         return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
     }
     areYouSure(arg, msg) {
