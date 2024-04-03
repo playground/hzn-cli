@@ -773,7 +773,7 @@ export class Utils {
   }
   listAgreement(param: IHznParam) {
     const arg = `${param.watch} hzn agreement list`;
-    return this.shell(arg);
+    return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
   }
   listService(param: IHznParam) {
     return new Observable((observer) => {
