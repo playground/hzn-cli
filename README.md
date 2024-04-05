@@ -257,3 +257,18 @@ Register agent with Policy
   Would you like to proceed to install Management Hub: Y/n?
   prompt: answer:  y
 ```
+
+# Install Docker on Ubuntu 
+Note: Don't use sudo snap install docker
+
+```
+- sudo apt update
+- sudo apt install apt-transport-https ca-certificates curl software-properties-common -y
+- curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+- sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+- apt-cache policy docker-ce
+- sudo apt install docker-ce -y
+- sudo systemctl status docker
+
+More details here: https://phoenixnap.com/kb/install-docker-on-ubuntu-20-04
+```
