@@ -550,6 +550,9 @@ export class Hzn {
       })  
     })
   }
+  deployCheck() {
+    return this.param.name.length > 0 ? utils.deployCheck(this.param.name, `${this.param.org}/${this.envVar.getHznNodeID()}`) : of('Please specify deployment policy name, ex: --name policy-chunk-saved-model-service_arm64')    
+  }
   checkConfigState() {
     return utils.checkConfigState();
   }

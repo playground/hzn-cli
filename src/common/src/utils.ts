@@ -166,43 +166,49 @@ export class Utils {
         }    
       })
       console.log(content)
-      if(configJson.test === 'undefined' || !configJson.test) {
-        // start with horizon-container instead of manually docker run
-        observer.next('')
-        observer.complete()
-      }
-      if(content.length > 0) {
-        const dest = pEnv['VAR_DIRECTORIES_FILES'] || '/var'; 
-        writeFileSync(`${process.cwd()}/horizon`, content);
-        this.copyFile(`sudo mv ${process.cwd()}/horizon /var`).then(() => {
-          const folders = configJson.folders;
-          if(existsSync(pEnv.CONFIG_CERT_PATH) && folders) {
-            this.copyFile(`sudo cp -u ${pEnv.CONFIG_CERT_PATH} /var/agent-install.crt`).then(() => {
-              let arg = ''
-              folders.forEach((folder) => {
-                if(arg.length > 0) {
-                  arg += ' && '
-                }
-                arg += `sudo mkdir -p ${folder} && sudo chmod 766 ${folder}`
-              })
-              this.shell(arg)
-              .subscribe({
-                complete: () => {
-                  observer.next()
-                  observer.complete()    
-                },
-                error: (err) => observer.error(err)
-              }) 
+      this.shell('sudo rm -f /var/agent-install.crt')
+      .subscribe(() => {
+        if(configJson.test === 'undefined' || !configJson.test) {
+          this.copyFile(`sudo cp ${pEnv.CONFIG_CERT_PATH} /var/agent-install.crt`).then(() => {
+            observer.next('')
+            observer.complete()
+          })
+        } else {
+          if(content.length > 0) {
+            const dest = pEnv['VAR_DIRECTORIES_FILES'] || '/var'; 
+            writeFileSync(`${process.cwd()}/horizon`, content);
+            this.copyFile(`sudo mv ${process.cwd()}/horizon /var`).then(() => {
+              const folders = configJson.folders;
+              if(existsSync(pEnv.CONFIG_CERT_PATH) && folders) {
+                const option = process.platform == 'darwin' ? '' : '-u';
+                this.copyFile(`sudo cp ${option} ${pEnv.CONFIG_CERT_PATH} /var/agent-install.crt`).then(() => {
+                  let arg = ''
+                  folders.forEach((folder) => {
+                    if(arg.length > 0) {
+                      arg += ' && '
+                    }
+                    arg += `sudo mkdir -p ${folder} && sudo chmod 766 ${folder}`
+                  })
+                  this.shell(arg)
+                  .subscribe({
+                    complete: () => {
+                      observer.next()
+                      observer.complete()    
+                    },
+                    error: (err) => observer.error(err)
+                  }) 
+                })
+              } else {
+                console.log(folders ? `CONFIG_CERT_PATH env var not found.` : `Missing folders property in config.`)
+                observer.error('')
+              }    
             })
           } else {
-            console.log(folders ? `CONFIG_CERT_PATH env var not found.` : `Missing folders property in config.`)
+            console.log(`Something went wrong, unable to create /var/horizon file`)
             observer.error('')
-          }    
-        })
-      } else {
-        console.log(`Something went wrong, unable to create /var/horizon file`)
-        observer.error('')
-      }
+          }
+        }
+      })
     })  
   }
   removeCliContainer(name = 'hzn-cli') {
@@ -770,7 +776,7 @@ export class Utils {
   }
   listAgreement(param: IHznParam) {
     const arg = `${param.watch} hzn agreement list`;
-    return this.shell(arg);
+    return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
   }
   listService(param: IHznParam) {
     return new Observable((observer) => {
@@ -871,11 +877,10 @@ export class Utils {
       })
     })  
   }
-  deployCheck(name: string) {
+  deployCheck(name: string, nodeName: string) {
     //hzn deploycheck all -b policy-chunk-saved-model-service_amd64 -n biz/jeff-work-vm
-    const arg = name.length > 0 ? `hzn exchange deployment listpolicy ${name}` : 'hzn exchange deployment listpolicy';
+    const arg = `hzn deploycheck all -b ${name} -n ${nodeName}`
     return this.shell(arg, 'commande executed successfully', 'failed to execute command', false);
-
   }
   areYouSure(arg: string, msg: string) {
     return new Observable((observer) => { 
@@ -979,8 +984,10 @@ export class Utils {
   }
   purgeManagementHub(purge: boolean) {
     if(purge && (os.arch() == 'x64' || process.platform == 'darwin')) {
-      const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`
-      return this.shell(arg)  
+      return of();
+      // TODO:  uncomment when the script is fixed
+      //const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`
+      //return this.shell(arg)  
     } else {
       return of()
     }  
@@ -1261,7 +1268,7 @@ export class Utils {
       anax = anax.replace('/agent-install.sh', '')
       let icss = css === 'true' || css == true ? '-i css:' : '';
       let cfg = process.env.AGENT_INSTALL_CONFIG? `-k ${process.env.AGENT_INSTALL_CONFIG}` : '-k css:';
-      return this.shell(`sudo touch /etc/default/horizon && sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} ${icss} ${cfg} -c css:`)
+      return this.shell(`sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} ${icss} ${cfg} -c css:`)
     } else {
       // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data
       return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`)

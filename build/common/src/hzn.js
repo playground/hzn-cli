@@ -531,6 +531,9 @@ class Hzn {
             });
         });
     }
+    deployCheck() {
+        return this.param.name.length > 0 ? exports.utils.deployCheck(this.param.name, `${this.param.org}/${this.envVar.getHznNodeID()}`) : (0, rxjs_1.of)('Please specify deployment policy name, ex: --name policy-chunk-saved-model-service_arm64');
+    }
     checkConfigState() {
         return exports.utils.checkConfigState();
     }
