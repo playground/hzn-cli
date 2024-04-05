@@ -62,7 +62,7 @@ export declare class Utils {
     listDeploymentPolicy(name: string): Observable<unknown>;
     removeDeploymentPolicy(name: string): Observable<unknown>;
     removeServicePolicy(name: string): Observable<unknown>;
-    deployCheck(name: string): Observable<unknown>;
+    deployCheck(name: string, nodeName: string): Observable<unknown>;
     areYouSure(arg: string, msg: string): Observable<unknown>;
     removeNode(name: string): Observable<unknown>;
     listObject(param: IHznParam): Observable<unknown>;
@@ -76,7 +76,7 @@ export declare class Utils {
     aptUpdate(): Observable<unknown>;
     installPrereq(): Observable<unknown>;
     clearUnconfiguring(): Observable<unknown>;
-    purgeManagementHub(purge: boolean): Observable<unknown>;
+    purgeManagementHub(purge: boolean): Observable<never>;
     cleanUp(): Observable<unknown>;
     uninstallK3s(msg?: string): Observable<unknown>;
     unregisterMeshAgent(params: IHznParam, msg?: string): Observable<unknown>;
