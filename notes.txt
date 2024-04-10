@@ -67,11 +67,11 @@ ENTRYPOINT ["/root/anax.service", "start"]
 
 oh-mesh
 
-oh deploy createDeployment --name ohmesh-frontend --image quay.io/skupper/hello-world-frontend
-oh deploy exposeDeployment --name ohmesh-frontend --port 8080 --type LoadBalancer
+oh deploy createDeployment --name frontend --image quay.io/skupper/hello-world-frontend
+oh deploy exposeDeployment --name frontend --port 8080 --type LoadBalancer
 
-oh deploy createDeployment --name ohmesh-backend --image quay.io/skupper/hello-world-backend
-oh deploy exposeDeployment --name ohmesh-backend --port 8080
+oh deploy createDeployment --name backend --image quay.io/skupper/hello-world-backend
+oh deploy exposeDeployment --name backend --port 8080
 
 k3s kubectl -n ohmesh-frontend-k3s-ns logs skupper-router-544bf88bb4-xdxd8
 k3s kubectl -n ohmesh-frontend-k3s-ns logs skupper-router-544bf88bb4-xdxd8 -c agent
