@@ -25,7 +25,7 @@ export class Env {
       const localEnv = dotenv.parse(readFileSync(`${this.hznConfig}/.env-local`));
       for(let i in localEnv) {
         pEnv[i] = localEnv[i];
-        console.log(pEnv[i])
+        //console.log(pEnv[i])
       }
       const supportEnv = dotenv.parse(readFileSync(`${this.hznConfig}/.env-support`));
       for(let i in supportEnv) {
