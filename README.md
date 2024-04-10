@@ -16,7 +16,9 @@ NOTE: Auto-dock is a containerized service that comes with hzn-cli built into th
 
 ### To setup Edge Node Agent, All-In-One, Agent with Mesh, running CLI & agent in containers and etc.
 
-`curl -sSL https://raw.githubusercontent.com/playground/hzn-cli/main/install.sh --output install.sh && bash ./install.sh`
+```
+curl -sSL https://raw.githubusercontent.com/playground/hzn-cli/main/install.sh --output install.sh && bash ./install.sh
+```
 
 #### Some example commands to work with Mesh
 ```
