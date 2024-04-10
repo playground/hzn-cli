@@ -65,3 +65,23 @@ COPY script/anax.service /root/
 # You can add a 2nd arg to this on the docker run cmd or the CMD statement in another dockerfile, to configure a specific >
 ENTRYPOINT ["/root/anax.service", "start"]
 
+oh-mesh
+
+oh deploy createDeployment --name ohmesh-frontend --image quay.io/skupper/hello-world-frontend
+oh deploy exposeDeployment --name ohmesh-frontend --port 8080 --type LoadBalancer
+
+oh deploy createDeployment --name ohmesh-backend --image quay.io/skupper/hello-world-backend
+oh deploy exposeDeployment --name ohmesh-backend --port 8080
+
+k3s kubectl -n ohmesh-frontend-k3s-ns logs skupper-router-544bf88bb4-xdxd8
+k3s kubectl -n ohmesh-frontend-k3s-ns logs skupper-router-544bf88bb4-xdxd8 -c agent
+kubectl -n ohmesh-frontend-k3s-ns exec -i agent-6ff5f98f9-95v8r -- hzn node list
+k3s kubectl get events -n ohmesh-backend-k3s-ns
+
+k3s kubectl exec -it ohmesh-backend-f5c846596-swmxc -n ohmesh-backend-k3s-ns -- /bin/sh
+cat hello
+wget http://0.0.0.0:8080/api/health
+cat health
+wget http://0.0.0.0:8080/api/data
+wget http://0.0.0.0:8080/api/date
+netstat -anp
