@@ -223,7 +223,7 @@ else echo "nvm not installed"
 	# Install nvm 
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v$INSTALL_NVM_VER/install.sh | bash
 	# Make nvm command available to terminal
-	source ~/.nvm/nvm.sh
+	[[ -f "~/.nvm/nvm.sh" ]] && source ~/.nvm/nvm.sh
 
 	echo "==> Installing node js version $INSTALL_NODE_VER"
 	nvm install $INSTALL_NODE_VER
