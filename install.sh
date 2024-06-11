@@ -26,37 +26,41 @@ ENV_SETUP=""
 CONFIG_FILE=""
 K8S_SETUP=""
 PS3='Choose your environment setup: '
-envsetup=("Run-In-Containers" "All-In-One" "OH-Mesh" "Confirm" "Quit")
-select fav in "${envsetup[@]}"; do
-    case $fav in
-        "Run-In-Containers")
-            echo "$fav, Runs both CLI and Agent in its own container, choose <Confirm> to continue setup."
-            ENV_SETUP=$fav
-            ;;
-        "All-In-One")
-            echo "$fav, Runs CLI, Agent & Management Hub on the same machine, choose <Confirm> to continue setup."
-            ENV_SETUP=$fav
-            ;;
-        "OH-Mesh")
-            echo "$fav, Set up OH Agent with Mesh, choose <Confirm> to continue setup."
-            ENV_SETUP=$fav
-            ;;
-        "Confirm")
-            if [ "${ENV_SETUP}" = "" ]
-            then
-                echo "You have not chosen an env setup yet."
-            else
-                echo "You have chosen $ENV_SETUP"
-                break
-            fi
-            ;;
-        "Quit")
-            echo "User requested exit"
-            exit
-            ;;
-        *) echo "invalid option $REPLY";;
-    esac
-done
+ENV_SETUP_OPTIONS=("Run-In-Containers" "All-In-One" "OH-Mesh" "Quit")
+
+# Create a dialog box
+CHOICE=$(dialog --colors --clear --no-shadow \
+--backtitle "Setup Configuration" \
+--title "\Zb\Z1Choose Your Environment Setup" \
+--menu "\n\Zb\Z3Select an option:" 15 60 5 \
+"1" "Run-In-Containers" \
+"2" "All-In-One" \
+"3" "OH-Mesh" \
+"4" "Quit" \
+3>&1 1>&2 2>&3)
+
+case $CHOICE in
+    1)
+        ENV_SETUP="Run-In-Containers"
+        echo "$ENV_SETUP, Runs both CLI and Agent in its own container, choose <Confirm> to continue setup."
+        ;;
+    2)
+        ENV_SETUP="All-In-One"
+        echo "$ENV_SETUP, Runs CLI, Agent & Management Hub on the same machine, choose <Confirm> to continue setup."
+        ;;
+    3)
+        ENV_SETUP="OH-Mesh"
+        echo "$ENV_SETUP, Set up OH Agent with Mesh, choose <Confirm> to continue setup."
+        ;;
+    4)
+        echo "User requested exit"
+        exit
+        ;;
+    *)
+        echo "Invalid option, exiting."
+        exit 1
+        ;;
+esac
 
 if [ "${ENV_SETUP}" = "OH-Mesh" ]
 then
