@@ -26,60 +26,36 @@ ENV_SETUP=""
 CONFIG_FILE=""
 K8S_SETUP=""
 PS3='Choose your environment setup: '
-envsetup=("Cli-And-Anax" "CLI-Only" "CLI-In-Container" "Anax-In-Container" "Run-In-Containers" "All-In-One" "OH-Mesh" "Confirm" "Quit")
+envsetup=("Run-In-Containers" "All-In-One" "OH-Mesh" "Confirm" "Quit")
 select fav in "${envsetup[@]}"; do
-	case $fav in
-		"Cli-And-Anax")
-			echo "$fav runs both CLI & Agent on host machine, choose <Confirm> to continue setup."
-			ENV_SETUP=$fav
-			# optionally call a function or run some code here
-			;;
-		"CLI-Only")
-			echo "$fav install CLI only on host, this option implies agent is running in a container, choose <Confirm> to continue setup."
-			ENV_SETUP=$fav
-			# optionally call a function or run some code here
-			;;
-		"CLI-In-Container")
-			echo "$fav runs CLI in a container, this option implies agent is running in a container, choose <Confirm> to continue setup."
-			ENV_SETUP=$fav
-			# optionally call a function or run some code here
-			;;
-		"Anax-In-Container")
-			echo "$fav, Runs Agent in container , choose <Confirm> to continue setup."
-			ENV_SETUP=$fav
-			# optionally call a function or run some code here
-			;;
-		"Run-In-Containers")
-			echo "$fav, Runs both CLI and Agent in its own container, choose <Confirm> to continue setup."
-			ENV_SETUP=$fav
-			# optionally call a function or run some code here
-			;;
-		"All-In-One")
-			echo "$fav, Runs CLI, Agent & Management Hub on the same machine, choose <Confirm> to continue setup."
-			ENV_SETUP=$fav
-			# optionally call a function or run some code here
-			;;
-		"OH-Mesh")
-			echo "$fav, Set up OH Agent with Mesh, choose <Confirm> to continue setup."
-			ENV_SETUP=$fav
-			# optionally call a function or run some code here
-			;;
-		"Confirm")
-			if [ "${ENV_SETUP}" = "" ]
-			then
-				echo "You have not chosen an env setup yet."
-			else
-				echo "You have chosen $ENV_SETUP"
-				break
-			fi
-			# optionally call a function or run some code here
-			;;
-		"Quit")
-	    echo "User requested exit"
-	    exit
-	    ;;
-    *) echo "invalid option $REPLY";;
-  esac
+    case $fav in
+        "Run-In-Containers")
+            echo "$fav, Runs both CLI and Agent in its own container, choose <Confirm> to continue setup."
+            ENV_SETUP=$fav
+            ;;
+        "All-In-One")
+            echo "$fav, Runs CLI, Agent & Management Hub on the same machine, choose <Confirm> to continue setup."
+            ENV_SETUP=$fav
+            ;;
+        "OH-Mesh")
+            echo "$fav, Set up OH Agent with Mesh, choose <Confirm> to continue setup."
+            ENV_SETUP=$fav
+            ;;
+        "Confirm")
+            if [ "${ENV_SETUP}" = "" ]
+            then
+                echo "You have not chosen an env setup yet."
+            else
+                echo "You have chosen $ENV_SETUP"
+                break
+            fi
+            ;;
+        "Quit")
+            echo "User requested exit"
+            exit
+            ;;
+        *) echo "invalid option $REPLY";;
+    esac
 done
 
 if [ "${ENV_SETUP}" = "OH-Mesh" ]
