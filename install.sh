@@ -22,6 +22,39 @@ else
 	sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install jq
 fi
 
+ensure_dialog_installed() {
+    if ! command -v dialog &> /dev/null; then
+        echo "dialog could not be found, attempting to install..."
+
+        # Detect the package manager and install dialog
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            if command -v apt-get &> /dev/null; then
+                sudo apt-get update && sudo apt-get install -y dialog
+            elif command -v yum &> /dev/null; then
+                sudo yum install -y dialog
+            else
+                echo "No compatible package manager found. Please install dialog manually."
+                exit 1
+            fi
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
+            # Assume Homebrew is installed on macOS
+            if command -v brew &> /dev/null; then
+                brew install dialog
+            else
+                echo "Homebrew is not installed. Please install Homebrew and dialog manually."
+                exit 1
+            fi
+        else
+            echo "Unsupported OS. Please install dialog manually."
+            exit 1
+        fi
+    else
+        echo "dialog is already installed."
+    fi
+}
+
+ensure_dialog_installed
+
 ENV_SETUP=""
 CONFIG_FILE=""
 K8S_SETUP=""
@@ -42,22 +75,22 @@ CHOICE=$(dialog --colors --clear --no-shadow \
 case $CHOICE in
     1)
         ENV_SETUP="Run-In-Containers"
-        echo "$ENV_SETUP, Runs both CLI and Agent in its own container, choose <Confirm> to continue setup."
+        #echo "$ENV_SETUP, Runs both CLI and Agent in its own container, choose <Confirm> to continue setup."
         ;;
     2)
         ENV_SETUP="All-In-One"
-        echo "$ENV_SETUP, Runs CLI, Agent & Management Hub on the same machine, choose <Confirm> to continue setup."
+        #echo "$ENV_SETUP, Runs CLI, Agent & Management Hub on the same machine, choose <Confirm> to continue setup."
         ;;
     3)
         ENV_SETUP="OH-Mesh"
-        echo "$ENV_SETUP, Set up OH Agent with Mesh, choose <Confirm> to continue setup."
+       # echo "$ENV_SETUP, Set up OH Agent with Mesh, choose <Confirm> to continue setup."
         ;;
     4)
-        echo "User requested exit"
+       # echo "User requested exit"
         exit
         ;;
     *)
-        echo "Invalid option, exiting."
+       # echo "Invalid option, exiting."
         exit 1
         ;;
 esac
