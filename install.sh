@@ -171,51 +171,51 @@ case $CHOICE in
         ;;
 		"Help")
         dialog --title "Configuration Help" --msgbox "You would need to provide your configuration json file with the following info:\n\n{
-  \"org\": {
-    \"HZN_ORG_ID\": \"examples\",
-    \"HZN_DEVICE_TOKEN\": \"\",
-    \"HZN_DEVICE_ID\": \"device-name\",
-    \"HZN_EXCHANGE_USER_AUTH\": \"************\",
-    \"HZN_EXCHANGE_URL\": \"http://xxx.xxx.xxx.xxx:3090/v1\",
-    \"HZN_FSS_CSSURL\": \"http://xxx.xxx.xxx.xxx:9443/\",
-    \"HZN_AGBOT_URL\": \"http://xxx.xxx.xxx.xxx:3111\",
-    \"HZN_SDO_SVC_URL\": \"http://xxx.xxx.xxx.xxx:9008/api\",
-    \"HZN_AGENT_PORT\": \"8510\",
-    \"HZN_CSS\": false,
-    \"ANAX\": \"https://github.com/open-horizon/anax/releases/latest/download/agent-install.sh\"
-  },
-  \"service\": {
-    \"SERVICE_NAME\": \"chunk-saved-model-service\",
-    \"SERVICE_CONTAINER_NAME\": \"chunk-saved-model-service\",
-    \"SERVICE_VERSION\": \"1.0.0\",
-    \"SERVICE_VERSION_RANGE_UPPER\": \"1.0.0\",
-    \"SERVICE_VERSION_RANGE_LOWER\": \"1.0.0\",
-    \"SERVICE_CONTAINER_CREDS\": \"\",
-    \"VOLUME_MOUNT\": \"/mms-shared\",
-    \"MMS_SHARED_VOLUME\": \"mms_shared_volume\",
-    \"MMS_OBJECT_TYPE\": \"chunk_object_detection\",
-    \"MMS_OBJECT_ID\": \"chunk_config.json\",
-    \"MMS_OBJECT_FILE\": \"config/config.json\",
-    \"MMS_CONTAINER_CREDS\": \"\",
-    \"MMS_CONTAINER_NAME\": \"chunk-mms-service\",
+  \"org\": {\n
+    \"HZN_ORG_ID\": \"examples\",\n
+    \"HZN_DEVICE_TOKEN\": \"\",\n
+    \"HZN_DEVICE_ID\": \"device-name\",\n
+    \"HZN_EXCHANGE_USER_AUTH\": \"************\",\n
+    \"HZN_EXCHANGE_URL\": \"http://xxx.xxx.xxx.xxx:3090/v1\",\n
+    \"HZN_FSS_CSSURL\": \"http://xxx.xxx.xxx.xxx:9443/\",\n
+    \"HZN_AGBOT_URL\": \"http://xxx.xxx.xxx.xxx:3111\",\n
+    \"HZN_SDO_SVC_URL\": \"http://xxx.xxx.xxx.xxx:9008/api\",\n
+    \"HZN_AGENT_PORT\": \"8510\",\n
+    \"HZN_CSS\": false,\n
+    \"ANAX\": \"https://github.com/open-horizon/anax/releases/latest/download/agent-install.sh\"\n
+  },\n
+  \"service\": {\n
+    \"SERVICE_NAME\": \"chunk-saved-model-service\",\n
+    \"SERVICE_CONTAINER_NAME\": \"chunk-saved-model-service\",\n
+    \"SERVICE_VERSION\": \"1.0.0\",\n
+    \"SERVICE_VERSION_RANGE_UPPER\": \"1.0.0\",\n
+    \"SERVICE_VERSION_RANGE_LOWER\": \"1.0.0\",\n
+    \"SERVICE_CONTAINER_CREDS\": \"\",\n
+    \"VOLUME_MOUNT\": \"/mms-shared\",\n
+    \"MMS_SHARED_VOLUME\": \"mms_shared_volume\",\n
+    \"MMS_OBJECT_TYPE\": \"chunk_object_detection\",\n
+    \"MMS_OBJECT_ID\": \"chunk_config.json\",\n
+    \"MMS_OBJECT_FILE\": \"config/config.json\",\n
+    \"MMS_CONTAINER_CREDS\": \"\",\n
+    \"MMS_CONTAINER_NAME\": \"chunk-mms-service\",\n
     \"MMS_SERVICE_NAME\": \"chunk-mms-service\",
     \"MMS_SERVICE_VERSION\": \"1.0.1\",
-    \"MMS_SERVICE_FALLBACK_VERSION\": \"1.0.0\",
-    \"UPDATE_FILE_NAME\": \"model.zip\"
-  },
-  \"folders\": [
-    \"/var/tmp/horizon/horizon1/fss-domain-socket\",
-    \"/var/tmp/horizon/horizon1/ess-auth\",
-    \"/var/tmp/horizon/horizon1/secrets\",
-    \"/var/tmp/horizon/horizon1/nmp\"
-  ],
-  \"local\": {
-    \"YOUR_DOCKERHUB_ID\": \"dockerid\",
-    \"DOCKER_REGISTRY\": \"hub.docker.com\",
-    \"DOCKER_TOKEN\": \"dckr_pat_w......\"
-  },
-  \"anaxInContainer\": \"docker run -d -t --restart always --name horizon1 --privileged -p 127.0.0.1:8081:8510 -e DOCKER_NAME=horizon1 -e HZN_VAR_RUN_BASE=/var/tmp/horizon/horizon1 -v /var/run/docker.sock:/var/run/docker.sock -v /var/horizon:/etc/default/horizon:ro -v /var/agent-install.crt:/var/agent-install.crt -v horizon1_var:/var/horizon/ -v horizon1_etc:/etc/horizon/ -v /var/tmp/horizon/horizon1:/var/tmp/horizon/horizon1 openhorizon/amd64_anax:2.30.0-952\",
-  \"cliInContainer\": \"docker run -d -it --restart always --name hzn-cli --privileged --network=\\\"host\\\" -v /var/run/docker.sock:/var/run/docker.sock -v /var/agent-install.crt:/var/agent-install.crt -e HORIZON_URL=http://localhost:8081 -e HZN_ORG_ID=${HZN_ORG_ID} -e HZN_EXCHANGE_USER_AUTH=${HZN_EXCHANGE_USER_AUTH} -e HZN_FSS_CSSURL=${HZN_FSS_CSSURL} -e HZN_EXCHANGE_URL=${HZN_EXCHANGE_URL} -e version=v2.30.0-952 playbox21/hzn-cli_amd64\"
+    \"MMS_SERVICE_FALLBACK_VERSION\": \"1.0.0\",\n
+    \"UPDATE_FILE_NAME\": \"model.zip\"\n
+  },\n
+  \"folders\": [\n
+    \"/var/tmp/horizon/horizon1/fss-domain-socket\",\n
+    \"/var/tmp/horizon/horizon1/ess-auth\",\n
+    \"/var/tmp/horizon/horizon1/secrets\",\n
+    \"/var/tmp/horizon/horizon1/nmp\"\n
+  ],\n
+  \"local\": {\n
+    \"YOUR_DOCKERHUB_ID\": \"dockerid\",\n
+    \"DOCKER_REGISTRY\": \"hub.docker.com\",\n
+    \"DOCKER_TOKEN\": \"dckr_pat_w......\"\n
+  },\n
+  \"anaxInContainer\": \"docker run -d -t --restart always --name horizon1 --privileged -p 127.0.0.1:8081:8510 -e DOCKER_NAME=horizon1 -e HZN_VAR_RUN_BASE=/var/tmp/horizon/horizon1 -v /var/run/docker.sock:/var/run/docker.sock -v /var/horizon:/etc/default/horizon:ro -v /var/agent-install.crt:/var/agent-install.crt -v horizon1_var:/var/horizon/ -v horizon1_etc:/etc/horizon/ -v /var/tmp/horizon/horizon1:/var/tmp/horizon/horizon1 openhorizon/amd64_anax:2.30.0-952\",\n
+  \"cliInContainer\": \"docker run -d -it --restart always --name hzn-cli --privileged --network=\\\"host\\\" -v /var/run/docker.sock:/var/run/docker.sock -v /var/agent-install.crt:/var/agent-install.crt -e HORIZON_URL=http://localhost:8081 -e HZN_ORG_ID=${HZN_ORG_ID} -e HZN_EXCHANGE_USER_AUTH=${HZN_EXCHANGE_USER_AUTH} -e HZN_FSS_CSSURL=${HZN_FSS_CSSURL} -e HZN_EXCHANGE_URL=${HZN_EXCHANGE_URL} -e version=v2.30.0-952 playbox21/hzn-cli_amd64\"\n
 }" 22 70
 			;;
 		"Quit")
