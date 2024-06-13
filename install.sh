@@ -97,115 +97,134 @@ esac
 
 if [ "${ENV_SETUP}" = "OH-Mesh" ]
 then
-	PS3='Choose your kube to install: '
-	k8ssetup=("None" "K3S" "K8S" "Confirm" "Quit")
-	select fav in "${k8ssetup[@]}"; do
-		case $fav in
-			"None")
-				echo "$fav, Kube is already setup."
-				K8S_SETUP="None"
-				# optionally call a function or run some code here
-				;;
-			"K3S")
-			echo "Setup $fav for OH Agent with Mesh, choose <Confirm> to continue setup."
-			K8S_SETUP=$fav
-			# optionally call a function or run some code here
-			;;
-			"K8S")
-			echo "Setup $fav for OH Agent with Mesh, choose <Confirm> to continue setup."
-			K8S_SETUP=$fav
-			# optionally call a function or run some code here
-			;;
-			"Confirm")
-					echo "You have chosen $K8S_SETUP for your setup."
-					break
-				# optionally call a function or run some code here
-				;;
-			"Quit")
-				echo "User requested exit"
-				exit
-				;;
-			*) echo "invalid option $REPLY";;
-		esac
-	done
+    # Use dialog to create a menu for Kubernetes setup
+    K8S_SETUP=$(dialog --colors --clear --no-shadow \
+    --backtitle "Kubernetes Setup" \
+    --title "\Zb\Z1Choose Kubernetes Setup for OH Agent with Mesh" \
+    --menu "\n\Zb\Z3Select Kubernetes setup:" 15 60 4 \
+    "None" "Kube is already setup" \
+    "K3S" "Setup K3S for OH Agent with Mesh" \
+    "K8S" "Setup K8S for OH Agent with Mesh" \
+    "Confirm" "Confirm your selection" \
+    "Quit" "Exit setup" \
+    3>&1 1>&2 2>&3)
+
+    case $K8S_SETUP in
+        "None")
+            echo "Kube is already setup."
+            K8S_SETUP="None"
+            ;;
+        "K3S")
+            echo "Setup K3S for OH Agent with Mesh, choose <Confirm> to continue setup."
+            K8S_SETUP="K3S"
+            ;;
+        "K8S")
+            echo "Setup K8S for OH Agent with Mesh, choose <Confirm> to continue setup."
+            K8S_SETUP="K8S"
+            ;;
+        "Confirm")
+            echo "You have chosen $K8S_SETUP for your setup."
+            ;;
+        "Quit")
+            echo "User requested exit"
+            exit
+            ;;
+        *)
+            echo "Invalid option, exiting."
+            exit 1
+            ;;
+    esac
 fi
 
 PS3='Continue with setup: '
 configfile=("Config-File" "Confirm" "Help" "Quit")
-select fav in "${configfile[@]}"; do
-	case $fav in
-		"Config-File")
-			echo "Please provide absolute path to configuration file, then choose <Confirm> to continue setup."
-			read CONFIG_FILE
-			# optionally call a function or run some code here
-			;;
+
+while true; do
+
+CHOICE=$(dialog --colors --clear --no-shadow \
+--backtitle "Configuration File Setup" \
+--title "\Zb\Z1Configuration Options" \
+--menu "\n\Zb\Z3Select an option:" 15 60 4 \
+"Config-File" "Provide configuration file path" \
+"Confirm" "Confirm the provided configuration file" \
+"Help" "Get help on what needs to be in the configuration file" \
+"Quit" "Exit setup" \
+3>&1 1>&2 2>&3)
+case $CHOICE in
+"Config-File")
+    CONFIG_FILE=$(dialog --title "Configuration File" --inputbox "Enter the absolute path to your configuration file:" 8 60 3>&1 1>&2 2>&3)
+    if [ "$?" -eq 1 ]; then
+        echo "User cancelled the input."
+    elif [ -z "$CONFIG_FILE" ]; then
+        dialog --title "Error" --msgbox "No path provided. Please provide a valid path." 5 50
+    else
+        dialog --title "File Provided" --msgbox "You have provided $CONFIG_FILE" 5 50
+        fi
+        ;;
+    "Confirm")
+        if [ -z "${CONFIG_FILE}" ]; then
+            dialog --title "Error" --msgbox "You have not provided your configuration file." 5 50
+        else
+            dialog --title "File Provided" --msgbox "You have provided $CONFIG_FILE for this setup" 5 50
+            break
+        fi
+        ;;
 		"Help")
-			echo "You would need to provide your configuration json file with the following info."
-			echo '\033[1;33m'
-			echo '{'
-			echo '  "org": {'
-    	echo '    "HZN_ORG_ID": "examples",'
-			echo '    "HZN_DEVICE_TOKEN": "",'
-			echo '    "HZN_DEVICE_ID": "device-name",'
-			echo '    "HZN_EXCHANGE_USER_AUTH": "************",'
-			echo '    "HZN_EXCHANGE_URL": "http://xxx.xxx.xxx.xxx:3090/v1",'
-			echo '    "HZN_FSS_CSSURL": "http://xxx.xxx.xxx.xxx:9443/",'
-			echo '    "HZN_AGBOT_URL": "http://xxx.xxx.xxx.xxx:3111",'
-			echo '    "HZN_SDO_SVC_URL": "http://xxx.xxx.xxx.xxx:9008/api",'
-			echo '    "HZN_AGENT_PORT": "8510",'
-			echo '    "HZN_CSS": false,'
-			echo '    "ANAX": "https://github.com/open-horizon/anax/releases/latest/download/agent-install.sh"'  
-			echo '  },'
-			echo '  "service": {'
-			echo '    "SERVICE_NAME": "chunk-saved-model-service",'
-			echo '    "SERVICE_CONTAINER_NAME": "chunk-saved-model-service",'
-			echo '    "SERVICE_VERSION": "1.0.0",'
-			echo '    "SERVICE_VERSION_RANGE_UPPER": "1.0.0",'
-			echo '    "SERVICE_VERSION_RANGE_LOWER": "1.0.0",'
-			echo '    "SERVICE_CONTAINER_CREDS": "",'
-			echo '    "VOLUME_MOUNT": "/mms-shared",'
-			echo '    "MMS_SHARED_VOLUME": "mms_shared_volume",'
-			echo '    "MMS_OBJECT_TYPE": "chunk_object_detection",'
-			echo '    "MMS_OBJECT_ID": "chunk_config.json",'
-			echo '    "MMS_OBJECT_FILE": "config/config.json",'
-			echo '    "MMS_CONTAINER_CREDS": "",'
-			echo '    "MMS_CONTAINER_NAME": "chunk-mms-service",'
-			echo '    "MMS_SERVICE_NAME": "chunk-mms-service",'
-			echo '    "MMS_SERVICE_VERSION": "1.0.1",'
-			echo '    "MMS_SERVICE_FALLBACK_VERSION": "1.0.0",'
-			echo '    "UPDATE_FILE_NAME": "model.zip"'
-			echo '  }'
-			echo '  "folders": ['
-			echo '    "/var/tmp/horizon/horizon1/fss-domain-socket",'
-			echo '    "/var/tmp/horizon/horizon1/ess-auth",'
-			echo '    "/var/tmp/horizon/horizon1/secrets",'
-			echo '    "/var/tmp/horizon/horizon1/nmp"'
-			echo '  ],'
-			echo '  "local": {'
-			echo '    "YOUR_DOCKERHUB_ID": "dockerid",'
-			echo '    "DOCKER_REGISTRY": "hub.docker.com",'
-			echo '    "DOCKER_TOKEN": "dckr_pat_w......"'
-			echo '  },'
-			echo '  "anaxInContainer": "docker run -d -t --restart always --name horizon1 --privileged -p 127.0.0.1:8081:8510 -e DOCKER_NAME=horizon1 -e HZN_VAR_RUN_BASE=/var/tmp/horizon/horizon1 -v /var/run/docker.sock:/var/run/docker.sock -v /var/horizon:/etc/default/horizon:ro -v /var/agent-install.crt:/var/agent-install.crt -v horizon1_var:/var/horizon/ -v horizon1_etc:/etc/horizon/ -v /var/tmp/horizon/horizon1:/var/tmp/horizon/horizon1 openhorizon/amd64_anax:2.30.0-952",'
-			echo '  "cliInContainer": "docker run -d -it --restart always --name hzn-cli --privileged --network=\"host\" -v /var/run/docker.sock:/var/run/docker.sock -v /var/agent-install.crt:/var/agent-install.crt -e HORIZON_URL=http://localhost:8081 -e HZN_ORG_ID=${HZN_ORG_ID} -e HZN_EXCHANGE_USER_AUTH=${HZN_EXCHANGE_USER_AUTH} -e HZN_FSS_CSSURL=${HZN_FSS_CSSURL} -e HZN_EXCHANGE_URL=${HZN_EXCHANGE_URL} -e version=v2.30.0-952 playbox21/hzn-cli_amd64"'
-			echo '}'
-			echo '\033[0m'
-			;;
-		"Confirm")
-			if [ "${CONFIG_FILE}" = "" ]
-			then
-				echo "You have not provided your configuration file."
-			else
-				echo "You have provided $CONFIG_FILE for this setup"
-				break
-			fi
-			# optionally call a function or run some code here
+        dialog --title "Configuration Help" --msgbox "You would need to provide your configuration json file with the following info:\n\n{
+  \"org\": {
+    \"HZN_ORG_ID\": \"examples\",
+    \"HZN_DEVICE_TOKEN\": \"\",
+    \"HZN_DEVICE_ID\": \"device-name\",
+    \"HZN_EXCHANGE_USER_AUTH\": \"************\",
+    \"HZN_EXCHANGE_URL\": \"http://xxx.xxx.xxx.xxx:3090/v1\",
+    \"HZN_FSS_CSSURL\": \"http://xxx.xxx.xxx.xxx:9443/\",
+    \"HZN_AGBOT_URL\": \"http://xxx.xxx.xxx.xxx:3111\",
+    \"HZN_SDO_SVC_URL\": \"http://xxx.xxx.xxx.xxx:9008/api\",
+    \"HZN_AGENT_PORT\": \"8510\",
+    \"HZN_CSS\": false,
+    \"ANAX\": \"https://github.com/open-horizon/anax/releases/latest/download/agent-install.sh\"
+  },
+  \"service\": {
+    \"SERVICE_NAME\": \"chunk-saved-model-service\",
+    \"SERVICE_CONTAINER_NAME\": \"chunk-saved-model-service\",
+    \"SERVICE_VERSION\": \"1.0.0\",
+    \"SERVICE_VERSION_RANGE_UPPER\": \"1.0.0\",
+    \"SERVICE_VERSION_RANGE_LOWER\": \"1.0.0\",
+    \"SERVICE_CONTAINER_CREDS\": \"\",
+    \"VOLUME_MOUNT\": \"/mms-shared\",
+    \"MMS_SHARED_VOLUME\": \"mms_shared_volume\",
+    \"MMS_OBJECT_TYPE\": \"chunk_object_detection\",
+    \"MMS_OBJECT_ID\": \"chunk_config.json\",
+    \"MMS_OBJECT_FILE\": \"config/config.json\",
+    \"MMS_CONTAINER_CREDS\": \"\",
+    \"MMS_CONTAINER_NAME\": \"chunk-mms-service\",
+    \"MMS_SERVICE_NAME\": \"chunk-mms-service\",
+    \"MMS_SERVICE_VERSION\": \"1.0.1\",
+    \"MMS_SERVICE_FALLBACK_VERSION\": \"1.0.0\",
+    \"UPDATE_FILE_NAME\": \"model.zip\"
+  },
+  \"folders\": [
+    \"/var/tmp/horizon/horizon1/fss-domain-socket\",
+    \"/var/tmp/horizon/horizon1/ess-auth\",
+    \"/var/tmp/horizon/horizon1/secrets\",
+    \"/var/tmp/horizon/horizon1/nmp\"
+  ],
+  \"local\": {
+    \"YOUR_DOCKERHUB_ID\": \"dockerid\",
+    \"DOCKER_REGISTRY\": \"hub.docker.com\",
+    \"DOCKER_TOKEN\": \"dckr_pat_w......\"
+  },
+  \"anaxInContainer\": \"docker run -d -t --restart always --name horizon1 --privileged -p 127.0.0.1:8081:8510 -e DOCKER_NAME=horizon1 -e HZN_VAR_RUN_BASE=/var/tmp/horizon/horizon1 -v /var/run/docker.sock:/var/run/docker.sock -v /var/horizon:/etc/default/horizon:ro -v /var/agent-install.crt:/var/agent-install.crt -v horizon1_var:/var/horizon/ -v horizon1_etc:/etc/horizon/ -v /var/tmp/horizon/horizon1:/var/tmp/horizon/horizon1 openhorizon/amd64_anax:2.30.0-952\",
+  \"cliInContainer\": \"docker run -d -it --restart always --name hzn-cli --privileged --network=\\\"host\\\" -v /var/run/docker.sock:/var/run/docker.sock -v /var/agent-install.crt:/var/agent-install.crt -e HORIZON_URL=http://localhost:8081 -e HZN_ORG_ID=${HZN_ORG_ID} -e HZN_EXCHANGE_USER_AUTH=${HZN_EXCHANGE_USER_AUTH} -e HZN_FSS_CSSURL=${HZN_FSS_CSSURL} -e HZN_EXCHANGE_URL=${HZN_EXCHANGE_URL} -e version=v2.30.0-952 playbox21/hzn-cli_amd64\"
+}" 22 70
 			;;
 		"Quit")
 	    echo "User requested exit"
 	    exit
 	    ;;
-    *) echo "invalid option $REPLY";;
+    *)  dialog --title "Invalid Option" --msgbox "Invalid option, exiting." 5 50
+        exit 1
+        ;;
   esac
 done
 
