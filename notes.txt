@@ -85,3 +85,140 @@ cat health
 wget http://0.0.0.0:8080/api/data
 wget http://0.0.0.0:8080/api/date
 netstat -anp
+
+==========================
+- hzn deploycheck all -b policy-ibm.myservicename_1.1.0 -n afcea-edge to check compatibility of the deployment policy
+since the deployment policy was for x86_64 and the service was for x86_64
+{
+  "compatible": false,
+  "reason": {
+    "afcea/myservicename_1.1.0_x86_64": "Policy Incompatible: Architecture does not match."
+  }
+}
+- need to publish service for arch amd64
+- hzn exchange service list afcea/myservicename_1.1.0_x86_64 -l > myservice.json to get the service definition and modify it for amd64
+{
+  "label": "myservicename for amd64",
+  "description": "",
+  "documentation": "",
+  "public": false,
+  "url": "myservicename",
+  "version": "1.1.0",
+  "arch": "amd64",
+  "sharable": "singleton",
+  "matchHardware": {},
+  "requiredServices": [],
+  "userInput": [],
+  "deployment": {
+    "services": {
+      "camerastuff": {
+        "binds": [
+          "/tmp:/root/.cache/torch/hub:rw"
+        ],
+        "environment": [],
+        "image": "default-route-openshift-image-registry.apps.afcea.demo.local/ibm-edge/second-image@sha256:ee76942e954f9ff1da2fffe91038e979ffeee1bc61974798075f22ee41db1cae",
+        "network": "",
+        "ports": [
+          {
+            "HostIP": "0.0.0.0",
+            "HostPort": "5000:5000/tcp"
+          }
+        ],
+        "privileged": true,
+        "secrets": {}
+      }
+    }
+  },
+  "clusterDeployment": "",
+  "clusterDeploymentSignature": ""
+}
+- since I don't have the keys, ran hzn key create jeff jeff
+Creating RSA PSS private and public keys, and an x509 certificate for distribution. This is a CPU-intensive operation and, depending on key length and platform, may take a while. Key generation on an amd64 or ppc64 system using the default key length will complete in less than 1 minute.
+Created keys:
+ 	/home/afcea/.hzn/keys/service.private.key
+	/home/afcea/.hzn/keys/service.public.pem
+
+export KEY_TEST_DIR=/home/afcea/.hzn/keys
+- publish the service with the myservice.json
+hzn exchange service publish -r "fkuntke/hofbox-chirpstackus:20240131::" -I  -f myservice.json -k ${KEY_TEST_DIR}/service.private.key -K ${KEY_TEST_DIR}/service.public.pem
+
+- check for compatibility again, run hzn deploycheck all -b policy-ibm.myservicename_1.1.0 -n afcea-edge
+{
+  "compatible": true,
+  "reason": {
+    "afcea/myservicename_1.1.0_amd64": "Compatible"
+  }
+}
+- hzn eventlog list
+  "2024-06-24 21:52:19:   Agreement 05656bd129903b873b04a6249fd09714b2d5dae1e85dd3f855111a0bfac2a240 already exists, ignoring proposal: myservicename",
+  "2024-06-24 21:52:29:   Agreement reached for service myservicename. The agreement id is 05656bd129903b873b04a6249fd09714b2d5dae1e85dd3f855111a0bfac2a240.",
+  "2024-06-24 21:52:29:   Start dependent services for afcea/myservicename.",
+  "2024-06-24 21:52:29:   Start workload service for afcea/myservicename.",
+  "2024-06-24 21:52:29:   Image loaded for afcea/myservicename.",
+  "2024-06-24 21:52:30:   Workload service containers for afcea/myservicename are up and running."
+
+- node got the agreement
+[
+  {
+    "name": "Policy for afcea/afcea-edge merged with afcea/policy-ibm.myservicename_1.1.0",
+    "current_agreement_id": "05656bd129903b873b04a6249fd09714b2d5dae1e85dd3f855111a0bfac2a240",
+    "consumer_id": "IBM/agbot",
+    "agreement_creation_time": "2024-06-24 21:52:18 +0200 CEST",
+    "agreement_accepted_time": "2024-06-24 21:52:28 +0200 CEST",
+    "agreement_finalized_time": "2024-06-24 21:52:29 +0200 CEST",
+    "agreement_execution_start_time": "2024-06-24 21:52:30 +0200 CEST",
+    "agreement_data_received_time": "",
+    "agreement_protocol": "Basic",
+    "workload_to_run": {
+      "url": "myservicename",
+      "org": "afcea",
+      "version": "1.1.0",
+      "arch": "amd64"
+    }
+  }
+]
+
+- upload it using this script (loadResource is a script that can take a service or pattern or a deployment policy from one org and re-create it in a different org)
+  wget https://raw.githubusercontent.com/open-horizon/examples/master/tools/loadResources; chmod +x loadResources
+  ./loadResources myservice.json
+
+
+
+  382  hzn deploycheck all -b policy-ibm.myservicename_1.1.0 -n afcea-edge
+  383  arch
+  384  hzn exchange service list
+  385  hzn exchange service list -l
+  386  hzn exchange service list afcea/myservicename_1.1.0_x86_64 -l > myservice.json
+  387  nano myservice.json
+  388  hzn exchange service listauth afcea/myservicename_1.1.0_x86_64
+  389  wget https://raw.githubusercontent.com/open-horizon/examples/master/tools/loadResources; chmod +x loadResources
+  390  ./loadResources myservice.json
+  391  hzn deploycheck all -b policy-ibm.myservicename_1.1.0 -n afcea-edge
+  392  hzn exchange business listpolicy policy-ibm.myservicename_1.1.0
+  393  hzn exchange business listpolicy policy-ibm.myservicename_1.1.0 > deployment.json
+  394  nano deployment.json
+  395  ./loadResources deployment.json
+  396  hzn deploycheck all -b policy-ibm.myservicename_1.1.0 -n afcea-edge
+  397  hzn eventlog list
+  398  hzn eventlog list -f
+  399  docker ps
+  400  hzn eventlog list
+  401  docker images
+  402  hzn eventlog list
+  403  cat myservice.json
+  404  hzn exchange service listauth afcea/myservicename_1.1.0_x86_64
+  405  hzn key create jeff jeff
+  406  export KEY_TEST_DIR=/home/afcea/.hzn/keys
+  407  hzn exchange service publish -r "fkuntke/hofbox-chirpstackus:20240131::" -I  -f myservice.json -k ${KEY_TEST_DIR}/service.pri>
+  408  cat myservice.json
+  409  nano myservice2.json
+  410  hzn exchange service publish -r "fkuntke/hofbox-chirpstackus:20240131::" -I  -f myservice2.json -k ${KEY_TEST_DIR}/service.pr>
+  411  hzn eventlog list
+  412  hzn eventlog list -f
+  413  hzn exchange service listauth afcea/myservicename_1.1.0_amd64
+  414  hzn eventlog list -f
+  415*
+  416  hzn agreement cancel 61d4d3b22ee0dba8185aa7274b34ebcb620a8fa2a725f1423c2123a76560c5cf
+  417  hzn eventlog list -f
+  418  hzn exchange service listauth afcea/myservicename_1.1.0_amd64
+  419  hzn exchange service publish -r "default-route-openshift-image-registry.apps.afcea.demo.local:doesntmatter:sha256~0rJSZajQ6u1DzYUqLs6nz32P-OLqk9CAawG_ZU16RTo" -I  -f myservice.json -k ${KEY_TEST_DIR}/service.private.key -K ${KEY_TEST_DIR}/service.public.pem
