@@ -86,7 +86,20 @@ wget http://0.0.0.0:8080/api/data
 wget http://0.0.0.0:8080/api/date
 netstat -anp
 
-==========================
+===============================
+If dialog installation candidate,
+
+You must enable the main repository in order to install the package lsb-release:
+
+sudo add-apt-repository main
+I highly recommend you to enable the Universe repository too:
+
+sudo add-apt-repository universe
+Run apt update after enabling the repositories:
+
+sudo apt update
+=================================
+
 - hzn deploycheck all -b policy-ibm.myservicename_1.1.0 -n afcea-edge to check compatibility of the deployment policy
 since the deployment policy was for x86_64 and the service was for x86_64
 {
