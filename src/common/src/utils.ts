@@ -400,7 +400,7 @@ export class Utils {
         complete: () => {
           const pEnv: any = process.env;
           let action = {};
-          if(setup != SetupEnvironment.autoSetupOpenHorizonMesh) {
+          if(setup != SetupEnvironment.autoSetupOpenHorizonMesh && setup != SetupEnvironment.autoSetupAllInOne) {
             action['preReq'] = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
           } 
           switch(setup) {
@@ -418,9 +418,6 @@ export class Utils {
               break;
             case SetupEnvironment.autoSetupContainer:
               action[setup] = this.installCliAndAnaxInContainers(this.configJson)
-              break;
-            case SetupEnvironment.autoSetupAllInOne:
-              action[setup] = this.setupManagementHub()
               break;
             case SetupEnvironment.autoSetupAllInOne:
               action[setup] = this.setupManagementHub()
@@ -1331,8 +1328,9 @@ export class Utils {
       let https = pEnv.HZN_TRANSPORT ? pEnv.HZN_TRANSPORT : 'https'
       let anaxRelease = pEnv.OH_ANAX_RELEASES ? pEnv.OH_ANAX_RELEASES : 'https://github.com/open-horizon/anax/releases/latest/download'
       let mgmtHubScript = pEnv.DEPLOY_MGMT_HUB_SCRIPT ? pEnv.DEPLOY_MGMT_HUB_SCRIPT : 'https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh';
+      const hubIP = pEnv.HZN_LISTEN_IP ? pEnv.HZN_LISTEN_IP : ips ? ips[0] : ''
       const props = [
-        {name: 'HZN_LISTEN_IP', default: ips ? ips[0]: '', ipList: ips, required: true},
+        {name: 'HZN_LISTEN_IP', default: hubIP, ipList: ips, required: true},
         {name: 'HZN_TRANSPORT', default: https, required: true},
         {name: 'EXCHANGE_IMAGE_NAME', default: '', required: false},
         {name: 'OH_ANAX_RELEASES', default: anaxRelease, required: true},
