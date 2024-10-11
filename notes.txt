@@ -85,3 +85,8 @@ cat health
 wget http://0.0.0.0:8080/api/data
 wget http://0.0.0.0:8080/api/date
 netstat -anp
+
+install hzn cli
+sudo -s -E curl -sSL https://github.com/open-horizon/anax/releases/latest/download/agent-install.sh | sudo bash -s -- -i anax: -k ./agent-install.cfg -c css:
+
+sudo add-apt-repository universe
