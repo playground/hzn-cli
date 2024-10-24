@@ -395,7 +395,6 @@ class Utils {
                 complete: () => {
                     const pEnv = process.env;
                     let action = {};
-                    console.log(`======>  ${setup}`);
                     if (setup != interface_1.SetupEnvironment.autoSetupOpenHorizonMesh && setup != interface_1.SetupEnvironment.autoSetupAllInOne) {
                         action['preReq'] = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN);
                     }
@@ -996,12 +995,12 @@ class Utils {
     }
     purgeManagementHub(purge) {
         if (purge && (os_1.default.arch() == 'x64' || process.platform == 'darwin')) {
-            return (0, rxjs_1.of)();
             // TODO:  uncomment when the script is fixed
-            //const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`
-            //return this.shell(arg)  
+            const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`;
+            return this.shell(arg);
         }
         else {
+            console.log('not supported yet.');
             return (0, rxjs_1.of)();
         }
     }
@@ -1383,12 +1382,26 @@ class Utils {
                     for (const [key, value] of Object.entries(result)) {
                         pEnv[key] = value;
                     }
-                    mgmtHubScript = pEnv.DEPLOY_MGMT_HUB_SCRIPT;
+                    mgmtHubScript = pEnv.DEPLOY_MGMT_HUB_SCRIPT || '';
                     if (mgmtHubScript.indexOf('://') < 0 && !(0, fs_1.existsSync)(mgmtHubScript)) {
                         console.log(`${mgmtHubScript} not found.`);
                         observer.error('exiting...');
                     }
-                    const arg = mgmtHubScript.indexOf('://') > 0 ? `curl -sSL ${mgmtHubScript} --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo -s -E -b ./deploy-mgmt-hub.sh` : `sudo -s -E -b ${mgmtHubScript}`;
+                    //curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh | bash -s -- -A -R -E
+                    //Flags:
+                    //-c <config-file>   A config file with lines in the form variable=value that set any of the environment variables supported by this script. Takes precedence over the same variables passed in through the environment.
+                    //-A    Do not install the horizon agent package. (It will still install the horizon-cli package.) Without this flag, it will install and register the horizon agent (as well as all of the management hub services).
+                    //-R    Skip registering the edge node. If -A is not specified, it will install the horizon agent.
+                    //-E    Skip loading the horizon example services, policies, and patterns.
+                    //-S    Stop the management hub services and agent (instead of starting them). This flag is necessary instead of you simply running 'docker-compose down' because docker-compose.yml contains environment variables that must be set.
+                    //-P    Purge (delete) the persistent volumes and images of the Horizon services and uninstall the Horizon agent. Can only be used with -S.
+                    //-s    Start the management hub services and agent, without installing software or creating configuration. Intended to be run to restart the services and agent at some point after you have stopped them using -S. (If you want to change the configuration, run this script without any flags.)
+                    //-u    Update any container whose specified version is not currently running.
+                    //-r <container>   Have docker-compose restart the specified container.
+                    //-v    Verbose output.
+                    //-h    Show this usage.
+                    //const arg = mgmtHubScript.indexOf('://') > 0 ? `curl -sSL ${mgmtHubScript} --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo -s -E -b ./deploy-mgmt-hub.sh` : `sudo -s -E -b ${mgmtHubScript}`
+                    const arg = mgmtHubScript.indexOf('://') > 0 ? `curl -sSL ${mgmtHubScript} --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -s -A -E` : `sudo -s -A -E ${mgmtHubScript}`;
                     this.shell(arg)
                         .subscribe({
                         next: (res) => {
