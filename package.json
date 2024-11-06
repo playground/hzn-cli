@@ -52,7 +52,7 @@
     "@types/yargs": "^17.0.2",
     "@typescript-eslint/parser": "^5.12.0",
     "jest": "^27.5.1",
-    "nodemon": "^2.0.15",
+    "nodemon": "^3.1.7",
     "onchange": "^7.1.0",
     "serve": "^14.2.1",
     "source-map-support": "^0.5.21",
