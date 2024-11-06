@@ -14,6 +14,8 @@
     "AGENT_INSTALL_CONFIG": "/home/mesh/cert/agent-install.cfg",
     "CONFIG_FILE_PATH": "/Users/jeff/sandbox/templates/3-22-2023",
     "CONFIG_FILE_NAME": "open-horizon-in-container.json",
+    "APP_PORT": "3000",
+    "EXPOSE_PORT": "3000",
     "ANAX": "https://github.com/open-horizon/anax/releases/download/v2.30.0-1291"
   },
   "service": {
