@@ -85,3 +85,23 @@ cat health
 wget http://0.0.0.0:8080/api/data
 wget http://0.0.0.0:8080/api/date
 netstat -anp
+
+install hzn cli
+sudo -s -E curl -sSL https://github.com/open-horizon/anax/releases/latest/download/agent-install.sh | sudo bash -s -- -i anax: -k ./agent-install.cfg -c css:
+
+sudo add-apt-repository universe
+
+
+hzn exchange service list --org myorg
+hzn policy list
+hzn exchange service listpolicy hello-world-01_1.0_arm64
+hzn exchange service removepolicy hello-world-01_1.0_arm64
+
+hzn exchange deployment listpolicy
+hzn exchange deployment listpolicy myorg/policy-hello-world-01_1.0
+hzn deploycheck all -b myorg/policy-hello-world-01_1.0 -n myorg/edge-device-1
+
+hzn deploycheck all -b myorg/policy-hello-world-01_1.0 -n myorg/edge-device-1 -v
+
+hzn exchange node addpolicy --json-file /root/hzn-config/node.policy.json dragon-fly -v
+hzn exchange node addpolicy --json-file /home/cscharfstein/node.policy.json edge-device-1 -v

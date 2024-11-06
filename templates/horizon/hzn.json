@@ -1,0 +1,8 @@
+{
+  "HZN_ORG_ID": "biz",
+  "MetadataVars": {
+      "DOCKER_IMAGE_BASE": "",
+      "SERVICE_NAME": "",
+      "SERVICE_VERSION": ""
+  }
+}
