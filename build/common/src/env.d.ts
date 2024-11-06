@@ -49,4 +49,6 @@ export declare class Env {
     getDockerToken(): any;
     getEdgeOwner(): any;
     getEdgeDeploy(): any;
+    getAppPort(): any;
+    getExposePort(): any;
 }
