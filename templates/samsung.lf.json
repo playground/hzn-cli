@@ -2,20 +2,16 @@
   "org": {
     "HZN_ORG_ID": "playground",
     "HZN_DEVICE_TOKEN": "",
-    "HZN_DEVICE_ID": "dragon-head",
-    "HZN_EXCHANGE_USER_AUTH": "<iamapikey>",
+    "HZN_DEVICE_ID": "samsung-demo",
+    "HZN_EXCHANGE_USER_AUTH": "<id:password>",
     "HZN_EXCHANGE_URL": "http://132.177.125.232:3090/v1",
     "HZN_FSS_CSSURL": "http://132.177.125.232:9443/",
     "HZN_AGBOT_URL": "http://132.177.125.232:3111",
     "HZN_SDO_SVC_URL": "http://132.177.125.232:9008/api",
     "HZN_AGENT_PORT": "8510",
     "HZN_CSS": false,
-    "CONFIG_CERT_PATH": "/home/mesh/cert/agent-install.crt",
-    "AGENT_INSTALL_CONFIG": "/home/mesh/cert/agent-install.cfg",
-    "CONFIG_FILE_PATH": "/Users/jeff/sandbox/templates/3-22-2023",
-    "CONFIG_FILE_NAME": "open-horizon-in-container.json",
-    "APP_PORT": "3000",
-    "EXPOSE_PORT": "3000",
+    "CONFIG_CERT_PATH": "/data/var/agent-install.crt",
+    "AGENT_INSTALL_CONFIG": "/data/var/agent-install.cfg",
     "ANAX": "https://github.com/open-horizon/anax/releases/download/v2.30.0-1291"
   },
   "service": {
@@ -46,7 +42,7 @@
   "local": {
     "YOUR_DOCKERHUB_ID": "playbox21",
     "DOCKER_REGISTRY": "hub.docker.com",
-    "DOCKER_TOKEN": "<docker token>"
+    "DOCKER_TOKEN": "dckr_pat_wQJZTXR2WfGLohIHnqQylRMRIpk"
   },
   "register": {
     "policy": {
@@ -59,13 +55,12 @@
       "deployment": {
         "properties": [
           {"name": "mms-agent", "value": "MMS Agent"},
-	        {"name": "liquid-prep", "value": "Liquid Prep"}
+	        {"name": "worker-safety", "value": "Worker Safety"}
         ]
       }
     }
   },
   "test": true,
-  "anaxInContainer": "docker run -d -t --restart always --name horizon1 --privileged -p 127.0.0.1:8081:8510 -e DOCKER_NAME=horizon1 -e HZN_VAR_RUN_BASE=/var/tmp/horizon/horizon1 -v /var/run/docker.sock:/var/run/docker.sock -v /var/horizon:/etc/default/horizon:ro -v /var/agent-install.crt:/var/agent-install.crt -v horizon1_var:/var/horizon/ -v horizon1_etc:/etc/horizon/ -v /var/tmp/horizon/horizon1:/var/tmp/horizon/horizon1 openhorizon/amd64_anax:2.30.0-1291",
-  "cliInContainer": "docker run -d -it --restart always --name auto-dock --privileged --network=\"host\" -v /var/lib/docker/volumes/mms_shared_volume/_data:/mms-shared/ -p 127.0.0.1:8888:8888 -v /var/run/docker.sock:/var/run/docker.sock -v /var/agent-install.crt:/var/agent-install.crt -v ${CONFIG_FILE_PATH}/${CONFIG_FILE_NAME}:/var/${CONFIG_FILE_NAME} -e HORIZON_URL=http://localhost:8081 -e HZN_ORG_ID=${HZN_ORG_ID} -e HZN_EXCHANGE_USER_AUTH=${HZN_EXCHANGE_USER_AUTH} -e HZN_FSS_CSSURL=${HZN_FSS_CSSURL} -e HZN_EXCHANGE_URL=${HZN_EXCHANGE_URL} -e HZN_CONFIG_FILE=/var/${CONFIG_FILE_NAME} -e version=v2.30.0-1291 playbox21/auto-dock-express_amd64:1.0.6"
+  "anaxInContainer": "docker run -d -t --restart always --name horizon1 --privileged -p 127.0.0.1:8081:8510 -e DOCKER_NAME=horizon1 -e HZN_VAR_RUN_BASE=/data/var/tmp/horizon/horizon1 -e ANAX_DOCKER_ENDPOINT=unix:///var/run/docker.sock -v /data/var/user/docker.sock:/var/run/docker.sock -v /data/var/horizon:/etc/default/horizon:ro -v /data/var/agent-install.crt:/data/var/agent-install.crt -v horizon1_var:/var/horizon/ -v horizon1_etc:/etc/horizon/ -v /data/var/tmp/horizon/horizon1:/data/var/tmp/horizon/horizon1 docker.io/openhorizon/arm64_anax:2.30.0-1291",
+  "cliInContainer": "docker run -d -t --restart always --name auto-dock --privileged --network host -v /data/var/lib/docker-bootstrap/volumes/mms_shared_volume/_data:/mms-shared/ -p 127.0.0.1:8888:8888 -v /data/var/user/docker.sock:/var/run/docker.sock -v /data/var/agent-install.crt:/data/var/agent-install.crt -v /data/var/samsung.lf.json:/data/var/samsung.lf.json -e HORIZON_URL=http://localhost:8081 -e HZN_ORG_ID=playground -e HZN_EXCHANGE_USER_AUTH=<id:password> -e HZN_FSS_CSSURL=http://132.177.125.232:9443/ -e HZN_EXCHANGE_URL=http://132.177.125.232:3090/v1 -e HZN_CONFIG_FILE=/data/var/samsung.lf.json -e version=v2.30.0-1291 playbox21/auto-dock-express_arm64:1.0.6"
 }
-

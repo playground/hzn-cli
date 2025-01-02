@@ -95,6 +95,7 @@ class Hzn {
                                     observer.complete();
                                 }
                                 else {
+                                    console.log('preInstallHznCli from hzn.ts');
                                     this.preInstallHznCli()
                                         .subscribe({
                                         complete: () => {

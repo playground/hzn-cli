@@ -83,6 +83,8 @@ class Env {
             pEnv.PATTERN_NAME = `pattern-${pEnv.SERVICE_NAME}`;
             pEnv.SERVICE_CONTAINER = `${registry}${pEnv.YOUR_DOCKERHUB_ID}/${container}_${pEnv.ARCH}:${pEnv.SERVICE_VERSION}`.replace(/\r?\n|\r/g, '');
         }
+        pEnv.APP_PORT = this.getAppPort();
+        pEnv.EXPOSE_PORT = this.getExposePort();
     }
     updateContainerAndServiceNames() {
         console.log('update', this.getEdgeDeploy(), this.getEdgeOwner(), this.getServiceContainerName(), this.getServiceContainerName());
@@ -219,6 +221,12 @@ class Env {
     }
     getEdgeDeploy() {
         return pEnv.EDGE_DEPLOY || null;
+    }
+    getAppPort() {
+        return pEnv.APP_PORT || '3000';
+    }
+    getExposePort() {
+        return pEnv.EXPOSE_PORT || '3000';
     }
 }
 exports.Env = Env;

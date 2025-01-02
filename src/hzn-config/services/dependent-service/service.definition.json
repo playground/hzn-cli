@@ -14,7 +14,7 @@
         "image": "$SERVICE_CONTAINER",
         "binds": ["$MMS_SHARED_VOLUME:$VOLUME_MOUNT:rw"],
         "ports": [
-          { "HostIP": "0.0.0.0", "HostPort": "3000:3000/tcp" }
+          { "HostIP": "0.0.0.0", "HostPort": "$EXPOSE_PORT:$APP_PORT/tcp" }
         ],
         "privileged": true
       }
