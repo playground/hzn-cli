@@ -257,7 +257,8 @@ export class Utils {
               } else {
                 let pEnv = process.env;
                 let anax = pEnv.ANAX.replace('/agent-install.sh', '') + '/agent-install.sh';
-                let container = process.platform == 'darwin' ? '' : '--container'
+                //let container = process.platform == 'darwin' ? '' : '--container'
+                let container = '--container'
                 let nodeId = pEnv.HZN_NODE_ID || pEnv.HZN_DEVICE_ID || '';
                 nodeId = nodeId.length > 0 ? `-a ${nodeId}:some-device-token` : '';
                 let containerStr = `sudo curl -sSL ${anax} | sudo -s -E bash -s -- -i ${anax} ${container} ${nodeId} -i css: -k css: -c css:`
@@ -400,7 +401,7 @@ export class Utils {
         complete: () => {
           const pEnv: any = process.env;
           let action = {};
-          if(setup != SetupEnvironment.autoSetupOpenHorizonMesh && setup != SetupEnvironment.autoSetupAllInOne) {
+          if(setup != SetupEnvironment.autoSetupContainer && setup != SetupEnvironment.autoSetupOpenHorizonMesh && setup != SetupEnvironment.autoSetupAllInOne) {
             action['preReq'] = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
           } 
           switch(setup) {
