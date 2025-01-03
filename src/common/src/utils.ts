@@ -401,7 +401,7 @@ export class Utils {
         complete: () => {
           const pEnv: any = process.env;
           let action = {};
-          if(setup != SetupEnvironment.autoSetupOpenHorizonMesh && setup != SetupEnvironment.autoSetupAllInOne) {
+          if(setup != SetupEnvironment.autoSetupContainer && setup != SetupEnvironment.autoSetupOpenHorizonMesh && setup != SetupEnvironment.autoSetupAllInOne) {
             action['preReq'] = this.preInstallHznCli(pEnv.HZN_ORG_ID, pEnv.ANAX, pEnv.HZN_DEVICE_ID, pEnv.HZN_CSS, pEnv.HZN_DEVICE_TOKEN)
           } 
           switch(setup) {
