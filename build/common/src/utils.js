@@ -1009,7 +1009,7 @@ class Utils {
         return this.shell(arg);
     }
     purgeManagementHub(purge) {
-        if (purge && (os_1.default.arch() == 'x64' || process.platform != 'darwin')) {
+        if (purge && (os_1.default.arch() == 'x64')) {
             // TODO:  darwin not supported
             const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`;
             return this.shell(arg);

@@ -25,7 +25,8 @@
     "test": "jest --coverage",
     "test:watch": "jest --watch && npm run build:watch",
     "clean": "rm -rf coverage src/**/*.js src/**/*.map",
-    "view:coverage": "serve coverage/lcov-report"
+    "view:coverage": "serve coverage/lcov-report",
+    "rpi:purge": "sudo apt purge -y bluehorizon horizon horizon-cli && sudo rm agent-install.* -y"
   },
   "repository": {
     "type": "git",
