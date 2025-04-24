@@ -12,7 +12,7 @@
     "services": {
       "$SERVICE_NAME": {
         "image": "$SERVICE_CONTAINER",
-        "binds": ["$MMS_SHARED_VOLUME:$VOLUME_MOUNT:rw"],
+        "binds": ["$MMS_SHARED_VOLUME:$VOLUME_MOUNT:rw","/var/run/docker.sock:/var/run/docker.sock"],
         "ports": [
           { "HostIP": "0.0.0.0", "HostPort": "$EXPOSE_PORT:$APP_PORT/tcp" }
         ],
