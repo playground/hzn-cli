@@ -37,7 +37,7 @@ export const loop = [
 export const installTar = {
   "x86_64": "horizon-agent-linux-deb-amd64.tar.gz",
   "x64": "horizon-agent-linux-deb-amd64.tar.gz",
-  "darwin": "horizon-agent-macos-pkg-x86_64.tar.gz",
+  "darwin": "horizon-agent-linux-deb-arm64.tar.gz",
   "arrch64": "horizon-agent-linux-deb-arm64.tar.gz",
   "arm64": "horizon-agent-linux-deb-arm64.tar.gz",
   "armv7l": "horizon-agent-linux-deb-armhf.tar.gz",

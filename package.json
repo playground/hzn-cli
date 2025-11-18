@@ -1,6 +1,6 @@
 {
   "name": "hzn-cli",
-  "version": "0.9.1",
+  "version": "0.9.5",
   "description": "Open Horizon CLI toolkit helps streamline the process of preparing node agents and perform tasks between orgs environments",
   "main": "./build/index.js",
   "bin": {
@@ -25,7 +25,11 @@
     "test": "jest --coverage",
     "test:watch": "jest --watch && npm run build:watch",
     "clean": "rm -rf coverage src/**/*.js src/**/*.map",
-    "view:coverage": "serve coverage/lcov-report"
+    "view:coverage": "serve coverage/lcov-report",
+    "rpi:purge": "sudo apt purge -y bluehorizon horizon horizon-cli && sudo rm agent-install.* -y",
+    "oh:status": "sudo systemctl status horizon",
+    "oh:syslog": "/var/log/syslog | grep anax",
+    "oh:instal-dialog": "sudo add-apt-repository universe"
   },
   "repository": {
     "type": "git",
