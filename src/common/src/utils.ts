@@ -268,11 +268,11 @@ export class Utils {
                 if(anax && anax.indexOf('open-horizon') > 0) {
                   anax = anax.replace('/agent-install.sh', '')
                   const arg = `curl -sSL https://github.com/open-horizon/anax/releases/latest/download/${tarFile} -o ${tarFile} && tar -zxvf ${tarFile}`
-                  containerStr = `${arg} && sudo curl -sSL ${anax}/agent-install.sh -o agent-install.sh && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -C`;
+                  containerStr = `${arg} && sudo curl -sSL ${anax}/agent-install.sh -o agent-install.sh && sudo chmod u+x agent-install.sh && sudo -s -E -b ./agent-install.sh -C`;
                 } else {
                   // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data
-                  containerStr = `sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' -C`;
-                  //containerStr = `curl -sSL https://raw.githubusercontent.com/open-horizon/anax/refs/heads/master/anax-in-container/horizon-container -o agent-install.sh && sudo chmod +x agent-install.sh && ./agent-install.sh -i 'css:' -l 5`;
+                  containerStr = `sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod u+x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' -C`;
+                  //containerStr = `curl -sSL https://raw.githubusercontent.com/open-horizon/anax/refs/heads/master/anax-in-container/horizon-container -o agent-install.sh && sudo chmod u+x agent-install.sh && ./agent-install.sh -i 'css:' -l 5`;
                 }    
                 this.shell(containerStr)
                 .subscribe({
@@ -996,7 +996,7 @@ export class Utils {
   purgeManagementHub(purge: boolean) {
     if(purge && (os.arch() == 'x64')) {
       // TODO:  darwin not supported
-      const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`
+      const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod u+x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`
       return this.shell(arg)  
     } else {
       console.log('not supported yet.')
@@ -1117,7 +1117,7 @@ export class Utils {
         kubeConfig = 'echo export KUBECONFIG=$HOME/.kube/config >> $HOME/.bashrc && ';
       }
       //let arg = `curl -sSfLO https://github.ibm.com/Edge-Fabric/qa-automation/blob/main/microk8s-install/run.sh -o run.sh && 
-      //        sudo chmod +x run.sh && 
+      //        sudo chmod u+x run.sh && 
       //        sudo ./run.sh`
       let arg = `
             sudo rm -rf ${kube} && 
@@ -1208,7 +1208,7 @@ export class Utils {
       tar -xvzf openhorizon-agent-install-files.tar.gz && 
       rm agent-install.sh && 
       wget https://raw.githubusercontent.com/open-horizon/anax/master/agent-install/agent-install.sh && 
-      chmod +x agent-install.sh && 
+      chmod u+x agent-install.sh && 
       ${agentInstall}`
       //sudo -s -E ${pEnv.PWD}/agent-install.sh -D cluster -u "${pEnv.HZN_EXCHANGE_USER_AUTH}" --namespace ${pEnv.AGENT_NAMESPACE} --namespace-scoped -k ${pEnv.PWD}/agent-install.cfg -i "remote:2.31.0-1482" -c "css:"`;
 
@@ -1260,10 +1260,10 @@ export class Utils {
     if(anax && anax.indexOf('open-horizon') > 0) {
       anax = anax.replace('/agent-install.sh', '')
       const arg = `curl -sSL https://github.com/open-horizon/anax/releases/latest/download/${tarFile} -o ${tarFile} && tar -zxvf ${tarFile}`
-      return this.shell(`${arg} && sudo curl -sSL ${anax}/agent-install.sh -o agent-install.sh && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -C`)
+      return this.shell(`${arg} && sudo curl -sSL ${anax}/agent-install.sh -o agent-install.sh && sudo chmod u+x agent-install.sh && sudo -s -E -b ./agent-install.sh -C`)
     } else {
       // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data
-      return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' -C`)
+      return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod u+x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' -C`)
     }    
   }
   installHznCli(anax: string, id: string, css, deviceToken = '') {
@@ -1282,7 +1282,7 @@ export class Utils {
       return this.shell(`sudo curl -sSL ${anax}/agent-install.sh | sudo -s -E bash -s -- -i ${tag} ${nodeId} ${icss} ${cfg} -c css:`)
     } else {
       // anax = api/v1/objects/IBM/agent_files/agent-install.sh/data
-      return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod +x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`)
+      return this.shell(`sudo curl -u "$HZN_ORG_ID/$HZN_EXCHANGE_USER_AUTH" -k -o agent-install.sh $HZN_FSS_CSSURL/${anax} && sudo chmod u+x agent-install.sh && sudo -s -E -b ./agent-install.sh -i 'css:' ${nodeId}`)
     }  
   }  
   uninstallHorizon(msg = 'Would you like to proceed to uninstall Horzion: Y/n?', yes = 'yes |') {
@@ -1390,8 +1390,8 @@ export class Utils {
             //-r <container>   Have docker-compose restart the specified container.
             //-v    Verbose output.
             //-h    Show this usage.
-          //const arg = mgmtHubScript.indexOf('://') > 0 ? `curl -sSL ${mgmtHubScript} --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo -s -E -b ./deploy-mgmt-hub.sh` : `sudo -s -E -b ${mgmtHubScript}`
-          const arg = mgmtHubScript.indexOf('://') > 0 ? `curl -sSL ${mgmtHubScript} --output deploy-mgmt-hub.sh && chmod +x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -s -A -E` : `sudo -s -A -E ${mgmtHubScript}`
+          //const arg = mgmtHubScript.indexOf('://') > 0 ? `curl -sSL ${mgmtHubScript} --output deploy-mgmt-hub.sh && chmod u+x deploy-mgmt-hub.sh && sudo -s -E -b ./deploy-mgmt-hub.sh` : `sudo -s -E -b ${mgmtHubScript}`
+          const arg = mgmtHubScript.indexOf('://') > 0 ? `curl -sSL ${mgmtHubScript} --output deploy-mgmt-hub.sh && chmod u+x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -s -A -E` : `sudo -s -A -E ${mgmtHubScript}`
 
           this.shell(arg)
           .subscribe({

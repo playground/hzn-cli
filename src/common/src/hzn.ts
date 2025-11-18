@@ -247,7 +247,7 @@ export class Hzn {
   }
   uninstallAgent() {
     return this.param.name.length > 0 ?
-      utils.shell(`sudo chmod +x ${this.param.name} && ${this.param.name}`) :
+      utils.shell(`sudo chmod u+x ${this.param.name} && ${this.param.name}`) :
       of('Please specify agent uninstall script --name')
   }
   setDefaultNamespace() {
