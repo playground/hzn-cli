@@ -26,7 +26,10 @@
     "test:watch": "jest --watch && npm run build:watch",
     "clean": "rm -rf coverage src/**/*.js src/**/*.map",
     "view:coverage": "serve coverage/lcov-report",
-    "rpi:purge": "sudo apt purge -y bluehorizon horizon horizon-cli && sudo rm agent-install.* -y"
+    "rpi:purge": "sudo apt purge -y bluehorizon horizon horizon-cli && sudo rm agent-install.* -y",
+    "oh:status": "sudo systemctl status horizon",
+    "oh:syslog": "/var/log/syslog | grep anax",
+    "oh:instal-dialog": "sudo add-apt-repository universe"
   },
   "repository": {
     "type": "git",
