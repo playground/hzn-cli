@@ -6,13 +6,71 @@ This document describes the agent architecture, types, and management capabiliti
 
 ## Table of Contents
 
-1. [Agent Architecture](#agent-architecture)
-2. [Agent Types](#agent-types)
-3. [Agent Lifecycle](#agent-lifecycle)
-4. [Deployment Patterns](#deployment-patterns)
-5. [Agent Operations](#agent-operations)
-6. [Configuration](#configuration)
-7. [Troubleshooting](#troubleshooting)
+1. [Tech Stack](#tech-stack)
+2. [Agent Architecture](#agent-architecture)
+3. [Agent Types](#agent-types)
+4. [Agent Lifecycle](#agent-lifecycle)
+5. [Deployment Patterns](#deployment-patterns)
+6. [Agent Operations](#agent-operations)
+7. [Configuration](#configuration)
+8. [Troubleshooting](#troubleshooting)
+
+---
+
+## Tech Stack
+
+### Core Technologies
+
+**Language & Runtime:**
+- **TypeScript** (v4.5.5) - Main development language
+- **Node.js** - Runtime environment (targeting ES2020)
+- **ts-node** (v10.5.0) - TypeScript execution
+
+**CLI Framework:**
+- **Commander** (v8.2.0) - Command-line interface framework
+- **Yargs** (v17.1.1) - Additional CLI argument parsing
+
+### Key Dependencies
+
+**User Interface:**
+- **chalk** (v4.1.2) - Terminal string styling
+- **figlet** (v1.5.2) - ASCII art text generation
+- **clear** (v0.1.0) - Terminal clearing
+- **prompt** & **prompt-sync** - Interactive user input
+
+**Utilities:**
+- **dotenv** (v10.0.0) - Environment variable management
+- **jsonfile** (v6.1.0) - JSON file I/O
+- **rxjs** (v7.3.0) - Reactive programming
+
+### Development Tools
+
+**Testing:**
+- **Jest** (v27.5.1) - Testing framework
+- **ts-jest** (v27.1.4) - TypeScript support for Jest
+- **@types/jest** - TypeScript type definitions
+
+**Development:**
+- **nodemon** (v3.1.7) - Auto-restart during development
+- **onchange** (v7.1.0) - File watcher for build automation
+- **source-map-support** (v0.5.21) - Stack trace mapping
+
+**Linting:**
+- **@typescript-eslint/parser** (v5.12.0) - TypeScript ESLint parser
+
+**Build System:**
+- TypeScript compiler (tsc)
+- Custom build scripts with file permissions and copying
+
+### Project Type
+
+This is a **CLI tool** (command-line interface) built as an **npm package** that:
+- Manages Open Horizon/IEAM edge computing deployments
+- Interacts with Docker, Kubernetes, and Open Horizon services
+- Can be installed globally via npm (`npm i -g hzn-cli`)
+- Provides the `oh` command for agent management
+
+The project uses **CommonJS modules** and compiles TypeScript to JavaScript in the `./build` directory.
 
 ---
 
