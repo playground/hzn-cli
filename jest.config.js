@@ -13,8 +13,7 @@ module.exports = {
           lines: 80,
           statements: 80
       }
-  },
-  typeAcquisition: { "include": ["jest"] },
-  coverageReporters: ['json', 'lcov', 'text', 'clover'],
+   },
+   coverageReporters: ['json', 'lcov', 'text', 'clover'],
   setupFiles: ['dotenv/config']
 };
