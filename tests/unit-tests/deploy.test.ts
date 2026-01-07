@@ -15,7 +15,22 @@ describe('Hzn', () => {
     objectFile: 'objectFile',
     mmsPattern: 'mmsPattern',
     action: 'action',
-    watch: 'true'
+    watch: 'true',
+    filter: '',
+    policy: {
+      envVar: '',
+      nodePolicyJson: '',
+      servicePolicyJson: '',
+      objectPolicyJson: '',
+      deploymentPolicyJson: '',
+      topLevelDeploymentPolicyJson: ''
+    },
+    configFile: '',
+    image: '',
+    port: '',
+    type: '',
+    k8s: '',
+    compatibility: ''
   }
 
   beforeEach(() => {
