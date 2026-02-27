@@ -994,6 +994,8 @@ export class Utils {
     return this.shell(arg)
   }
   purgeManagementHub(purge: boolean) {
+    // skip this for now for RHEL8 since it has some unique steps, will add later if needed
+    return of();
     if(purge && (os.arch() == 'x64')) {
       // TODO:  darwin not supported
       const arg = `curl -sSL https://raw.githubusercontent.com/open-horizon/devops/master/mgmt-hub/deploy-mgmt-hub.sh --output deploy-mgmt-hub.sh && chmod u+x deploy-mgmt-hub.sh && sudo ./deploy-mgmt-hub.sh -PS && sudo rm -rf /tmp/horizon-all-in-1`

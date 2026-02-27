@@ -29,7 +29,7 @@
     "rpi:purge": "sudo apt purge -y bluehorizon horizon horizon-cli && sudo rm agent-install.* -y",
     "oh:status": "sudo systemctl status horizon",
     "oh:syslog": "/var/log/syslog | grep anax",
-    "oh:instal-dialog": "sudo add-apt-repository universe"
+    "oh:install-dialog": "sudo add-apt-repository universe"
   },
   "repository": {
     "type": "git",
